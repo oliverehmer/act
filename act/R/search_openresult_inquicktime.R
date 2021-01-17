@@ -3,9 +3,9 @@
 #' The function remote controls 'Quicktime' by using an Apple Script. 
 #' It opens a search result in 'Quicktime' and plays it.
 #' 
-#' You need to be on a Mac to use this function.
+#' Note: You need to be on a Mac to use this function.
 #' 
-#' #' \emph{Span} \cr
+#' \emph{Span} \cr
 #' If you want to extend the cut before or after each search result, you can modify \code{@cuts.span.beforesec} and \code{@cuts.span.aftersec} in your search object.
 #' 
 #' @param x Corpus object.
@@ -30,9 +30,9 @@ search_openresult_inquicktime  <- function(x,
 										   filterFile=c('.*\\.(mp4|mov)', '.*\\.(aiff|aif|wav)', '.*\\.mp3') ) {
 	
 	# result <- mysearch@results[1,]
-	# x <-examplecorpus
+	# x <- examplecorpus
 	# search_openresult_inquicktime(x, searchresults[1,])
-	# closeAfterPlaying <-TRUE
+	# closeAfterPlaying <- TRUE
 
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
@@ -60,8 +60,8 @@ search_openresult_inquicktime  <- function(x,
 	appleScriptPath <- normalizePath(appleScriptPath)
 	file.exists(appleScriptPath)
 	
-	startSec <-result$startSec - s@cuts.span.beforesec
-	endSec <-result$endSec + s@cuts.span.aftersec
+	startSec <- result$startSec - s@cuts.span.beforesec
+	endSec <- result$endSec + s@cuts.span.aftersec
 	durationSec <- endSec-startSec+0.3
 	
 	#execute script

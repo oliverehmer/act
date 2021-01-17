@@ -17,7 +17,7 @@ media_delete <- function(x, transcriptNames=NULL) {
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
 	
 	#  if no filter is set, process all transcripts
-	if (is.null(transcriptNames)) {transcriptNames <-names(x@transcripts)}
+	if (is.null(transcriptNames)) {transcriptNames <- names(x@transcripts)}
 	
 	#--- run through all transcripts in the corpus file
 	for (i in transcriptNames) {

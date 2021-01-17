@@ -10,12 +10,12 @@
 #' @param x Corpus object.
 #' @param intervalToPoint Logical; if \code{TRUE} interval tiers will be converted to point/text tiers.
 #' @param pointToInterval Logical; if \code{TRUE} point/text tiers will be converted to interval tiers.
-#' @param filterTranscriptNames Vector of character strings; names of the transcripts to be included. 
 #' @param filterTierNames Vector of character strings; names of the tiers to be included. 
+#' @param filterTranscriptNames Vector of character strings; names of the transcripts to be checked. If left open, all transcripts will be checked 
 #'
 #' @return Corpus object.
 #' 
-#' @seealso \link{tiers_rename}, \link{tiers_sort}
+#' @seealso \link{tiers_add}, \link{tiers_delete}, \link{tiers_rename}, \link{tiers_sort}, \link{helper_tiers_new_table}, \link{helper_tiers_sort_table}
 #' 
 #' @export
 #'
@@ -23,8 +23,9 @@
 tiers_convert <- function(x, 
 						  intervalToPoint=FALSE, 
 						  pointToInterval=FALSE, 
-						  filterTranscriptNames=NULL, 
-						  filterTierNames=NULL) {
+						  filterTierNames=NULL,
+						  filterTranscriptNames=NULL
+						  ) {
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
 	
@@ -53,19 +54,19 @@ tiers_convert <- function(x,
 		tiers_converted_transcript <- c()
 		if (length(filterTierNamesCurrent)>0) {
 			for (j in 1:length(filterTierNamesCurrent)) {
-				TierAlreadyConverted <-FALSE
+				TierAlreadyConverted <- FALSE
 				if (intervalToPoint & x@transcripts[[i]]@tiers$type[j]=='IntervalTier') {
 					#--change type in list
 					x@transcripts[[i]]@tiers$type[j]<-'TextTier'
 					
 					#--modify times
-					ids <-which(x@transcripts[[i]]@annotations$tier.name==j)
+					ids <- which(x@transcripts[[i]]@annotations$tier.name==j)
 					if (length(ids)>0) {
-						x@transcripts[[i]]@annotations$endSec[ids]<-x@transcripts[[i]]@annotations$startSec[ids]
+						x@transcripts[[i]]@annotations$endSec[ids]<- x@transcripts[[i]]@annotations$startSec[ids]
 					}
 					tiers_converted_transcript <- c(tiers_converted_transcript,j)
 					transcripts_modified_ids <- c(transcripts_modified_ids, i)
-					TierAlreadyConverted <-TRUE
+					TierAlreadyConverted <- TRUE
 				}
 				
 				if (pointToInterval & !TierAlreadyConverted & x@transcripts[[i]]@tiers$type[j]=='TextTier' ) {
@@ -74,11 +75,11 @@ tiers_convert <- function(x,
 					
 					#--modify times
 					#get all end times
-					ids <-which(x@transcripts[[i]]@annotations$tier.name==j)
+					ids <- which(x@transcripts[[i]]@annotations$tier.name==j)
 					if (length(ids)>0) {
-						newTimes <-c(x@transcripts[[i]]@annotations$endSec[ids], x@transcripts[[i]]@length)
-						newTimes <-newTimes[2:length(newTimes)]
-						x@transcripts[[i]]@annotations$endSec[ids]<-newTimes
+						newTimes <- c(x@transcripts[[i]]@annotations$endSec[ids], x@transcripts[[i]]@length)
+						newTimes <- newTimes[2:length(newTimes)]
+						x@transcripts[[i]]@annotations$endSec[ids]<- newTimes
 					}
 					tiers_converted_transcript <- c(tiers_converted_transcript,j)
 					transcripts_modified_ids <- c(transcripts_modified_ids, i)
@@ -95,7 +96,7 @@ tiers_convert <- function(x,
 		)
 
 		x@transcripts[[i]]@modification.systime <- Sys.time()
-		tiers_converted_all <-c(tiers_converted_all, tiers_converted_transcript)
+		tiers_converted_all <- c(tiers_converted_all, tiers_converted_transcript)
 	}
 	
 	#report

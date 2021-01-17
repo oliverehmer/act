@@ -17,7 +17,7 @@ search_transcript_content <- function(t, s) {
 	temp <- NULL
 	
 	#=== get matches
-	myAnnotations <-t@annotations
+	myAnnotations <- t@annotations
 	
 	#=== filter 
 	#---tiers

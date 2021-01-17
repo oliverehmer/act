@@ -87,15 +87,15 @@ search_results_import <- function(path,
 	if (filetype=="csv") {
 		temp <- utils::read.table(path, header = TRUE, sep = separatorCSV, fileEncoding = encodingCSV, encoding=encodingCSV )
 		if (is.null(temp$resultID)==FALSE){
-			rownames(temp)<-temp$resultID
+			rownames(temp)<- temp$resultID
 		}
 	} else {
-		temp <-openxlsx::read.xlsx(xlsxFile=path, sheet=sheetNameXLSX)
+		temp <- openxlsx::read.xlsx(xlsxFile=path, sheet=sheetNameXLSX)
 	}
 	
 	#check colnames
 	necessarycolnames <- c("resultID", "transcript.name", "annotationID",  "tier.name", "startSec", "endSec", "content", "content.norm", "hit", "hit.nr", "hit.length", "hit.pos.content", "hit.pos.fulltext", "search.mode", "hit.span")
-	mycolnames <-colnames(temp)
+	mycolnames <- colnames(temp)
 	missingcolnames <- necessarycolnames[!necessarycolnames %in% mycolnames]
 	if (length(missingcolnames>0)) {
 		stop(	stringr::str_c(c("Some necessary columns are missing in your input file'. Missing columns: ", missingcolnames), sep="", collapse=" "))

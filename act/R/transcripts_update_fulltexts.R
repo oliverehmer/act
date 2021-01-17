@@ -32,10 +32,10 @@ transcripts_update_fulltexts <- function(x,
 	}
 	
 	#  if no filter is set, process all transcripts
-	if (is.null(transcriptNames)) {transcriptNames <-names(x@transcripts)}
+	if (is.null(transcriptNames)) {transcriptNames <- names(x@transcripts)}
 	
 	#=== check arguments
-	searchMode <-match.arg(searchMode)
+	searchMode <- match.arg(searchMode)
 	
 	#=== check which transcripts need an update
 	transcriptNames.update <- c()
@@ -53,9 +53,9 @@ transcripts_update_fulltexts <- function(x,
 				} else {
 					#if transcript has been modified since last update
 					if (x@transcripts[[i]]@modification.systime>x@transcripts[[i]]@fulltext.systime) {
-						updateThis <-TRUE
+						updateThis <- TRUE
 					} else if (x@transcripts[[i]]@normalization.systime>x@transcripts[[i]]@fulltext.systime) {
-						updateThis <-TRUE
+						updateThis <- TRUE
 					} else {
 						
 					}
@@ -73,7 +73,7 @@ transcripts_update_fulltexts <- function(x,
 			}
 		}
 		if (updateThis) {
-			transcriptNames.update <-c(transcriptNames.update, i)
+			transcriptNames.update <- c(transcriptNames.update, i)
 		}
 	}
 	

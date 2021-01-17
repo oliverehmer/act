@@ -118,7 +118,7 @@ import_exb <- function(filePath=NULL,
 	#=== time slots
 	timeline <- xml2::xml_find_all(myexb, "basic-body/common-timeline")
 	tli <- xml2::xml_find_all(timeline, "tli")
-	tsID <-xml2::xml_attr(tli, "id")
+	tsID <- xml2::xml_attr(tli, "id")
 	tsTime <- xml2::xml_attr(tli, "time")	
 	tsType <- xml2::xml_attr(tli, "type")
 	
@@ -133,7 +133,7 @@ import_exb <- function(filePath=NULL,
 		#--- interpolate missing values
 		#correct first timeslot being NA
 		if (is.na(tsTime[1])) {
-			tsTime[1]<-0
+			tsTime[1]<- 0
 		}
 		#correct last timeslot being NA
 		if (is.na(tsTime[length(tsTime)])) {
@@ -148,14 +148,14 @@ import_exb <- function(filePath=NULL,
 		if (any(is.na(tsTime)))  {
 			#get the sequences of NAs
 			rl <- rle(is.na(tsTime)) 
-			cumsums <-cumsum(rl$length)+1
+			cumsums <- cumsum(rl$length)+1
 			rl$start <- c(0,cumsums[1:length(cumsums)-1])-1
 			rl$end <- rl$start + rl$length +1
-			nasequences <-data.frame(value=rl$values, start=rl$start, end=rl$end)
+			nasequences <- data.frame(value=rl$values, start=rl$start, end=rl$end)
 			nasequences <- nasequences[nasequences$value==TRUE,]
 			for (i in 1:nrow(nasequences)) {
 				timesequence <- seq(from = tsTime[nasequences$start[i]], to = tsTime[nasequences$end[i]], length.out = nasequences$end[i]-nasequences$start[i]+1)
-				tsTime[ nasequences$start[i]:nasequences$end[i]]<-timesequence
+				tsTime[ nasequences$start[i]:nasequences$end[i]]<- timesequence
 			}
 		}
 		timeslots <- data.frame(id = tsID, value = as.double(tsTime), tsType=tsType, stringsAsFactors = FALSE)
@@ -175,24 +175,24 @@ import_exb <- function(filePath=NULL,
 		
 		#=== extract annotations
 		annotations <- data.frame(stringsAsFactors = FALSE)
-		i <-7
+		i <- 7
 		for (i in 1:length(tiers)) {
 			tierID <- xml2::xml_attr(tiers[[i]], "id")
 	
 			content <- xml2::xml_text(xml2::xml_find_all(tiers[[i]], "event"))
 			#if (length(content) == 0) { content <- "" }
-			content <-content[!is.na(content)]
+			content <- content[!is.na(content)]
 			
 			ts1     <- xml2::xml_attr(xml2::xml_children(tiers[[i]]), "start")
 			#if (length(ts1) == 0) {	ts1 <- "" }
-			ts1 <-ts1[!is.na(ts1)]
+			ts1 <- ts1[!is.na(ts1)]
 			
 			ts2     <- xml2::xml_attr(xml2::xml_children(tiers[[i]]), "end")
 			#if (length(ts2) == 0) { ts2 <- "" }
-			ts2 <-ts2[!is.na(ts2)]
+			ts2 <- ts2[!is.na(ts2)]
 			tierID <- rep(tierID, length(content))
 			
-			test <-c( length(tierID), length(content), length(ts1),  length(ts2))
+			test <- c( length(tierID), length(content), length(ts1),  length(ts2))
 			if (length(unique(test))!=1) {
 				print(i)
 				print(t@file.path)
@@ -212,8 +212,8 @@ import_exb <- function(filePath=NULL,
 			annotations <- annotations[,c(3,5,7,4)]
 			names(annotations) <- c("tier.name","startSec","endSec", "content")
 			
-			annotationID <-c(1:nrow(annotations))
-			t@annotations <-data.frame(
+			annotationID <- c(1:nrow(annotations))
+			t@annotations <- data.frame(
 				annotationID = as.integer(annotationID),
 				
 				tier.name  				= annotations$tier.name,

@@ -4,18 +4,18 @@
 library(act)
 
 # --- Create a tier table from scratch
-tierTable <-helper_tiers_new_table(c("a","b","c", "d"), 
+tierTable <- helper_tiers_new_table(c("a","b","c", "d"), 
 c("IntervalTier", "TextTier","IntervalTier","TextTier"))
 
 # --- Create a vector, defining the new order of the tiers.
-sortVector <-c("c","a","d","b")
+sortVector <- c("c","a","d","b")
 
 # Sort the table
 tierTable.1 <- act::helper_tiers_sort_table(tierTable=tierTable, sortVector=sortVector)
 tierTable.1
 
 # --- Create a vector, in which the tier "c" is missing.
-sortVector <-c("a","b","d")
+sortVector <- c("a","b","d")
 
 # Sort the table, the missing tier will be inserted at the end.
 tierTable.1 <- act::helper_tiers_sort_table(tierTable=tierTable, sortVector=sortVector)
@@ -23,7 +23,7 @@ tierTable.1
 
 # --- Create a vector, in which the tier "c" is missing, 
 # but define the place, where missing tiers will be inserted by "*"
-sortVector <-c("a","\\*", "b","d")
+sortVector <- c("a","\\*", "b","d")
 
 # Sort the table. The missing tier "c" will be inserted in second place.
 tierTable.2 <- act::helper_tiers_sort_table(tierTable=tierTable, sortVector=sortVector)
@@ -38,7 +38,7 @@ deleteTiersThatAreNotInTheSortVector=TRUE)
 tierTable.3
 
 # --- Create a vector, which contains tier names that are not present in 'tierTable'.
-sortVector <-c("c","a","x", "y", "d","b")
+sortVector <- c("c","a","x", "y", "d","b")
 tierTable.4 <- act::helper_tiers_sort_table(tierTable=tierTable, sortVector=sortVector)
 tierTable.4
 

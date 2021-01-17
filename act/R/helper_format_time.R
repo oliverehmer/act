@@ -52,9 +52,9 @@ helper_format_time <- function (t,
 	m <- floor(m/60)
 	s <- t-(h*3600)-(m*60)
 	s <- round(s,0)
-	digits <-max(0,as.integer(digits))
+	digits <- max(0,as.integer(digits))
 	if (digits>0) {
-		digitsSTR <-substr(as.character(round(t %% 1,3)),3,6)
+		digitsSTR <- substr(as.character(round(t %% 1,3)),3,6)
 	} else {
 		digitsSTR <-""
 	}
@@ -73,7 +73,7 @@ helper_format_time <- function (t,
 		}
 		
 		if (digitsSTR!="") {
-			f <-paste(f," ", digitsSTR, sep="")
+			f <- paste(f," ", digitsSTR, sep="")
 		}
 		
 		if (addTimeInSeconds) {
@@ -92,7 +92,7 @@ helper_format_time <- function (t,
 		}
 		
 		if (digitsSTR!="") {
-			f <-paste(f, digitsSTR ,sep=",")
+			f <- paste(f, digitsSTR ,sep=",")
 		}
 		
 		if (addTimeInSeconds) {

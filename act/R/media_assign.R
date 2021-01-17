@@ -49,7 +49,7 @@ media_assign <- function(x,
 		paths.dont.exist <- which(!file.exists(paths))
 		if (length(paths.dont.exist)>0) {
 			message <- c(message, sprintf("%s of %s media path(s) in 'x@paths.media.files' do not exist.", length(paths.dont.exist), length(x@paths.media.files)))
-			m       <-stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
+			m       <- stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
 			message <- stringr::str_c(message,"\n", m, collapse="\n")
 			
 			paths <- paths[-paths.dont.exist]
@@ -59,7 +59,7 @@ media_assign <- function(x,
 		paths.dont.exist <- which(!file.exists(paths))
 		if (length(paths.dont.exist)>0) {
 			message <- c(message, sprintf("%s of %s media path(s) in the parameter 'searchPaths' do not exist.", length(paths.dont.exist), length(x@paths.media.files)))
-			m       <-stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
+			m       <- stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
 			message <- stringr::str_c(message,"\n", m, collapse="\n")
 			
 			paths <- paths[-paths.dont.exist]
@@ -106,7 +106,7 @@ media_assign <- function(x,
 	filterFile.media <- stringr::str_flatten(c("(?i)\\.(", filterFile.media, ")"), collapse="")
 	paths.new <- unlist(paths.new[stringr::str_which(string=paths.new, pattern=filterFile.media, )		])
 	if (length(paths.new)==0) {
-		message<-c(message, "No annotation files found. Please check 'x@paths.annotation.files'.")
+		message<- c(message, "No annotation files found. Please check 'x@paths.annotation.files'.")
 		warning(paste(message,sep="\n", collapse="\n"))
 		return (x)
 	}
@@ -116,7 +116,7 @@ media_assign <- function(x,
 	file.names <- basename(paths.new)
 
 	#--- if no filter is set, process all transcripts
-	if (is.null(transcriptNames)) {transcriptNames <-names(x@transcripts)}
+	if (is.null(transcriptNames)) {transcriptNames <- names(x@transcripts)}
 
 	#--- set progress bar
 	helper_progress_set("Assigning media", length(transcriptNames))

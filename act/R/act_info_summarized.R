@@ -23,8 +23,8 @@
 info_summarized <- function(...) {
 	dots <- list(...)                
 	if(length(dots) == 0) {stop ("You need to pass a corpus object or a transcript object to this function.")}
-	x <-NULL
-	t <-NULL
+	x <- NULL
+	t <- NULL
 	if (class(dots[[1]])=="corpus") {
 		x <- dots[[1]]	
 	} else if (class(dots[[1]])=="transcript" ) {
@@ -54,13 +54,13 @@ info_summarized <- function(...) {
 		annotations.count <- sum(unlist(lapply(annotations, nrow)))
 		
 		#--- words org
-		content.org <-lapply(annotations,"[[", 5)
+		content.org <- lapply(annotations,"[[", 5)
 		words.org.count <- lapply(content.org, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
 		words.org.count <- sum(unlist(words.org.count))
 		
 		#--words norm
-		content.norm <-lapply(annotations,"[[", 6)
-		words.norm.count <-lapply(content.norm, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+		content.norm <- lapply(annotations,"[[", 6)
+		words.norm.count <- lapply(content.norm, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
 		words.norm.count <- sum(unlist(words.norm.count))
 		
 		info <- list(length.formatted  = length.formatted,

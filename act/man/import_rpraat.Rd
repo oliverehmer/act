@@ -43,7 +43,7 @@ path <- system.file("extdata", "examplecorpus", "GAT",
 	rPraat.tg <- rPraat::tg.read(path)
 
 	# Convert to an act transcript
-	t <-act::import_rpraat(rPraat.tg)
+	t <- act::import_rpraat(rPraat.tg)
 	
 	# Change the name and add it to the examplecorpus
 	t@name <-"rpraat"

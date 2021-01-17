@@ -16,7 +16,7 @@ table(t2@annotations$tier.name)
 # Use act::search_meta() first to get the tier names, 
 # in this case search for tiers with a capital 'I',
 # which is the second tier, called 'ISanti'
-mymeta <-act::search_meta(examplecorpus, 
+mymeta <- act::search_meta(examplecorpus, 
 				filterTranscriptNames=t2@name,
 				filterTierIncludeRegEx="I"
 				)

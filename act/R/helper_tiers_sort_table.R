@@ -27,32 +27,33 @@ helper_tiers_sort_table <- function (tierTable,
 	
 	#set old and new data frame
 	oldTable <- tierTable[order(tierTable$position),]
-	oldTable$counter <-NA
+	oldTable$counter <- NA
 	
 	newTable <- tierTable[0,]
 	if (nrow(oldTable)>0) {
 		newRow <- oldTable[1,]
-		newRow[1,]<-NA
+		newRow[1,]<- NA
 	} else {
 		newRow <- .emptyTiers
-		newRow <- rbind(newRow, list(name=as.character("NA"), type=as.character("NA"), position=as.integer(NA)))
+		#newRow <- rbind(newRow, list(name=as.character("NA"), type=as.character("NA"), position=as.integer(NA)))
+		newRow <- rbind(newRow, list(name=NA, type=NA, position=NA))
 	}
 	
 	#check each pattern in the sort vector
 	insertPosition <- -1
-	counter <-0
-	sortVector <-as.character(sortVector) #needs to be a as.character and not a factor
+	counter <- 0
+	sortVector <- as.character(sortVector) #needs to be a as.character and not a factor
 	for (myPattern in sortVector) {
 		#increase the counter
-		counter <-counter+1
+		counter <- counter+1
 		
 		#if this is the insert position, remember the counter and increase greatly
 		if (myPattern=="\\*" |myPattern=="*") {
 			insertPosition <- counter+1
-			counter <-counter+100000
+			counter <- counter+100000
 		} else {
 			#are there hits for this pattern?
-			hits <-stringr::str_which(oldTable$name, myPattern)
+			hits <- stringr::str_which(oldTable$name, myPattern)
 			
 			#if there are
 			if (length(hits) >0) {
@@ -60,15 +61,15 @@ helper_tiers_sort_table <- function (tierTable,
 				oldTable$counter[hits] <- seq(counter,counter+(length(hits)-1))
 				
 				#add items to new list
-				newTable <-rbind(newTable, oldTable[hits,])
+				newTable <- rbind(newTable, oldTable[hits,])
 				
 				#delete items from old list
 				oldTable <- oldTable[-hits, ]
 			} else {
 				#if missing tiers should be added
 				if (addMissingTiers) {
-					newRow$name <-as.character(myPattern)
-					newRow$type <-as.character("IntervalTier")
+					newRow$name <- as.character(myPattern)
+					newRow$type <- as.character("IntervalTier")
 					newRow$counter <- as.integer(counter)
 					newTable <- rbind(newTable, newRow)
 				}
@@ -83,7 +84,7 @@ helper_tiers_sort_table <- function (tierTable,
 			
 			#if no insert position has been found, insert at the end
 			if (insertPosition==-1) {
-				insertPosition <-counter+1
+				insertPosition <- counter+1
 			}
 			oldTable$counter <- seq(insertPosition, (insertPosition+nrow(oldTable)-1))
 			
@@ -91,17 +92,15 @@ helper_tiers_sort_table <- function (tierTable,
 		}
 	}
 	
-	#--- reorder and set new positions
+	#--- reorder and set new positions, set row names
 	if (nrow(newTable)>0) {
-		newTable <-newTable[order(newTable$counter),]
-		newTable$position <-seq(1,nrow(newTable))
+		newTable <- newTable[order(newTable$counter),]
+		newTable$position <- seq(1,nrow(newTable))
+		rownames(newTable) <- newTable$name
 	}
 	
 	#--- remove column "counter"
-	newTable <-newTable[ ,!colnames(newTable)=="counter"]
-	
-	#--- set row names
-	rownames(newTable) <- newTable$name
-	
+	newTable <- newTable[ ,!colnames(newTable)=="counter"]
+
 	return(newTable)
 }

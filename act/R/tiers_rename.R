@@ -15,7 +15,7 @@
 #'
 #' @return Corpus object.
 #' 
-#' @seealso \link{tiers_convert}, \link{tiers_sort}
+#' @seealso \link{tiers_add}, \link{tiers_convert}, \link{tiers_rename}, \link{tiers_sort}, \link{helper_tiers_new_table}, \link{helper_tiers_sort_table}
 #' 
 #' @export
 #'
@@ -60,12 +60,12 @@ tiers_rename <- function(x,
 		if(length(setdiff(tiers_before$name, tiers_after$name))==0) {
 			#no changes at all
 			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
-				modification    = "tiers_rename",
-				systime          = Sys.time(),
-				result           = "OK: no matches, no tiers renamed.",
-				tiers_renamed_nr = 0,
-				tiers_before     = tiers_before$name,
-				tiers_after      = tiers_after$name
+				modification        = "tiers_rename",
+				systime             = Sys.time(),
+				result              = "OK: no matches, no tiers renamed.",
+				tiers.renamed.count = 0,
+				tiers.before.names  = tiers_before$name,
+				tiers.after.names   = tiers_after$name
 			)
 														 
 			x@transcripts[[i]]@modification.systime <- character()
@@ -81,8 +81,8 @@ tiers_rename <- function(x,
 					tiers.problematic                = setdiff(tiers_before$name, tiers_after$name),
 					tiers.problematic.resulting.name = setdiff(tiers_after$name, tiers_before$name),
 					tiers.renamed.count              = 0,
-					tiers.before.ids                 = tiers_before$name,
-					tiers.after.ids                  = tiers_after$name
+					tiers.before.names               = tiers_before$name,
+					tiers.after.names                = tiers_after$name
 				)
 				x@transcripts[[i]]@modification.systime <- Sys.time()
 				
@@ -102,8 +102,8 @@ tiers_rename <- function(x,
 					tiers.renamed        =setdiff(tiers_after$name, tiers_before$name),
 					tiers.original       =setdiff(tiers_before$name, tiers_after$name),
 					tiers.renamed.count  =length(setdiff(tiers_after$name, tiers_before$name)),
-					tiers.before.ids     =tiers_before$name,
-					tiers.after.ids      =tiers_after$name
+					tiers.before.names   =tiers_before$name,
+					tiers.after.names    =tiers_after$name
 				)
 				
 				

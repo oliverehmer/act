@@ -148,7 +148,7 @@ search_concordance <- function(x,
 	conccolnames	  	  <- c("concLeft2", "concLeft1", "concHit", "concRight1", "concRight2", "nrWordsLeft", "nrWordsHitPosition", "nrWordsHit", "nrWordsRight", "nrWordsTotal")
 
 	#remove old concordance
-	mynames <-setdiff(colnames(s@results),conccolnames)
+	mynames <- setdiff(colnames(s@results),conccolnames)
 	temp <- s@results[,mynames]
 	
 	if (nrow(s@results)==0 ) {

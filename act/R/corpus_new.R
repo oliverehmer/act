@@ -94,7 +94,7 @@ corpus_new <- function(pathsAnnotationFiles,
 		paths.dont.exist <- which(!file.exists(paths))
 		if (length(paths.dont.exist)>0) {
 			message <- sprintf("%s of %s media path(s) in 'x@paths.media.files' do not exist.", length(paths.dont.exist), length(x@paths.media.files))
-			m       <-stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
+			m       <- stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
 			message <- stringr::str_c(message,"\n", m, collapse="\n")
 			warning(message)
 		}
@@ -106,7 +106,7 @@ corpus_new <- function(pathsAnnotationFiles,
 		paths.dont.exist <- which(!file.exists(paths))
 		if (length(paths.dont.exist)>0) {
 			message <- sprintf("%s of %s path(s) in 'x@paths.annotation.files' do not exist.", length(paths.dont.exist), length(x@paths.annotation.files))
-			m       <-stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
+			m       <- stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
 			message <- stringr::str_c(message,"\n", m, collapse="\n")
 			warning(message)
 		}

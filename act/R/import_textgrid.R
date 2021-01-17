@@ -68,7 +68,7 @@ import_textgrid <- function(filePath=NULL,
 		# Trying to read files (actually in LATIN1)  with option enc=UTF-18/-8 will result in an error.
 		# Function will not work when trying to read files (actually in UTF8) with enc=LATIN1		# (
 		#--> that's why i need to try first with utf
-		myEncodings	<-c("UTF-16", "UTF-8", "LATIN1")
+		myEncodings	<- c("UTF-16", "UTF-8", "LATIN1")
 		
 		#test all encondings, tell me in the end which worked
 		mytg <- NULL
@@ -133,7 +133,7 @@ import_textgrid <- function(filePath=NULL,
 	regex_tierinfo <- '(?<!Object\\s)(?:class\\s=\\s")(.+?)(?s:\\".*?name\\s=\\s")(.*?)(?s:\\".*?xmin\\s=)(.*\\d)(?s:.*?xmax\\s=)(.*\\d)(?s:.*?(?:intervals|points):\\ssize\\s=)(.*\\d)'
 	tierinfo <- stringr::str_match_all(mytg.merge, regex_tierinfo)
 	tierinfo <- do.call(rbind, lapply(tierinfo, data.frame, stringsAsFactors=FALSE))
-	colnames(tierinfo) <-c("none","type","tier.name", "xmin","xmax","size")
+	colnames(tierinfo) <- c("none","type","tier.name", "xmin","xmax","size")
 	tierinfo <- tierinfo[,c("type","tier.name","xmin","xmax","size")]
 	
 	tierinfo$xmin <- as.double(tierinfo$xmin)
@@ -174,8 +174,8 @@ import_textgrid <- function(filePath=NULL,
 			t@annotations  <- .emptyAnnotations
 			t@tiers		 <- .emptyTiers
 		} else {
-			annotationID <-c(1:nrow(tiercontent))
-			t@annotations <-data.frame(
+			annotationID <- c(1:nrow(tiercontent))
+			t@annotations <- data.frame(
 				annotationID = as.integer(annotationID),
 				
 				tier.name = alltierNames,

@@ -29,6 +29,7 @@ The package uses the following options.
 \emph{Paths}
 * \code{act.path.praat} Character string; path to the 'Praat' executable on your computer. Only necessary if you use the functions to remote control Praat using Praat scripts.
 * \code{act.path.sendpraat} Character string; path to the 'sendpraat' executable on your computer. Only necessary if you use the functions to remote control Praat using Praat scripts.
+* \code{act.path.elan} Character string; path to the 'ELAN' executable on your computer. Only necessary if you want to open search results in ELAN.
 
 \emph{File formats}
 * \code{act.fileformats.video} Vector of character strings; Suffixes of video files that will be identified; default is 'c("mp4", "mov")'.

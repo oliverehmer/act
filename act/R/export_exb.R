@@ -63,7 +63,7 @@ export_exb <- function(t,
 	if (!all(myCols %in% colnames(myAnnotations))) {
 		stop(paste("Missing colums. Annotations need to contain: ", paste(myCols, collapse = " ", sep="")))
 	}
-	myAnnotations <-myAnnotations[,myCols]
+	myAnnotations <- myAnnotations[,myCols]
 	
 	#convert annotations to html save characters
 	myAnnotations$content <-	XML::xmlValue(XML::xmlTextNode(as.vector(myAnnotations$content)))
@@ -170,7 +170,7 @@ export_exb <- function(t,
 	
 	#--- speaker
 	#create list of speakers
-	numberofspeakers <-max(1, nrow(t@tiers))
+	numberofspeakers <- max(1, nrow(t@tiers))
 	speakernames <- paste("SPK", 1:numberofspeakers, sep="")
 	speaker   <- sprintf(speaker, speakernames, speakernames, sep='')
 	speaker   <- paste(speaker, collapse='\n')
@@ -214,10 +214,10 @@ export_exb <- function(t,
     } else {
 		tli   <-         '<tli id="T0"/>\n<tli id="T1"/>'
     }
-	tli <-paste(tli, collapse="\n")
-	tli <-stringr::str_replace(tli, 'time="0"', 'time="0.0"')
-	timeline <-sprintf(timeline, tli)
-	timeline <-paste(timeline, collapse="\n")
+	tli <- paste(tli, collapse="\n")
+	tli <- stringr::str_replace(tli, 'time="0"', 'time="0.0"')
+	timeline <- sprintf(timeline, tli)
+	timeline <- paste(timeline, collapse="\n")
 	#cat(timeline)
 	
 	#iterate through all tiers
@@ -225,16 +225,16 @@ export_exb <- function(t,
 		tier <- '      <tier id="TIE0" speaker="SPK0" category="v" type="t" display-name="X [v]">\n</tier>'
 	} else {
 		#sort annotations by tier names and start time
-		myAnnotations <-myAnnotations[order(ordered(myAnnotations$tier.name, levels = t@tiers$name), myAnnotations$startSec),]
+		myAnnotations <- myAnnotations[order(ordered(myAnnotations$tier.name, levels = t@tiers$name), myAnnotations$startSec),]
 		
 		#for each tier
-		tierNr <-1
+		tierNr <- 1
 		tier_block <- list()
 		for (tierNr in 1:nrow(t@tiers)) 	{
 			speaker_name <- speakernames[tierNr]
 			
-			event_block <-sprintf(events, myAnnotations$tsStart[myAnnotations$tier.name==t@tiers$name[tierNr]], myAnnotations$tsEnd[myAnnotations$tier.name==t@tiers$name[tierNr]], myAnnotations$content[myAnnotations$tier.name==t@tiers$name[tierNr]], sep="\n")
-			event_block <-paste(event_block, collapse="\n")
+			event_block <- sprintf(events, myAnnotations$tsStart[myAnnotations$tier.name==t@tiers$name[tierNr]], myAnnotations$tsEnd[myAnnotations$tier.name==t@tiers$name[tierNr]], myAnnotations$content[myAnnotations$tier.name==t@tiers$name[tierNr]], sep="\n")
+			event_block <- paste(event_block, collapse="\n")
 			#cat(event_block)
 			
 			tier_block[tierNr] <- sprintf(tier, t@tiers$name[tierNr], speaker_name, speaker_name, event_block, sep="\n")
@@ -246,7 +246,7 @@ export_exb <- function(t,
 	basic_body <- sprintf(basic_body, timeline, tiers)
 	
 	#=== put everything together
-	myEXB <-sprintf(myEXB, head, basic_body)
+	myEXB <- sprintf(myEXB, head, basic_body)
 	#cat(myEXB)
 			
 	if (is.null(outputPath)) 	{

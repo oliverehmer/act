@@ -10,7 +10,7 @@ search_openresult_inpraat(
   resultNr,
   play = TRUE,
   closeAfterPlaying = FALSE,
-  filterFile = c(".*\\\\.(aiff|aif|wav)", ".*\\\\.mp3")
+  filterMediaFile = c(".*\\\\.(aiff|aif|wav)", ".*\\\\.mp3")
 )
 }
 \arguments{
@@ -24,7 +24,7 @@ search_openresult_inpraat(
 
 \item{closeAfterPlaying}{Logical; If \code{TRUE} TextGrid editor will be closed after playing (Currently non functional!)}
 
-\item{filterFile}{Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is uncompressed audio > compressed audio.}
+\item{filterMediaFile}{Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is uncompressed audio > compressed audio.}
 }
 \description{
 The function remote controls 'Praat' by using 'sendpraat' and a 'Praat' script. 
@@ -38,8 +38,8 @@ library(act)
 
 mysearch <- act::search_new(x=examplecorpus, pattern = "pero")
 
-# You can only use this functions if you have located the 'sendpraat' executable properly
-# in the package options.
+# You can only use this functions if you have located the 'sendpraat' 
+# executable properly in the package options.
 \dontrun{
 act::search_openresult_inpraat(x=examplecorpus, s=mysearch, resultNr=1, TRUE, TRUE)
 }

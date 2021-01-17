@@ -73,9 +73,9 @@ annotations_matrix <- function(x,
 	if (is.null(out)) 						{	stop("Replacement matrix seems to be containing invalid regular expressions.")		}
 	
 	#=== do the replacement
-	annotations_modified_nr <-0
-	transcripts_modified_nr <-0
-	transcripts_modified_ids <-c()
+	annotations_modified_nr <- 0
+	transcripts_modified_nr <- 0
+	transcripts_modified_ids <- c()
 	annotations_modified_nr <- 0
 	if (length(mymatrix)<1) {
 		warning("Replacement matrix is empty.")
@@ -93,11 +93,11 @@ annotations_matrix <- function(x,
 			x@transcripts[[i]]@annotations$content <- stringr::str_to_lower(x@transcripts[[i]]@annotations$content)   
 				
 			#replace
-			annotations_modified_nr <-annotations_modified_nr+length(which(stringr::str_detect(x@transcripts[[i]]@annotations$content, "update.*_B")))
+			annotations_modified_nr <- annotations_modified_nr+length(which(stringr::str_detect(x@transcripts[[i]]@annotations$content, "update.*_B")))
 			if (annotations_modified_nr>0) {
 				x@transcripts[[i]]@annotations$content <- stringr::str_replace_all(x@transcripts[[i]]@annotations$content, mymatrix)  
-				transcripts_modified_nr <-transcripts_modified_nr+1
-				transcripts_modified_ids <-c(transcripts_modified_ids, i)
+				transcripts_modified_nr <- transcripts_modified_nr+1
+				transcripts_modified_ids <- c(transcripts_modified_ids, i)
 			}
 			x@transcripts[[i]]@modification.systime <- Sys.time()			
 		}

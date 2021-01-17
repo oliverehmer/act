@@ -39,8 +39,8 @@ annotations_replace_copy <- function (x,
 	annotations_replaced_total_nr <- 0
 	recodsets_copiederror_tiermissingintranscript_nr <- 0
 	recodsets_copiederror_tiermissingintranscript_ids <- c()
-	#i <-1
-	#x <-corpus
+	#i <- 1
+	#x <- corpus
 	
 	
 	#=== get the transcript names
@@ -109,14 +109,14 @@ annotations_replace_copy <- function (x,
 								
 							} else {
 								#if there is one or several overlapping record sets on the destination tiers, take the first one
-								index <-which(temp, TRUE) [[1]]
+								index <- which(temp, TRUE) [[1]]
 								#add text in the end
 								x@transcripts[[i]]@annotations$content[[index]] <- paste (x@transcripts[[i]]@annotations$content[[index]], hits_merged, collapse= collapseString)
 							}
 							
 							annotations_copied_nr <- annotations_copied_nr + 1
 
-							anyChanges <-TRUE
+							anyChanges <- TRUE
 							
 						} #end there are hits
 					} #end copy
@@ -129,10 +129,10 @@ annotations_replace_copy <- function (x,
 							x@transcripts[[i]]@annotations$content[[j]] <- newvalue
 							
 							#increase counter
-							annotations_replaced_nr <-annotations_replaced_nr + 1
+							annotations_replaced_nr <- annotations_replaced_nr + 1
 							
 
-							anyChanges <-TRUE
+							anyChanges <- TRUE
 						}
 					}
 				}
@@ -160,7 +160,7 @@ annotations_replace_copy <- function (x,
 			)
 			
 			#increase counter for corpus object
-			transcripts_modified_nr <-transcripts_modified_nr +1
+			transcripts_modified_nr <- transcripts_modified_nr +1
 			transcripts_modified_ids=c(transcripts_modified_ids, i)
 			annotations_replaced_total_nr = annotations_replaced_total_nr + annotations_replaced_nr
 			annotations_copied_total_nr = annotations_copied_total_nr + annotations_copied_nr

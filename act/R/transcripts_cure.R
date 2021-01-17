@@ -34,13 +34,13 @@ transcripts_cure <- function (x,
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
 	
-	annotationsWithReversedTimes.deleted.count    <-0     
-	annotationsWithTimesBelowZero.deleted.count   <-0
-	annotationsWithTimesBelowZero.corrected.count <-0
-	overlappingAnnotations.corrected.count		  <-0
-	missingTiers.added.count				      <-0
-	transcripts.cured.count                       <-0
-	transcripts.cured.ids                         <-c()
+	annotationsWithReversedTimes.deleted.count    <- 0     
+	annotationsWithTimesBelowZero.deleted.count   <- 0
+	annotationsWithTimesBelowZero.corrected.count <- 0
+	overlappingAnnotations.corrected.count		  <- 0
+	missingTiers.added.count				      <- 0
+	transcripts.cured.count                       <- 0
+	transcripts.cured.ids                         <- c()
 	
 	for (i in filterTranscriptNames) {
 		x@transcripts[[i]] <- act::transcripts_cure_single(x@transcripts[[i]], 

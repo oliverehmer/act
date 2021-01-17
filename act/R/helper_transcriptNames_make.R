@@ -17,7 +17,7 @@
 #'
 #' @example inst/examples/helper_transcriptNames_make.R
 #' 
-helper_transcriptNames_make <-function(transcriptNames,
+helper_transcriptNames_make <- function(transcriptNames,
 									   searchPatterns       = character(),
 									   searchReplacements   = character(),
 									   toUpperCase          = FALSE,
@@ -75,7 +75,7 @@ helper_transcriptNames_make <-function(transcriptNames,
 	names.ok.ids <- make.unique(names.ok.ids)
 	
 	#---results
-	result <-list(
+	result <- list(
 		names.ok.ids=names.ok.ids,
 		names.original.ids=names.original.ids,
 		names.modified.ids=setdiff(names.ok.ids, names.original.ids),

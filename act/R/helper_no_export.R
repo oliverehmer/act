@@ -64,7 +64,7 @@ helper_test_read <- function(input_path,
 							 testlinenrs) {
 	
 	assign("last.warning", NULL, envir = baseenv())
-	input_path <-toString(input_path)
+	input_path <- toString(input_path)
 	tryCatch(
 		{
 			myCon <- file(input_path, encoding = testencoding)
@@ -94,13 +94,13 @@ helper_test_read <- function(input_path,
 	)
 }
 
-helper_progress_set <-function(title, total) {
+helper_progress_set <- function(title, total) {
 	#set progress bar	
 	if(getOption("act.showprogress", TRUE)) {
 		
 		if (exists("act.environment", mode="environment")) {
 			if(exists("pb", envir=act.environment)) {
-				title <-stringr::str_pad(title, width=24, side="right", pad=" ")
+				title <- stringr::str_pad(title, width=24, side="right", pad=" ")
 				act.environment$pb <- progress::progress_bar$new(
 					format = paste("  ", title, "[:bar] :percent missing: :eta", sep=""),
 					total = total, 
@@ -112,7 +112,7 @@ helper_progress_set <-function(title, total) {
 	}
 }
 
-helper_progress_tick <-function() {
+helper_progress_tick <- function() {
 	#update progress
 	if (getOption("act.showprogress", TRUE)) {
 		if (exists("act.environment", mode="environment")) {

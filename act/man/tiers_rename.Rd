@@ -35,12 +35,12 @@ library(act)
 examplecorpus@transcripts[[1]]@tiers$name
 examplecorpus@transcripts[[2]]@tiers$name
 
-examplecorpus <- act::tiers_rename(examplecorpus, "Entrevistador", "E")
+x <- act::tiers_rename(examplecorpus, "Entrevistador", "E")
 
-examplecorpus@transcripts[[1]]@tiers$name
-examplecorpus@transcripts[[2]]@tiers$name
+x@transcripts[[1]]@tiers$name
+x@transcripts[[2]]@tiers$name
 
 }
 \seealso{
-\link{tiers_convert}, \link{tiers_sort}
+\link{tiers_add}, \link{tiers_convert}, \link{tiers_rename}, \link{tiers_sort}, \link{helper_tiers_new_table}, \link{helper_tiers_sort_table}
 }

@@ -72,11 +72,11 @@ transcripts_add <- function(x,
 														  defaultForEmptyNames      = x@import.modify.transcript.names$defaultForEmptyNames)
 	
 	#--- set the new names
-	x<-act::helper_transcriptNames_set(x, transcript.names.info$names.ok.ids)
+	x<- act::helper_transcriptNames_set(x, transcript.names.info$names.ok.ids)
 	
 	#--- skip
-	transcripts_skipped_nr <-0
-	transcripts_skipped_ids <-c()
+	transcripts_skipped_nr <- 0
+	transcripts_skipped_ids <- c()
 	if (skipDuplicates) {
 		#get the numbers of the transcripts to skip
 		skip <- transcript.names.info$duplicated.ids[ which(transcript.names.info$duplicated.ids > length(transcripts_previous_ids))]
@@ -91,7 +91,7 @@ transcripts_add <- function(x,
 	
 	#get names/ids of added transcripts
 	transcripts_added_ids <- setdiff(names(x@transcripts), transcripts_previous_ids)
-	if (length(transcripts_added_ids)==0) {transcripts_added_ids <-c()}
+	if (length(transcripts_added_ids)==0) {transcripts_added_ids <- c()}
 	
 	#=== update
 	if (length(transcripts_added_ids)!=0) 	{	

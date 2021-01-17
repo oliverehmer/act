@@ -55,7 +55,7 @@ export_eaf <- function(t,
 	if (!all(myCols %in% colnames(myAnnotations))) {
 		stop(paste("Missing columns. Annotations needs to contain: ", paste(myCols, collapse = " ", sep="")))
 	}
-	myAnnotations <-myAnnotations[,myCols]
+	myAnnotations <- myAnnotations[,myCols]
 	
 	#convert annotations to html safe characters
 	myAnnotations$content <-	XML::xmlValue(XML::xmlTextNode(as.vector(myAnnotations$content)))
@@ -106,7 +106,7 @@ export_eaf <- function(t,
 	
 	#iterate through all tierNames
 	if (nrow(t@tiers)>0) {
-		tierNr <-1
+		tierNr <- 1
 		for (tierNr in 1:nrow(t@tiers))		{
 			#--- get annotations within tier
 			annotations.tier <- myAnnotations[myAnnotations$tier.name==t@tiers$name[tierNr],]
@@ -136,7 +136,7 @@ export_eaf <- function(t,
 						overlaps <- c(1:length(overlaps))[overlaps]
 						
 						#replace endSec with startSec of the following interval
-						annotations.tier$endSec[overlaps]<-annotations.tier$startSec[overlaps+1]
+						annotations.tier$endSec[overlaps]<- annotations.tier$startSec[overlaps+1]
 					}
 				}
 				
@@ -169,7 +169,7 @@ export_eaf <- function(t,
 	} else {
 		#---write to file
 		fileConn <- file(outputPath, open="wb")
-		myEAF <-stringr::str_flatten(myEAF, collapse="\n")
+		myEAF <- stringr::str_flatten(myEAF, collapse="\n")
 		writeBin(charToRaw(myEAF), fileConn, endian="little")
 		close(fileConn)			
 	}

@@ -72,16 +72,16 @@ search_cuts_media <- function(x,
 							  videoCodecCopy=FALSE, 
 							  audioCutsAsMP3=FALSE, 
 							  Panning) {
-	#x <-examplecorpus
-	#x <-corpus
+	#x <- examplecorpus
+	#x <- corpus
 	#s <- mysearch
 	#outputFolder <- 
-	#outputFolder <-NULL
+	#outputFolder <- NULL
 	#filterMediaInclude <- ""
-	#fastVideoPostioning <-TRUE
-	#videoCodecCopy <-FALSE
-	#audioCutsAsMP3 <-FALSE
-	#Panning <-NULL
+	#fastVideoPostioning <- TRUE
+	#videoCodecCopy <- FALSE
+	#audioCutsAsMP3 <- FALSE
+	#Panning <- NULL
 	
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
@@ -107,17 +107,17 @@ search_cuts_media <- function(x,
 	if (missing(outputFolder)) {
 		output_folder_cutlist <- "."
 	} else {
-		output_folder_cutlist <-normalizePath(outputFolder)
+		output_folder_cutlist <- normalizePath(outputFolder)
 		if (file.exists(output_folder_cutlist)==FALSE) 	{
 			stop("Output folder does not exist.")
 		}		
 	}
 
 	#make total lists
-	cutlist_total_mac <-c()
-	cutlist_total_win <-c()
+	cutlist_total_mac <- c()
+	cutlist_total_win <- c()
 	
-	i <-1
+	i <- 1
 	#for each search result
 	for (i in 1:nrow(s@results)) 	{
 		#update progress
@@ -127,8 +127,8 @@ search_cuts_media <- function(x,
 			}
 		}
 		#reset individual lists
-		cutlist_win <-c()
-		cutlist_mac <-c()
+		cutlist_win <- c()
+		cutlist_mac <- c()
 
 		#=== get transcript
 		t <- NULL
@@ -155,7 +155,7 @@ search_cuts_media <- function(x,
 				}
 		
 				#for each media file
-				j <-1
+				j <- 1
 				for (j in 1:length(input_paths)) {
 					#====== file name of original
 					myMediaFileName <- stringr::str_to_lower(basename(tools::file_path_sans_ext(   input_paths[j])))
@@ -278,7 +278,7 @@ search_cuts_media <- function(x,
 					
 					#=== destination path
 					out_filepath <- rep("",3)
-					filename <-as.character(s@results[i, filename.fromColumnName])
+					filename <- as.character(s@results[i, filename.fromColumnName])
 					#replace everything that is not allowed in file names
 					filename <- stringr::str_replace_all(filename, '/', "_")
 					filename <- stringr::str_replace_all(filename, '\\\\', "_")

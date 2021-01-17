@@ -6,13 +6,13 @@
 \usage{
 media_getPathToExistingFile(
   t,
-  filterFile = c(".*\\\\.(mp4|mov)", ".*\\\\.(aiff|aif|wav)", ".*\\\\.mp3")
+  filterMediaFile = c(".*\\\\.(mp4|mov)", ".*\\\\.(aiff|aif|wav)", ".*\\\\.mp3")
 )
 }
 \arguments{
 \item{t}{transcript object; transcript for which you want to get the media path.}
 
-\item{filterFile}{Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is video > uncompressed audio > compressed audio.}
+\item{filterMediaFile}{Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is video > uncompressed audio > compressed audio.}
 }
 \value{
 Character string; path to a media file, or \code{NULL} if no existing media file has been found.
@@ -33,7 +33,7 @@ examplecorpus@transcripts[["SYNC_rotar_y_flexionar"]]@media.path
 
 # Get only media files of a certain type, e.g. a wav file, and return only the first match:
 act::media_getPathToExistingFile(examplecorpus@transcripts[["SYNC_rotar_y_flexionar"]],
-                              filterFile=".*\\\\.wav")
+ filterMediaFile=".*\\\\.wav")
 }
 \seealso{
 \link{media_assign}, \link{media_delete}

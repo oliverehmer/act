@@ -48,7 +48,7 @@ export_rpraat <- function(t,
 	textgrid.startSec <- min(0, myAnnotations$startSec, myAnnotations$endSec)
 	textgrid.endSec   <- max(c(t@length, myAnnotations$startSec, myAnnotations$endSec))
 
-	myTG <-list()
+	myTG <- list()
 	if (nrow(t@tiers)>0) {
 		#iterate though all tierNames
 		for (tierNr in 1:nrow(t@tiers)) 		{
@@ -84,7 +84,7 @@ export_rpraat <- function(t,
 								overlaps <- c(1:length(overlaps))[overlaps]
 								
 								#replace endSec with startSec of the following interval
-								annotations.tier$endSec[overlaps]<-annotations.tier$startSec[overlaps+1]
+								annotations.tier$endSec[overlaps]<- annotations.tier$startSec[overlaps+1]
 							}
 						}
 					}
@@ -106,7 +106,7 @@ export_rpraat <- function(t,
 					merged$content.x[is.na(merged$content.x)]<-""
 					
 					#remove superflous colums
-					merged$content.y <-NULL
+					merged$content.y <- NULL
 					
 					annotations.tier <- merged
 				}

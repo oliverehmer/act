@@ -19,8 +19,8 @@ search_cuts_printtranscript(x, s, l = NULL, outputFolder = NULL)
 Search object;
 }
 \description{
-Subtitles in 'Subrib Title' .srt format will be created for each search result.
-The subtitles will be inserted into the column defined in \code{s@cuts.column.printtranscript}.
+Print transcripts in the style of conversation analysis will be created for each search result.
+The transcripts will be inserted into the column defined in \code{s@cuts.column.printtranscript}.
 All transcripts will be stored in \code{s@cuts.printtranscripts}.
 }
 \details{

@@ -19,7 +19,7 @@ item []:
         intervals [2]:
             xmin = 5.290462465354136 
             xmax = 9.115834298429387 
-            text = "org_A" 
+            text = "original1" 
         intervals [3]:
             xmin = 9.115834298429387 
             xmax = 5274.442979166666 
@@ -37,7 +37,7 @@ item []:
         intervals [2]:
             xmin = 9.726831188434462 
             xmax = 12.22394891280303 
-            text = "org_B" 
+            text = "original2" 
         intervals [3]:
             xmin = 12.22394891280303 
             xmax = 5274.442979166666 

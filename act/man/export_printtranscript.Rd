@@ -13,8 +13,7 @@ export_printtranscript(
   filterSectionEndsec = NULL,
   insert_arrow_annotationID = "",
   header_heading = "",
-  header_firstinfo = "",
-  alignBrackets = FALSE
+  header_firstinfo = ""
 )
 }
 \arguments{
@@ -35,14 +34,13 @@ export_printtranscript(
 \item{header_heading}{Character string; text that will be used as heading.}
 
 \item{header_firstinfo}{Character string; text that will used as first information in the header.}
-
-\item{alignBrackets}{Logical; if \code{TRUE} the function will align [] brackets that signal overlapping speech (attention: experimental function; results may not satisfy)}
 }
 \value{
 Character string; transcript as text.
 }
 \description{
 If you want to modify the layout of the print transcripts, create a new layout object with \code{mylayout <- methods::new("layout")}, modify the settings and pass it as argument \code{l}.
+In the layout object you may also set additional filters to include/exclude tiers matching regular expressions.
 }
 \examples{
 library(act)

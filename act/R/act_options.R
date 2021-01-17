@@ -6,6 +6,7 @@ act.options.default <- list (
 	
 	act.path.praat					    	= "",
 	act.path.sendpraat					    = "",
+	act.path.elan                           = "",
 
 	act.fileformats.video                      = c("mp4", "mov"),
 	act.fileformats.audio                      = c("wav", "aif", "aiff", "mp3"),
@@ -49,6 +50,7 @@ act.options.default <- list (
 #' \emph{Paths}
 #' * \code{act.path.praat} Character string; path to the 'Praat' executable on your computer. Only necessary if you use the functions to remote control Praat using Praat scripts.
 #' * \code{act.path.sendpraat} Character string; path to the 'sendpraat' executable on your computer. Only necessary if you use the functions to remote control Praat using Praat scripts.
+#' * \code{act.path.elan} Character string; path to the 'ELAN' executable on your computer. Only necessary if you want to open search results in ELAN.
 #' 
 #' \emph{File formats}
 #' * \code{act.fileformats.video} Vector of character strings; Suffixes of video files that will be identified; default is 'c("mp4", "mov")'.
@@ -95,6 +97,7 @@ options_show <- function () {
 	cat("  Paths", fill=TRUE)
 	cat("    act.path.praat                                 : ",paste("'", options()$act.path.praat,"'",sep="", collapse=""), fill=TRUE)
 	cat("    act.path.sendpraat                             : ",paste("'", options()$act.path.sendpraat, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.path.elan                                  : ",paste("'", options()$act.path.elan, "'",sep="", collapse=""),fill=TRUE)
 	cat("", fill=TRUE)
 	cat("  File formats", fill=TRUE)
 	cat("    act.fileformats.video                          : ",paste("'", options()$act.fileformats.video, "'",sep="", collapse=""),fill=TRUE)
@@ -108,9 +111,9 @@ options_show <- function () {
 	cat("    act.ffmpeg.exportchannels.fromColumnName       : ",paste("'", options()$act.ffmpeg.exportchannels.fromColumnName, "'",sep="", collapse=""),fill=TRUE)
 	cat("", fill=TRUE)
 	cat("  Import annotation files", fill=TRUE)
-	cat("    act.import.readEmptyIntervals                    : ", options()$act.import.readEmptyIntervals, fill=TRUE)
-	cat("    act.import.scanSubfolders                        : ", options()$act.import.scanSubfolders, fill=TRUE)
-	cat("    act.import.storeFileContentInTranscript         : ", options()$act.import.scanSubfolders, fill=TRUE)
+	cat("    act.import.readEmptyIntervals                  : ", options()$act.import.readEmptyIntervals, fill=TRUE)
+	cat("    act.import.scanSubfolders                      : ", options()$act.import.scanSubfolders, fill=TRUE)
+	cat("    act.import.storeFileContentInTranscript        : ", options()$act.import.scanSubfolders, fill=TRUE)
 	cat("", fill=TRUE)
 	cat("  Export", fill=TRUE)
 	cat("    act.export.foldergrouping1.fromColumnName      : ",paste("'", options()$act.export.foldergrouping1.fromColumnName,"'",sep="", collapse=""), fill=TRUE)
@@ -140,6 +143,7 @@ options_delete <- function() {
 
 	options(act.path.praat                          = NULL)
 	options(act.path.sendpraat						= NULL)
+	options(act.path.elan	  					    = NULL)
 	
 	options(act.fileformats.video                   = NULL)
 	options(act.fileformats.audio                   = NULL)
@@ -150,8 +154,8 @@ options_delete <- function() {
 	options(act.ffmpeg.exportchannels.fromColumnName= NULL)
 			
 	options(act.import.readEmptyIntervals 		    = NULL)
-	options(act.import.scanSubfolders                 = NULL)
-	options(act.import.storeFileContentInTranscript   = NULL)
+	options(act.import.scanSubfolders               = NULL)
+	options(act.import.storeFileContentInTranscript = NULL)
 	
 	options(act.export.foldergrouping1.fromColumnName= NULL)
 	options(act.export.foldergrouping2.fromColumnName= NULL)

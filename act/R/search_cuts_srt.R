@@ -1,8 +1,7 @@
-#' Create srt subtitles for all search results
+#' Create .srt subtitles for all search results
 #'
 #' Subtitles in 'Subrib Title' .srt format will be created for each search result.
 #' The subtitles will be inserted into the column defined in \code{s@cuts.column.srt}.
-#' 
 #' 
 #' \emph{Span} \cr
 #' If you want to extend the cut before or after each search result, you can modify \code{@cuts.span.beforesec} and \code{@cuts.span.aftersec} in your search object.
@@ -28,14 +27,14 @@ search_cuts_srt <- function(x,
 							speaker.show=TRUE, 
 							speaker.width=3, 
 							speaker.ending=":" ) {
-
+	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		} else { if (class(s)[[1]]!="search")		{stop("Parameter 's' needs to be a search object.") 	} }
 	if (is.null(s@results$transcript.name)) 		{ stop("Data frame s@results does not contain column 'transcript.name'") 	}
-
+	
 	
 	#--- check if output folder is given
-	destination_folder <-NULL
+	destination_folder <- NULL
 	if (!is.null(outputFolder)) {
 		destination_folder <- normalizePath(outputFolder)
 		if (destination_folder!="") {
@@ -64,96 +63,97 @@ search_cuts_srt <- function(x,
 	#set progress bar
 	helper_progress_set("Creating subtitles",max(1,nrow(s@results)))
 	
-	i <-1
-	for (i in 1:nrow(s@results)) 	{
-		#update progress bar
-		helper_progress_tick()
+	if (nrow(s@results)) {
 		
-		
-		#=== get transcript
-		t <- NULL
-		
-		if (is.null(s@results$transcript.name[i])) {
-			#transcript not found
-			myWarnings <- paste(myWarnings, sprintf("- result %s '%s': transcript '%s' not found in corpus. ", i, as.character(s@results[i, options()$act.export.filename.fromColumnName]),  as.character(s@results$transcript.name[i]) ), collapse="\n", sep="\n")
+		i <- 1
+		for (i in 1:nrow(s@results)) 	{
+			#update progress bar
+			helper_progress_tick()
 			
-		} else {
-			t <- x@transcripts[[ s@results$transcript.name[i] ]]
+			#=== get transcript
+			t <- NULL
 			
-			if (is.null(t)) {
+			if (is.null(s@results$transcript.name[i])) {
 				#transcript not found
 				myWarnings <- paste(myWarnings, sprintf("- result %s '%s': transcript '%s' not found in corpus. ", i, as.character(s@results[i, options()$act.export.filename.fromColumnName]),  as.character(s@results$transcript.name[i]) ), collapse="\n", sep="\n")
-			}
-		}
-		
-		if (!is.null(t)) {
-			#=== assemble_file NAME
-			filename <- as.character(s@results[i, options()$act.export.filename.fromColumnName])
-			if (!exists("filename")) {
-				filename <- as.character(i)
-			} else if (is.na(filename)) {
-				filename <- as.character(i)
-			} else if (length(filename)==0) {
-				filename <- as.character(i)
+				
 			} else {
-				if (filename == "") {filename <- as.character(i)}
+				t <- x@transcripts[[ s@results$transcript.name[i] ]]
+				
+				if (is.null(t)) {
+					#transcript not found
+					myWarnings <- paste(myWarnings, sprintf("- result %s '%s': transcript '%s' not found in corpus. ", i, as.character(s@results[i, options()$act.export.filename.fromColumnName]),  as.character(s@results$transcript.name[i]) ), collapse="\n", sep="\n")
+				}
 			}
 			
-			#=== get start & end
-			startSec 	<- max(0, s@results$startSec[i] - s@cuts.span.beforesec)
-			endSec 		<- min(s@results$endSec[i] + s@cuts.span.beforesec, t@length)
-			
-			#assemble file PATH
-			myFilepath <- NULL
-			if (!is.null(destination_folder)) {
-				myFilepath <- file.path(destination_folder, "srt", paste(filename, ".srt", sep=""))
-			} 
-			
-			srt <- act::export_srt(   t                     = x@transcripts[[ s@results$transcript.name[i] ]],
-											 outputPath            = myFilepath,
-											 filterTierNames       = s@filter.tier.names,
-											 filterSectionStartsec = startSec,
-											 filterSectionEndsec   = endSec,
-											 speaker.show          = TRUE, 
-											 speaker.width         = 3, 
-											 speaker.ending        = ":"
-										)   
-
-			
-			#insert into column
-			#add srt column if missing
-			if (!s@cuts.column.srt %in% colnames(s@results)) {
-				s@results <- cbind(s@results, newcolumn=as.character(""), stringsAsFactors=FALSE)
-				colnames(s@results)[ncol(s@results)] <- s@cuts.column.srt
+			if (!is.null(t)) {
+				#=== assemble_file NAME
+				filename <- as.character(s@results[i, options()$act.export.filename.fromColumnName])
+				if (!exists("filename")) {
+					filename <- as.character(i)
+				} else if (is.na(filename)) {
+					filename <- as.character(i)
+				} else if (length(filename)==0) {
+					filename <- as.character(i)
+				} else {
+					if (filename == "") {filename <- as.character(i)}
+				}
+				
+				#=== get start & end
+				startSec 	<- max(0, s@results$startSec[i] - s@cuts.span.beforesec)
+				endSec 		<- min(s@results$endSec[i] + s@cuts.span.beforesec, t@length)
+				
+				#assemble file PATH
+				myFilepath <- NULL
+				if (!is.null(destination_folder)) {
+					myFilepath <- file.path(destination_folder, "srt", paste(filename, ".srt", sep=""))
+				} 
+				
+				srt <- act::export_srt(   t                     = x@transcripts[[ s@results$transcript.name[i] ]],
+										  outputPath            = myFilepath,
+										  filterTierNames       = s@filter.tier.names,
+										  filterSectionStartsec = startSec,
+										  filterSectionEndsec   = endSec,
+										  speaker.show          = TRUE, 
+										  speaker.width         = 3, 
+										  speaker.ending        = ":"
+				)   
+				
+				
+				#insert into column
+				#add srt column if missing
+				if (!s@cuts.column.srt %in% colnames(s@results)) {
+					s@results <- cbind(s@results, newcolumn=as.character(""), stringsAsFactors=FALSE)
+					colnames(s@results)[ncol(s@results)] <- s@cuts.column.srt
+				}
+				#insert srt into search results
+				output <- stringr::str_flatten(srt, collapse="\n")
+				s@results[i, s@cuts.column.srt] <- output
+				
 			}
-			#insert srt into search results
-			output <-stringr::str_flatten(srt, collapse="\n")
-			s@results[i, s@cuts.column.srt] <- output
+		} #next i
+		
+		
+		# if output folder is given
+		if (!is.null(destination_folder)) {
 			
+			#--- save modified results
+			# R
+			filename <- paste("searchResults_", s@name, ".RData", sep="")
+			path_R 	    <-	file.path(destination_folder, filename)
+			save(s, file = path_R)
+			
+			# CSV
+			filename <- paste("searchResults_", s@name, ".csv", sep="")
+			path_CSV 		<- file.path(destination_folder, filename)
+			act::search_results_export(s, path_CSV, saveAsCSV = TRUE)
+			
+			# XLSX
+			filename <- paste("searchResults_", s@name, ".xlsx", sep="")
+			path_XLSX  <- file.path(destination_folder, filename)
+			act::search_results_export(s, path_XLSX)
 		}
-	} #next i
-	
-	
-	# if output folder is given
-	if (!is.null(destination_folder)) {
-		
-		#--- save modified results
-		# R
-		filename <-paste("searchResults_", s@name, ".RData", sep="")
-		path_R 	    <-	file.path(destination_folder, filename)
-		save(s, file = path_R)
-		
-		# CSV
-		filename <-paste("searchResults_", s@name, ".csv", sep="")
-		path_CSV 		<- file.path(destination_folder, filename)
-		act::search_results_export(s, path_CSV, saveAsCSV = TRUE)
-		
-		# XLSX
-		filename <-paste("searchResults_", s@name, ".xlsx", sep="")
-		path_XLSX  <- file.path(destination_folder, filename)
-		act::search_results_export(s, path_XLSX)
 	}
-	
 	#=== print warnings
 	if (!myWarnings=="") {
 		warning(myWarnings)		

@@ -5,21 +5,20 @@
 \alias{layout-class}
 \title{Layout object, defining the layout of print transcripts}
 \description{
-You can check the default layout settings with \code{methods::new("layout")}
-If you want to modify the layout of the print transcripts, create a new layout object with \code{mylayout <- methods::new("layout")}, modify the settings and pass it as argument \code{l} to the respective functions.
+You can create an new layout object with \code{methods::new("layout")}.
+This will give you a new layout object with the default settings uses by act.
+If you want to modify the layout of the print transcripts, create a new layout object with \code{mylayout <- methods::new("layout")}, modify the values in the \code{@slots} and pass it as argument \code{l} to the respective functions.
 }
 \section{Slots}{
 
 \describe{
 \item{\code{name}}{Character string; Name of the layout.}
 
+\item{\code{filter.tier.include.regex}}{Character string; as regular expression, tiers matching the expression will be included in the print transcript.}
+
+\item{\code{filter.tier.exclude.regex}}{Character string; as regular expression, tiers matching the expression will be excluded from the print transcript.}
+
 \item{\code{transcript.width}}{Integer; width of transcript, -1 for no line wrapping.}
-
-\item{\code{header.insert}}{Logical; if \code{TRUE} a transcript header is inserted.}
-
-\item{\code{header.heading.fromColumnName}}{Character string; from which column the heading is taken (if \code{object$.header.insert==TRUE})}
-
-\item{\code{header.firstInfo.fromColumnName}}{Character string; from which column the first info is taken (if \code{object$.header.insert==TRUE})}
 
 \item{\code{speaker.width}}{Integer; width of speaker abbreviation, -1 for full name without shortening.}
 
@@ -39,12 +38,18 @@ If you want to modify the layout of the print transcripts, create a new layout o
 
 \item{\code{additionalline2.indent}}{Logical; if \code{TRUE} the content of the dummy line 2 will be indented to begin where the content of the annotations start.}
 
-\item{\code{arrow.insert}}{Logical; if \code{TRUE} an arrow will be inserted, highlighting the transcript line containing the search hit.}
-
-\item{\code{arrow.shape}}{Character string; shape of the arrow.}
-
 \item{\code{brackets.tryToAlign}}{Logical; if \code{TRUE} act will try to align brackets [] for parallel speaking (Attention: experimental function; results may not satisfy).}
 
 \item{\code{pauseTier.regex}}{Character string; regular expression to identify pause tier for auto formatting pauses.}
+
+\item{\code{header.insert}}{Logical; if \code{TRUE} a transcript header is inserted.}
+
+\item{\code{header.heading.fromColumnName}}{Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the heading is taken (if \code{object$.header.insert==TRUE})}
+
+\item{\code{header.firstInfo.fromColumnName}}{Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the first info is taken (if \code{object$.header.insert==TRUE})}
+
+\item{\code{arrow.insert}}{Logical; is only used when transcripts are made based on a search results; if \code{TRUE} an arrow will be inserted, highlighting the transcript line containing the search hit.}
+
+\item{\code{arrow.shape}}{Character string; shape of the arrow.}
 }}
 

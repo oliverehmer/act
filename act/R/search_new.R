@@ -65,7 +65,7 @@ search_new <- function(x,
 	if (is.null(x@transcripts)) 	{stop("No transcripts found in corpus object x.")	}
 
 	#=== check arguments
-	searchMode <-match.arg(searchMode)
+	searchMode <- match.arg(searchMode)
 
 	#=== create search object
 	s <- methods::new("search")

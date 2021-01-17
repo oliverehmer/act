@@ -67,7 +67,7 @@ import_rpraat <- function(rPraatTextGrid,
 	if (length(rPraatTextGrid)>0) {
 		for (i in 1:length(rPraatTextGrid)) {
 			if (rPraatTextGrid[[i]]$type=="interval") {
-				myAnnotations <-rbind(myAnnotations, 
+				myAnnotations <- rbind(myAnnotations, 
 									  cbind(
 									  	tier.name = tierNames[[i]], 
 									  	startSec  = as.double(rPraatTextGrid[[i]]$t1), 
@@ -76,7 +76,7 @@ import_rpraat <- function(rPraatTextGrid,
 									  	)
 									  )
 			} else {
-				myAnnotations <-rbind(myAnnotations, 
+				myAnnotations <- rbind(myAnnotations, 
 									  cbind(
 									  	tier.name = tierNames[[i]], 
 									  	startSec  = as.double(rPraatTextGrid[[i]]$t), 
@@ -92,8 +92,8 @@ import_rpraat <- function(rPraatTextGrid,
 	if (nrow(myAnnotations)==0) {
 		t@annotations 				<- .emptyAnnotations
 	} else {
-		annotationID <-c(1:nrow(myAnnotations))
-		myAnnotations <-cbind(
+		annotationID <- c(1:nrow(myAnnotations))
+		myAnnotations <- cbind(
 			annotationID 			= as.integer(annotationID),
 			
 			myAnnotations,	

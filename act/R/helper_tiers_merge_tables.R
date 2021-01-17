@@ -47,7 +47,7 @@ helper_tiers_merge_tables <- function (...) {
 	}
 	
 	#--- check if tiers with the same name are all of the same type
-	differing_tier_types <-c()
+	differing_tier_types <- c()
 	for (i in nrow(tiers.table.merged)) {
 		tier1 <- tiers.table.merged[i,]
 		#compare with the other updates
@@ -55,23 +55,23 @@ helper_tiers_merge_tables <- function (...) {
 			tier2 <- tiers.table.merged[j,]
 			temp         <- merge(x=tier1, y=tier2 , by.x = "name", by.y ="name", all.x=FALSE, all.y = FALSE)
 			#check if types of any of the tiers differ
-			ids <-which(temp$type.x!=temp$type.y)
+			ids <- which(temp$type.x!=temp$type.y)
 			if(length(ids) >0) {
 				differing_tier_types <- c(differing_tier_types, temp$name[ids])		
 			}
 		}
 	}
-	differing_tier_types <-unique(differing_tier_types)
+	differing_tier_types <- unique(differing_tier_types)
 	if (length(differing_tier_types)>0) {
 		stop(paste("Some of the tiers in the transcripts have the same name but are of different types ('IntervalTier', 'TextTier'). The tiers with differing types are: ", paste(differing_tier_types, sep=", "), sep=""))
 	}
 
 	#drop rows with non unique names
-	tiers.table.merged <-tiers.table.merged[-which(duplicated(tiers.table.merged$name)),]
+	tiers.table.merged <- tiers.table.merged[-which(duplicated(tiers.table.merged$name)),]
 		if (nrow(tiers.table.merged)==0 ){
 		tiers.table.merged$position <- NA
 	} else {
-		tiers.table.merged$position <-seq(1, nrow(tiers.table.merged))
+		tiers.table.merged$position <- seq(1, nrow(tiers.table.merged))
 	}
 	rownames(tiers.table.merged) <- tiers.table.merged$name
 	return(tiers.table.merged)

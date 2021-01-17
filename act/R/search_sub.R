@@ -32,14 +32,14 @@ search_sub <- function(x,
 					   deleteLinesWithNoResults=FALSE, 
 					   excludeHitsWithinSameTier=TRUE) {
 	
-	#x <-examplecorpus
-	#s <-mysearch
+	#x <- examplecorpus
+	#s <- mysearch
 	#pattern <- myRegEx
 	#destinationColumn <-"subsearch"
 	#filterTierInclude <-""
 	#filterTierExclude <-""
-	#deleteLinesWithNoResults <-FALSE
-	#excludeHitsWithinSameTier <-TRUE
+	#deleteLinesWithNoResults <- FALSE
+	#excludeHitsWithinSameTier <- TRUE
 	
 	
 	
@@ -62,9 +62,9 @@ search_sub <- function(x,
 		}
 	}
 	
-	s@results <-cbind(s@results, newCol=as.character(rep(times=nrow(s@results), "")), stringsAsFactors=FALSE)
+	s@results <- cbind(s@results, newCol=as.character(rep(times=nrow(s@results), "")), stringsAsFactors=FALSE)
 	colnames(s@results)[ncol(s@results)] <- destinationColumn
-	#i <-1
+	#i <- 1
 	for (i in 1:nrow(s@results)) {
 		#get all info
 		search.sub <- act::search_new(x=x, pattern=pattern, filterTranscriptInclude=s@results$transcript.name[i], filterTierInclude=filterTierInclude, filterTierExclude=filterTierExclude, filterSectionStartsec=s@results$startSec[i], filterSectionEndsec=s@results$endSec[i], searchMode="content", searchNormalized=FALSE, concordanceMake=FALSE)
@@ -76,7 +76,7 @@ search_sub <- function(x,
 		} else {
 			# if results from the same tier should be excluded
 			if (excludeHitsWithinSameTier) {
-				pos <-grep(pattern=s@results$tier[i], x=searchResults.sub$tier.name)
+				pos <- grep(pattern=s@results$tier[i], x=searchResults.sub$tier.name)
 				if (length(pos)>0) {
 					searchResults.sub <- searchResults.sub[-pos, ]
 				}

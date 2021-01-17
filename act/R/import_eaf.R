@@ -122,21 +122,21 @@ import_eaf <- function(filePath=NULL,
 	timeslots <- stringr::str_match_all(timeorder, regex_timeslots)
 	timeslots <- do.call(rbind, lapply(timeslots, data.frame, stringsAsFactors=FALSE))
 	#View(timeslots)
-	timeslots <-as.data.frame(cbind(timeSlotID=timeslots[,3], value=timeslots[,6]))
+	timeslots <- as.data.frame(cbind(timeSlotID=timeslots[,3], value=timeslots[,6]))
 	timeslots$value <- as.double(timeslots$value)/1000
 	#View(timeslots)
 	
 	#=== extract annotations
 	#Split the entire eaf
 	#get position of beginning of "<tier"
-	pos.tier <-as.data.frame(stringr::str_locate_all(myeaf.merge, pattern="<TIER")[[1]] )
-	annotations.block <-c()
+	pos.tier <- as.data.frame(stringr::str_locate_all(myeaf.merge, pattern="<TIER")[[1]] )
+	annotations.block <- c()
 	if (nrow(pos.tier)>0) {
 		pos.lingtype <- stringr::str_locate(myeaf.merge, pattern="<LINGUISTIC_TYPE")[1,1]
 		if (nrow(pos.tier)==1) {
 			annotations.block <- unlist(stringr::str_sub(myeaf.merge, pos.tier$start, pos.lingtype-1))
 		} else {
-			repl <-c(pos.tier$start[2:nrow(pos.tier)], pos.lingtype)
+			repl <- c(pos.tier$start[2:nrow(pos.tier)], pos.lingtype)
 			pos.tier$end <- repl-1
 			annotations.block <- unlist(stringr::str_sub(myeaf.merge, pos.tier$start, pos.tier$end))
 		}
@@ -174,9 +174,9 @@ import_eaf <- function(filePath=NULL,
 		#View(tiers)
 		
 		#construct the hierarchy of the tiers
-		tiers$tier.hierarchy[is.na(tiers$tier.parent.ref)]<-1
+		tiers$tier.hierarchy[is.na(tiers$tier.parent.ref)]<- 1
 		hierarchy <- 0
-		i <-1
+		i <- 1
 		for (i in 1:nrow(tiers)) {
 			#exit loop if all tiers have already a place in the hierarcy   
 			if (!any(is.na(tiers$tier.hierarchy))) {
@@ -209,7 +209,7 @@ import_eaf <- function(filePath=NULL,
 		#		#get multiple tierNames
 		#		multiple <- tiers$tier.name[duplicated(tiers$tier.name)]
 		#		for (myName in multiple) {
-		#			tiers$tier.name[tiers$tier.name==myName]<-paste(tiers$tier.name[tiers$tier.name==myName],1:length(tiers$tier.name[tiers$tier.name==myName]),sep="-")
+		#			tiers$tier.name[tiers$tier.name==myName]<- paste(tiers$tier.name[tiers$tier.name==myName],1:length(tiers$tier.name[tiers$tier.name==myName]),sep="-")
 		#		}
 		#		t@import.result 		<- "ok"
 		#		t@load.message   <- "Some tiers have been renamed since their names were not unique."
@@ -234,10 +234,10 @@ import_eaf <- function(filePath=NULL,
 			regex_ann_alignable <- '(?s)(<ALIGNABLE_ANNOTATION)(.*?ANNOTATION_ID="(.*?)")(.*?TIME_SLOT_REF1="(.*?)")(.*?TIME_SLOT_REF2="(.*?)">)(.*?<ANNOTATION_VALUE>(.*?)</ANNOTATION_VALUE>)'
 			constraints_ann_alignable <- c("Time_Subdivision",    "Included_In", "No_Constraint")
 			
-			#i <-13
+			#i <- 13
 			#tiers[i,]
 			#annotations.block[i]
-			#i <-3
+			#i <- 3
 			#cat(annotations.block[i])
 			#View(tiers)
 			for (i in 1:nrow(tiers)) {
@@ -317,11 +317,11 @@ import_eaf <- function(filePath=NULL,
 				#all_tiers <- unique(annotations$tier[which(annotations$annotation.ref!="")]) 
 				
 				#=mark which are the first and the last annotations in a group
-				annotations <-cbind(annotations, position=NA)
+				annotations <- cbind(annotations, position=NA)
 				annotations$position[!is.na(annotations$annotation.ref) & is.na(annotations$annotation.previous)] <- 1# "first"
 				firstannotations <- which(annotations$position=="1") #"first"
 				for (i in firstannotations) {
-					counter <-1
+					counter <- 1
 					lastannotation <- NA
 					#print ("..")
 					#print(i)
@@ -339,7 +339,7 @@ import_eaf <- function(filePath=NULL,
 							break
 						} else {
 							annotations$annotation.previous[nextannotation]<-"found"
-							counter <-counter+1
+							counter <- counter+1
 							annotations$position[nextannotation] <- counter
 							search <- annotations$id[nextannotation]
 							#remember the last annotation
@@ -352,9 +352,9 @@ import_eaf <- function(filePath=NULL,
 				annotations.safe <- annotations
 				
 				#iterate through all tiers with referring annotations tiers
-				i <-2
+				i <- 2
 				#all_tiers[i]
-				j <-1
+				j <- 1
 				#allrefids[j]
 				#order / sort by tiers, annotarion referred to and Position()
 				annotations <- annotations[order(annotations$tier, annotations$annotation.ref, annotations$position),]
@@ -401,7 +401,7 @@ import_eaf <- function(filePath=NULL,
 				
 				#=== resolve empty time slots of annotations
 				#run through all annotations
-				i <-4
+				i <- 4
 				for (m in 1:nrow(tiers)) {
 					for (i in 1:(nrow(annotations)-1)) {
 						#print(i)
@@ -413,7 +413,7 @@ import_eaf <- function(filePath=NULL,
 							}
 							
 							#otherwise search for the next end value
-							counter <-0
+							counter <- 0
 							for (j in i:nrow(annotations)) {
 								if (!is.na(annotations$endSec[j])) {
 									break
@@ -428,9 +428,9 @@ import_eaf <- function(filePath=NULL,
 								newTimes.end	<- newTimes[2:length(newTimes)]
 								
 								#assign new time values to annotations
-								l <-0
+								l <- 0
 								for (k in i:j) {
-									l <-l+1
+									l <- l+1
 									annotations$startSec[k] <- newTimes.start[l]
 									annotations$endSec[k] <- newTimes.end[l]
 									annotations[k, ]$ts1 <- "interpolated"
@@ -450,8 +450,8 @@ import_eaf <- function(filePath=NULL,
 		if (nrow(annotations)==0) {
 			#empty myAnnotations is already set at the beginning
 		} else {
-			annotationID <-c(1:nrow(annotations))
-			myAnnotations <-data.frame(
+			annotationID <- c(1:nrow(annotations))
+			myAnnotations <- data.frame(
 				annotationID  			= as.integer(annotationID),
 				
 				tier.name  				= annotations$tier,

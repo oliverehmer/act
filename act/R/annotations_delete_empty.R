@@ -80,7 +80,7 @@ annotations_delete_empty <- function (x,
 			
 			
 			#increase counter for corpus object
-			transcripts_modified_nr <-transcripts_modified_nr +1
+			transcripts_modified_nr <- transcripts_modified_nr +1
 			transcripts_modified_ids=c(transcripts_modified_ids, i)
 			annotations_deleted_total_nr = annotations_deleted_total_nr + length(annotations_deleted_ids)
 		}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/search_playresults_inquicktime.R
 \name{search_playresults_inquicktime}
 \alias{search_playresults_inquicktime}
-\title{Open all search result in 'Quicktime' and play them}
+\title{Open all search results in 'Quicktime' and play them}
 \usage{
 search_playresults_inquicktime(x, s, bringQuicktimeToFront = FALSE)
 }
@@ -21,7 +21,7 @@ The function remote controls 'Quicktime' by using an Apple Script.
 It opens consecutively all search results in 'Quicktime' and plays them.
 }
 \details{
-You need to be on a Mac to use this function.
+Note: You need to be on a Mac to use this function.
 }
 \examples{
 library(act)

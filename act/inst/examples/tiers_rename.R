@@ -4,8 +4,8 @@ library(act)
 examplecorpus@transcripts[[1]]@tiers$name
 examplecorpus@transcripts[[2]]@tiers$name
 
-examplecorpus <- act::tiers_rename(examplecorpus, "Entrevistador", "E")
+x <- act::tiers_rename(examplecorpus, "Entrevistador", "E")
 
-examplecorpus@transcripts[[1]]@tiers$name
-examplecorpus@transcripts[[2]]@tiers$name
+x@transcripts[[1]]@tiers$name
+x@transcripts[[2]]@tiers$name
 

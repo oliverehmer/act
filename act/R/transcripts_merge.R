@@ -24,7 +24,7 @@ transcripts_merge <- function (trans_destination,
 							   identifier_intervall=".+",
 							   erase_update_sections_completely=TRUE) {
 	
-	#x <-examplecorpus
+	#x <- examplecorpus
 	#trans_destination 	<- x@transcripts[['update_destination']]
 	#trans_updates 		<- x@transcripts[c('update_update1', 'update_update2')]
 	#identifier_tier <- "update"
@@ -86,7 +86,7 @@ transcripts_merge <- function (trans_destination,
 				
 				#intervals that end after
 				for (j in 1:nrow(myAnnotationsUpdate)) {
-					myAnnotationsUpdate$endSec[j] <-min(myAnnotationsUpdate$endSec[j], myDestInterval$endSec)
+					myAnnotationsUpdate$endSec[j] <- min(myAnnotationsUpdate$endSec[j], myDestInterval$endSec)
 				}
 				
 				#destination

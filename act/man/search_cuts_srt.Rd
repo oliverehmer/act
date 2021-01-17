@@ -2,7 +2,7 @@
 % Please edit documentation in R/search_cuts_srt.R
 \name{search_cuts_srt}
 \alias{search_cuts_srt}
-\title{Create srt subtitles for all search results}
+\title{Create .srt subtitles for all search results}
 \usage{
 search_cuts_srt(
   x,

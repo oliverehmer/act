@@ -16,7 +16,7 @@ t
 
 # Content of a .TextGrid (already read by \code{readLines}), 
 # e.g. from an existing transcript object:
-mycontent <-examplecorpus@transcripts[[1]]@file.content
+mycontent <- examplecorpus@transcripts[[1]]@file.content
 t <- act::import_textgrid(fileContent=mycontent, transcriptName="test")
 t
 

@@ -27,8 +27,8 @@ transcripts_filter_single <- function (t,
 	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	} else { if (class(t)[[1]]!="transcript") 	{stop("Parameter 't' needs to be a transcript object.") 	} }
 	
 	#--- tiers
-	tiers.deleted.count<-0
-	tiers.deleted.ids <-c()
+	tiers.deleted.count<- 0
+	tiers.deleted.ids <- c()
 	annotations.deleted.count <- 0
 	if (nrow(t@annotations)>0) {
 		if (!is.null(filterTierNames)) {
@@ -94,13 +94,13 @@ transcripts_filter_single <- function (t,
 	
 	#------ sort
 	if (nrow( t@annotations)>0) {
-		sort <-sort[1]
+		sort <- sort[1]
 		if (sort=='tier>startSec') {
 			#sort annotations by tier names and start time
-			t@annotations <-t@annotations[order(ordered(t@annotations$tier.name, levels = t@tiers$name), t@annotations$startSec),]
+			t@annotations <- t@annotations[order(ordered(t@annotations$tier.name, levels = t@tiers$name), t@annotations$startSec),]
 		} else if (sort=='startSec>tier') {
 			#sort annotations by tier names and start time
-			t@annotations <-t@annotations[order(t@annotations$startSec, ordered(t@annotations$tier.name, levels = 	t@tiers$name)),]
+			t@annotations <- t@annotations[order(t@annotations$startSec, ordered(t@annotations$tier.name, levels = 	t@tiers$name)),]
 		} else {
 		}
 	}

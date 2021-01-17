@@ -1,46 +1,3 @@
-#' Search corpus and open first result in Praat
-#'
-#' The function remote controls 'Praat' by using 'sendpraat' and a 'Praat' script. 
-#' It first searches your corpus object and uses the first search hit. 
-#' The corresponding TextGrid will be opened in the 'Praat' TextGrid Editor and the search hit will be displayed.
-#' 
-#' To make this function work you need to set the path to the 'sendpraat' executable using 'options(act.path.sendpraat = ...)'.
-#' 
-#' @param x Corpus object.
-#' @param pattern Character string; search pattern as regular expression.
-#' 
-#' @export
-#'
-#' @examples
-#' library(act)
-#' 
-#' # You can only use this functions if you have located the 'sendpraat' executable 
-#' # properly in the package options.
-#' \dontrun{
-#' act::search_searchandopen_inpraat(x=examplecorpus, "pero")
-#' }
-#' 
-#' 
-#' 
-search_searchandopen_inpraat <- function(x,
-										 pattern) {
-	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
-
-	if (missing(pattern)) 	{stop("Pattern is missing.") }	
-	
-	s <- act::search_new(x=x, pattern=pattern, concordanceMake=FALSE)
-	if (is.null(s@results)) {
-		#No results
-		#return(NULL)
-	} else if (nrow(s@results)==0) {
-		#No results.
-		#return(NULL)
-	} else {
-		act::search_openresult_inpraat(x, s, 1)
-	}
-}
-
 #' Open a search result in 'Praat'
 #'
 #' The function remote controls 'Praat' by using 'sendpraat' and a 'Praat' script. 
@@ -53,7 +10,7 @@ search_searchandopen_inpraat <- function(x,
 #' @param resultNr Integer; Number of the search result (row in the data frame \code{s@results}) to be played. 
 #' @param play Logical; If \code{TRUE} selection will be played.
 #' @param closeAfterPlaying Logical; If \code{TRUE} TextGrid editor will be closed after playing (Currently non functional!)
-#' @param filterFile Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is uncompressed audio > compressed audio.
+#' @param filterMediaFile Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is uncompressed audio > compressed audio.
 #' 
 #' @export
 #'
@@ -62,8 +19,8 @@ search_searchandopen_inpraat <- function(x,
 #' 
 #' mysearch <- act::search_new(x=examplecorpus, pattern = "pero")
 #' 
-#' # You can only use this functions if you have located the 'sendpraat' executable properly
-#' # in the package options.
+#' # You can only use this functions if you have located the 'sendpraat' 
+#' # executable properly in the package options.
 #' \dontrun{
 #' act::search_openresult_inpraat(x=examplecorpus, s=mysearch, resultNr=1, TRUE, TRUE)
 #' }
@@ -72,10 +29,10 @@ search_openresult_inpraat  <- function(x,
 									   resultNr, 
 									   play=TRUE, 
 									   closeAfterPlaying=FALSE, 
-									   filterFile=c('.*\\.(aiff|aif|wav)', '.*\\.mp3') ) {
+									   filterMediaFile=c('.*\\.(aiff|aif|wav)', '.*\\.mp3') ) {
 	
 	# result <- mysearch@results[1,]
-	# x <-examplecorpus
+	# x <- examplecorpus
 	# search_openresult_inpraat(x, searchresults[1,])
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
@@ -101,7 +58,7 @@ search_openresult_inpraat  <- function(x,
 	name_textgrid	<- stringr::str_replace_all(string = t@name, pattern=" ", replacement="_")
 	
 	#---get path of sound
-	path_longsound <- media_getPathToExistingFile(t, filterFile=".*\\.(wav|mp3|aif|aiff)") 
+	path_longsound <- media_getPathToExistingFile(t, filterMediaFile=".*\\.(wav|mp3|aif|aiff)") 
 	if (is.null(path_longsound))	{
 		name_longsound <-""
 		path_longsound <-""

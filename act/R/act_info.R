@@ -24,8 +24,8 @@
 info <- function(...) {
 	dots <- list(...)                
 	if(length(dots) == 0) {stop ("You need to pass a corpus object or a transcript object to this function.")}
-	x <-NULL
-	t <-NULL
+	x <- NULL
+	t <- NULL
 	if (class(dots[[1]])=="corpus") {
 		x <- dots[[1]]	
 	} else if (class(dots[[1]])=="transcript" ) {
@@ -46,10 +46,10 @@ info <- function(...) {
 			annotations.count    =integer(),
 			path                 =character(),
 			file.encoding        =character(),
-			import.result          =character(),
+			import.result        =character(),
 			load.message         =character(),
 			media.path.count     =integer(),
-			modification.systime = character(),
+			modification.systime =character(),
 			stringsAsFactors     =FALSE
 		)
 		if (length(x@transcripts)>0) {
@@ -62,14 +62,15 @@ info <- function(...) {
 					annotations.count    = nrow(x@transcripts[[i]]@annotations),
 					path                 = x@transcripts[[i]]@file.path,
 					file.encoding        = x@transcripts[[i]]@file.encoding,
-					import.result          = x@transcripts[[i]]@import.result,
-					load.message    = x@transcripts[[i]]@load.message,
+					import.result        = x@transcripts[[i]]@import.result,
+					load.message         = x@transcripts[[i]]@load.message,
 					media.path.count     = length(x@transcripts[[i]]@media.path),
 					modification.systime = as.character(x@transcripts[[i]]@modification.systime)
 				)
 				transcripts[nrow(transcripts)+1,] <- myRow
 			}
 		}
+		rownames(transcripts) <- transcripts$transcript.name
 
 		#--- tiers
 		#=== base data
@@ -77,7 +78,7 @@ info <- function(...) {
 		
 		#=== Collapse by tier type
 		name.unique <- unique(temp$name)
-		temp2 <-data.frame(name                        =character(),
+		temp2 <- data.frame(tier.name                        =character(),
 						  tiers.count                  =integer(),
 						  transcripts.count            =integer(),
 						  transcripts.names            =character(),
@@ -108,33 +109,34 @@ info <- function(...) {
 				tiers.current.text                         <- temp[which(temp$name==name.unique[i] & temp$type=="TextTier"),]
 				
 				myRow <- c(
-					name                              = name.unique[i],
+					tier.name                              = name.unique[i],
 					tiers.count 		              = nrow(tiers.current),
-					transcripts.count                 = length(unique(tiers.current$transcripts.name)),
-					transcripts.names                 = paste(unique(tiers.current$transcripts.name), sep="|", collapse="|"),
+					transcripts.count                 = length(unique(tiers.current$transcript.name)),
+					transcripts.names                 = paste(unique(tiers.current$transcript.name), sep="|", collapse="|"),
 					annotations.count                 = sum(tiers.current$annotations.count),
 					words.org.count                   = sum(tiers.current$words.org.count),
 					words.norm.count                  = sum(tiers.current$words.norm.count),
 					
 					interval.tiers.count              = nrow(tiers.current.interval),
-					interval.transcripts.count        = length(unique(tiers.current.interval$transcripts.name)),
-					interval.transcripts.names        = paste(unique(tiers.current.interval$transcripts.name), sep="|", collapse="|"),
+					interval.transcripts.count        = length(unique(tiers.current.interval$transcript.name)),
+					interval.transcripts.names        = paste(unique(tiers.current.interval$transcript.name), sep="|", collapse="|"),
 					interval.annotations.count        = sum(tiers.current.interval$annotations.count),
 					interval.words.org.count          = sum(tiers.current.interval$words.org.count),
 					interval.words.norm.count         = sum(tiers.current.interval$words.norm.count),
 					
 					text.tiers.count                  = nrow(tiers.current.text),
-					text.transcripts.count            = length(unique(tiers.current.text$transcripts.name)),
-					text.transcripts.names            = paste(unique(tiers.current.text$transcripts.name), sep="|", collapse="|"),
+					text.transcripts.count            = length(unique(tiers.current.text$transcript.name)),
+					text.transcripts.names            = paste(unique(tiers.current.text$transcript.name), sep="|", collapse="|"),
 					text.annotations.count            = sum(tiers.current.text$annotations.count),
 					text.tiers.words.org.count        = sum(tiers.current.text$words.org.count),
 					text.tiers.words.norm.count       = sum(tiers.current.text$words.norm.count)
 				)
 				temp2[nrow(temp2)+1,] <- myRow
 			}
-			temp2 <- temp2[order(temp2$name),]
+			temp2 <- temp2[order(temp2$tier.name),]
 		}
-
+		rownames(temp2) <- temp2$tier.name
+		
 		#--- list info
 		info <- list(transcripts=transcripts, 
 					 tiers=temp2)
@@ -150,7 +152,7 @@ info <- function(...) {
 		tiers.detailed <- t@tiers
 		for (i in 1:nrow(tiers.detailed)) {
 			#--- get annotations
-			ids <-which(t@annotations$tier.name==tiers.detailed$name[i])
+			ids <- which(t@annotations$tier.name==tiers.detailed$name[i])
 			#--- number of annotations
 			tiers.detailed$annotations.count[i] <- length(ids)
 			#--- words org

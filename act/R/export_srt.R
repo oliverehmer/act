@@ -62,36 +62,36 @@ export_srt <- function(t,
 	
 	#--- iterate all times
 	text <-""
-	counter <-0
+	counter <- 0
 	for (i in 1:(length(alltimes)-1)) {
 		#which annotations span this interval
 		
 		#starts before the end of the segment, ends after the start of the segment
-		ids <-which(t@annotations$startSec<alltimes[i+1] & t@annotations$end > alltimes[i])
+		ids <- which(t@annotations$startSec<alltimes[i+1] & t@annotations$end > alltimes[i])
 		
 		#if content is not empty
 		if (paste(t@annotations$content[ids],collapse='', sep='')!='') {
 			
 			#--- add new line if not the first entry
 			if (text!="") {
-				text <-paste(text,'\n')
+				text <- paste(text,'\n')
 			}
 			
 			#--- add block
 			#counter
-			counter <-counter+1
-			text <-paste(text, counter, '\n', sep='')
+			counter <- counter+1
+			text <- paste(text, counter, '\n', sep='')
 			
 			#times
-			text <-paste(text, dhms(alltimes[i]), ' --> ', dhms(alltimes[i+1]), '\n', sep='')
+			text <- paste(text, dhms(alltimes[i]), ' --> ', dhms(alltimes[i+1]), '\n', sep='')
 			
 			#content
 			if (speaker.show) {
 				tiernames  <- substr(t@annotations$tier.name[ids], 1, speaker.width)
 				tiernames <- paste(tiernames, speaker.ending, sep='')
-				text <-paste(text,paste(tiernames, ' ', t@annotations$content[ids], collapse='\n'),'\n', sep='')
+				text <- paste(text,paste(tiernames, ' ', t@annotations$content[ids], collapse='\n'),'\n', sep='')
 			} else {
-				text <-paste(text,paste(t@annotations$content[ids],collapse='\n'),'\n', sep='')
+				text <- paste(text,paste(t@annotations$content[ids],collapse='\n'),'\n', sep='')
 			}
 			
 		}
@@ -102,7 +102,7 @@ export_srt <- function(t,
 		return(text)
 	} else {
 		#---write to file
-		fileConn <-file(outputPath)
+		fileConn <- file(outputPath)
 		writeLines(text, fileConn)
 		close(fileConn)		
 	}

@@ -66,7 +66,7 @@ export_textgrid <- function(t,
 	if (nrow(t@tiers)>0) {
 		#iterate though all tiers
 		for (tierNr in 1:nrow(t@tiers)) 		{
-			# tierNr <-2
+			# tierNr <- 2
 
 			#get annotations within tier
 			annotations.tier <- myAnnotations[myAnnotations$tier.name==t@tiers$name[tierNr],]
@@ -110,7 +110,7 @@ export_textgrid <- function(t,
 					merged$content.x[is.na(merged$content.x)]<-""
 					
 					#remove superfluous columns
-					merged$content.y <-NULL
+					merged$content.y <- NULL
 					
 					annotations.tier <- merged
 				}
@@ -141,11 +141,11 @@ export_textgrid <- function(t,
 									'            text = \"%s\" ',
 									sep="\n", collapse="\n")
 				
-				allInter<-c()
+				allInter<- c()
 				for (i in 1:intervalNr) {
 					allInter[i] <- sprintf(myInter, annotations.tier[i,1], as.character(annotations.tier[i, 3]), as.character(annotations.tier[i, 4]), stringr::str_replace_all( annotations.tier[i, 5], "\"", "\"\""))
 				}
-				a<-paste(allInter, sep="", collapse='\n')
+				a<- paste(allInter, sep="", collapse='\n')
 				
 				myTG <- append(myTG, a)
 			} else if (t@tiers$type[tierNr] == "TextTier") {
@@ -164,7 +164,7 @@ export_textgrid <- function(t,
 					#add consecutive numbers
 					annotations.tier <- cbind(as.character(1:nrow(annotations.tier)),annotations.tier)
 					
-					#createPointBlock <-function(myPoint) {
+					#createPointBlock <- function(myPoint) {
 					#	myInter <- sprintf(                 "        points [%s]:" , myPoint[1])
 					#	myInter <- append(myInter, sprintf(	"            number = %s " , as.character(myPoint[3])))
 					#	myInter <- append(myInter, sprintf( "            mark = \"%s\" " , stringr::str_replace_all(  myPoint[5], "\"", "\"\"")))
@@ -178,7 +178,7 @@ export_textgrid <- function(t,
 										'            mark = \"%s\" ',
 										sep="\n", collapse="\n")
 					
-					allPoints<-c()
+					allPoints<- c()
 					for (i in 1:pointNr) {
 						allPoints[i] <- sprintf(myPoint, annotations.tier[i,1], as.character(annotations.tier[i, 3]), stringr::str_replace_all( annotations.tier[i, 5], "\"", "\"\""))
 					}
@@ -194,7 +194,7 @@ export_textgrid <- function(t,
 		return(myTG)
 	} else {
 		#---write to file
-		fileConn <-file(outputPath)
+		fileConn <- file(outputPath)
 		writeLines(myTG, fileConn)
 		close(fileConn)		
 	}

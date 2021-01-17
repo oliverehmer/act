@@ -78,5 +78,5 @@ examplecorpus@transcripts[[1]]@tiers
 # To get more examples and information about sorting see 'helper_tiers_sort_table()'.
 }
 \seealso{
-\link{tiers_convert}, \link{tiers_rename}, \link{helper_tiers_new_table}, \link{helper_tiers_sort_table},
+\link{tiers_add}, \link{tiers_convert}, \link{tiers_delete}, \link{tiers_rename}, \link{helper_tiers_new_table}, \link{helper_tiers_sort_table}
 }

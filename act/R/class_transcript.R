@@ -1,4 +1,4 @@
-.emptyAnnotations <-data.frame(
+.emptyAnnotations <- data.frame(
 	annotationID 			= as.integer(),
 	tier.name 				= as.character(),
 	startSec 				= as.double(),

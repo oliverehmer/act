@@ -35,12 +35,12 @@ tiers_all <- function(x, compact=TRUE) {
 	#--- Count annotations in tiers
 	if (nrow(tiers)>0) {
 		#each tier
-		i <-1
+		i <- 1
 		for (i in 1:nrow(tiers)) {
 			
 			#--- count annotations
-			ids <-which(x@transcripts[[tiers$transcript.name[i]]]@annotations$tier.name==tiers$name[i])
-			tiers$annotations.count[i]<-length(ids)
+			ids <- which(x@transcripts[[tiers$transcript.name[i]]]@annotations$tier.name==tiers$name[i])
+			tiers$annotations.count[i]<- length(ids)
 			
 			#--- get annotations
 			annotations <- x@transcripts[[tiers$transcript.name[i]]]@annotations[ids,]
@@ -51,7 +51,7 @@ tiers_all <- function(x, compact=TRUE) {
 			tiers$words.org.count[i] <- sum(unlist(words.org.count))
 			
 			#--- words norm
-			content.norm <-annotations$content.norm
+			content.norm <- annotations$content.norm
 			words.norm.count <- lapply(content.norm, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
 			tiers$words.norm.count[i] <- sum(unlist(words.norm.count))
 		}

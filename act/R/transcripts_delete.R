@@ -26,7 +26,7 @@ transcripts_delete <- function(x, transcriptNames) {
 	x@history[[length(x@history)+1]] <- list(
 		modification               = "transcripts_delete",
 		systime                    = Sys.time(),
-		transcripts.deleted.names    = transcripts.deleted.names,
+		transcripts.deleted.names  = transcripts.deleted.names,
 		transcripts.deleted.count  = length(transcripts.deleted.ids)
 	)
 	return(x)

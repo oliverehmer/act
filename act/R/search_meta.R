@@ -48,7 +48,7 @@ search_meta <- function( x,
 	#filter the names by regular expressions
 	if (!is.null(filterTranscriptIncludeRegEx)) {
 		if (filterTranscriptIncludeRegEx!="") {
-			filterTranscriptNames <-grep(pattern=filterTranscriptIncludeRegEx, filterTranscriptNames, value=TRUE)
+			filterTranscriptNames <- grep(pattern=filterTranscriptIncludeRegEx, filterTranscriptNames, value=TRUE)
 		}
 	}
 	if (!is.null(filterTranscriptExcludeRegEx)) {
@@ -61,7 +61,7 @@ search_meta <- function( x,
 	if (is.null(filterTranscriptNames)) {		
 		filterTierNames <- NULL
 	} else if (length(filterTierNames)==0) {
-		filterTierNames <-NULL
+		filterTierNames <- NULL
 	} else if (length(filterTierNames)==1) {
 		if (filterTierNames[1]=="") {
 			filterTierNames <- NULL
@@ -77,7 +77,7 @@ search_meta <- function( x,
 	#filter the filterTierNames by regular expressions
 	if (!is.null(filterTierIncludeRegEx)) {
 		if (filterTierIncludeRegEx!="") {
-			filterTierNames <-grep(pattern=filterTierIncludeRegEx, filterTierNames, value=TRUE)
+			filterTierNames <- grep(pattern=filterTierIncludeRegEx, filterTierNames, value=TRUE)
 		}
 	}
 	if (!is.null(filterTierExcludeRegEx)) {
@@ -99,7 +99,7 @@ search_meta <- function( x,
 	filterTranscriptNames <- filterTranscriptNames.new
 	
 	#store names in a named list
-	meta <-list(transcripts.names=filterTranscriptNames, tiers.names=filterTierNames)
+	meta <- list(transcripts.names=filterTranscriptNames, tiers.names=filterTierNames)
 	#return this
 	return(meta)
 }

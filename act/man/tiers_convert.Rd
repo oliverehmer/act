@@ -8,8 +8,8 @@ tiers_convert(
   x,
   intervalToPoint = FALSE,
   pointToInterval = FALSE,
-  filterTranscriptNames = NULL,
-  filterTierNames = NULL
+  filterTierNames = NULL,
+  filterTranscriptNames = NULL
 )
 }
 \arguments{
@@ -19,9 +19,9 @@ tiers_convert(
 
 \item{pointToInterval}{Logical; if \code{TRUE} point/text tiers will be converted to interval tiers.}
 
-\item{filterTranscriptNames}{Vector of character strings; names of the transcripts to be included.}
-
 \item{filterTierNames}{Vector of character strings; names of the tiers to be included.}
+
+\item{filterTranscriptNames}{Vector of character strings; names of the transcripts to be checked. If left open, all transcripts will be checked}
 }
 \value{
 Corpus object.
@@ -56,5 +56,5 @@ newcorpus <- act::tiers_convert(newcorpus, pointToInterval=TRUE)
 # the original end times of the annotations get lost (when converting from interval > point).
 }
 \seealso{
-\link{tiers_rename}, \link{tiers_sort}
+\link{tiers_add}, \link{tiers_delete}, \link{tiers_rename}, \link{tiers_sort}, \link{helper_tiers_new_table}, \link{helper_tiers_sort_table}
 }

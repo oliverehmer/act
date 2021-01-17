@@ -22,14 +22,14 @@ helper_tiers_new_table <- function(tierNames,
 								   tierPositions=NULL) {
 	
 	#---- check tier names
-	tierNames <-as.character(tierNames)
+	tierNames <- as.character(tierNames)
 	if (length(tierNames)!=length(unique(tierNames))) {
 		stop("The values given in 'tierNames' are not unique.")
 	}
 	
 	#--- set and check tier types
 	if(is.null(tierTypes)){
-		tierTypes <-rep("IntervalTier", length(tierNames))
+		tierTypes <- rep("IntervalTier", length(tierNames))
 	} else {
 		if (length(tierNames)!=length(tierTypes)) {
 			stop("The parameters 'tierNames' and 'tierTypes' do not have the same length.")	
@@ -42,7 +42,7 @@ helper_tiers_new_table <- function(tierNames,
 	#--- set positions
 	if(is.null(tierPositions)){
 		if(length(tierNames)==0) {
-			tierPositions <-integer()
+			tierPositions <- integer()
 		} else {
 			tierPositions <- seq(1:length(tierNames))
 		}
@@ -51,7 +51,7 @@ helper_tiers_new_table <- function(tierNames,
 			stop("The parameters 'tierNames' and 'tierPositions' do not have the same length.")	
 		}
 
-		tierPositions <-as.integer(tierPositions)
+		tierPositions <- as.integer(tierPositions)
 		if (length(tierPositions)!=length(unique(tierPositions))) {
 			stop("The values given in 'tierPositions' are not unique.")	
 		}

@@ -17,7 +17,7 @@ t
 
 # Content of an .eaf file (already read by \code{readLines}), 
 # e.g. from an existing transcript object:
-mycontent <-examplecorpus@transcripts[['SYNC_rotar_y_flexionar']]@file.content
+mycontent <- examplecorpus@transcripts[['SYNC_rotar_y_flexionar']]@file.content
 t <- act::import_eaf(fileContent=mycontent, transcriptName="test")
 t
 

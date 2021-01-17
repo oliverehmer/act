@@ -49,7 +49,7 @@ transcripts_rename <- function(x,
 	}
 	
 	#--- perform the rename operations
-	transcript.names.info <-helper_transcriptNames_make(transcriptNames      = newTranscriptNames,
+	transcript.names.info <- helper_transcriptNames_make(transcriptNames      = newTranscriptNames,
 														searchPatterns       = searchPatterns,
 														searchReplacements   = searchReplacements,
 														toUpperCase          = toUpperCase,

@@ -40,7 +40,7 @@ transcripts_filter <- function (x,
 	if (!is.null(filterTranscriptNames)) {
 		x@transcripts <- x@transcripts[[filterTranscriptNames]]
 		transcripts.deleted.count <- length(filterTranscriptNames)
-		transcripts.deleted.ids<-filterTranscriptNames
+		transcripts.deleted.ids<- filterTranscriptNames
 	}
 	
 	if (is.null(filterOnlyTheseTranscripts)) {

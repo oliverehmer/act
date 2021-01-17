@@ -23,7 +23,7 @@ tail(t2@history, n=1)
 
 
 # --- overlappingAnnotations: will end where the next starts
-t<-examplecorpus@transcripts[[1]]
+t<- examplecorpus@transcripts[[1]]
 t@annotations <- t@annotations[order(t@annotations$tier.name, t@annotations$startSec), ]
 t@annotations$endSec[1] <- 8
 t2 <- act::transcripts_cure_single(t)
@@ -31,7 +31,7 @@ tail(t2@history, n=1)
 
 
 # --- missingTiers: will be added to @tiers in transcript object
-t<-examplecorpus@transcripts[[1]]
+t<- examplecorpus@transcripts[[1]]
 t@annotations <- t@annotations[order(t@annotations$tier.name, t@annotations$startSec), ]
 t@annotations$tier.name[1] <- "NEW"
 t2 <- act::transcripts_cure_single(t)
@@ -42,7 +42,7 @@ t@tiers
 
 
 # --- several things at once
-t<-examplecorpus@transcripts[[1]]
+t<- examplecorpus@transcripts[[1]]
 t@annotations <- t@annotations[order(t@annotations$tier.name, t@annotations$startSec), ]
 # annotation completely below 0 sec
 t@annotations$startSec[1] <- -6

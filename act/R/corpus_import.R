@@ -44,7 +44,7 @@ corpus_import <- function(x,
 	message <- c()
 	if (length(paths.dont.exist)>0) {
 		message <- c(message, sprintf("%s of %s path(s) in 'x@paths.annotation.files' do not exist.", length(paths.dont.exist), length(x@paths.annotation.files)))
-		m       <-stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
+		m       <- stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
 		message <- stringr::str_c(message,"\n", m, collapse="\n")
 			
 		paths <- paths[-paths.dont.exist]
@@ -115,8 +115,8 @@ corpus_import <- function(x,
 	#set progress bar
 	helper_progress_set("Importing files", nrow(results))
 	test <- list()
-	counter <-0
-	i<-1
+	counter <- 0
+	i<- 1
 	if (nrow(results) > 0) {
 		for (i in 1:nrow(results) ) {
 			#update progress bar
@@ -147,7 +147,7 @@ corpus_import <- function(x,
 						}
 						
 						#add to the list
-						counter <-counter+1
+						counter <- counter+1
 						test[[counter]] <- new.transcript
 						
 					} else {
@@ -176,7 +176,7 @@ corpus_import <- function(x,
 	if (length(test)==0) {
 		stop("No annotation files found in input path(s).")	
 	} else {
-		x <-act::transcripts_add(x, 
+		x <- act::transcripts_add(x, 
 								 test, 
 								 createFullText=createFullText, 
 								 assignMedia=assignMedia)

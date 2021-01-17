@@ -256,7 +256,7 @@ search_transcript_fulltext <- function(t, s) {
 	}
 	
 	if(	is.null(mySearchResults)) {
-		myColNames <-c("annotationID", "tier.name", "startSec","endSec", "content", "content.norm", "char.orig.bytime.start", "char.orig.bytime.end", "char.norm.bytime.start", "char.norm.bytime.end", "char.orig.bytier.start", "char.orig.bytier.end", "char.norm.bytier.start", "char.norm.bytier.end", "hit", "hit.nr" ,"hit.length", "hit.pos.fulltext", "hit.pos.content", "search.mode", "hit.span")
+		myColNames <- c("annotationID", "tier.name", "startSec","endSec", "content", "content.norm", "char.orig.bytime.start", "char.orig.bytime.end", "char.norm.bytime.start", "char.norm.bytime.end", "char.orig.bytier.start", "char.orig.bytier.end", "char.norm.bytier.start", "char.norm.bytier.end", "hit", "hit.nr" ,"hit.length", "hit.pos.fulltext", "hit.pos.content", "search.mode", "hit.span")
 		mySearchResults <- data.frame(matrix(ncol = length(myColNames), nrow = 0))
 		colnames(mySearchResults) <- myColNames	
 	}

@@ -24,12 +24,12 @@
 #' 
 import <- function(..., transcriptName=NULL) {
 	
-	arguments <-list(...)
+	arguments <- list(...)
 	
 	if (length(arguments)==0) {
 		warning("The parameter '...' may not be empty.")
 	}
-	argument <-arguments[[1]]
+	argument <- arguments[[1]]
 	# if argument is a list
 	if (typeof(argument)=="list") {
 			#check it if it is a rpraat object
@@ -64,7 +64,7 @@ import <- function(..., transcriptName=NULL) {
 			} else if (any(stringr::str_detect(argument, pattern="<basic-transcription>"))) {
 				#write to temporary file and read
 				tempPath <- tempfile(pattern = "file", tmpdir = tempdir(), fileext = "exb")
-				fileConn <-file(tempPath, encoding="UTF-8")
+				fileConn <- file(tempPath, encoding="UTF-8")
 				writeLines(argument, fileConn)
 				close(fileConn)
 				#import
