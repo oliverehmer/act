@@ -1,0 +1,90 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 5.984671200558726 
+tiers? <exists> 
+size = 3 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "Mery" 
+        xmin = 0 
+        xmax = 5.984671200558726 
+        intervals: size = 8 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.415490784742957 
+            text = "[<<:-)> BUEno.>]" 
+        intervals [2]:
+            xmin = 0.415490784742957 
+            xmax = 0.5577606286721206 
+            text = "" 
+        intervals [3]:
+            xmin = 0.5577606286721206 
+            xmax = 0.9364189763430666 
+            text = " [por lo-]" 
+        intervals [4]:
+            xmin = 0.9364189763430666 
+            xmax = 1.791810414970758 
+            text = "" 
+        intervals [5]:
+            xmin = 1.791810414970758 
+            xmax = 1.957842170788453 
+            text = "[no,]" 
+        intervals [6]:
+            xmin = 1.957842170788453 
+            xmax = 2.7266256853487256 
+            text = "" 
+        intervals [7]:
+            xmin = 2.7266256853487256 
+            xmax = 3.110957460332603 
+            text = "[<<f>NO;>]" 
+        intervals [8]:
+            xmin = 3.110957460332603 
+            xmax = 5.984671200558726 
+            text = "<<f>pero: <<h>yo:_yo digA[mos (.) por lo que=he LEI:do;>>]= " 
+    item [2]:
+        class = "IntervalTier" 
+        name = "Gaby" 
+        xmin = 0 
+        xmax = 5.984671200558726 
+        intervals: size = 4 
+        intervals [1]:
+            xmin = 0 
+            xmax = 2.1197674685883854 
+            text = "" 
+        intervals [2]:
+            xmin = 2.1197674685883854 
+            xmax = 3.110957460332603 
+            text = "[<<p>según ella] [esTAba;>]" 
+        intervals [3]:
+            xmin = 3.110957460332603 
+            xmax = 4.57404008495514 
+            text = "" 
+        intervals [4]:
+            xmin = 4.57404008495514 
+            xmax = 5.984671200558726 
+            text = "[(iba (xxx) arriba) maNUEla;]" 
+    item [3]:
+        class = "IntervalTier" 
+        name = "Steve" 
+        xmin = 0 
+        xmax = 5.984671200558726 
+        intervals: size = 4 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.4243826499885266 
+            text = "[((rie))][((rie))]" 
+        intervals [2]:
+            xmin = 0.4243826499885266 
+            xmax = 1.957116925121607 
+            text = "[<<:-)> la mEry] ya esTAba n[o:->]" 
+        intervals [3]:
+            xmin = 1.957116925121607 
+            xmax = 2.7266256853487256 
+            text = "[((rie))]]" 
+        intervals [4]:
+            xmin = 2.7266256853487256 
+            xmax = 5.984671200558726 
+            text = "" 

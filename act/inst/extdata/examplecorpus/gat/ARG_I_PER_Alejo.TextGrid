@@ -1,0 +1,88 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 15.047100106042071 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "E" 
+        xmin = 0 
+        xmax = 15.047100106042071 
+        intervals: size = 7 
+        intervals [1]:
+            xmin = 0 
+            xmax = 3.4201780823470838 
+            text = "" 
+        intervals [2]:
+            xmin = 3.4201780823470838 
+            xmax = 3.8540105662055186 
+            text = "[<<:-)> CL][Aro;>]" 
+        intervals [3]:
+            xmin = 3.8540105662055186 
+            xmax = 6.371121123734463 
+            text = "" 
+        intervals [4]:
+            xmin = 6.371121123734463 
+            xmax = 6.7991892085504215 
+            text = "[es CIERto.]" 
+        intervals [5]:
+            xmin = 6.7991892085504215 
+            xmax = 13.750622102952383 
+            text = "" 
+        intervals [6]:
+            xmin = 13.750622102952383 
+            xmax = 14.83062210295231 
+            text = "[<<riendo> clA:ro CLAro.>]" 
+        intervals [7]:
+            xmin = 14.83062210295231 
+            xmax = 15.047100106042071 
+            text = "(-)" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "A" 
+        xmin = 0 
+        xmax = 15.047100106042071 
+        intervals: size = 10 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.23293019052058028 
+            text = "" 
+        intervals [2]:
+            xmin = 0.23293019052058028 
+            xmax = 3.522209866306941 
+            text = "y ahí me explicÓ: (.) la importAn<<riendo>cia real>mente de esa paLAbra-=[vIste;]" 
+        intervals [3]:
+            xmin = 3.522209866306941 
+            xmax = 5.416098293428554 
+            text = "=[y de (.)] que no se puede <<acc> usar así noMÁS;> " 
+        intervals [4]:
+            xmin = 5.416098293428554 
+            xmax = 6.782586039162707 
+            text = "°hhh [hh°]" 
+        intervals [5]:
+            xmin = 6.782586039162707 
+            xmax = 8.034465010996287 
+            text = "((rie))" 
+        intervals [6]:
+            xmin = 8.034465010996287 
+            xmax = 8.18721416936325 
+            text = "(.)" 
+        intervals [7]:
+            xmin = 8.18721416936325 
+            xmax = 11.779272579387746 
+            text = "pero yO hasta ese (.) hasta Antes de: que me diga ESo yo me <<h, quebrada> sentía  norMAL;>= " 
+        intervals [8]:
+            xmin = 11.779272579387746 
+            xmax = 13.68272649629118 
+            text = "=<<h, quebrada> pero después me dijo Eso y me <<:-)>senTÍ::->>" 
+        intervals [9]:
+            xmin = 13.68272649629118 
+            xmax = 14.787914494581775 
+            text = "[((rie))]" 
+        intervals [10]:
+            xmin = 14.787914494581775 
+            xmax = 15.047100106042071 
+            text = "" 

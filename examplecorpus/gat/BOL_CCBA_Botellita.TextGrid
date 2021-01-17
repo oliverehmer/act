@@ -1,0 +1,68 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 5.037947488445755 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "A" 
+        xmin = 0 
+        xmax = 5.037947488445755 
+        intervals: size = 6 
+        intervals [1]:
+            xmin = 0 
+            xmax = 2.092830035562979 
+            text = "" 
+        intervals [2]:
+            xmin = 2.092830035562979 
+            xmax = 3.1084865209822223 
+            text = "Ah la boteLLIta;" 
+        intervals [3]:
+            xmin = 3.1084865209822223 
+            xmax = 3.6280228325828436 
+            text = "de vos ES?" 
+        intervals [4]:
+            xmin = 3.6280228325828436 
+            xmax = 4.092017416274581 
+            text = "(--)" 
+        intervals [5]:
+            xmin = 4.092017416274581 
+            xmax = 4.683259825929736 
+            text = "no he VISto_yo." 
+        intervals [6]:
+            xmin = 4.683259825929736 
+            xmax = 5.037947488445755 
+            text = "(--)" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "B" 
+        xmin = 0 
+        xmax = 5.037947488445755 
+        intervals: size = 6 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.07232021322148632 
+            text = "" 
+        intervals [2]:
+            xmin = 0.07232021322148632 
+            xmax = 0.3843310657596372 
+            text = "ah:=" 
+        intervals [3]:
+            xmin = 0.3843310657596372 
+            xmax = 1.432967559783767 
+            text = "=esa es mi boteLLIta; " 
+        intervals [4]:
+            xmin = 1.432967559783767 
+            xmax = 1.5725941398836383 
+            text = "(.)" 
+        intervals [5]:
+            xmin = 1.5725941398836383 
+            xmax = 2.092830035562979 
+            text = "bien (vos/bo);" 
+        intervals [6]:
+            xmin = 2.092830035562979 
+            xmax = 5.037947488445755 
+            text = "" 

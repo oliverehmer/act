@@ -1,0 +1,76 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 9.277211975545196 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "Entrevistador" 
+        xmin = 0 
+        xmax = 9.277211975545196 
+        intervals: size = 7 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.8139503855565167 
+            text = "" 
+        intervals [2]:
+            xmin = 0.8139503855565167 
+            xmax = 5.837236759551619 
+            text = "[y ahí ad]quiʔ (.) ahí digamos adquiriste el:: (1.6) el: aMOR," 
+        intervals [3]:
+            xmin = 5.837236759551619 
+            xmax = 6.7340448741021 
+            text = "<<all> no sé cómo llaMARlo.>" 
+        intervals [4]:
+            xmin = 6.7340448741021 
+            xmax = 6.967773901123753 
+            text = "(-)" 
+        intervals [5]:
+            xmin = 6.967773901123753 
+            xmax = 7.067999999999998 
+            text = "" 
+        intervals [6]:
+            xmin = 7.067999999999998 
+            xmax = 8.599802430142773 
+            text = "[<<quebrada, p> (la la)> <<ff> la] pa!SIÓN!.>" 
+        intervals [7]:
+            xmin = 8.599802430142773 
+            xmax = 9.277211975545196 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "ISanti" 
+        xmin = 0 
+        xmax = 9.277211975545196 
+        intervals: size = 7 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.7787669308608507 
+            text = "" 
+        intervals [2]:
+            xmin = 0.7787669308608507 
+            xmax = 1.3348099777334532 
+            text = "[había UN-]" 
+        intervals [3]:
+            xmin = 1.3348099777334532 
+            xmax = 6.967773901123753 
+            text = "" 
+        intervals [4]:
+            xmin = 6.967773901123753 
+            xmax = 8.229014658153488 
+            text = "[la (.) la paSIÓN.]" 
+        intervals [5]:
+            xmin = 8.229014658153488 
+            xmax = 8.599802430142773 
+            text = "" 
+        intervals [6]:
+            xmin = 8.599802430142773 
+            xmax = 9.079591789872559 
+            text = "sí:-" 
+        intervals [7]:
+            xmin = 9.079591789872559 
+            xmax = 9.277211975545196 
+            text = " (-)" 

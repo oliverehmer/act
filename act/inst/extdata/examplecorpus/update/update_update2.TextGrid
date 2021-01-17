@@ -1,0 +1,80 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 5274.442979166666 
+tiers? <exists> 
+size = 4 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "update" 
+        xmin = 0 
+        xmax = 5274.442979166666 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 9.248659709300055 
+            text = "" 
+        intervals [2]:
+            xmin = 9.248659709300055 
+            xmax = 19.263692630807608 
+            text = "update" 
+        intervals [3]:
+            xmin = 19.263692630807608 
+            xmax = 5274.442979166666 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "A" 
+        xmin = 0 
+        xmax = 5274.442979166666 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 16.20871123892308 
+            text = "" 
+        intervals [2]:
+            xmin = 16.20871123892308 
+            xmax = 22.26554997462556 
+            text = "2_C" 
+        intervals [3]:
+            xmin = 22.26554997462556 
+            xmax = 5274.442979166666 
+            text = "" 
+    item [3]:
+        class = "IntervalTier" 
+        name = "B" 
+        xmin = 0 
+        xmax = 5274.442979166666 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 14.003809418469984 
+            text = "" 
+        intervals [2]:
+            xmin = 14.003809418469984 
+            xmax = 18.78552420981405 
+            text = "2_B" 
+        intervals [3]:
+            xmin = 18.78552420981405 
+            xmax = 5274.442979166666 
+            text = "" 
+    item [4]:
+        class = "IntervalTier" 
+        name = "C" 
+        xmin = 0 
+        xmax = 5274.442979166666 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 8.181926248704809 
+            text = "" 
+        intervals [2]:
+            xmin = 8.181926248704809 
+            xmax = 14.960152376738797 
+            text = "2_A" 
+        intervals [3]:
+            xmin = 14.960152376738797 
+            xmax = 5274.442979166666 
+            text = "" 

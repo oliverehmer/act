@@ -1,0 +1,72 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 9.199673254487607 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "María" 
+        xmin = 0 
+        xmax = 9.199673254487607 
+        intervals: size = 8 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.41791462402179036 
+            text = "" 
+        intervals [2]:
+            xmin = 0.41791462402179036 
+            xmax = 0.7167717586331683 
+            text = "[y eh-]" 
+        intervals [3]:
+            xmin = 0.7167717586331683 
+            xmax = 5.225019005037286 
+            text = "" 
+        intervals [4]:
+            xmin = 5.225019005037286 
+            xmax = 5.891444414021631 
+            text = "[°h (YA),]" 
+        intervals [5]:
+            xmin = 5.891444414021631 
+            xmax = 6.357253885994396 
+            text = "" 
+        intervals [6]:
+            xmin = 6.357253885994396 
+            xmax = 6.818225095047698 
+            text = "no NO;=" 
+        intervals [7]:
+            xmin = 6.818225095047698 
+            xmax = 7.374057975165464 
+            text = "=de por SÍ, (.)" 
+        intervals [8]:
+            xmin = 7.374057975165464 
+            xmax = 9.199673254487607 
+            text = "<<quebrada> el paraguayo ya SAbe que e!XIS!te;>" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "ISalva" 
+        xmin = 0 
+        xmax = 9.199673254487607 
+        intervals: size = 5 
+        intervals [1]:
+            xmin = 0 
+            xmax = 3.501190731155372 
+            text = "<<all> y y [esta(s) ley]Enda(s)> cómo se:: (.) cómo se (.) transMIten;=<<acc> diGAmos;>" 
+        intervals [2]:
+            xmin = 3.501190731155372 
+            xmax = 3.5903938016531676 
+            text = "(.)" 
+        intervals [3]:
+            xmin = 3.5903938016531676 
+            xmax = 4.32582213341033 
+            text = "de_forma oRAL:,=" 
+        intervals [4]:
+            xmin = 4.32582213341033 
+            xmax = 6.357253885994396 
+            text = " se transmiten entre:: [de: <<cresc> bOca en] BOca,>" 
+        intervals [5]:
+            xmin = 6.357253885994396 
+            xmax = 9.199673254487607 
+            text = "" 

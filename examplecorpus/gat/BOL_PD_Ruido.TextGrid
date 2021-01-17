@@ -1,0 +1,56 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 4.284739357339497 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "Pr" 
+        xmin = 0 
+        xmax = 4.284739357339497 
+        intervals: size = 5 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.19656178305811522 
+            text = "" 
+        intervals [2]:
+            xmin = 0.19656178305811522 
+            xmax = 2.699057347558302 
+            text = "y que<<quebrada>ría::> (.) descubRIR yo también=[nO,]" 
+        intervals [3]:
+            xmin = 2.699057347558302 
+            xmax = 3.153908283499483 
+            text = "" 
+        intervals [4]:
+            xmin = 3.153908283499483 
+            xmax = 4.06624594788709 
+            text = "dónde era el RUIdo." 
+        intervals [5]:
+            xmin = 4.06624594788709 
+            xmax = 4.284739357339497 
+            text = "(-)" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "Ph" 
+        xmin = 0 
+        xmax = 4.284739357339497 
+        intervals: size = 4 
+        intervals [1]:
+            xmin = 0 
+            xmax = 2.589322643654235 
+            text = "" 
+        intervals [2]:
+            xmin = 2.589322643654235 
+            xmax = 2.91047619047621 
+            text = "[a]HA," 
+        intervals [3]:
+            xmin = 2.91047619047621 
+            xmax = 3.153908283499483 
+            text = "(.)" 
+        intervals [4]:
+            xmin = 3.153908283499483 
+            xmax = 4.284739357339497 
+            text = "" 

@@ -1,0 +1,72 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 5274.442979166666 
+tiers? <exists> 
+size = 4 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "update" 
+        xmin = 0 
+        xmax = 5274.442979166666 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 22.05302581628071 
+            text = "" 
+        intervals [2]:
+            xmin = 22.05302581628071 
+            xmax = 25.453355794762206 
+            text = "update" 
+        intervals [3]:
+            xmin = 25.453355794762206 
+            xmax = 5274.442979166666 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "A" 
+        xmin = 0 
+        xmax = 5274.442979166666 
+        intervals: size = 1 
+        intervals [1]:
+            xmin = 0 
+            xmax = 5274.442979166666 
+            text = "" 
+    item [3]:
+        class = "IntervalTier" 
+        name = "B" 
+        xmin = 0 
+        xmax = 5274.442979166666 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 22.770375285651426 
+            text = "" 
+        intervals [2]:
+            xmin = 22.770375285651426 
+            xmax = 23.68215335046059 
+            text = "1_A" 
+        intervals [3]:
+            xmin = 23.68215335046059 
+            xmax = 5274.442979166666 
+            text = "" 
+    item [4]:
+        class = "IntervalTier" 
+        name = "D" 
+        xmin = 0 
+        xmax = 5274.442979166666 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 23.9050324329695 
+            text = "" 
+        intervals [2]:
+            xmin = 23.9050324329695 
+            xmax = 24.938380906419884 
+            text = "1_B" 
+        intervals [3]:
+            xmin = 24.938380906419884 
+            xmax = 5274.442979166666 
+            text = "" 

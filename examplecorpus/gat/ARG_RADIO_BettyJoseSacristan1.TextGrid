@@ -1,0 +1,30 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 6.899484013385923 
+tiers? <exists> 
+size = 1 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "JS" 
+        xmin = 0 
+        xmax = 6.899484013385923 
+        intervals: size = 4 
+        intervals [1]:
+            xmin = 0 
+            xmax = 1.4977529250922004 
+            text = "lo imporTANte es que- °hh" 
+        intervals [2]:
+            xmin = 1.4977529250922004 
+            xmax = 3.861006053351936 
+            text = " esto que damos en llamar el <<rall, :-)> primEr MUNdo;> (.) " 
+        intervals [3]:
+            xmin = 3.861006053351936 
+            xmax = 4.221817478042368 
+            text = "no?" 
+        intervals [4]:
+            xmin = 4.221817478042368 
+            xmax = 6.899484013385923 
+            text = "no !PIER!da (.) su (.) perspectiva de proGREso;" 

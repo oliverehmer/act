@@ -1,0 +1,116 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 10.623352976690796 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "B" 
+        xmin = 0 
+        xmax = 10.623352976690796 
+        intervals: size = 11 
+        intervals [1]:
+            xmin = 0 
+            xmax = 1.4891671885548021 
+            text = "" 
+        intervals [2]:
+            xmin = 1.4891671885548021 
+            xmax = 1.9275894591237162 
+            text = "nop;" 
+        intervals [3]:
+            xmin = 1.9275894591237162 
+            xmax = 2.246370400243947 
+            text = "(-)" 
+        intervals [4]:
+            xmin = 2.246370400243947 
+            xmax = 3.415815969096599 
+            text = "" 
+        intervals [5]:
+            xmin = 3.415815969096599 
+            xmax = 3.6549016749367738 
+            text = "[no;]" 
+        intervals [6]:
+            xmin = 3.6549016749367738 
+            xmax = 4.528584356819515 
+            text = "" 
+        intervals [7]:
+            xmin = 4.528584356819515 
+            xmax = 6.459013158947499 
+            text = "porque las mu´jEres te puede(n) decir <<pronunciación guaraní> nde po`RA;>" 
+        intervals [8]:
+            xmin = 6.459013158947499 
+            xmax = 7.437827476300917 
+            text = "(1.0)" 
+        intervals [9]:
+            xmin = 7.437827476300917 
+            xmax = 9.115784775976358 
+            text = " [y vOs le] podés de[cir a las mujEres <<pronunciación guaraní> nde poR]A;>" 
+        intervals [10]:
+            xmin = 9.115784775976358 
+            xmax = 9.823079989086878 
+            text = "(0.7)" 
+        intervals [11]:
+            xmin = 9.823079989086878 
+            xmax = 10.623352976690796 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "N" 
+        xmin = 0 
+        xmax = 10.623352976690796 
+        intervals: size = 13 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.3246625029577501 
+            text = "ah;= " 
+        intervals [2]:
+            xmin = 0.3246625029577501 
+            xmax = 1.4361355082300236 
+            text = "=<<all> no tiene (.) no tendrían GÉnero;>" 
+        intervals [3]:
+            xmin = 1.4361355082300236 
+            xmax = 2.246370400243947 
+            text = "" 
+        intervals [4]:
+            xmin = 2.246370400243947 
+            xmax = 3.055602419732786 
+            text = "ah:-=miRÁ; " 
+        intervals [5]:
+            xmin = 3.055602419732786 
+            xmax = 3.369327081849896 
+            text = "(-)" 
+        intervals [6]:
+            xmin = 3.369327081849896 
+            xmax = 4.136393721420461 
+            text = "in[teres]anTÍsimo." 
+        intervals [7]:
+            xmin = 4.136393721420461 
+            xmax = 4.528584356819515 
+            text = "(0.4)" 
+        intervals [8]:
+            xmin = 4.528584356819515 
+            xmax = 7.441726334924162 
+            text = "" 
+        intervals [9]:
+            xmin = 7.441726334924162 
+            xmax = 7.786819997875924 
+            text = "[ah:;] " 
+        intervals [10]:
+            xmin = 7.786819997875924 
+            xmax = 8.009302529699418 
+            text = "" 
+        intervals [11]:
+            xmin = 8.009302529699418 
+            xmax = 8.935759639830103 
+            text = "[<<all> decir ne pona a ELlas;>]" 
+        intervals [12]:
+            xmin = 8.935759639830103 
+            xmax = 9.823079989086878 
+            text = "" 
+        intervals [13]:
+            xmin = 9.823079989086878 
+            xmax = 10.623352976690796 
+            text = "ah::;" 

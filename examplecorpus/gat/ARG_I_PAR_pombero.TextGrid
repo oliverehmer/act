@@ -1,0 +1,78 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 7.99690610929947 
+tiers? <exists> 
+size = 3 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "María" 
+        xmin = 0 
+        xmax = 7.99690610929947 
+        intervals: size = 7 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.03057619401953191 
+            text = "" 
+        intervals [2]:
+            xmin = 0.03057619401953191 
+            xmax = 1.5816251169243323 
+            text = "y hay sí MIles de histOrias;=eh," 
+        intervals [3]:
+            xmin = 1.5816251169243323 
+            xmax = 2.4117839083009276 
+            text = "(---)" 
+        intervals [4]:
+            xmin = 2.4117839083009276 
+            xmax = 3.5540822535942684 
+            text = "" 
+        intervals [5]:
+            xmin = 3.5540822535942684 
+            xmax = 6.07455214522133 
+            text = "°hh (--) <<h> porque el nOmbre es aSÍ;>" 
+        intervals [6]:
+            xmin = 6.07455214522133 
+            xmax = 7.146823547733803 
+            text = "el pomBEro; (-)" 
+        intervals [7]:
+            xmin = 7.146823547733803 
+            xmax = 7.99690610929947 
+            text = "[el !PO]M!bero." 
+    item [2]:
+        class = "IntervalTier" 
+        name = "ISalva" 
+        xmin = 0 
+        xmax = 7.99690610929947 
+        intervals: size = 1 
+        intervals [1]:
+            xmin = 0 
+            xmax = 7.99690610929947 
+            text = "" 
+    item [3]:
+        class = "IntervalTier" 
+        name = "Nacho" 
+        xmin = 0 
+        xmax = 7.99690610929947 
+        intervals: size = 5 
+        intervals [1]:
+            xmin = 0 
+            xmax = 2.4117839083009276 
+            text = "" 
+        intervals [2]:
+            xmin = 2.4117839083009276 
+            xmax = 3.5540822535942684 
+            text = "<<h> por qué le dicen el bomBEro;>" 
+        intervals [3]:
+            xmin = 3.5540822535942684 
+            xmax = 7.146823547733803 
+            text = "" 
+        intervals [4]:
+            xmin = 7.146823547733803 
+            xmax = 7.47224577833316 
+            text = "[aJÁ;]" 
+        intervals [5]:
+            xmin = 7.47224577833316 
+            xmax = 7.99690610929947 
+            text = "" 

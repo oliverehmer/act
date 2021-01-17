@@ -1,0 +1,114 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 19.649679855036396 
+tiers? <exists> 
+size = 3 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "Mery" 
+        xmin = 0 
+        xmax = 19.649679855036396 
+        intervals: size = 11 
+        intervals [1]:
+            xmin = 0 
+            xmax = 2.9711756275323085 
+            text = "quÉ sabemos <<quebrada> del_eh:> (.) de: la histOria de cochaBAMba nosotros- (.)" 
+        intervals [2]:
+            xmin = 2.9711756275323085 
+            xmax = 3.061959380379486 
+            text = "" 
+        intervals [3]:
+            xmin = 3.061959380379486 
+            xmax = 4.672578085924269 
+            text = "del grito liberTArio? (-)" 
+        intervals [4]:
+            xmin = 4.672578085924269 
+            xmax = 6.514539630625914 
+            text = "cuando los españOles estaban domiNANdo?" 
+        intervals [5]:
+            xmin = 6.514539630625914 
+            xmax = 7.936677476694373 
+            text = "" 
+        intervals [6]:
+            xmin = 7.936677476694373 
+            xmax = 12.426679473427562 
+            text = "<<len> cuando (.) s:e levantaron::> (-) com[o !FIE!ras] los cochabamBInos? (-)" 
+        intervals [7]:
+            xmin = 12.426679473427562 
+            xmax = 13.971802812620897 
+            text = "°h[h] que eran (.) conTAdos," 
+        intervals [8]:
+            xmin = 13.971802812620897 
+            xmax = 15.968239778071784 
+            text = "creo_que_eran once HOmbres a la cabEza?" 
+        intervals [9]:
+            xmin = 15.968239778071784 
+            xmax = 17.091535707849996 
+            text = "[era] <<acc> esteban ARce,> (1.0)" 
+        intervals [10]:
+            xmin = 17.091535707849996 
+            xmax = 18.138902490317268 
+            text = "" 
+        intervals [11]:
+            xmin = 18.138902490317268 
+            xmax = 19.649679855036396 
+            text = "e:ra nataniel aGUI:rre, (.)" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "Gaby" 
+        xmin = 0 
+        xmax = 19.649679855036396 
+        intervals: size = 5 
+        intervals [1]:
+            xmin = 0 
+            xmax = 10.348635629477084 
+            text = "" 
+        intervals [2]:
+            xmin = 10.348635629477084 
+            xmax = 11.052380889073898 
+            text = "[<<p> (xxx)>]" 
+        intervals [3]:
+            xmin = 11.052380889073898 
+            xmax = 12.66777199249318 
+            text = "" 
+        intervals [4]:
+            xmin = 12.66777199249318 
+            xmax = 12.840444806954398 
+            text = "[<<p> hm_HM.>]" 
+        intervals [5]:
+            xmin = 12.840444806954398 
+            xmax = 19.649679855036396 
+            text = "" 
+    item [3]:
+        class = "IntervalTier" 
+        name = "Steve" 
+        xmin = 0 
+        xmax = 19.649679855036396 
+        intervals: size = 6 
+        intervals [1]:
+            xmin = 0 
+            xmax = 6.514539630625914 
+            text = "" 
+        intervals [2]:
+            xmin = 6.514539630625914 
+            xmax = 6.872292214717009 
+            text = "sÍ." 
+        intervals [3]:
+            xmin = 6.872292214717009 
+            xmax = 7.936677476694373 
+            text = "(1.2)" 
+        intervals [4]:
+            xmin = 7.936677476694373 
+            xmax = 15.997918186546382 
+            text = "" 
+        intervals [5]:
+            xmin = 15.997918186546382 
+            xmax = 16.33590054433189 
+            text = "[hm;]" 
+        intervals [6]:
+            xmin = 16.33590054433189 
+            xmax = 19.649679855036396 
+            text = "" 

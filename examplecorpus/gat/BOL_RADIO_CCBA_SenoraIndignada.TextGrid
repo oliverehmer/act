@@ -1,0 +1,46 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 16.57495003426931 
+tiers? <exists> 
+size = 1 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "A" 
+        xmin = 0 
+        xmax = 16.57495003426931 
+        intervals: size = 8 
+        intervals [1]:
+            xmin = 0 
+            xmax = 3.801811390125506 
+            text = "°h y el profesional que le °h estÁ defenDIENdo, (-)" 
+        intervals [2]:
+            xmin = 3.801811390125506 
+            xmax = 5.664846882956358 
+            text = "<<all> seguramEnte no tiene su esPOsa->=" 
+        intervals [3]:
+            xmin = 5.664846882956358 
+            xmax = 6.9942569505401515 
+            text = "=no tiene NIñas? °hh" 
+        intervals [4]:
+            xmin = 6.9942569505401515 
+            xmax = 7.817262406965174 
+            text = "que cuiDAR," 
+        intervals [5]:
+            xmin = 7.817262406965174 
+            xmax = 9.67701147832846 
+            text = "por eso el se_es (.) está defenDIENdo;=" 
+        intervals [6]:
+            xmin = 9.67701147832846 
+            xmax = 11.852325039826734 
+            text = "=es que no se (.) !PUE!de hacer eso=<<p> señor VAN;>=" 
+        intervals [7]:
+            xmin = 11.852325039826734 
+            xmax = 15.018289804644013 
+            text = "=yo estoy muy °h muy indigNAda porque; °hh " 
+        intervals [8]:
+            xmin = 15.018289804644013 
+            xmax = 16.57495003426931 
+            text = "la justIcia se está doBLANdo." 

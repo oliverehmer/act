@@ -1,0 +1,752 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 112.094943602875 
+tiers? <exists> 
+size = 6 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "JAN" 
+        xmin = 0 
+        xmax = 112.094943602875 
+        intervals: size = 84 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.186035343769674 
+            text = "" 
+        intervals [2]:
+            xmin = 0.186035343769674 
+            xmax = 1.24171465085766 
+            text = "una vez <<quebrada> el:_e;> (.)" 
+        intervals [3]:
+            xmin = 1.24171465085766 
+            xmax = 2.95381405180627 
+            text = "y yo estaba limPIANdo el livIng;" 
+        intervals [4]:
+            xmin = 2.95381405180627 
+            xmax = 3.1104992816999 
+            text = "(0.2)" 
+        intervals [5]:
+            xmin = 3.1104992816999 
+            xmax = 3.86043530842332 
+            text = "en [mi CAsa;]=" 
+        intervals [6]:
+            xmin = 3.86043530842332 
+            xmax = 5.42302407274429 
+            text = "=y este mi amIgo el p:aVIto;=" 
+        intervals [7]:
+            xmin = 5.42302407274429 
+            xmax = 6.66905565648524 
+            text = "=pues entra a la caRREra-=" 
+        intervals [8]:
+            xmin = 6.66905565648524 
+            xmax = 8.48610236407555 
+            text = "=y TOdo me lo <<dim> ensUcia;> °h (0.6)" 
+        intervals [9]:
+            xmin = 8.48610236407555 
+            xmax = 11.0699981196528 
+            text = "yo agarro el trApo de ence:RA:R; (0.4)" 
+        intervals [10]:
+            xmin = 11.0699981196528 
+            xmax = 13.2581458713745 
+            text = "<<len> y:: le:: dOy:> (-) [!PÁ!des;]" 
+        intervals [11]:
+            xmin = 13.2581458713745 
+            xmax = 15.4537817866836 
+            text = "" 
+        intervals [12]:
+            xmin = 15.4537817866836 
+            xmax = 16.3756833640774 
+            text = "[a Ese mi a][MI][go;]" 
+        intervals [13]:
+            xmin = 16.3756833640774 
+            xmax = 16.5085878308414 
+            text = "" 
+        intervals [14]:
+            xmin = 16.5085878308414 
+            xmax = 17.1039356400008 
+            text = "[[PA:v]o.]" 
+        intervals [15]:
+            xmin = 17.1039356400008 
+            xmax = 18.1134289146966 
+            text = "(XXX XXX XXX XXX XXX);=" 
+        intervals [16]:
+            xmin = 18.1134289146966 
+            xmax = 18.5849689799804 
+            text = "=se LLAma,=" 
+        intervals [17]:
+            xmin = 18.5849689799804 
+            xmax = 19.5977189176773 
+            text = "pero le dicen (.) !PA!vo;" 
+        intervals [18]:
+            xmin = 19.5977189176773 
+            xmax = 20.0346500456772 
+            text = "(0.4)" 
+        intervals [19]:
+            xmin = 20.0346500456772 
+            xmax = 23.5860906966181 
+            text = "y (.) <<rítmico> con el trApo (.) [con cEra le dOy] (sea)_en [su espAlda y en su CAra;>]=" 
+        intervals [20]:
+            xmin = 23.5860906966181 
+            xmax = 24.3641899787427 
+            text = "=[y TOdo.]" 
+        intervals [21]:
+            xmin = 24.3641899787427 
+            xmax = 24.699128046094 
+            text = "" 
+        intervals [22]:
+            xmin = 24.699128046094 
+            xmax = 25.9954937121792 
+            text = "[bIEn] manCHANdolo_(aún);" 
+        intervals [23]:
+            xmin = 25.9954937121792 
+            xmax = 26.661529715074 
+            text = "(0.7)" 
+        intervals [24]:
+            xmin = 26.661529715074 
+            xmax = 29.6270022283038 
+            text = "" 
+        intervals [25]:
+            xmin = 29.6270022283038 
+            xmax = 31.3267014355041 
+            text = "[desPUÉS,] " 
+        intervals [26]:
+            xmin = 31.3267014355041 
+            xmax = 32.89986394557823 
+            text = "[<<f> se ha ido a quejArse al] TUco;>" 
+        intervals [27]:
+            xmin = 32.89986394557823 
+            xmax = 33.1720732777843 
+            text = "" 
+        intervals [28]:
+            xmin = 33.1720732777843 
+            xmax = 35.8991363969867 
+            text = "°hh [<<f> y yo seguía limpiAndo lo que él se me lo había ensuCIAdo;>]=" 
+        intervals [29]:
+            xmin = 35.8991363969867 
+            xmax = 36.3690002599816 
+            text = "=[<<f> BIE:N.>]" 
+        intervals [30]:
+            xmin = 36.3690002599816 
+            xmax = 38.0272157984278 
+            text = "" 
+        intervals [31]:
+            xmin = 38.0272157984278 
+            xmax = 39.3276126795382 
+            text = "viene mi hermAno el TUco,=" 
+        intervals [32]:
+            xmin = 39.3276126795382 
+            xmax = 41.8894629175005 
+            text = "=y me (.) tIra una(s) patAdas en el traSEro-=" 
+        intervals [33]:
+            xmin = 41.8894629175005 
+            xmax = 43.6899154916436 
+            text = "=que mi cabeza asÍ me lleva al PIso." 
+        intervals [34]:
+            xmin = 43.6899154916436 
+            xmax = 46.4767618466372 
+            text = "" 
+        intervals [35]:
+            xmin = 46.4767618466372 
+            xmax = 49.5261991164257 
+            text = "porque lo había pegAdo al su amIgo con el trApo con CEra." 
+        intervals [36]:
+            xmin = 49.5261991164257 
+            xmax = 49.6543436702492 
+            text = "(-)" 
+        intervals [37]:
+            xmin = 49.6543436702492 
+            xmax = 50.3772465970993 
+            text = "" 
+        intervals [38]:
+            xmin = 50.3772465970993 
+            xmax = 52.2820793457727 
+            text = "<<all, nasalizado> pero qué le has hEcho> a mi <<quebrada, p> aMI:go y::;>" 
+        intervals [39]:
+            xmin = 52.2820793457727 
+            xmax = 52.7763511962346 
+            text = "[<<quebrada, p> iDIOta;>]" 
+        intervals [40]:
+            xmin = 52.7763511962346 
+            xmax = 53.8862023050154 
+            text = "" 
+        intervals [41]:
+            xmin = 53.8862023050154 
+            xmax = 57.162117898815744 
+            text = "<<len, rítmico> a:gA:rro la escOba y lo BUSco a mi hermAno=<<dim> (pavo/para).>" 
+        intervals [42]:
+            xmin = 57.162117898815744 
+            xmax = 57.6851686252878 
+            text = "(0.5)" 
+        intervals [43]:
+            xmin = 57.6851686252878 
+            xmax = 58.1660255633247 
+            text = "peGARlo." 
+        intervals [44]:
+            xmin = 58.1660255633247 
+            xmax = 58.6345522565445 
+            text = "(0.5)" 
+        intervals [45]:
+            xmin = 58.6345522565445 
+            xmax = 60.9026082164668 
+            text = "" 
+        intervals [46]:
+            xmin = 60.9026082164668 
+            xmax = 62.2879341570018 
+            text = "[<<ff> lo agArro al] TUco;>" 
+        intervals [47]:
+            xmin = 62.2879341570018 
+            xmax = 62.5920498366869 
+            text = "" 
+        intervals [48]:
+            xmin = 62.5920498366869 
+            xmax = 63.9487510992469 
+            text = "[<<f>lo a][gArro al] TUco;>" 
+        intervals [49]:
+            xmin = 63.9487510992469 
+            xmax = 64.67018283091114 
+            text = "[(SIgo)-] (-)" 
+        intervals [50]:
+            xmin = 64.67018283091114 
+            xmax = 65.8582561545743 
+            text = " llego hasta la paRED." 
+        intervals [51]:
+            xmin = 65.8582561545743 
+            xmax = 66.2360716960467 
+            text = "(0.4)" 
+        intervals [52]:
+            xmin = 66.2360716960467 
+            xmax = 66.9399481652751 
+            text = "" 
+        intervals [53]:
+            xmin = 66.9399481652751 
+            xmax = 69.06722734307772 
+            text = "[<<len>el] PAlo en su <<dim, quebrada> cuEllo ahí.>>" 
+        intervals [54]:
+            xmin = 69.06722734307772 
+            xmax = 70.1377161396951 
+            text = "" 
+        intervals [55]:
+            xmin = 70.1377161396951 
+            xmax = 71.8411281237701 
+            text = "mi rodIlla en <<:-), quebrada> su PEcho;>" 
+        intervals [56]:
+            xmin = 71.8411281237701 
+            xmax = 73.9709134704307 
+            text = "" 
+        intervals [57]:
+            xmin = 73.9709134704307 
+            xmax = 74.4116982688152 
+            text = "[((suspira))]" 
+        intervals [58]:
+            xmin = 74.4116982688152 
+            xmax = 75.810223980803 
+            text = "<<:-), all> ay yo no te mAto san JOrge;>" 
+        intervals [59]:
+            xmin = 75.810223980803 
+            xmax = 76.4508850136998 
+            text = "<<riendo> te mata_ÉL.>" 
+        intervals [60]:
+            xmin = 76.4508850136998 
+            xmax = 79.0241609288953 
+            text = "" 
+        intervals [61]:
+            xmin = 79.0241609288953 
+            xmax = 81.3531218324537 
+            text = "e:se [rAto una] tÍa forTIta." 
+        intervals [62]:
+            xmin = 81.3531218324537 
+            xmax = 82.1494812930467 
+            text = "(0.8)" 
+        intervals [63]:
+            xmin = 82.1494812930467 
+            xmax = 83.32063492063493 
+            text = "aparece y me VE;" 
+        intervals [64]:
+            xmin = 83.32063492063493 
+            xmax = 83.6617611221658 
+            text = "(-)" 
+        intervals [65]:
+            xmin = 83.6617611221658 
+            xmax = 84.52124264669789 
+            text = "[<<a> uh:::->] " 
+        intervals [66]:
+            xmin = 84.52124264669789 
+            xmax = 85.3445233124818 
+            text = "(0.8)" 
+        intervals [67]:
+            xmin = 85.3445233124818 
+            xmax = 88.2864226916956 
+            text = "cómo vas a hacer eso (.) <<rall> con tu ^herMA::no;>" 
+        intervals [68]:
+            xmin = 88.2864226916956 
+            xmax = 89.4821119015795 
+            text = "(1.2)" 
+        intervals [69]:
+            xmin = 89.4821119015795 
+            xmax = 91.6706137939944 
+            text = "<<len> que después <<pronunciación quechua> qariMA::cho;>>" 
+        intervals [70]:
+            xmin = 91.6706137939944 
+            xmax = 93.4763287269933 
+            text = "<<len> qué cosa <<quebrada>E:res;>>" 
+        intervals [71]:
+            xmin = 93.4763287269933 
+            xmax = 95.8111899241577 
+            text = "<<len> fascinerOsa mal:VA:da;>" 
+        intervals [72]:
+            xmin = 95.8111899241577 
+            xmax = 96.4549196195136 
+            text = "" 
+        intervals [73]:
+            xmin = 96.4549196195136 
+            xmax = 97.5594773208765 
+            text = "°hh <<all> lo que opinaba mi herMAno->" 
+        intervals [74]:
+            xmin = 97.5594773208765 
+            xmax = 99.2783144494234 
+            text = "te has librA:do por la TÍA;" 
+        intervals [75]:
+            xmin = 99.2783144494234 
+            xmax = 100.866498248733 
+            text = "la prÓxima (.) <<a, riendo> te MAto;=" 
+        intervals [76]:
+            xmin = 100.866498248733 
+            xmax = 101.612925413915 
+            text = "=[<<riendo> me deCÍA;>]" 
+        intervals [77]:
+            xmin = 101.612925413915 
+            xmax = 102.923089777731 
+            text = "" 
+        intervals [78]:
+            xmin = 102.923089777731 
+            xmax = 105.031202826507 
+            text = "°hh <<:-) len> con el !TU!co pues así;>" 
+        intervals [79]:
+            xmin = 105.031202826507 
+            xmax = 108.10792071334673 
+            text = "<<voz quebrada> porque> como sOmos casi con la misma eDAD todo." 
+        intervals [80]:
+            xmin = 108.10792071334673 
+            xmax = 108.820092367402 
+            text = "" 
+        intervals [81]:
+            xmin = 108.820092367402 
+            xmax = 110.435151588946 
+            text = "nos aga!RRÁ!bamos;=<<suspirando> ps;>" 
+        intervals [82]:
+            xmin = 110.435151588946 
+            xmax = 111.576075092069 
+            text = "" 
+        intervals [83]:
+            xmin = 111.576075092069 
+            xmax = 111.934233266217 
+            text = "NO." 
+        intervals [84]:
+            xmin = 111.934233266217 
+            xmax = 112.094943602875 
+            text = "(-)" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "ROB" 
+        xmin = 0 
+        xmax = 112.094943602875 
+        intervals: size = 29 
+        intervals [1]:
+            xmin = 0 
+            xmax = 13.2581458713745 
+            text = "" 
+        intervals [2]:
+            xmin = 13.2581458713745 
+            xmax = 13.847419959888 
+            text = "[a quiÉN,]=" 
+        intervals [3]:
+            xmin = 13.847419959888 
+            xmax = 14.3225533075825 
+            text = "=[a quiÉN?]" 
+        intervals [4]:
+            xmin = 14.3225533075825 
+            xmax = 15.4537817866836 
+            text = "" 
+        intervals [5]:
+            xmin = 15.4537817866836 
+            xmax = 15.923285805171073 
+            text = "[al PA[vo;]] " 
+        intervals [6]:
+            xmin = 15.923285805171073 
+            xmax = 16.2509854134167 
+            text = "[[AH;]]=" 
+        intervals [7]:
+            xmin = 16.2509854134167 
+            xmax = 16.481452759289844 
+            text = "" 
+        intervals [8]:
+            xmin = 16.481452759289844 
+            xmax = 16.8635067170711 
+            text = "[[el PAvo;]]" 
+        intervals [9]:
+            xmin = 16.8635067170711 
+            xmax = 43.6899154916436 
+            text = "" 
+        intervals [10]:
+            xmin = 43.6899154916436 
+            xmax = 44.3297250400147 
+            text = "<<p, voz quebrada> oh_OH.>" 
+        intervals [11]:
+            xmin = 44.3297250400147 
+            xmax = 45.0549665886491 
+            text = "(0.7)" 
+        intervals [12]:
+            xmin = 45.0549665886491 
+            xmax = 49.6543436702492 
+            text = "" 
+        intervals [13]:
+            xmin = 49.6543436702492 
+            xmax = 49.9195874763012 
+            text = "ah_HA." 
+        intervals [14]:
+            xmin = 49.9195874763012 
+            xmax = 50.3772465970993 
+            text = "(0.5)" 
+        intervals [15]:
+            xmin = 50.3772465970993 
+            xmax = 52.2820793457727 
+            text = "" 
+        intervals [16]:
+            xmin = 52.2820793457727 
+            xmax = 53.2725030474134 
+            text = "[((suspira))] °h" 
+        intervals [17]:
+            xmin = 53.2725030474134 
+            xmax = 53.8862023050154 
+            text = "(0.6)" 
+        intervals [18]:
+            xmin = 53.8862023050154 
+            xmax = 60.2768738993999 
+            text = "" 
+        intervals [19]:
+            xmin = 60.2768738993999 
+            xmax = 61.7045285937892 
+            text = "<<:-)> con otras (.) [herMAnas,=o:;>]" 
+        intervals [20]:
+            xmin = 61.7045285937892 
+            xmax = 62.2879341570018 
+            text = "" 
+        intervals [21]:
+            xmin = 62.2879341570018 
+            xmax = 62.8611002980384 
+            text = "((rie)) [((rie))]" 
+        intervals [22]:
+            xmin = 62.8611002980384 
+            xmax = 69.8285943330358 
+            text = "" 
+        intervals [23]:
+            xmin = 69.8285943330358 
+            xmax = 70.1377161396951 
+            text = "" 
+        intervals [24]:
+            xmin = 70.1377161396951 
+            xmax = 71.8411281237701 
+            text = "" 
+        intervals [25]:
+            xmin = 71.8411281237701 
+            xmax = 74.3960120085167 
+            text = "((rie 2.1)) [((rie 0.4))]" 
+        intervals [26]:
+            xmin = 74.3960120085167 
+            xmax = 110.435151588946 
+            text = "" 
+        intervals [27]:
+            xmin = 110.435151588946 
+            xmax = 111.175362300946 
+            text = "y con el PANcho?" 
+        intervals [28]:
+            xmin = 111.175362300946 
+            xmax = 111.576075092069 
+            text = "tamBIÉN?" 
+        intervals [29]:
+            xmin = 111.576075092069 
+            xmax = 112.094943602875 
+            text = "" 
+    item [3]:
+        class = "IntervalTier" 
+        name = "PHI" 
+        xmin = 0 
+        xmax = 112.094943602875 
+        intervals: size = 27 
+        intervals [1]:
+            xmin = 0 
+            xmax = 3.27486567112582 
+            text = "" 
+        intervals [2]:
+            xmin = 3.27486567112582 
+            xmax = 3.76091401841182 
+            text = "[<<p> hm_HM;>]" 
+        intervals [3]:
+            xmin = 3.76091401841182 
+            xmax = 12.1357584858769 
+            text = "" 
+        intervals [4]:
+            xmin = 12.1357584858769 
+            xmax = 14.4004741243246 
+            text = "[((rie 0.9))] [((rie 0.5))] [((rie 0.4))]" 
+        intervals [5]:
+            xmin = 14.4004741243246 
+            xmax = 14.4805808845755 
+            text = "" 
+        intervals [6]:
+            xmin = 14.4805808845755 
+            xmax = 15.035893420639 
+            text = "al PAvo;" 
+        intervals [7]:
+            xmin = 15.035893420639 
+            xmax = 15.4537817866836 
+            text = "(0.4)" 
+        intervals [8]:
+            xmin = 15.4537817866836 
+            xmax = 15.754872597853632 
+            text = "" 
+        intervals [9]:
+            xmin = 15.754872597853632 
+            xmax = 16.473028399005205 
+            text = "[<<p, all> al ami[go] [PAvo;>]" 
+        intervals [10]:
+            xmin = 16.473028399005205 
+            xmax = 21.516498754092215 
+            text = "" 
+        intervals [11]:
+            xmin = 21.516498754092215 
+            xmax = 22.154800545976066 
+            text = "[((rie))]" 
+        intervals [12]:
+            xmin = 22.154800545976066 
+            xmax = 22.4407987234345 
+            text = "" 
+        intervals [13]:
+            xmin = 22.4407987234345 
+            xmax = 25.3259444368578 
+            text = "[((rie))] [((rie))] [((rie))]" 
+        intervals [14]:
+            xmin = 25.3259444368578 
+            xmax = 45.0549665886491 
+            text = "" 
+        intervals [15]:
+            xmin = 45.0549665886491 
+            xmax = 45.4821153786026 
+            text = "por QUÉ;" 
+        intervals [16]:
+            xmin = 45.4821153786026 
+            xmax = 46.4767618466372 
+            text = "(1.0)" 
+        intervals [17]:
+            xmin = 46.4767618466372 
+            xmax = 58.6345522565445 
+            text = "" 
+        intervals [18]:
+            xmin = 58.6345522565445 
+            xmax = 60.2768738993999 
+            text = "((rie sin voz)) °hh" 
+        intervals [19]:
+            xmin = 60.2768738993999 
+            xmax = 63.9487510992469 
+            text = "" 
+        intervals [20]:
+            xmin = 63.9487510992469 
+            xmax = 64.3001919265781 
+            text = "[BIEN.]" 
+        intervals [21]:
+            xmin = 64.3001919265781 
+            xmax = 66.2360716960467 
+            text = "" 
+        intervals [22]:
+            xmin = 66.2360716960467 
+            xmax = 67.26400712375437 
+            text = "" 
+        intervals [23]:
+            xmin = 67.26400712375437 
+            xmax = 79.5281791449828 
+            text = "" 
+        intervals [24]:
+            xmin = 79.5281791449828 
+            xmax = 80.2208409710155 
+            text = "[ah_AH;]" 
+        intervals [25]:
+            xmin = 80.2208409710155 
+            xmax = 83.6617611221658 
+            text = "" 
+        intervals [26]:
+            xmin = 83.6617611221658 
+            xmax = 84.5087495389216 
+            text = "" 
+        intervals [27]:
+            xmin = 84.5087495389216 
+            xmax = 112.094943602875 
+            text = "" 
+    item [4]:
+        class = "IntervalTier" 
+        name = "FRA" 
+        xmin = 0 
+        xmax = 112.094943602875 
+        intervals: size = 6 
+        intervals [1]:
+            xmin = 0 
+            xmax = 26.661529715074 
+            text = "" 
+        intervals [2]:
+            xmin = 26.661529715074 
+            xmax = 27.869751504754 
+            text = "<<pp> tu lEche no le poDEmos;>" 
+        intervals [3]:
+            xmin = 27.869751504754 
+            xmax = 28.2565802067154 
+            text = "(0.4)" 
+        intervals [4]:
+            xmin = 28.2565802067154 
+            xmax = 62.9870388118626 
+            text = "" 
+        intervals [5]:
+            xmin = 62.9870388118626 
+            xmax = 63.3820277870383 
+            text = "[((rie))]" 
+        intervals [6]:
+            xmin = 63.3820277870383 
+            xmax = 112.094943602875 
+            text = "" 
+    item [5]:
+        class = "IntervalTier" 
+        name = "X" 
+        xmin = 0 
+        xmax = 112.094943602875 
+        intervals: size = 16 
+        intervals [1]:
+            xmin = 0 
+            xmax = 28.2565802067154 
+            text = "" 
+        intervals [2]:
+            xmin = 28.2565802067154 
+            xmax = 28.7238872708591 
+            text = "<<p> no.>" 
+        intervals [3]:
+            xmin = 28.7238872708591 
+            xmax = 29.6270022283038 
+            text = "(0.9)" 
+        intervals [4]:
+            xmin = 29.6270022283038 
+            xmax = 36.6603392673642 
+            text = "" 
+        intervals [5]:
+            xmin = 36.6603392673642 
+            xmax = 38.0272157984278 
+            text = "<<pp, susurrando> ven aCÁ mi vIda;>" 
+        intervals [6]:
+            xmin = 38.0272157984278 
+            xmax = 66.2360716960467 
+            text = "" 
+        intervals [7]:
+            xmin = 66.2360716960467 
+            xmax = 67.26400712375437 
+            text = "((rie)) [((rie))]" 
+        intervals [8]:
+            xmin = 67.26400712375437 
+            xmax = 69.204861439385 
+            text = "" 
+        intervals [9]:
+            xmin = 69.204861439385 
+            xmax = 69.8285943330358 
+            text = "<<f> UH:;> °h" 
+        intervals [10]:
+            xmin = 69.8285943330358 
+            xmax = 70.1377161396951 
+            text = "(-)" 
+        intervals [11]:
+            xmin = 70.1377161396951 
+            xmax = 83.6617611221658 
+            text = "" 
+        intervals [12]:
+            xmin = 83.6617611221658 
+            xmax = 84.5087495389216 
+            text = "[((rie))]" 
+        intervals [13]:
+            xmin = 84.5087495389216 
+            xmax = 108.09312798571793 
+            text = "" 
+        intervals [14]:
+            xmin = 108.09312798571793 
+            xmax = 108.56478458049888 
+            text = "°hh" 
+        intervals [15]:
+            xmin = 108.56478458049888 
+            xmax = 108.820092367402 
+            text = "(-)" 
+        intervals [16]:
+            xmin = 108.820092367402 
+            xmax = 112.094943602875 
+            text = "" 
+    item [6]:
+        class = "IntervalTier" 
+        name = "Ruidos" 
+        xmin = 0 
+        xmax = 112.094943602875 
+        intervals: size = 15 
+        intervals [1]:
+            xmin = 0 
+            xmax = 16.411644175945828 
+            text = "" 
+        intervals [2]:
+            xmin = 16.411644175945828 
+            xmax = 17.1094366219038 
+            text = "[[((ruidos de bebé))]]" 
+        intervals [3]:
+            xmin = 17.1094366219038 
+            xmax = 29.6270022283038 
+            text = "" 
+        intervals [4]:
+            xmin = 29.6270022283038 
+            xmax = 30.5545256981118 
+            text = "[((llantos de bebe))]" 
+        intervals [5]:
+            xmin = 30.5545256981118 
+            xmax = 31.2412716422323 
+            text = "((llantos))" 
+        intervals [6]:
+            xmin = 31.2412716422323 
+            xmax = 32.60848913106191 
+            text = "[((llantos))]" 
+        intervals [7]:
+            xmin = 32.60848913106191 
+            xmax = 33.1653830122894 
+            text = "" 
+        intervals [8]:
+            xmin = 33.1653830122894 
+            xmax = 35.89114606065437 
+            text = "[((llantos))]" 
+        intervals [9]:
+            xmin = 35.89114606065437 
+            xmax = 35.95763568269392 
+            text = "" 
+        intervals [10]:
+            xmin = 35.95763568269392 
+            xmax = 36.6603392673642 
+            text = "[((llantos))]" 
+        intervals [11]:
+            xmin = 36.6603392673642 
+            xmax = 76.4508850136998 
+            text = "" 
+        intervals [12]:
+            xmin = 76.4508850136998 
+            xmax = 79.0241609288953 
+            text = "((todos rien)) (2.6)" 
+        intervals [13]:
+            xmin = 79.0241609288953 
+            xmax = 100.446631401772 
+            text = "" 
+        intervals [14]:
+            xmin = 100.446631401772 
+            xmax = 102.923089777731 
+            text = "[((todos rien))] ((todos rien))" 
+        intervals [15]:
+            xmin = 102.923089777731 
+            xmax = 112.094943602875 
+            text = "" 

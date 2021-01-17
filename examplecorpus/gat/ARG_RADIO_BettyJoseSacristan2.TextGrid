@@ -1,0 +1,124 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 30.1311777955168 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "JS" 
+        xmin = 0 
+        xmax = 30.1311777955168 
+        intervals: size = 23 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.003382207041866536 
+            text = "" 
+        intervals [2]:
+            xmin = 0.003382207041866536 
+            xmax = 1.5557104846088885 
+            text = "°h es que los mercaDEres:-" 
+        intervals [3]:
+            xmin = 1.5557104846088885 
+            xmax = 1.9485927407767987 
+            text = "pues." 
+        intervals [4]:
+            xmin = 1.9485927407767987 
+            xmax = 3.651696008908316 
+            text = "tienen que resolver sus aSUNtos- °hhh (.)" 
+        intervals [5]:
+            xmin = 3.651696008908316 
+            xmax = 4.404063062692652 
+            text = "" 
+        intervals [6]:
+            xmin = 4.404063062692652 
+            xmax = 6.441029632395731 
+            text = "pues vendiendo cOsas y comprando COsas;=nO," 
+        intervals [7]:
+            xmin = 6.441029632395731 
+            xmax = 7.257905907845615 
+            text = "" 
+        intervals [8]:
+            xmin = 7.257905907845615 
+            xmax = 10.409003212474039 
+            text = "<<quebrada> en el> (.) mejOr de los casos que se vendan y se: (.) compren toMAtes;" 
+        intervals [9]:
+            xmin = 10.409003212474039 
+            xmax = 13.232140542193013 
+            text = "pero (.) cuando: <<acc> no hay más remEdio que> (.) comprar y vender BOMbas;=" 
+        intervals [10]:
+            xmin = 13.232140542193013 
+            xmax = 13.69038818230174 
+            text = "=o TANques;=" 
+        intervals [11]:
+            xmin = 13.69038818230174 
+            xmax = 15.430815109209801 
+            text = "=porque de cualquier maNEra Eso; °hh" 
+        intervals [12]:
+            xmin = 15.430815109209801 
+            xmax = 17.100901480272448 
+            text = "no jode (.) no deja de SER eso. °hh " 
+        intervals [13]:
+            xmin = 17.100901480272448 
+            xmax = 18.946079660728074 
+            text = "en fin:_en una fÁbrica te_da mano de OBra;=" 
+        intervals [14]:
+            xmin = 18.946079660728074 
+            xmax = 20.39298765788498 
+            text = "=y: unas son: unas EMpresas;=" 
+        intervals [15]:
+            xmin = 20.39298765788498 
+            xmax = 21.36099710117427 
+            text = "=son padres de faMIlia;" 
+        intervals [16]:
+            xmin = 21.36099710117427 
+            xmax = 23.277316756316964 
+            text = "tienen que necesariaMENte; (0.5)" 
+        intervals [17]:
+            xmin = 23.277316756316964 
+            xmax = 23.874006897215633 
+            text = "y estas COsas, " 
+        intervals [18]:
+            xmin = 23.874006897215633 
+            xmax = 24.762694110433173 
+            text = "<<all> pues,=biEn en koSO:vo->" 
+        intervals [19]:
+            xmin = 24.762694110433173 
+            xmax = 25.667293970484366 
+            text = "bien en_en en iRAK," 
+        intervals [20]:
+            xmin = 25.667293970484366 
+            xmax = 26.486209084594904 
+            text = "o BIEN- °hh" 
+        intervals [21]:
+            xmin = 26.486209084594904 
+            xmax = 27.70895070880711 
+            text = "de vez en CUANdo hay que, °hh (.)" 
+        intervals [22]:
+            xmin = 27.70895070880711 
+            xmax = 28.25596669858625 
+            text = "" 
+        intervals [23]:
+            xmin = 28.25596669858625 
+            xmax = 30.1311777955168 
+            text = "<<voz tensionada> m:_hay que vender algunas (.) unas BOMbas.>" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "B" 
+        xmin = 0 
+        xmax = 30.1311777955168 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 6.441029632395731 
+            text = "" 
+        intervals [2]:
+            xmin = 6.441029632395731 
+            xmax = 7.257905907845615 
+            text = "(-) hm_HM," 
+        intervals [3]:
+            xmin = 7.257905907845615 
+            xmax = 30.1311777955168 
+            text = "" 
