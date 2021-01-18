@@ -4,6 +4,7 @@
 [![](http://cranlogs.r-pkg.org/badges/grand-total/act)](https://CRAN.R-project.org/package=act)
 [![CRAN version](http://www.r-pkg.org/badges/version/act)](https://cran.r-project.org/package=act)
 
+
 ## Aligned Corpus Toolkit (act) for R
 The `Aligned Corpus Toolkit` (act) is a R package that is designed for linguists that work with time aligned transcription data. It offers functions to 
 * import and export various annotation file formats ('ELAN' .eaf, 'EXMARaLDA .exb and 'Praat' .TextGrid files), 
