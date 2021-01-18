@@ -33,11 +33,9 @@ Package website: [here](http://www.romanistik.uni-freiburg.de/ehmer/digitalhuman
 CRAN site: [here](https://cran.r-project.org/web/packages/act/index.html)
 
 ## How to cite
-
 Creating the act package took a lot of time and effort. Please cite it when you publish reasearch.
 
 Ehmer, Oliver (2021). act: Aligned Corpus Toolkit. R package version 1.0. https://CRAN.R-project.org/package=act
-
 
 ## Installation
 To install the package in R use the following commands.
