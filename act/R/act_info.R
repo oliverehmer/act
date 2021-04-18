@@ -34,16 +34,17 @@ info <- function(...) {
 		stop ("You need to pass a corpus object or a transcript object to this function. ")
 	}
 
-		#=== corpus
 	if (!is.null(x)) {
 
-		#--- transcripts
+		#=== transcripts
 		transcripts <- 	data.frame( 
 			transcript.name      =character(),
 			length.sec           =double(),
 			length.formatted     =character(),
 			tiers.count          =integer(),
 			annotations.count    =integer(),
+			words.org.count      =integer(),
+			words.norm.count     =integer(),
 			path                 =character(),
 			file.encoding        =character(),
 			import.result        =character(),
@@ -54,12 +55,28 @@ info <- function(...) {
 		)
 		if (length(x@transcripts)>0) {
 			for (i in 1:length(x@transcripts)) {
+				
+				
+				
+				#--- words org
+				content.org <- x@transcripts[[i]]@annotations$content
+				words.org.count <- lapply(content.org, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+				words.org.count <- sum(unlist(words.org.count))
+				
+				#--- words norm
+				content.norm <- x@transcripts[[i]]@annotations$content.norm
+				words.norm.count <- lapply(content.norm, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+				words.norm.count <- sum(unlist(words.norm.count))
+				
+				
 				myRow <- c(
 					transcript.name      = x@transcripts[[i]]@name,
 					length               = x@transcripts[[i]]@length,
 					length.formatted     = helper_format_time(x@transcripts[[i]]@length),
 					tiers.count          = nrow(x@transcripts[[i]]@tiers),
 					annotations.count    = nrow(x@transcripts[[i]]@annotations),
+					words.org.count      = words.org.count, 
+					words.norm.count     = words.norm.count, 
 					path                 = x@transcripts[[i]]@file.path,
 					file.encoding        = x@transcripts[[i]]@file.encoding,
 					import.result        = x@transcripts[[i]]@import.result,
@@ -72,11 +89,11 @@ info <- function(...) {
 		}
 		rownames(transcripts) <- transcripts$transcript.name
 
-		#--- tiers
-		#=== base data
+		#=== tiers
+		#--- base data
 		temp <- act::tiers_all(x)
 		
-		#=== Collapse by tier type
+		#--- Collapse by tier type
 		name.unique <- unique(temp$name)
 		temp2 <- data.frame(tier.name                        =character(),
 						  tiers.count                  =integer(),
@@ -85,7 +102,6 @@ info <- function(...) {
 						  annotations.count            =integer(),
 						  words.org.count              =integer(),
 						  words.norm.count             =integer(),
-						  
 						  interval.tiers.count         =integer(),
 						  interval.transcripts.count   =integer(),
 						  interval.transcripts.names   =character(),
@@ -109,7 +125,7 @@ info <- function(...) {
 				tiers.current.text                         <- temp[which(temp$name==name.unique[i] & temp$type=="TextTier"),]
 				
 				myRow <- c(
-					tier.name                              = name.unique[i],
+					tier.name                         = name.unique[i],
 					tiers.count 		              = nrow(tiers.current),
 					transcripts.count                 = length(unique(tiers.current$transcript.name)),
 					transcripts.names                 = paste(unique(tiers.current$transcript.name), sep="|", collapse="|"),

@@ -26,6 +26,8 @@ import_textgrid <- function(filePath=NULL,
 							fileContent=NULL, 
 							transcriptName=NULL) {
 	
+	#filePath<-	'/Users/oliverehmer/Desktop/Mary_John_bell.TextGrid'
+	
 	if (is.null(filePath) & is.null(fileContent)) {
 		stop("You need to pass as parameter eiter a file path to a TextGrid file (filePath) or the contents of a TextGrid file (fileContent) as parameter.")
 	}
@@ -53,8 +55,8 @@ import_textgrid <- function(filePath=NULL,
 	
 	t@file.type 			   <- "textgrid"
 	t@import.result 		   <- "ok"
-	t@load.message 	       <- ""
-	t@modification.systime   <- character()
+	t@load.message 	           <- ""
+	t@modification.systime     <- character()
 	
 	if (!missing(filePath)) {
 		#--- check if file exists
@@ -105,7 +107,7 @@ import_textgrid <- function(filePath=NULL,
 	}
 	
 	if(is.null(mytg)) 	{
-		t@import.result    <- "error"
+		t@import.result  <- "error"
 		t@load.message   <- "File not recognized as TextGrid."
 		return(t)
 	} else {
@@ -172,7 +174,7 @@ import_textgrid <- function(filePath=NULL,
 		
 		if (nrow(tiercontent)==0)  	{
 			t@annotations  <- .emptyAnnotations
-			t@tiers		 <- .emptyTiers
+			t@tiers		   <- .emptyTiers
 		} else {
 			annotationID <- c(1:nrow(tiercontent))
 			t@annotations <- data.frame(

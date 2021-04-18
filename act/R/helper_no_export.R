@@ -63,7 +63,7 @@ helper_test_read <- function(input_path,
 							 testencoding, 
 							 testlinenrs) {
 	
-	assign("last.warning", NULL, envir = baseenv())
+	#assign("last.warning", NULL, envir = baseenv())
 	input_path <- toString(input_path)
 	tryCatch(
 		{

@@ -95,7 +95,7 @@ search_cuts_media <- function(x,
 	if (exists("act.environment", mode="environment")) {
 		if(exists("pb", envir=act.environment)) {
 			act.environment$pb <- progress::progress_bar$new(
-				format = "  Creating transcripts  [:bar] :percent missing: :eta",
+				format = "  Creating cutlist  [:bar] :percent missing: :eta",
 				total = max(1,nrow(s@results)), 
 				clear = FALSE, 
 				show_after = 0,
@@ -186,19 +186,20 @@ search_cuts_media <- function(x,
 	
 					#====== PANNED
 					#if  CreatePannedVersions in the arguments if the functions is not set
-					if (missing(Panning)) {
+					CreatePannedVersions <- 0
+					if (!missing(Panning)) {
+						CreatePannedVersions <- Panning
+					} else { 
 						#check if channels are set in the search results
 						if(options()$act.ffmpeg.exportchannels.fromColumnName %in% colnames(s@results)) {
 							#if it is set, take the value given there
 							CreatePannedVersions <- s@results[i, options()$act.ffmpeg.exportchannels.fromColumnName]
-						} else {
-							#do not create a panned version
-							CreatePannedVersions <- 0
+							if (is.na(CreatePannedVersions)) {
+								CreatePannedVersions <-0
+							}
 						}
-					} else {
-						CreatePannedVersions <- Panning
 					}
-
+					
 					if (CreatePannedVersions==0 ) {			#no panning
 					} else if (CreatePannedVersions==1 ) {	#only left
 					} else if (CreatePannedVersions==2 ) {	#only right
@@ -385,7 +386,7 @@ search_cuts_media <- function(x,
 	return(s)
 }
 
-makeBlock <- function(os, CreatePannedVersions, in_filepath, out_filename, cmd, titletext) {
+makeBlock <- function(os, CreatePannedVersionsBlock, in_filepath, out_filename, cmd, titletext) {
 	if (os=="win") {
 		block <- '
 IF EXIST "INFILEPATH" ( 
@@ -414,31 +415,31 @@ fi\n\n'
 	#2 ch2
 	#3 ch1 & 2
 	#4 all audio & ch1 & ch2
-	if (CreatePannedVersions==0) { 
+	if (CreatePannedVersionsBlock==0) { 
 		block <- 	stringr::str_replace_all(block, "FFMPEGcmd1", cmd[1])
 		block <- 	stringr::str_replace_all(block, " *FFMPEGcmd2\n", "" )
 		block <- 	stringr::str_replace_all(block, " *FFMPEGcmd3\n", "")
 	}
 	
-	if (CreatePannedVersions==1) { 
+	if (CreatePannedVersionsBlock==1) { 
 		block <- 	stringr::str_replace_all(block, " *FFMPEGcmd1\n", "")
 		block <- 	stringr::str_replace_all(block, "FFMPEGcmd2", cmd[2])
 		block <- 	stringr::str_replace_all(block, " *FFMPEGcmd3\n", "")
 	}
 	
-	if (CreatePannedVersions==2) { 
+	if (CreatePannedVersionsBlock==2) { 
 		block <- 	stringr::str_replace_all(block, " *FFMPEGcmd1\n", "")
 		block <- 	stringr::str_replace_all(block, " *FFMPEGcmd2\n", "")
 		block <- 	stringr::str_replace_all(block, "FFMPEGcmd3", cmd[3])
 	}
 	
-	if (CreatePannedVersions==3) { 
+	if (CreatePannedVersionsBlock==3) { 
 		block <- 	stringr::str_replace_all(block, " *FFMPEGcmd1\n", "")
 		block <- 	stringr::str_replace_all(block, "FFMPEGcmd2", cmd[2])
 		block <- 	stringr::str_replace_all(block, "FFMPEGcmd3", cmd[3])
 	}
 	
-	if (CreatePannedVersions==4) { 
+	if (CreatePannedVersionsBlock==4) { 
 		block <- 	stringr::str_replace_all(block, "FFMPEGcmd1", cmd[1])
 		block <- 	stringr::str_replace_all(block, "FFMPEGcmd2", cmd[2])
 		block <- 	stringr::str_replace_all(block, "FFMPEGcmd3", cmd[3])
