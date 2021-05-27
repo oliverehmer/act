@@ -33,9 +33,9 @@ info <- function(...) {
 	} else {
 		stop ("You need to pass a corpus object or a transcript object to this function. ")
 	}
-
+	
+	# INFO about CORPUS
 	if (!is.null(x)) {
-
 		#=== transcripts
 		transcripts <- 	data.frame( 
 			transcript.name      =character(),
@@ -53,13 +53,12 @@ info <- function(...) {
 			modification.systime =character(),
 			stringsAsFactors     =FALSE
 		)
+		
 		if (length(x@transcripts)>0) {
+			#i<-1
 			for (i in 1:length(x@transcripts)) {
-				
-				
-				
 				#--- words org
-				content.org <- x@transcripts[[i]]@annotations$content
+				content.org     <- x@transcripts[[i]]@annotations$content
 				words.org.count <- lapply(content.org, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
 				words.org.count <- sum(unlist(words.org.count))
 				
@@ -68,12 +67,11 @@ info <- function(...) {
 				words.norm.count <- lapply(content.norm, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
 				words.norm.count <- sum(unlist(words.norm.count))
 				
-				
-				myRow <- c(
+				myRow <- data.frame(
 					transcript.name      = x@transcripts[[i]]@name,
-					length               = x@transcripts[[i]]@length,
+					length.sec           = as.double(x@transcripts[[i]]@length),
 					length.formatted     = helper_format_time(x@transcripts[[i]]@length),
-					tiers.count          = nrow(x@transcripts[[i]]@tiers),
+					tiers.count          = as.integer(nrow(x@transcripts[[i]]@tiers)),
 					annotations.count    = nrow(x@transcripts[[i]]@annotations),
 					words.org.count      = words.org.count, 
 					words.norm.count     = words.norm.count, 
@@ -82,7 +80,8 @@ info <- function(...) {
 					import.result        = x@transcripts[[i]]@import.result,
 					load.message         = x@transcripts[[i]]@load.message,
 					media.path.count     = length(x@transcripts[[i]]@media.path),
-					modification.systime = as.character(x@transcripts[[i]]@modification.systime)
+					modification.systime = as.character(x@transcripts[[i]]@modification.systime),
+					stringsAsFactors     = FALSE
 				)
 				transcripts[nrow(transcripts)+1,] <- myRow
 			}
@@ -95,7 +94,7 @@ info <- function(...) {
 		
 		#--- Collapse by tier type
 		name.unique <- unique(temp$name)
-		temp2 <- data.frame(tier.name                        =character(),
+		temp2 <- data.frame(tier.name                  =character(),
 						  tiers.count                  =integer(),
 						  transcripts.count            =integer(),
 						  transcripts.names            =character(),
@@ -115,8 +114,7 @@ info <- function(...) {
 						  text.annotations.count       =integer(),
 						  text.tiers.words.org.count   =integer(),
 						  text.tiers.words.norm.count  =integer(),
-						  
-						  stringsAsFactors=FALSE)
+						  stringsAsFactors             = FALSE)
 		
 		if (length(name.unique)>0) {
 			for (i in 1:length(name.unique)) {
@@ -124,7 +122,7 @@ info <- function(...) {
 				tiers.current.interval                     <- temp[which(temp$name==name.unique[i] & temp$type=="IntervalTier"),]
 				tiers.current.text                         <- temp[which(temp$name==name.unique[i] & temp$type=="TextTier"),]
 				
-				myRow <- c(
+				myRow <- data.frame(
 					tier.name                         = name.unique[i],
 					tiers.count 		              = nrow(tiers.current),
 					transcripts.count                 = length(unique(tiers.current$transcript.name)),
@@ -145,7 +143,8 @@ info <- function(...) {
 					text.transcripts.names            = paste(unique(tiers.current.text$transcript.name), sep="|", collapse="|"),
 					text.annotations.count            = sum(tiers.current.text$annotations.count),
 					text.tiers.words.org.count        = sum(tiers.current.text$words.org.count),
-					text.tiers.words.norm.count       = sum(tiers.current.text$words.norm.count)
+					text.tiers.words.norm.count       = sum(tiers.current.text$words.norm.count),
+					stringsAsFactors                  = FALSE
 				)
 				temp2[nrow(temp2)+1,] <- myRow
 			}
@@ -159,6 +158,7 @@ info <- function(...) {
 		return(info)
 	}
 
+	# INFO about TRANSCRIPT
 	if (!is.null(t)) {
 		#--- tiers
 		tiers.names <- t@tiers$name

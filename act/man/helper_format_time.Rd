@@ -6,7 +6,7 @@
 \usage{
 helper_format_time(
   t,
-  digits = 0,
+  digits = 1,
   addHrsMinSec = FALSE,
   addTimeInSeconds = FALSE
 )

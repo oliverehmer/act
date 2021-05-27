@@ -119,7 +119,7 @@ methods::setClass("transcript",
 transcript_show <- function (object) {
 	cat("  transcript object", fill=TRUE)
 	cat("    name                       : ", paste("'",object@name,"'",sep="", collapse=""), fill=TRUE)
-	cat("    length                     : ", helper_format_time(object@length), fill=TRUE)
+	cat("    length                     : ", object@length, fill=TRUE)
 	cat("    tiers                      : ", nrow(object@tiers), fill=TRUE)
 	cat("    annotations                : ", nrow(object@annotations), fill=TRUE)
 	cat("\n")

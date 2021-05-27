@@ -44,9 +44,9 @@ If you want to modify the layout of the print transcripts, create a new layout o
 
 \item{\code{header.insert}}{Logical; if \code{TRUE} a transcript header is inserted.}
 
-\item{\code{header.heading.fromColumnName}}{Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the heading is taken (if \code{object$.header.insert==TRUE})}
+\item{\code{header.heading.fromColumnName}}{Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the heading is taken (if \code{object@.header.insert==TRUE})}
 
-\item{\code{header.firstInfo.fromColumnName}}{Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the first info is taken (if \code{object$.header.insert==TRUE})}
+\item{\code{header.firstInfo.fromColumnName}}{Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the first info is taken (if \code{object@.header.insert==TRUE})}
 
 \item{\code{arrow.insert}}{Logical; is only used when transcripts are made based on a search results; if \code{TRUE} an arrow will be inserted, highlighting the transcript line containing the search hit.}
 

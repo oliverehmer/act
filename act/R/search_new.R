@@ -37,10 +37,10 @@ search_new <- function(x,
 					   searchMode=c("content", "fulltext", "fulltext.byTime", "fulltext.byTier"),
 					   searchNormalized=TRUE, 
 					   name="mysearch",  
-					   resultidprefix="result", 
-					   filterTranscriptNames=NULL,
-					   filterTranscriptInclude=NULL, 
-					   filterTranscriptExclude=NULL, 
+					   resultidprefix         ="result", 
+					   filterTranscriptNames   =NULL,
+					   filterTranscriptInclude =NULL, 
+					   filterTranscriptExclude =NULL, 
 					   filterTierNames=NULL,
 					   filterTierInclude=NULL, 
 					   filterTierExclude=NULL, 
@@ -78,11 +78,14 @@ search_new <- function(x,
 	s@filter.transcript.names   <- if(!is.null(filterTranscriptNames))     {filterTranscriptNames}     else {s@filter.transcript.names}
 	s@filter.transcript.include <- if(!is.null(filterTranscriptInclude))   {filterTranscriptInclude}   else {s@filter.transcript.include}
 	s@filter.transcript.exclude <- if(!is.null(filterTranscriptExclude))   {filterTranscriptExclude}   else {s@filter.transcript.exclude}
-	s@filter.transcript.names   <- if(!is.null(filterTierNames))           {filterTierNames}           else {s@filter.tier.names}
+	
+	s@filter.tier.names         <- if(!is.null(filterTierNames))           {filterTierNames}           else {s@filter.tier.names}
 	s@filter.tier.include       <- if(!is.null(filterTierInclude))         {filterTierInclude}         else {s@filter.tier.include}
 	s@filter.tier.exclude       <- if(!is.null(filterTierExclude))         {filterTierExclude}         else {s@filter.tier.exclude}
+	
 	s@filter.section.startsec   <- if(!is.null(filterSectionStartsec))     {filterSectionStartsec}     else {s@filter.section.startsec}
 	s@filter.section.endsec     <- if(!is.null(filterSectionEndsec))       {filterSectionEndsec}       else {s@filter.section.endsec}
+	
 	s@concordance.make          <- concordanceMake
 	s@concordance.width         <- if(!is.null(concordanceWidth))   {concordanceWidth}   else {s@concordance.width}
 	s@cuts.span.beforesec       <- cutSpanBeforesec

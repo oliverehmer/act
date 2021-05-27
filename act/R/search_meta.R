@@ -90,10 +90,13 @@ search_meta <- function( x,
 	#check for each transcript if it contains one of the included tiers
 	filterTranscriptNames.new <- c()
 	for (transcriptName in filterTranscriptNames) {
-		intersectingTiers <- intersect(x@transcripts[[transcriptName]]@tiers$name, filterTierNames)
-		#if current transcript contains tiers in the included filterTierNames
-		if (length(intersectingTiers)>0) {
-			filterTranscriptNames.new <- c(filterTranscriptNames.new, transcriptName)
+		myTrans <- x@transcripts[[transcriptName]]
+		if (!is.null(myTrans)) {
+			intersectingTiers <- intersect(x@transcripts[[transcriptName]]@tiers$name, filterTierNames)
+			#if current transcript contains tiers in the included filterTierNames
+			if (length(intersectingTiers)>0) {
+				filterTranscriptNames.new <- c(filterTranscriptNames.new, transcriptName)
+			}		
 		}
 	}	
 	filterTranscriptNames <- filterTranscriptNames.new

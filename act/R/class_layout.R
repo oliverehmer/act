@@ -20,8 +20,8 @@
 #' @slot brackets.tryToAlign Logical; if \code{TRUE} act will try to align brackets [] for parallel speaking (Attention: experimental function; results may not satisfy).
 #' @slot pauseTier.regex Character string; regular expression to identify pause tier for auto formatting pauses.
 #' @slot header.insert Logical; if \code{TRUE} a transcript header is inserted.
-#' @slot header.heading.fromColumnName Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the heading is taken (if \code{object$.header.insert==TRUE})
-#' @slot header.firstInfo.fromColumnName Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the first info is taken (if \code{object$.header.insert==TRUE})
+#' @slot header.heading.fromColumnName Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the heading is taken (if \code{object@.header.insert==TRUE})
+#' @slot header.firstInfo.fromColumnName Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the first info is taken (if \code{object@.header.insert==TRUE})
 #' @slot arrow.insert Logical; is only used when transcripts are made based on a search results; if \code{TRUE} an arrow will be inserted, highlighting the transcript line containing the search hit.
 #' @slot arrow.shape Character string; shape of the arrow.
 #' 
@@ -74,32 +74,32 @@ methods::setClass("layout",
 
 layout_show <- function (object) {
 	cat("layout object", fill=TRUE)
-	cat("  name                            : ", paste("'", object$name, "'",sep="", collapse=""),fill=TRUE)
+	cat("  name                            : ", paste("'", object@name, "'",sep="", collapse=""),fill=TRUE)
 	cat("\n")
-	cat("  filter.tier.include.regex       : ", paste("'", object$filter.tier.include.regex, "'",sep="", collapse=""),fill=TRUE)
-	cat("  filter.tier.exclude.regex       : ", paste("'", object$filter.tier.exclude.regex, "'",sep="", collapse=""),fill=TRUE)
+	cat("  filter.tier.include.regex       : ", paste("'", object@filter.tier.include.regex, "'",sep="", collapse=""),fill=TRUE)
+	cat("  filter.tier.exclude.regex       : ", paste("'", object@filter.tier.exclude.regex, "'",sep="", collapse=""),fill=TRUE)
 	cat("\n")
-	cat("  transcript.width                : ", object$transcript.width, fill=TRUE)
+	cat("  transcript.width                : ", object@transcript.width, fill=TRUE)
 	cat("\n")
-	cat("  speaker.width                   : ", object$speaker.width, fill=TRUE)
-	cat("  speaker.ending                  : ", paste("'", object$speaker.ending, "'",sep="", collapse=""),fill=TRUE)
-	cat("  spacesbefore                    : ", object$spacesbefore, fill=TRUE)
+	cat("  speaker.width                   : ", object@speaker.width, fill=TRUE)
+	cat("  speaker.ending                  : ", paste("'", object@speaker.ending, "'",sep="", collapse=""),fill=TRUE)
+	cat("  spacesbefore                    : ", object@spacesbefore, fill=TRUE)
 	cat("\n")
-	cat("  additionalline1.insert          : ", paste("'", object$additionalline1.insert, "'",sep="", collapse=""),fill=TRUE)
-	cat("  additionalline1.text            : ", paste("'", object$additionalline1.text, "'",sep="", collapse=""),fill=TRUE)
-	cat("  additionalline1.indent          : ", object$additionalline1.indent, fill=TRUE)
-	cat("  additionalline2.insert          : ", object$additionalline2.insert, fill=TRUE)
-	cat("  additionalline2.text            : ", paste("'", object$additionalline2.text, "'",sep="", collapse=""),fill=TRUE)
-	cat("  additionalline2.indent          : ", object$additionalline2.indent, fill=TRUE)
+	cat("  additionalline1.insert          : ", paste("'", object@additionalline1.insert, "'",sep="", collapse=""),fill=TRUE)
+	cat("  additionalline1.text            : ", paste("'", object@additionalline1.text, "'",sep="", collapse=""),fill=TRUE)
+	cat("  additionalline1.indent          : ", object@additionalline1.indent, fill=TRUE)
+	cat("  additionalline2.insert          : ", object@additionalline2.insert, fill=TRUE)
+	cat("  additionalline2.text            : ", paste("'", object@additionalline2.text, "'",sep="", collapse=""),fill=TRUE)
+	cat("  additionalline2.indent          : ", object@additionalline2.indent, fill=TRUE)
 	cat("\n")
-	cat("  brackets.tryToAlign             : ", object$brackets.tryToAlign, fill=TRUE)
-	cat("  pauseTier.regex                 : ", paste("'", object$pauseTier.regex, "'",sep="", collapse=""),fill=TRUE)
+	cat("  brackets.tryToAlign             : ", object@brackets.tryToAlign, fill=TRUE)
+	cat("  pauseTier.regex                 : ", paste("'", object@pauseTier.regex, "'",sep="", collapse=""),fill=TRUE)
 	cat("\n")
-	cat("  header.insert                   : ", object$header.insert, fill=TRUE)
-	cat("  header.heading.fromColumnName   : ", paste("'", object$header.heading.fromColumnName, "'",sep="", collapse=""),fill=TRUE)
-	cat("  header.firstInfo.fromColumnName : ", paste("'", object$header.firstInfo.fromColumnName,"'",sep="", collapse=""), fill=TRUE)
-	cat("  arrow.insert                    : ", object$arrow.insert, fill=TRUE)
-	cat("  arrow.shape                     : ", paste("'", object$arrow.shape,"'",sep="", collapse=""), fill=TRUE)
+	cat("  header.insert                   : ", object@header.insert, fill=TRUE)
+	cat("  header.heading.fromColumnName   : ", paste("'", object@header.heading.fromColumnName, "'",sep="", collapse=""),fill=TRUE)
+	cat("  header.firstInfo.fromColumnName : ", paste("'", object@header.firstInfo.fromColumnName,"'",sep="", collapse=""), fill=TRUE)
+	cat("  arrow.insert                    : ", object@arrow.insert, fill=TRUE)
+	cat("  arrow.shape                     : ", paste("'", object@arrow.shape,"'",sep="", collapse=""), fill=TRUE)
 }
 
 methods::setMethod("show", signature = "layout", definition = layout_show)

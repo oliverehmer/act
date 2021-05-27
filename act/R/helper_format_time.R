@@ -43,34 +43,43 @@
 #' helper_format_time(0.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=TRUE)
 #' 
 helper_format_time <- function (t,
-								digits=0,
+								digits=1,
 								addHrsMinSec=FALSE, 
 								addTimeInSeconds=FALSE) {
+	
+	#t<-examplecorpus@transcripts[[1]]@length
+	#t<-25.039000
+	#digits<-1
+	#addHrsMinSec<-FALSE
+	#addTimeInSeconds<-FALSE
 	
 	h <- floor(t/3600)
 	m <- t-(h*3600)
 	m <- floor(m/60)
 	s <- t-(h*3600)-(m*60)
 	s <- round(s,0)
-	digits <- max(0,as.integer(digits))
+	
+	digits <- max(0, as.integer(digits))
+	
+	
 	if (digits>0) {
-		digitsSTR <- substr(as.character(round(t %% 1,3)),3,6)
+		digitsSTR <- substr(format(round(t %% 1, digits), nsmall = digits) ,3,3+digits)
 	} else {
 		digitsSTR <-""
 	}
-	if (addHrsMinSec) {
-		if (t<60) {
-			f <- paste(s,"sec", sep="")
-		} else {
-			if (h>0) {
-#				f <- sprintf("%02.fhrs %02.fmin %02.fsec", h, m, s)
-								f <- sprintf("%0.fhrs %02.fmin %02.fsec", h, m, s)
-				
-							} else if (m>0) {
-				f <- sprintf("%2.fmin %02.fsec", m, s)
-			}
 	
-		}
+	if (addHrsMinSec) {
+		#if (t<60) {
+		#	f <- paste(s,"sec", sep="")
+		#} else {
+		#	if (h>0) {
+		#		f <- sprintf("%02.fhrs %02.fmin %02.fsec", h, m, s)
+		        f <- sprintf("%0.fhrs %02.fmin %02.fsec", h, m, s)
+				
+		#   } else if (m>0) {
+		#		f <- sprintf("%2.fmin %02.fsec", m, s)
+		#	}
+		#}
 		
 		if (digitsSTR!="") {
 			f <- paste(f," ", digitsSTR, sep="")
@@ -81,15 +90,15 @@ helper_format_time <- function (t,
 		}
 	} else {
 		
-		if (t<60) {
-			f <- paste(s,"", sep="")
-		} else {
-			if (h>0) {
+		#if (t<60) {
+		#	f <- paste( s,"", sep="")
+		#} else {
+#			if (h>0) {
 				f <- sprintf("%02.f:%02.f:%02.f", h, m, s)
-			} else if (m>0) {
-				f <- sprintf("%2.f:%02.f", m, s)
-			}
-		}
+#			} else if (m>0) {
+#				f <- sprintf("%2.f:%02.f", m, s)
+#			}
+		#}
 		
 		if (digitsSTR!="") {
 			f <- paste(f, digitsSTR ,sep=",")
