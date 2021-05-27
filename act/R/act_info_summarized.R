@@ -39,7 +39,7 @@ info_summarized <- function(...) {
 		transcripts.count <- length(transcripts.names)
 		
 		#--- length
-		length <- lapply(x@transcripts, "slot", name = "length")
+		length <- lapply(x@transcripts, "slot", name = "length.sec")
 		length.sec <- sum(unlist(length))
 		length.formatted <- helper_format_time(length.sec, addTimeInSeconds = TRUE)
 		
@@ -90,8 +90,8 @@ info_summarized <- function(...) {
 		words.norm.count <- lapply(t@annotations$content.norm, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
 		words.norm.count <- sum(unlist(words.norm.count))
 
-		info <- list(length.formatted  = helper_format_time(t@length , addTimeInSeconds = TRUE),
-					 length.sec        = t@length,
+		info <- list(length.formatted  = helper_format_time(t@length.sec , addTimeInSeconds = TRUE),
+					 length.sec        = t@length.sec,
 					 words.org.count   = words.org.count,
 					 words.norm.count  = words.norm.count,					 
 					 annotations.count = annotations.count,

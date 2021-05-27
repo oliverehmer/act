@@ -460,10 +460,10 @@ export_printtranscript <- function (t,
 		}
 		
 		if (is.null(filterSectionEndsec)) {
-			header <- paste(header, round(t@length, digits=0), " sec)\n", sep="")
+			header <- paste(header, round(t@length.sec, digits=0), " sec)\n", sep="")
 		} else {
 			if (filterSectionEndsec<0) {
-				header <- paste(header, round(t@length, digits=0), " sec)\n", sep="")
+				header <- paste(header, round(t@length.sec, digits=0), " sec)\n", sep="")
 			} else {
 				header <- paste(header, round(filterSectionStartsec, digits=1), " sec)\n", sep="")
 			}

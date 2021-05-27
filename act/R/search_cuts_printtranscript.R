@@ -97,7 +97,7 @@ search_cuts_printtranscript <- function(x,
 				
 				#=== get start & end
 				startSec 	<- max(0, s@results$startSec[i] - s@cuts.span.beforesec)
-				endSec 		<- min(s@results$endSec[i] + s@cuts.span.beforesec, t@length)
+				endSec 		<- min(s@results$endSec[i] + s@cuts.span.beforesec, t@length.sec)
 				
 				#arrow
 				if (!l@arrow.insert) {

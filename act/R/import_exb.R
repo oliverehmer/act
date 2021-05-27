@@ -125,7 +125,7 @@ import_exb <- function(filePath=NULL,
 	if (length(tsTime)==0) {
 		#there are no timeslots 
 		#--> treat as empty transcript
-		t@length <- 0
+		t@length.sec <- 0
 		t@annotations <- .emptyAnnotations
 		t@tiers       <- .emptyTiers
 		
@@ -162,7 +162,7 @@ import_exb <- function(filePath=NULL,
 		#View(timeslots)
 		
 		#--- set transcript length
-		t@length <- max(timeslots$value)
+		t@length.sec <- max(timeslots$value)
 		
 		#=== extract tier info
 		tiers <- xml2::xml_find_all(myexb, "basic-body/tier")

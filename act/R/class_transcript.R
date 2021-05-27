@@ -43,7 +43,7 @@
 #' @slot file.content Character string; \code{[READ ONLY]} Content of the original annotation file/object.
 #' @slot import.result Character string; \code{[READ ONLY]} Information about the success of the import of the annotation file.
 #' @slot load.message Character string; \code{[READ ONLY]} Possibly messages about errors that occurred on importing the annotation file.
-#' @slot length Double; \code{[READ ONLY]} Duration of the transcript in seconds.
+#' @slot length.sec Double; \code{[READ ONLY]} Duration of the transcript in seconds.
 #' @slot tiers Data.frame; \code{[READ ONLY]} Table with the tiers. To modify the tiers it is highly recommended to use functions of the package to ensure for consistency of the data.
 #' @slot annotations Data.frame; Table with the annotations.
 #' @slot media.path Character string; Path(s) to the media files that correspond to this transcript object.
@@ -74,7 +74,7 @@ methods::setClass("transcript",
 				  	import.result                = "character",
 				  	load.message               = "character",
 				  	
-				  	length                     = "numeric",
+				  	length.sec                 = "numeric",
 				  	tiers                      = "ANY",
 				  	annotations                = "ANY",
 				  	media.path                 = "character",
@@ -99,7 +99,7 @@ methods::setClass("transcript",
 				  	import.result                = "",
 				  	load.message               = "",
 				  	
-				  	length                     = 0,
+				  	length.sec                 = 0,
 				  	tiers                      = .emptyTiers,
 				  	annotations                = .emptyAnnotations ,
 				  	media.path                 = character(),
@@ -119,7 +119,7 @@ methods::setClass("transcript",
 transcript_show <- function (object) {
 	cat("  transcript object", fill=TRUE)
 	cat("    name                       : ", paste("'",object@name,"'",sep="", collapse=""), fill=TRUE)
-	cat("    length                     : ", object@length, fill=TRUE)
+	cat("    length.sec                 : ", object@length.sec, fill=TRUE)
 	cat("    tiers                      : ", nrow(object@tiers), fill=TRUE)
 	cat("    annotations                : ", nrow(object@annotations), fill=TRUE)
 	cat("\n")

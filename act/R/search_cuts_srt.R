@@ -101,7 +101,7 @@ search_cuts_srt <- function(x,
 				
 				#=== get start & end
 				startSec 	<- max(0, s@results$startSec[i] - s@cuts.span.beforesec)
-				endSec 		<- min(s@results$endSec[i] + s@cuts.span.beforesec, t@length)
+				endSec 		<- min(s@results$endSec[i] + s@cuts.span.beforesec, t@length.sec)
 				
 				#assemble file PATH
 				myFilepath <- NULL

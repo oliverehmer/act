@@ -192,8 +192,8 @@ export_exb <- function(t,
 		if (min (alltimes>0)) {
 			alltimes <- c(0,alltimes)
 		}
-		if (max (alltimes< t@length )) {
-			alltimes <- c(alltimes, t@length)
+		if (max (alltimes< t@length.sec )) {
+			alltimes <- c(alltimes, t@length.sec)
 		}
 		alltimes <- alltimes[order(alltimes)]
 		alltimes <- unique(alltimes)

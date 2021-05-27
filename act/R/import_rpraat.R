@@ -42,10 +42,10 @@ import_rpraat <- function(rPraatTextGrid,
 		t@name				<- stringr::str_replace(attr(rPraatTextGrid, "class")["name"], ".TextGrid","")
 	}
 	t@file.type 			 <- "rpraat"
-	t@import.result 		     <- "ok"
+	t@import.result 		 <- "ok"
 	t@load.message    	     <- ""
 	t@modification.systime   <- character()
-	t@length				 <- as.double(attr(rPraatTextGrid, "class")["tmax"])
+	t@length.sec        	 <- as.double(attr(rPraatTextGrid, "class")["tmax"])
 	if(getOption("act.import.storeFileContentInTranscript", default=TRUE)) {
 		t@file.content <- rPraatTextGrid
 	}

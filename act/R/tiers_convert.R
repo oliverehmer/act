@@ -77,7 +77,7 @@ tiers_convert <- function(x,
 					#get all end times
 					ids <- which(x@transcripts[[i]]@annotations$tier.name==j)
 					if (length(ids)>0) {
-						newTimes <- c(x@transcripts[[i]]@annotations$endSec[ids], x@transcripts[[i]]@length)
+						newTimes <- c(x@transcripts[[i]]@annotations$endSec[ids], x@transcripts[[i]]@length.sec)
 						newTimes <- newTimes[2:length(newTimes)]
 						x@transcripts[[i]]@annotations$endSec[ids]<- newTimes
 					}

@@ -129,7 +129,7 @@ import_textgrid <- function(filePath=NULL,
 	#===set transcript length
 	rexeg_alltimes <- '((?:xmin|number)\\s=\\D*)([\\d\\.]*)(?:(?:[\\r\\n\\s]*xmax\\s=\\D*)([\\d\\.]*))'
 	alltimes <- stringr::str_match_all(mytg.merge, rexeg_alltimes)
-	t@length <- max(as.double(alltimes[[1]][,4]))
+	t@length.sec <- max(as.double(alltimes[[1]][,4]))
 	
 	#== extract tier info
 	regex_tierinfo <- '(?<!Object\\s)(?:class\\s=\\s")(.+?)(?s:\\".*?name\\s=\\s")(.*?)(?s:\\".*?xmin\\s=)(.*\\d)(?s:.*?xmax\\s=)(.*\\d)(?s:.*?(?:intervals|points):\\ssize\\s=)(.*\\d)'

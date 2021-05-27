@@ -291,7 +291,7 @@ search_cuts_media <- function(x,
 					#====== Replacements in command
 					#--- times
 					startSec 	<- max(0, s@results$startSec[i] - s@cuts.span.beforesec)
-					endSec 		<- min(s@results$endSec[i] + s@cuts.span.aftersec, t@length)
+					endSec 		<- min(s@results$endSec[i] + s@cuts.span.aftersec, t@length.sec)
 					
 					#--- replace general place holders	
 					cmd <- 	stringr::str_replace_all(cmd, "INFILEPATH", 				input_paths[j])

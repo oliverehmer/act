@@ -481,7 +481,7 @@ import_eaf <- function(filePath=NULL,
 		}
 		
 		#===set transcript length
-		t@length <- 0
+		t@length.sec <- 0
 		
 		#=== if it is not a completely empty transcript
 		if (!nrow(myAnnotations)==0)  	{
@@ -506,7 +506,7 @@ import_eaf <- function(filePath=NULL,
 				#View(myAnnotations)
 			}
 			#make transcript 1 sec longer than last annotation
-			t@length <- max( t@length, as.double(annotations$startSec)+1, as.double(annotations$endSec)+1)
+			t@length.sec <- max( t@length.sec, as.double(annotations$startSec)+1, as.double(annotations$endSec)+1)
 		}
 		
 		#=== html conversion

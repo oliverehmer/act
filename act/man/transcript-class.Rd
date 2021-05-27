@@ -31,7 +31,7 @@ on the object.
 
 \item{\code{load.message}}{Character string; \code{[READ ONLY]} Possibly messages about errors that occurred on importing the annotation file.}
 
-\item{\code{length}}{Double; \code{[READ ONLY]} Duration of the transcript in seconds.}
+\item{\code{length.sec}}{Double; \code{[READ ONLY]} Duration of the transcript in seconds.}
 
 \item{\code{tiers}}{Data.frame; \code{[READ ONLY]} Table with the tiers. To modify the tiers it is highly recommended to use functions of the package to ensure for consistency of the data.}
 

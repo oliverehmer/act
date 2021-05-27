@@ -46,7 +46,7 @@ export_rpraat <- function(t,
 	
 	#--- get min and max times of textgrid
 	textgrid.startSec <- min(0, myAnnotations$startSec, myAnnotations$endSec)
-	textgrid.endSec   <- max(c(t@length, myAnnotations$startSec, myAnnotations$endSec))
+	textgrid.endSec   <- max(c(t@length.sec, myAnnotations$startSec, myAnnotations$endSec))
 
 	myTG <- list()
 	if (nrow(t@tiers)>0) {

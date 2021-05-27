@@ -47,12 +47,6 @@ helper_format_time <- function (t,
 								addHrsMinSec=FALSE, 
 								addTimeInSeconds=FALSE) {
 	
-	#t<-examplecorpus@transcripts[[1]]@length
-	#t<-25.039000
-	#digits<-1
-	#addHrsMinSec<-FALSE
-	#addTimeInSeconds<-FALSE
-	
 	h <- floor(t/3600)
 	m <- t-(h*3600)
 	m <- floor(m/60)
