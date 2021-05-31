@@ -106,7 +106,7 @@ media_assign <- function(x,
 	filterFile.media <- stringr::str_flatten(c("(?i)\\.(", filterFile.media, ")"), collapse="")
 	paths.new <- unlist(paths.new[stringr::str_which(string=paths.new, pattern=filterFile.media, )		])
 	if (length(paths.new)==0) {
-		message<- c(message, "No annotation files found. Please check 'x@paths.annotation.files'.")
+		message<- c(message, "No media files found. Please check 'x@paths.media.files'.")
 		warning(paste(message,sep="\n", collapse="\n"))
 		return (x)
 	}

@@ -92,16 +92,7 @@ search_cuts_media <- function(x,
 	myWarnings <- c()
 
 	#set progress bar	
-	if (exists("act.environment", mode="environment")) {
-		if(exists("pb", envir=act.environment)) {
-			act.environment$pb <- progress::progress_bar$new(
-				format = "  Creating cutlist  [:bar] :percent missing: :eta",
-				total = max(1,nrow(s@results)), 
-				clear = FALSE, 
-				show_after = 0,
-				width= 60)
-		}
-	}
+	helper_progress_set("Creating cutlist", max(1,nrow(s@results)))
 	
 	#--- if cut list should be saved - check it  output folder exists
 	if (missing(outputFolder)) {
@@ -120,12 +111,9 @@ search_cuts_media <- function(x,
 	i <- 1
 	#for each search result
 	for (i in 1:nrow(s@results)) 	{
-		#update progress
-		if (exists("act.environment", mode="environment")) {
-			if(exists("pb", envir=act.environment)) {
-				act.environment$pb$tick()
-			}
-		}
+		#update progress bar
+		helper_progress_tick()
+		
 		#reset individual lists
 		cutlist_win <- c()
 		cutlist_mac <- c()

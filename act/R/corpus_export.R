@@ -8,8 +8,9 @@
 #' @param outputFolder Character string; path to a folder where the transcription files will be saved.
 #' @param filterTranscriptNames Vector of character strings; names of transcripts to be included. If left unspecified, all transcripts will be exported.
 #' @param filterTierNames Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.
-#' @param formats Vector with one or more character strings; output formats, accepted values: 'eaf', 'exb', 'srt', 'textgrid'. If left unspecified, all supported formats will be exported.
-#' @param createMediaLinks Logical; if \code{TRUE} media links will be created (affects only eaf files).
+#' @param formats Vector with one or more character strings; output formats, accepted values: 'eaf', 'exb', 'srt', 'textgrid', 'printtranscript'. If left unspecified, all supported formats will be exported.
+#' @param l Layout object. layout of print transcripts (affects only 'printtranscript' files).
+#' @param createMediaLinks Logical; if \code{TRUE} media links will be created (affects only 'eaf' and 'exb' files).
 #'
 #' 
 #' @export
@@ -22,8 +23,9 @@ corpus_export <-  function(x,
 						   outputFolder, 
 						   filterTranscriptNames=NULL, 
 						   filterTierNames=NULL, 
-						   formats=NULL, 
-						   createMediaLinks=TRUE) {
+						   formats=c("eaf","exb","srt","textgrid", "printtranscript"), 
+						   createMediaLinks=TRUE, 
+						   l=NULL) {
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
 	
@@ -34,10 +36,6 @@ corpus_export <-  function(x,
 	
 	if (is.null(filterTranscriptNames)) {
 		filterTranscriptNames <- names(x@transcripts)
-	}
-	
-	if (is.null(formats)) {
-		formats <- c("eaf","exb","srt","textgrid")
 	}
 	
 	#set progress bar
@@ -65,6 +63,11 @@ corpus_export <-  function(x,
 		if ( "textgrid" %in% stringr::str_to_lower(formats)) {
 			outputPath <- file.path(outputFolder, paste(x@transcripts[[i]]@name, "TextGrid", sep="."))
 			export_textgrid(t=x@transcripts[[i]], outputPath=outputPath,filterTierNames=filterTierNames )
+		}
+		
+		if ( "printtranscript" %in% stringr::str_to_lower(formats)) {
+			outputPath <- file.path(outputFolder, paste(x@transcripts[[i]]@name, "txt", sep="."))
+			export_printtranscript(t=x@transcripts[[i]], l=l, outputPath=outputPath, filterTierNames=filterTierNames )
 		}
 	}
 }

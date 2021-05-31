@@ -150,7 +150,6 @@ export_printtranscript <- function (t,
 	#--- take the tier name
 	myAnnotations$speaker <- myAnnotations$tier.name
 	
-	
 	#--- same speaker as before ? --> set to ""
 	myAnnotations_speaker_previous <- c("", myAnnotations$speaker[1:length(myAnnotations$speaker)-1] )
 	sameSpeaker_pos <- myAnnotations_speaker_previous==myAnnotations$speaker
@@ -449,25 +448,21 @@ export_printtranscript <- function (t,
 		}
 		header <- paste(header, t@name , ", ", sep="")
 		
-		if (is.null(filterSectionStartsec)) {
-			header <- paste(header, "0-", sep="")
-		} else {
-			if (filterSectionStartsec<0) {
-				header <- paste(header, "0-", sep="")
-			} else {
-				header <- paste(header, round(filterSectionStartsec, digits=1), "-", sep="")
-			}
-		}
+		timesSTR <- paste(
+			
+			helper_format_time(min(myAnnotations$startSec)), 
+			"-", 
+			helper_format_time(max(myAnnotations$endSec)),
+			" (",
+			stringr::str_replace_all(format(round(min(myAnnotations$startSec), digits=1), nsmall = 1), '\\.', ","),
+					"-", 
+					stringr::str_replace_all(format(round(max(myAnnotations$endSec), digits=1),nsmall = 1), '\\.', ","), 
+					" sec)",
+						  
+		#			   " (", round(min(myAnnotations$startSec), digits=1), "-", round(max(myAnnotations$endSec), digits=1), " sec)", 
+				    sep="")
 		
-		if (is.null(filterSectionEndsec)) {
-			header <- paste(header, round(t@length.sec, digits=0), " sec)\n", sep="")
-		} else {
-			if (filterSectionEndsec<0) {
-				header <- paste(header, round(t@length.sec, digits=0), " sec)\n", sep="")
-			} else {
-				header <- paste(header, round(filterSectionStartsec, digits=1), " sec)\n", sep="")
-			}
-		}
+		header <- paste(header, timesSTR, sep="")
 		output <- c(header, output)
 	}
 	

@@ -42,19 +42,20 @@
 #' helper_format_time(34.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=TRUE)
 #' helper_format_time(0.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=TRUE)
 #' 
+#' 
 helper_format_time <- function (t,
 								digits=1,
 								addHrsMinSec=FALSE, 
 								addTimeInSeconds=FALSE) {
-	
+
+	digits <- max(0, as.integer(digits))
+	t<-round(t, digits)
+
 	h <- floor(t/3600)
 	m <- t-(h*3600)
 	m <- floor(m/60)
 	s <- t-(h*3600)-(m*60)
-	s <- round(s,0)
-	
-	digits <- max(0, as.integer(digits))
-	
+	s <- as.integer(s)
 	
 	if (digits>0) {
 		digitsSTR <- substr(format(round(t %% 1, digits), nsmall = digits) ,3,3+digits)
@@ -63,17 +64,7 @@ helper_format_time <- function (t,
 	}
 	
 	if (addHrsMinSec) {
-		#if (t<60) {
-		#	f <- paste(s,"sec", sep="")
-		#} else {
-		#	if (h>0) {
-		#		f <- sprintf("%02.fhrs %02.fmin %02.fsec", h, m, s)
-		        f <- sprintf("%0.fhrs %02.fmin %02.fsec", h, m, s)
-				
-		#   } else if (m>0) {
-		#		f <- sprintf("%2.fmin %02.fsec", m, s)
-		#	}
-		#}
+        f <- sprintf("%0.fhrs %02.fmin %02.fsec", h, m, s)
 		
 		if (digitsSTR!="") {
 			f <- paste(f," ", digitsSTR, sep="")
@@ -83,17 +74,8 @@ helper_format_time <- function (t,
 			f <- paste(f, " (=",round(t,3)," sec)", sep="")
 		}
 	} else {
-		
-		#if (t<60) {
-		#	f <- paste( s,"", sep="")
-		#} else {
-#			if (h>0) {
-				f <- sprintf("%02.f:%02.f:%02.f", h, m, s)
-#			} else if (m>0) {
-#				f <- sprintf("%2.f:%02.f", m, s)
-#			}
-		#}
-		
+		f <- sprintf("%02.f:%02.f:%02.f", h, m, s)
+
 		if (digitsSTR!="") {
 			f <- paste(f, digitsSTR ,sep=",")
 		}
@@ -104,11 +86,4 @@ helper_format_time <- function (t,
 	}
 
 	return(f)
-	
-	#paste(paste(formatC(time %/% (60*60) %% 24, width = 2, format = "d", flag = "0")
-	#			,":", formatC(time %/% 60 %% 60, width = 2, format = "d", flag = "0")
-	#			,":", formatC(time %% 60, width = 2, format = "d", flag = "0")
-	#			, ",", substr(as.character(round(time %% 1,3)),3,6)
-	#			,sep='' 
-	#)
 }

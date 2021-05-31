@@ -60,4 +60,5 @@ helper_format_time(2734.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=T
 helper_format_time(34.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=TRUE)
 helper_format_time(0.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=TRUE)
 
+
 }

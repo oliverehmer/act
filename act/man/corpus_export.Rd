@@ -9,8 +9,9 @@ corpus_export(
   outputFolder,
   filterTranscriptNames = NULL,
   filterTierNames = NULL,
-  formats = NULL,
-  createMediaLinks = TRUE
+  formats = c("eaf", "exb", "srt", "textgrid", "printtranscript"),
+  createMediaLinks = TRUE,
+  l = NULL
 )
 }
 \arguments{
@@ -22,9 +23,11 @@ corpus_export(
 
 \item{filterTierNames}{Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.}
 
-\item{formats}{Vector with one or more character strings; output formats, accepted values: 'eaf', 'exb', 'srt', 'textgrid'. If left unspecified, all supported formats will be exported.}
+\item{formats}{Vector with one or more character strings; output formats, accepted values: 'eaf', 'exb', 'srt', 'textgrid', 'printtranscript'. If left unspecified, all supported formats will be exported.}
 
-\item{createMediaLinks}{Logical; if \code{TRUE} media links will be created (affects only eaf files).}
+\item{createMediaLinks}{Logical; if \code{TRUE} media links will be created (affects only 'eaf' and 'exb' files).}
+
+\item{l}{Layout object. layout of print transcripts (affects only 'printtranscript' files).}
 }
 \description{
 Exports all (or some) transcript objects in a corpus object to different annotation file formats.

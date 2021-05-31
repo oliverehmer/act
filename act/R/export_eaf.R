@@ -140,11 +140,11 @@ export_eaf <- function(t,
 					}
 				}
 				
-				annotations <- paste("        <ANNOTATION>",
+				annotations <- paste(        "        <ANNOTATION>",
 									 sprintf("            <ALIGNABLE_ANNOTATION ANNOTATION_ID=\"%s\" TIME_SLOT_REF1=\"%s\" TIME_SLOT_REF2=\"%s\">", annotations.tier$annotationID, annotations.tier$TIME_SLOT_REF1, annotations.tier$TIME_SLOT_REF2),
-									 sprintf("                <ANNOTATION_VALUE>%s</ANNOTATION_VALUE>",annotations.tier$content ),
-									 "            </ALIGNABLE_ANNOTATION>",
-									 "        </ANNOTATION>", sep="\n")
+									 sprintf("                <ANNOTATION_VALUE>%s</ANNOTATION_VALUE>", annotations.tier$content ),
+									         "            </ALIGNABLE_ANNOTATION>",
+									         "        </ANNOTATION>", sep="\n")
 				
 				myEAF <- append(myEAF, annotations)
 				myEAF <- append(myEAF,         "    </TIER>")
