@@ -7,5 +7,5 @@ t <- examplecorpus@transcripts[[1]]
 printtranscript <- act::export_printtranscript (t=t)
 
 # Display on screen
-cat(stringr::str_c(printtranscript, sep="\n", collapse = "\n"))
+cat(printtranscript)
 

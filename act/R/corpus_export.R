@@ -5,7 +5,7 @@
 #' In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_meta} first. 
 #'
 #' @param x Corpus object.
-#' @param outputFolder Character string; path to a folder where the transcription files will be saved.
+#' @param outputFolder Character string; path to a folder where the transcription files will be saved. By default the forlder will be created recursively it does not exist.
 #' @param filterTranscriptNames Vector of character strings; names of transcripts to be included. If left unspecified, all transcripts will be exported.
 #' @param filterTierNames Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.
 #' @param formats Vector with one or more character strings; output formats, accepted values: 'eaf', 'exb', 'srt', 'textgrid', 'printtranscript'. If left unspecified, all supported formats will be exported.
@@ -26,7 +26,7 @@ corpus_export <-  function(x,
 						   filterTierNames=NULL, 
 						   formats=c("eaf","exb","srt","textgrid", "printtranscript"), 
 						   createMediaLinks=TRUE,
-						   createOutputfolder=FALSE,
+						   createOutputfolder=TRUE,
 						   l=NULL) {
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
@@ -35,14 +35,13 @@ corpus_export <-  function(x,
 	
 	if (!dir.exists(outputFolder)) {
 		if (createOutputfolder) {
-			dir.create(outputFolder)
+			dir.create(outputFolder, recursive=TRUE)
 			if (!dir.exists(outputFolder)) {
 				stop("Error while crating the output. Modify parameter 'outputFolder'.")
 				endif
 			} 
-		}else {
+		} else {
 			stop("Output folder does not exist. Modify parameter 'outputFolder'.")
-			
 		}
 	}
 	
@@ -51,7 +50,7 @@ corpus_export <-  function(x,
 	}
 	
 	#set progress bar
-	helper_progress_set("Exporting",length(x@transcripts))
+	helper_progress_set("Exporting",length(filterTranscriptNames))
 	
 	for (i in filterTranscriptNames) {
 		#update progress bar

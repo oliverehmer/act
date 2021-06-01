@@ -2,7 +2,7 @@ library(act)
 
 # Have a look at the first transcript in the examplecorpus:
 printtranscript <- act::export_printtranscript(examplecorpus@transcripts[[1]])
-cat(stringr::str_c(printtranscript, sep="\n", collapse = "\n"))
+cat(printtranscript)
 # In line 01 there is the word "UN".
 
 # Replace this word by "XXX" in the entire corpus
@@ -12,7 +12,7 @@ test <- act::annotations_replace_copy(x=examplecorpus,
 
 # Have a look at the first transcript in the corprus object test:
 printtranscript <- act::export_printtranscript(test@transcripts[[1]])
-cat(stringr::str_c(printtranscript, sep="\n", collapse = "\n"))
+cat(printtranscript)
 # In line 01 there is now "XXX" instead of "UN"
 
 # Insert a tier called "newTier" into all transcripts in the corpus:
@@ -35,7 +35,7 @@ test <- act::annotations_replace_copy(x=examplecorpus,
 
 # Have a look again at the first transcript in the corpus object test.
 printtranscript <- act::export_printtranscript(test@transcripts[[1]])
-cat(stringr::str_c(printtranscript, sep="\n", collapse = "\n"))
+cat(printtranscript)
 # In line 01 you see that "UN" has been replaced by "YYY.
 # In line 02 you see that it has been copied to the tier "newTier".
 
@@ -45,6 +45,6 @@ test <- act::annotations_replace_copy(x=examplecorpus,
 									  pattern="\\bUN\\b",
 									  destTier = "newTier")
 printtranscript <- act::export_printtranscript(test@transcripts[[1]])
-cat(stringr::str_c(printtranscript, sep="\n", collapse = "\n"))
+cat(printtranscript)
 # In line 01 you see that "UN" has been maintained.
 # In line 02 you see that "UN" it has been copied to the tier "newTier".

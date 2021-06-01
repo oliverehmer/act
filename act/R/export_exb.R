@@ -155,7 +155,7 @@ export_exb <- function(t,
 
 	#--- files
 	if (createMediaLinks) {
-		files   <- sprintf(files, basename(t@media.path), sep='')
+		files   <- sprintf(files, basename(t@media.path))
 		files   <- paste(files, collapse='\n')
 		if (length(files)==0) {
 			files <- '<referenced-file url=""/>'
@@ -222,7 +222,7 @@ export_exb <- function(t,
 	
 	#iterate through all tiers
 	if (nrow(t@tiers)==0) {
-		tier <- '      <tier id="TIE0" speaker="SPK0" category="v" type="t" display-name="X [v]">\n</tier>'
+		tiers <- '      <tier id="TIE0" speaker="SPK0" category="v" type="t" display-name="X [v]">\n</tier>'
 	} else {
 		#sort annotations by tier names and start time
 		myAnnotations <- myAnnotations[order(ordered(myAnnotations$tier.name, levels = t@tiers$name), myAnnotations$startSec),]
@@ -245,8 +245,8 @@ export_exb <- function(t,
 			tier_block[tierNr] <- paste(tier_block[tierNr], collapse="\n")
 			#cat(tier_block[[tierNr]])
 		}
+		tiers <- paste(unlist(tier_block), collapse="\n")
 	}
-	tiers <- paste(unlist(tier_block), collapse="\n")
 	basic_body <- sprintf(basic_body, timeline, tiers)
 	
 	#=== put everything together

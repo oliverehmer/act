@@ -12,7 +12,7 @@
 #' @param header_heading Character string; text that will be used as heading.
 #' @param header_firstinfo Character string; text that will used as first information in the header.
 #' @param insert_arrow_annotationID Integer; ID of the annotation in front of which the arrow will be placed.
-#'
+#' @param collapse Logical; if \code{FALSE} a vector will be created, each element corresponding to one annotation. if \code{TRUE} a single string will be created, collased by linebreaks \n.
 #' @return Character string; transcript as text.
 #' 
 #' @seealso \code{corpus_export}, \code{export_eaf}, \code{export_exb}, \code{export_rpraat}, \code{export_srt}, \code{export_textgrid} 
@@ -29,7 +29,8 @@ export_printtranscript <- function (t,
 									filterSectionEndsec = NULL,  
 									insert_arrow_annotationID = "", 
 									header_heading ="", 
-									header_firstinfo = "") {
+									header_firstinfo = "",
+									collapse=TRUE) {
 	#=== settings
 	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	} else { if (class(t)[[1]]!="transcript") 	{stop("Parameter 't' needs to be a transcript object.") 	} }
 	if (is.null(l)) 	{
@@ -392,7 +393,6 @@ export_printtranscript <- function (t,
 		} #next i
 	} #if brackets need to be aligned
 	
-	
 	#wrap and build entire text
 	for (i in 1:length(myAnnotations$text)) {
 		
@@ -464,6 +464,10 @@ export_printtranscript <- function (t,
 		
 		header <- paste(header, timesSTR, sep="")
 		output <- c(header, output)
+	}
+	
+	if (collapse) {
+		output <- stringr::str_c(output, sep='\n', collapse = '\n')
 	}
 	
 	if (is.null(outputPath)) {

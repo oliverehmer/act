@@ -38,36 +38,40 @@ export_textgrid <- function(t,
 	#--- Filter and cure transcript
 	t <- act::transcripts_filter_single(t, filterTierNames=filterTierNames, filterSectionStartsec = filterSectionStartsec, filterSectionEndsec = filterSectionEndsec)
 	t <- act::transcripts_cure_single(t, annotationsWithReversedTimes=TRUE, overlappingAnnotations=TRUE, annotationsWithTimesBelowZero=FALSE, missingTiers=TRUE, showWarning=TRUE)
-	#--- get only relevant columns
-	myCols <- c("tier.name", "startSec","endSec","content")
-	if (!all(myCols %in% colnames(t@annotations))) {
-		stop(paste("Missing colums. Annotations need to contain: ", paste(myCols, collapse = " ", sep="")))
-	}
-	myAnnotations <- t@annotations[,myCols]
 	
-	#sort annotations by start time
-	myAnnotations <- myAnnotations[order(myAnnotations$startSec), ]
-	
-	#--- get min and max times of textgrid
-	textgrid.startSec <- min(0, myAnnotations$startSec, myAnnotations$endSec)
-	textgrid.endSec   <- max(c(t@length.sec, myAnnotations$startSec, myAnnotations$endSec))
-	
-	#--- create TextGrid header
-	myTG <- 			"File type = \"ooTextFile\""
-	myTG <- append(myTG, "Object class = \"TextGrid\"" )
-	myTG <- append(myTG, "" )
-	myTG <- append(myTG, sprintf("xmin = %s ", as.character(textgrid.startSec)))
-	myTG <- append(myTG, sprintf("xmax = %s ", as.character(textgrid.endSec)))
-	myTG <- append(myTG, "tiers? <exists> ")
-	myTG <- append(myTG, sprintf("size = %s ", nrow(t@tiers) ))
-	myTG <- append(myTG, "item []: ")
-	#cat(myTG)
-	
-	if (nrow(t@tiers)>0) {
+	if (nrow(t@tiers)==0) {
+		warning(sprintf('Textgrid for transcript "%s" not exported. Transcript did not contain any tiers (after filtering).', t@name))
+	} else {
+		#--- get only relevant columns
+		myCols <- c("tier.name", "startSec","endSec","content")
+		if (!all(myCols %in% colnames(t@annotations))) {
+			stop(paste("Missing colums. Annotations need to contain: ", paste(myCols, collapse = " ", sep="")))
+		}
+		myAnnotations <- t@annotations[,myCols]
+		
+		#sort annotations by start time
+		myAnnotations <- myAnnotations[order(myAnnotations$startSec), ]
+		
+		#--- get min and max times of textgrid
+		textgrid.startSec <- min(0, myAnnotations$startSec, myAnnotations$endSec)
+		textgrid.endSec   <- max(c(t@length.sec, myAnnotations$startSec, myAnnotations$endSec))
+		
+		#--- create TextGrid header
+		myTG <- 			"File type = \"ooTextFile\""
+		myTG <- append(myTG, "Object class = \"TextGrid\"" )
+		myTG <- append(myTG, "" )
+		myTG <- append(myTG, sprintf("xmin = %s ", as.character(textgrid.startSec)))
+		myTG <- append(myTG, sprintf("xmax = %s ", as.character(textgrid.endSec)))
+		myTG <- append(myTG, "tiers? <exists> ")
+		myTG <- append(myTG, sprintf("size = %s ", nrow(t@tiers) ))
+		myTG <- append(myTG, "item []: ")
+		#cat(myTG)
+		
+		
 		#iterate though all tiers
 		for (tierNr in 1:nrow(t@tiers)) 		{
 			# tierNr <- 2
-
+			
 			#get annotations within tier
 			annotations.tier <- myAnnotations[myAnnotations$tier.name==t@tiers$name[tierNr],]
 			
@@ -101,7 +105,7 @@ export_textgrid <- function(t,
 						content="", 
 						stringsAsFactors=FALSE		)
 					
-	
+					
 					
 					#merge new and actual annotations
 					merged <- merge(x=annotations.tier, y=newAnnotations, all.y =TRUE, by= c("tier.name","startSec", "endSec"))
@@ -134,7 +138,7 @@ export_textgrid <- function(t,
 				myTG <- append(myTG, sprintf("        xmax = %s ", as.character(textgrid.endSec)))
 				myTG <- append(myTG, sprintf("        intervals: size = %s " , intervalNr))
 				
-
+				
 				myInter <- paste(   '        intervals [%s]:', 
 									'            xmin = %s ',  
 									'            xmax = %s ', 
@@ -152,7 +156,7 @@ export_textgrid <- function(t,
 				
 				#get number of points in tier
 				pointNr <- nrow(annotations.tier)
-
+				
 				myTG <- append(myTG, sprintf("    item [%s]:", tierNr))
 				myTG <- append(myTG,         "        class = \"TextTier\" ")
 				myTG <- append(myTG, sprintf("        name = \"%s\" " , t@tiers$name[tierNr]))
@@ -172,7 +176,6 @@ export_textgrid <- function(t,
 					#}
 					#a <- unlist(apply(annotations.tier,  1, FUN=createPointBlock))
 					
-					
 					myPoint <- paste(   '        points [%s]:', 
 										'            number = %s ',  
 										'            mark = \"%s\" ',
@@ -188,14 +191,15 @@ export_textgrid <- function(t,
 				}
 			}
 		}
-	}
-
-	if (is.null(outputPath)) {
-		return(myTG)
-	} else {
-		#---write to file
-		fileConn <- file(outputPath)
-		writeLines(myTG, fileConn)
-		close(fileConn)		
+		
+		
+		if (is.null(outputPath)) {
+			return(myTG)
+		} else {
+			#---write to file
+			fileConn <- file(outputPath)
+			writeLines(myTG, fileConn)
+			close(fileConn)		
+		}
 	}
 }
