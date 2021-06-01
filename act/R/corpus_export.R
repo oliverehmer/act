@@ -9,8 +9,9 @@
 #' @param filterTranscriptNames Vector of character strings; names of transcripts to be included. If left unspecified, all transcripts will be exported.
 #' @param filterTierNames Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.
 #' @param formats Vector with one or more character strings; output formats, accepted values: 'eaf', 'exb', 'srt', 'textgrid', 'printtranscript'. If left unspecified, all supported formats will be exported.
-#' @param l Layout object. layout of print transcripts (affects only 'printtranscript' files).
 #' @param createMediaLinks Logical; if \code{TRUE} media links will be created (affects only 'eaf' and 'exb' files).
+#' @param createOutputfolder Logical; if \code{TRUE} the outputfolder will be created recursively in case that it does not exist.
+#' @param l Layout object. layout of print transcripts (affects only 'printtranscript' files).
 #'
 #' 
 #' @export
@@ -24,14 +25,25 @@ corpus_export <-  function(x,
 						   filterTranscriptNames=NULL, 
 						   filterTierNames=NULL, 
 						   formats=c("eaf","exb","srt","textgrid", "printtranscript"), 
-						   createMediaLinks=TRUE, 
+						   createMediaLinks=TRUE,
+						   createOutputfolder=FALSE,
 						   l=NULL) {
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
 	
 	if (missing(outputFolder)) { stop("No output folder specified in parameter 'outputFolder'") }
+	
 	if (!dir.exists(outputFolder)) {
-		stop("Output folder does not exist. Modify parameter 'outputFolder'.")
+		if (createOutputfolder) {
+			dir.create(outputFolder)
+			if (!dir.exists(outputFolder)) {
+				stop("Error while crating the output. Modify parameter 'outputFolder'.")
+				endif
+			} 
+		}else {
+			stop("Output folder does not exist. Modify parameter 'outputFolder'.")
+			
+		}
 	}
 	
 	if (is.null(filterTranscriptNames)) {
@@ -44,6 +56,12 @@ corpus_export <-  function(x,
 	for (i in filterTranscriptNames) {
 		#update progress bar
 		helper_progress_tick()
+		
+		#print(i)
+		#formats<-"eaf"
+		#outputFolder<-"/Users/oliverehmer/Desktop/export/"
+		#filterTierNames<-NULL
+		#createMediaLinks <- TRUE
 		
 		if ( "eaf" %in% stringr::str_to_lower(formats)) {
 			outputPath <- file.path(outputFolder, paste(x@transcripts[[i]]@name, "eaf", sep="."))
@@ -71,5 +89,3 @@ corpus_export <-  function(x,
 		}
 	}
 }
-
-
