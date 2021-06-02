@@ -2,7 +2,7 @@
 #'
 #' This function is only for checking how the normalization matrix will be loaded internally.
 #'
-#' @param path Character string; path to the replacement matrix (a CSV file). If arguement is left open, the default replacement matrix of the package will be returned.
+#' @param path Character string; path to the replacement matrix (a CSV file). If argument is left open, the default replacement matrix of the package will be returned.
 #' @param myFileEncoding Character string; encoding of the file.
 #'
 #' @return Data.frame

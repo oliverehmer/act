@@ -9,10 +9,10 @@
 #' 
 #' 
 search_transcript_content <- function(t, s) {
+	helper_progress_tick()
+	
 	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	} else { if (class(t)[[1]]!="transcript") 	{stop("Parameter 't' needs to be a transcript object.") 	} }
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		} else { if (class(s)[[1]]!="search")		{stop("Parameter 's' needs to be a search object.") 	} }
-	
-	helper_progress_tick()
 	
 	temp <- NULL
 	

@@ -23,8 +23,6 @@ search_run <- function(x, s) {
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		} else { if (class(s)[[1]]!="search")		{stop("Parameter 's' needs to be a search object.") 	} }
 
-	
-	
 	#get transcripts and tiers to include
 	#x <- examplecorpus
 	#s <- mysearch
@@ -63,7 +61,7 @@ search_run <- function(x, s) {
 		#=== some user error
 		stop ("Unknow 'searchMode'. Please select 'fulltext', 'fulltext.byTime', 'fulltext.byTier' or 'content' .")
 	}
-	
+
 	if(is.null(temp)) {
 		myColNames <- c("transcript.name", "annotationID", "tier.name", "startSec","endSec", "content", "content.norm", "char.orig.bytime.start", "char.orig.bytime.end", "char.norm.bytime.start", "char.norm.bytime.end", "char.orig.bytier.start", "char.orig.bytier.end", "char.norm.bytier.start", "char.norm.bytier.end", "hit", "hit.nr" ,"hit.length", "hit.pos.fulltext", "hit.pos.content", "search.mode", "hit.span")
 		temp <- data.frame(matrix(ncol = length(myColNames), nrow = 0))
