@@ -2,7 +2,7 @@
 % Please edit documentation in R/transcripts_cure.R
 \name{transcripts_cure}
 \alias{transcripts_cure}
-\title{Cure a corpus}
+\title{Cure all transcript objects in a corpus}
 \usage{
 transcripts_cure(
   x,

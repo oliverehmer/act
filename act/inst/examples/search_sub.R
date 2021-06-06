@@ -14,4 +14,4 @@ test <- act::search_sub(x=examplecorpus,
 						pattern=myRegEx)
 
 # Check the co-occurring search hits
-test$subsearch
+test@results$subsearch

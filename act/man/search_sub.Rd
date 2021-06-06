@@ -8,6 +8,8 @@ search_sub(
   x,
   s,
   pattern,
+  searchMode = c("content", "fulltext", "fulltext.byTime", "fulltext.byTier"),
+  searchNormalized = TRUE,
   filterTierInclude = "",
   filterTierExclude = "",
   destinationColumn = "subsearch",
@@ -22,6 +24,10 @@ search_sub(
 
 \item{pattern}{Character string; search pattern as regular expression}
 
+\item{searchMode}{Character string; takes the following values: \code{content}, \code{fulltext} (=default, includes both full text modes), \code{fulltext.byTime}, \code{fulltext.byTier}.}
+
+\item{searchNormalized}{Logical; if \code{TRUE} function will search in the normalized content, if \code{FALSE} function will search in the original content.}
+
 \item{filterTierInclude}{Character string; limit search to tiers that match the regular expression}
 
 \item{filterTierExclude}{Character string; limit search to tiers that match the regular expression}
@@ -33,10 +39,10 @@ search_sub(
 \item{excludeHitsWithinSameTier}{Logical; if \code{TRUE} the function will not add hits from the same tier as the original search result; if \code{FALSE} hits from the same tier as the original search result will be included.}
 }
 \value{
-Data frame.
+Search object.
 }
 \description{
-This function starts from the results of a prior search and performs a sub search. 
+This function starts from the results of a prior search and performs a sub search for a temporal co-occurence. 
 In the sub search all results from the prior search will be checked. 
 The sub search will check annotations in other tiers that temporally overlap with the original search result. 
 Those annotation will be checked if they match a search pattern.
@@ -59,7 +65,7 @@ test <- act::search_sub(x=examplecorpus,
 						pattern=myRegEx)
 
 # Check the co-occurring search hits
-test$subsearch
+test@results$subsearch
 }
 \seealso{
 \link{search_new}, \link{search_run}, \link{search_meta}

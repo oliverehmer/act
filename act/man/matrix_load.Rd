@@ -7,7 +7,7 @@
 matrix_load(path = NULL, myFileEncoding = "UTF-8")
 }
 \arguments{
-\item{path}{Character string; path to the replacement matrix (a CSV file). If arguement is left open, the default replacement matrix of the package will be returned.}
+\item{path}{Character string; path to the replacement matrix (a CSV file). If argument is left open, the default replacement matrix of the package will be returned.}
 
 \item{myFileEncoding}{Character string; encoding of the file.}
 }

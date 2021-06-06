@@ -37,8 +37,7 @@ corpus_export <-  function(x,
 		if (createOutputfolder) {
 			dir.create(outputFolder, recursive=TRUE)
 			if (!dir.exists(outputFolder)) {
-				stop("Error while crating the output. Modify parameter 'outputFolder'.")
-				endif
+				stop("Error while crating the output. Modify the parameter 'outputFolder'.")
 			} 
 		} else {
 			stop("Output folder does not exist. Modify parameter 'outputFolder'.")

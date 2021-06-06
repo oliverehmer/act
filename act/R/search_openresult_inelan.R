@@ -6,7 +6,9 @@
 #' Therefore you need to set the path to the ELAN executable in the option 'act.path.elan' using \code{options(act.path.elan='PATHTOYOURELANEXECUTABLE')}.
 #' 
 #' WARNING: This function will overwrite existing .psfx files. 
-#'
+#' 
+#' Credits: Thanks to Han Sloetjes for Feedback on the structure of the temporary .pfsx files. He actually made the code work. 
+#' 
 #' @param x Corpus object.
 #' @param s Search object. 
 #' @param resultNr Integer; Number of the search result (row in the data frame \code{s@results}) to be opened.

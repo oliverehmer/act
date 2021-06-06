@@ -99,9 +99,6 @@ search_cuts_media <- function(x,
 		output_folder_cutlist <- "."
 	} else {
 		output_folder_cutlist <- normalizePath(outputFolder)
-		if (file.exists(output_folder_cutlist)==FALSE) 	{
-			stop("Output folder does not exist.")
-		}		
 	}
 
 	#make total lists
@@ -337,6 +334,12 @@ search_cuts_media <- function(x,
 		#--- save cutlists
 		# if output folder is given
 		if (!missing(outputFolder)) {
+			#-- make the destination folder, if it does not exist
+			output_folder_cutlist.sub <- file.path(output_folder_cutlist, s@name)
+			if (dir.exists(output_folder_cutlist.sub)==FALSE) 	{
+				dir.create(output_folder_cutlist.sub, recursive=TRUE)
+			}
+			
 			#-- name
 			cutlistFileNameSansExt="FFMPEG_cutlist"
 			if (s@name!="") {
@@ -344,7 +347,7 @@ search_cuts_media <- function(x,
 			}
 			
 			#--- save cutlist_total_win as cmd
-			myFilepath 	<- file.path(output_folder_cutlist, paste(cutlistFileNameSansExt, "_win.cmd", sep=""))
+			myFilepath 	<- file.path(output_folder_cutlist.sub, paste(cutlistFileNameSansExt, "_win.cmd", sep=""))
 			fileConn 	<- file(myFilepath)
 			writeLines(cutlist_total_win, fileConn)
 			close(fileConn)
@@ -353,13 +356,16 @@ search_cuts_media <- function(x,
 			#add that it is an executable
 			cutlist_total_mac <- c("#!/bin/sh",cutlist_total_mac)
 			#save
-			myFilepath 	<- file.path(output_folder_cutlist, paste(cutlistFileNameSansExt, "_mac", sep=""))
+			myFilepath 	<- file.path(output_folder_cutlist.sub, paste(cutlistFileNameSansExt, "_mac", sep=""))
 			fileConn 	<- file(myFilepath)
 			writeLines(cutlist_total_mac, fileConn)
 			close(fileConn)
-			#only do this on a mac or a linux machine
-			if (Sys.info()["sysname"]=="Darwin") {
-				system(paste("chmod 755 ", myFilepath, sep=""))
+			
+			#make executable on a mac or a linux machine
+			if (file.exists(myFilepath)) {
+				if (Sys.info()["sysname"]=="Darwin") {
+					system(paste("chmod 755 ", myFilepath, sep=""))
+				}				
 			}
 		}
 	}

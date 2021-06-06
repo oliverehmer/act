@@ -5,7 +5,7 @@
 #' This function is to create compatibility with the \code{rPraat} package. 
 #' It converts an act transcript to a rPraat TextGrid object.
 #' 
-#' Credits to Tomáš Bořil, the author of the rPraat package, for commenting on the exchange functions.
+#' Credits: Thanks to Tomáš Bořil, the author of the rPraat package, for commenting on the exchange functions.
 #' 
 #' @param t Transcript object; transcript to be converted.
 #' @param filterTierNames Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.

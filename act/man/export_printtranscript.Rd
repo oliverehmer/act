@@ -13,7 +13,8 @@ export_printtranscript(
   filterSectionEndsec = NULL,
   insert_arrow_annotationID = "",
   header_heading = "",
-  header_firstinfo = ""
+  header_firstinfo = "",
+  collapse = TRUE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ export_printtranscript(
 \item{header_heading}{Character string; text that will be used as heading.}
 
 \item{header_firstinfo}{Character string; text that will used as first information in the header.}
+
+\item{collapse}{Logical; if \code{FALSE} a vector will be created, each element corresponding to one annotation. if \code{TRUE} a single string will be created, collapsed by linebreaks \\n.}
 }
 \value{
 Character string; transcript as text.
@@ -52,7 +55,7 @@ t <- examplecorpus@transcripts[[1]]
 printtranscript <- act::export_printtranscript (t=t)
 
 # Display on screen
-cat(stringr::str_c(printtranscript, sep="\n", collapse = "\n"))
+cat(printtranscript)
 
 }
 \seealso{

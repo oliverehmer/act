@@ -49,7 +49,7 @@ search_run <- function(x, s) {
 	}
 
 	#=== Search
-	helper_progress_set("Searching", length(x@transcripts))
+	helper_progress_set("Searching", length(transcriptNames))
 	if (s@search.mode=="fulltext" | s@search.mode=="fulltext.byTime" | s@search.mode=="fulltext.byTier" ) {
 		temp 	  			<-	lapply(x@transcripts[transcriptNames], search_transcript_fulltext, s=s)
 		temp	  			<-	do.call("rbind", temp)
@@ -74,7 +74,9 @@ search_run <- function(x, s) {
 	s@results <- temp
 	
 	#=== make adaptations and concordance
-	if (nrow(temp)>0)	{
+	if (nrow(temp)==0) {
+		s@results      <- 	cbind(resultID=as.character(), s@results)
+	} else	{
 		#=== add names for results
 		resultID      <- 	helper_makeNamesForSearch(s@results, s@resultidprefix)
 		s@results      <- 	cbind(resultID, s@results)

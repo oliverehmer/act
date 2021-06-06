@@ -11,13 +11,14 @@ corpus_export(
   filterTierNames = NULL,
   formats = c("eaf", "exb", "srt", "textgrid", "printtranscript"),
   createMediaLinks = TRUE,
+  createOutputfolder = TRUE,
   l = NULL
 )
 }
 \arguments{
 \item{x}{Corpus object.}
 
-\item{outputFolder}{Character string; path to a folder where the transcription files will be saved.}
+\item{outputFolder}{Character string; path to a folder where the transcription files will be saved. By default the forlder will be created recursively it does not exist.}
 
 \item{filterTranscriptNames}{Vector of character strings; names of transcripts to be included. If left unspecified, all transcripts will be exported.}
 
@@ -26,6 +27,8 @@ corpus_export(
 \item{formats}{Vector with one or more character strings; output formats, accepted values: 'eaf', 'exb', 'srt', 'textgrid', 'printtranscript'. If left unspecified, all supported formats will be exported.}
 
 \item{createMediaLinks}{Logical; if \code{TRUE} media links will be created (affects only 'eaf' and 'exb' files).}
+
+\item{createOutputfolder}{Logical; if \code{TRUE} the outputfolder will be created recursively in case that it does not exist.}
 
 \item{l}{Layout object. layout of print transcripts (affects only 'printtranscript' files).}
 }

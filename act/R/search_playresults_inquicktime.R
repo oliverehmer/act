@@ -35,7 +35,7 @@ search_playresults_inquicktime <- function(x,
 		cat("content        : ", s@results[i, ]$content, "\n")
 		if ("printtranscript" %in% colnames(s@results)) {
 			cat("\n")	
-			cat(s@results$printtranscript)
+			cat(s@results$printtranscript[i])
 			cat("\n")	
 		}
 		played <- act::search_openresult_inquicktime(x=x, 

@@ -12,7 +12,7 @@
 #' @param header_heading Character string; text that will be used as heading.
 #' @param header_firstinfo Character string; text that will used as first information in the header.
 #' @param insert_arrow_annotationID Integer; ID of the annotation in front of which the arrow will be placed.
-#' @param collapse Logical; if \code{FALSE} a vector will be created, each element corresponding to one annotation. if \code{TRUE} a single string will be created, collased by linebreaks \n.
+#' @param collapse Logical; if \code{FALSE} a vector will be created, each element corresponding to one annotation. if \code{TRUE} a single string will be created, collapsed by linebreaks \\n.
 #' @return Character string; transcript as text.
 #' 
 #' @seealso \code{corpus_export}, \code{export_eaf}, \code{export_exb}, \code{export_rpraat}, \code{export_srt}, \code{export_textgrid} 
@@ -408,7 +408,7 @@ export_printtranscript <- function (t,
 			text_line <- stringr::str_replace(text_line, searchString, "")
 		}
 		#remove line breaks that will lead to an error
-		searchString <- "\\r?\\n"
+		searchString <- "\\r?\n"
 		text_line <- stringr::str_replace_all(text_line, searchString, "")
 		
 		#wrap
@@ -457,10 +457,7 @@ export_printtranscript <- function (t,
 			stringr::str_replace_all(format(round(min(myAnnotations$startSec), digits=1), nsmall = 1), '\\.', ","),
 					"-", 
 					stringr::str_replace_all(format(round(max(myAnnotations$endSec), digits=1),nsmall = 1), '\\.', ","), 
-					" sec)",
-						  
-		#			   " (", round(min(myAnnotations$startSec), digits=1), "-", round(max(myAnnotations$endSec), digits=1), " sec)", 
-				    sep="")
+					" sec))", sep="")
 		
 		header <- paste(header, timesSTR, sep="")
 		output <- c(header, output)

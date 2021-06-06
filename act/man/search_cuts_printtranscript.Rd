@@ -42,7 +42,7 @@ cat(test@cuts.printtranscripts)
 
 # Display all print transcripts from results data frame
 cat(test@results[,mysearch@cuts.column.printtranscript])
-cat(stringr::str_c(test@results[,mysearch@cuts.column.printtranscript], sep="\n", collapse = "\n"))
+cat(test@results[,mysearch@cuts.column.printtranscript])
 
 # Only single print transcript from results data frame
 cat(test@results[1,mysearch@cuts.column.printtranscript])
@@ -54,5 +54,5 @@ test <- act::search_cuts_printtranscript (x=examplecorpus,
 s=mysearch)
 
 # Display all transcript snippets on screen
-cat(stringr::str_c(test@results[,mysearch@cuts.column.printtranscript], sep="\n", collapse = "\n"))
+cat(test@results[,mysearch@cuts.column.printtranscript])
 }

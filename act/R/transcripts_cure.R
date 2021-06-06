@@ -1,4 +1,4 @@
-#' Cure a corpus
+#' Cure all transcript objects in a corpus
 #' 
 #' Transcript object may contain errors, e.g. because of defect annotation input files or user modifications.
 #' This function may cure some of these errors in all transcript objects of a corpus.
