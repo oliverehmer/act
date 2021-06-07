@@ -5,23 +5,23 @@
 \title{Merge several transcripts}
 \usage{
 transcripts_merge(
-  trans_destination,
-  trans_updates,
-  identifier_tier = "update",
-  identifier_intervall = ".+",
-  erase_update_sections_completely = TRUE
+  transDestination,
+  transUpdates,
+  identifierTier = "update",
+  identifierPattern = ".+",
+  eraseUpdateSectionsCompletely = TRUE
 )
 }
 \arguments{
-\item{trans_destination}{Transcript object; transcript that serves as destination (and will receive the updates).}
+\item{transDestination}{Transcript object; transcript that serves as destination (and will receive the updates).}
 
-\item{trans_updates}{List of transcript objects; transcript objects that will be inserted into the destination transcripts (entirely or in part).}
+\item{transUpdates}{List of transcript objects; transcript objects that will be inserted into the destination transcripts (entirely or in part).}
 
-\item{identifier_tier}{Character string;  regular expression that identifies tier (in all trans_updates) in which the sections that will be inserted into trans_destination are marked.}
+\item{identifierTier}{Character string;  regular expression that identifies tier (in all transUpdates) in which the sections that will be inserted into transDestination are marked.}
 
-\item{identifier_intervall}{Character string; regular expression that identifies  (in trans_updates) the sections that will be inserted into trans_destination.}
+\item{identifierPattern}{Character string; regular expression that identifies  (in transUpdates) the sections that will be inserted into transDestination.}
 
-\item{erase_update_sections_completely}{Logical; if \code{TRUE} update sections in destination transcript will be erased completely, if \code{FALSE} update sections in the destination tier will not be erased completely but only the tiers that are present in the trans_updates be erased.}
+\item{eraseUpdateSectionsCompletely}{Logical; if \code{TRUE} update sections in destination transcript will be erased completely, if \code{FALSE} update sections in the destination tier will not be erased completely but only the tiers that are present in the transUpdates be erased.}
 }
 \value{
 Transcript object
@@ -41,13 +41,13 @@ library(act)
 
 # We have three transcripts that to demonstrate the function \code{transcripts_merge}:
 # - the destination transcript
-trans_destination <- 	examplecorpus@transcripts[["update_destination"]]
+transDestination <- 	examplecorpus@transcripts[["update_destination"]]
 # - two transcripts that contain updates
-trans_updates <- 		c(examplecorpus@transcripts[["update_update1" ]],
+transUpdates <- 		c(examplecorpus@transcripts[["update_update1" ]],
                            examplecorpus@transcripts[["update_update2" ]])
 
 # Run the function
-test <- transcripts_merge(trans_destination, trans_updates)
+test <- transcripts_merge(transDestination, transUpdates)
 
 # Save the transcript to a TextGrid file.
 # Set the destination file path

@@ -2,13 +2,13 @@ library(act)
 
 # We have three transcripts that to demonstrate the function \code{transcripts_merge}:
 # - the destination transcript
-trans_destination <- 	examplecorpus@transcripts[["update_destination"]]
+transDestination <- 	examplecorpus@transcripts[["update_destination"]]
 # - two transcripts that contain updates
-trans_updates <- 		c(examplecorpus@transcripts[["update_update1" ]],
+transUpdates <- 		c(examplecorpus@transcripts[["update_update1" ]],
                            examplecorpus@transcripts[["update_update2" ]])
 
 # Run the function
-test <- transcripts_merge(trans_destination, trans_updates)
+test <- transcripts_merge(transDestination, transUpdates)
 
 # Save the transcript to a TextGrid file.
 # Set the destination file path
