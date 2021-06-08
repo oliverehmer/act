@@ -30,7 +30,7 @@ Corpus object.
 Reorder the positions of tiers in all transcripts of a corpus object. 
 The ordering of the tiers will be done according to a vector of regular expressions defined in 'sortVector'.
 If only certain transcripts or tiers should be affected set the parameter \code{filterTranscriptNames}.
-In case that you want to select transcripts by using regular expressions use the function \code{act::search_meta} first.
+In case that you want to select transcripts by using regular expressions use the function \code{act::search_makefilter} first.
 }
 \examples{
 library(act)

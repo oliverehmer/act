@@ -9,7 +9,7 @@
 #' and [matrix_save()] for saving the matrix to a CSV file.
 #'
 #' If only certain transcripts or tiers should be affected set the parameter \code{filterTranscriptNames}.
-#' In case that you want to select transcripts  by using regular expressions use the function \code{act::search_meta} first.
+#' In case that you want to select transcripts  by using regular expressions use the function \code{act::search_makefilter} first.
 #'
 #'
 #' @param x Corpus object.

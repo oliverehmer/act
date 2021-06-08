@@ -14,7 +14,7 @@ examplecorpus@transcripts[[1]]@annotations$content[hits]
 examplecorpus@transcripts[[1]]@annotations$content[-hits]
 
 # Run the function and delete the annotations that match the regular expression
-test <- act::annotations_delete (x=examplecorpus, filterContent=myRegEx)
+test <- act::annotations_delete (x=examplecorpus, pattern=myRegEx)
 
 # Compare how many data rows are in the first transcript in 
 # the example corpus and in the newly created test corpus:

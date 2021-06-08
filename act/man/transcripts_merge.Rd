@@ -17,9 +17,9 @@ transcripts_merge(
 
 \item{transUpdates}{List of transcript objects; transcript objects that will be inserted into the destination transcripts (entirely or in part).}
 
-\item{identifierTier}{Character string;  regular expression that identifies tier (in all transUpdates) in which the sections that will be inserted into transDestination are marked.}
+\item{identifierTier}{Character string;  regular expression that identifies the tier in which the sections are marked, that will be inserted into transDestination.}
 
-\item{identifierPattern}{Character string; regular expression that identifies  (in transUpdates) the sections that will be inserted into transDestination.}
+\item{identifierPattern}{Character string; regular expression that identifies the sections that will be inserted into transDestination.}
 
 \item{eraseUpdateSectionsCompletely}{Logical; if \code{TRUE} update sections in destination transcript will be erased completely, if \code{FALSE} update sections in the destination tier will not be erased completely but only the tiers that are present in the transUpdates be erased.}
 }
@@ -29,7 +29,7 @@ Transcript object
 \description{
 Merges several transcripts. One transcript is the destination transcript (the transcript that will be updated). 
 The other transcripts are the update transcripts and contain the updates. 
-The update transcripts need to contain a tier in which the update sections are marked.
+The update transcripts need to contain a tier in which the update sections are marked with a specific character string.
 }
 \details{
 You may chose between the following two options:

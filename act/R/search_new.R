@@ -26,7 +26,7 @@
 #' 
 #' @return Search object.
 #' 
-#' @seealso \link{search_run}, \link{search_meta}, \link{search_sub}
+#' @seealso \link{search_run}, \link{search_makefilter}, \link{search_sub}
 #' 
 #' @export
 #'
@@ -76,8 +76,8 @@ search_new <- function(x,
 	s@resultidprefix            <- resultidprefix
 	
 	s@filter.transcript.names   <- if(!is.null(filterTranscriptNames))     {filterTranscriptNames}     else {s@filter.transcript.names}
-	s@filter.transcript.include <- if(!is.null(filterTranscriptInclude))   {filterTranscriptInclude}   else {s@filter.transcript.include}
-	s@filter.transcript.exclude <- if(!is.null(filterTranscriptExclude))   {filterTranscriptExclude}   else {s@filter.transcript.exclude}
+	s@filter.transcript.includeRegEx  <- if(!is.null(filterTranscriptInclude))   {filterTranscriptInclude}   else {s@filter.transcript.includeRegEx }
+	s@filter.transcript.excludeRegEx  <- if(!is.null(filterTranscriptExclude))   {filterTranscriptExclude}   else {s@filter.transcript.excludeRegEx }
 	
 	s@filter.tier.names         <- if(!is.null(filterTierNames))           {filterTierNames}           else {s@filter.tier.names}
 	s@filter.tier.include       <- if(!is.null(filterTierInclude))         {filterTierInclude}         else {s@filter.tier.include}

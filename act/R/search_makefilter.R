@@ -1,8 +1,8 @@
-#' Find names of transcripts and tiers 
+#' Makes a filter for transcript and tier names 
 #'
 #' Search a corpus object and return the names of all transcripts and tiers that match the given parameters.
 #' You can define parameters to include and/or exclude transcripts and tiers based on their names.
-#' All parameters that you pass to the function will be combined.
+#' All parameters passed to the function will be combined.
 #' 
 #' This functions is useful if you want to use functions of the package such as \code{transcripts_update_normalization}, \code{transcripts_update_fulltexts}, \code{corpus_export} and limit them to only some of the transcripts.
 #' 
@@ -20,30 +20,46 @@
 #' 
 #' @export
 #'
-#' @example inst/examples/search_meta.R
+#' @example inst/examples/search_makefilter.R
 #' 
-search_meta <- function( x,
-						 filterTranscriptNames=NULL,
-						 filterTranscriptIncludeRegEx=NULL, 
-						 filterTranscriptExcludeRegEx=NULL,
-						 filterTierNames=NULL,
-						 filterTierIncludeRegEx=NULL,
-						 filterTierExcludeRegEx=NULL) {
+search_makefilter <- function( x,
+						 filterTranscriptNames        =NULL,
+						 filterTranscriptIncludeRegEx =NULL, 
+						 filterTranscriptExcludeRegEx =NULL,
+						 filterTierNames              =NULL,
+						 filterTierIncludeRegEx       =NULL,
+						 filterTierExcludeRegEx       =NULL) {
 	
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
 
-	#=== get the transcript names
-	#if none are given, take all names
-	if (is.null(filterTranscriptNames)) {		
-		filterTranscriptNames <- NULL
-	} else if (length(filterTranscriptNames)==0) {
-		filterTranscriptNames <- NULL
-	} else if (length(filterTranscriptNames)==1) {
-		if (filterTranscriptNames[1]=="") { filterTranscriptNames <- NULL }
-	}
-	if (is.null(filterTranscriptNames)) {	filterTranscriptNames <- names(x@transcripts)	}
+	# x<-corpus
+	# filterTranscriptNames<-NULL
+	# filterTranscriptIncludeRegEx<-NULL
+	# filterTranscriptExcludeRegEx<-NULL
+	# filterTierNames<-NULL
+	# filterTierIncludeRegEx<-NULL
+	# filterTierExcludeRegEx<-NULL
+	# 
+	# 
+	# filterTranscriptIncludeRegEx <- "ARG"
+	# filterTierIncludeRegEx       <- "A"
+	# 
+	# filterTranscriptIncludeRegEx <- "(i)A"
 	
+	
+	#=== TRANSCRIPT
+	#do some checks
+	if (!is.null(filterTranscriptNames)) {		
+		if (length(filterTranscriptNames)==0) {
+			filterTranscriptNames <- NULL
+		} else if (length(filterTranscriptNames)==1) {
+			if (filterTranscriptNames[1]=="") { filterTranscriptNames <- NULL }
+		}
+	}
+	
+	#if no filter is given, take all names
+	if (is.null(filterTranscriptNames)) {	filterTranscriptNames <- names(x@transcripts)	}
 	
 	#filter the names by regular expressions
 	if (!is.null(filterTranscriptIncludeRegEx)) {
@@ -57,23 +73,34 @@ search_meta <- function( x,
 		}
 	}
 	
-	#if filterTierNames are not specified, get all tiers (in selected transcripts)
-	if (is.null(filterTranscriptNames)) {		
-		filterTierNames <- NULL
-	} else if (length(filterTierNames)==0) {
-		filterTierNames <- NULL
-	} else if (length(filterTierNames)==1) {
-		if (filterTierNames[1]=="") {
+	#=== TIER
+	#do some checks
+	if (!is.null(filterTierNames)) {		
+		if (length(filterTierNames)==0) {
 			filterTierNames <- NULL
+		} else if (length(filterTierNames)==1) {
+			if (filterTierNames[1]=="") {
+				filterTierNames <- NULL
+			}
 		}
 	}
 	
-	if (is.null(filterTierNames)) {
-		tiers           <- lapply(x@transcripts, "slot", name = "tiers")
-		temp            <- do.call("rbind", tiers)
-		filterTierNames <- unique(temp$name)
+	#get all tier names from selected transcripts
+	tiers.all        <- lapply(x@transcripts[filterTranscriptNames], "slot", name = "tiers")
+	tiers.all        <- do.call("rbind", tiers.all)
+	tiernames.all    <- unique(tiers.all$name)
+	if (is.null(tiernames.all)) {
+		tiernames.all <- as.character()
 	}
 	
+	if (is.null(filterTierNames)) {
+		filterTierNames <- tiernames.all
+	} else {
+		# if tiernames have been passed to the function
+		# intersect the names : only names that are in both vectors
+		filterTierNames <- intersect(tiernames.all, filterTierNames)
+	}
+
 	#filter the filterTierNames by regular expressions
 	if (!is.null(filterTierIncludeRegEx)) {
 		if (filterTierIncludeRegEx!="") {
@@ -86,9 +113,10 @@ search_meta <- function( x,
 		}
 	}
 	
+	#=== TRANSCRIPT
 	#now filter the transcripts again 
 	#check for each transcript if it contains one of the included tiers
-	filterTranscriptNames.new <- c()
+	filterTranscriptNames.new <- as.character()
 	for (transcriptName in filterTranscriptNames) {
 		myTrans <- x@transcripts[[transcriptName]]
 		if (!is.null(myTrans)) {

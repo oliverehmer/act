@@ -7,7 +7,7 @@
 #'  
 #' @return Search object.
 #' 
-#' @seealso \link{search_new}, \link{search_meta}, \link{search_sub} 
+#' @seealso \link{search_new}, \link{search_makefilter}, \link{search_sub} 
 #' 
 #' @export
 #'
@@ -26,10 +26,10 @@ search_run <- function(x, s) {
 	#get transcripts and tiers to include
 	#x <- examplecorpus
 	#s <- mysearch
-	mymeta <- act::search_meta(     x,
+	mymeta <- act::search_makefilter(     x,
 									filterTranscriptNames        =s@filter.transcript.names, 
-									filterTranscriptIncludeRegEx =s@filter.transcript.include, 
-									filterTranscriptExcludeRegEx =s@filter.transcript.exclude,
+									filterTranscriptIncludeRegEx =s@filter.transcript.includeRegEx , 
+									filterTranscriptExcludeRegEx =s@filter.transcript.excludeRegEx ,
 									filterTierNames              =s@filter.tier.names,	
 									filterTierIncludeRegEx       =s@filter.tier.include,
 									filterTierExcludeRegEx       =s@filter.tier.exclude) 

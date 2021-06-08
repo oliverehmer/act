@@ -3,7 +3,7 @@
 #' Reorder the positions of tiers in all transcripts of a corpus object. 
 #' The ordering of the tiers will be done according to a vector of regular expressions defined in 'sortVector'.
 #' If only certain transcripts or tiers should be affected set the parameter \code{filterTranscriptNames}.
-#' In case that you want to select transcripts by using regular expressions use the function \code{act::search_meta} first.
+#' In case that you want to select transcripts by using regular expressions use the function \code{act::search_makefilter} first.
 
 #' @param x Corpus object.
 #' @param sortVector Vector of character strings; regular expressions to match the tier names. The order within the vector presents the new order of the tiers. Use "\\*" (=two backslashes and a star) to indicate where tiers that are not present in the sort vector but in the transcript should be inserted.

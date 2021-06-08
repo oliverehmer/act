@@ -103,5 +103,5 @@ mysearch@results$hit
 
 }
 \seealso{
-\link{search_run}, \link{search_meta}, \link{search_sub}
+\link{search_run}, \link{search_makefilter}, \link{search_sub}
 }

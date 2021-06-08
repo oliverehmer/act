@@ -44,5 +44,5 @@ cbind(mysearch@results$transcript.name, mysearch@results$tier.name, mysearch@res
 
 }
 \seealso{
-\link{search_new}, \link{search_meta}, \link{search_sub}
+\link{search_new}, \link{search_makefilter}, \link{search_sub}
 }

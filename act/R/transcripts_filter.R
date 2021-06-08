@@ -2,7 +2,7 @@
 #' 
 #' Filter all transcript objects in a corpus and return the filtered corpus object.
 #' It is possible to filter out temporal sections and tiers.
-#' In case that you want to select tiers by using regular expressions use the function \code{act::search_meta} first.
+#' In case that you want to select tiers by using regular expressions use the function \code{act::search_makefilter} first.
 #' 
 #' @param x Corpus object;
 #' @param filterTranscriptNames Vector of character strings; names of transcripts to remain in the transcripts. If left unspecified, all transcripts will  remain in the transcripts.

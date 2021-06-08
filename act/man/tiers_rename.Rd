@@ -21,7 +21,7 @@ Corpus object.
 \description{
 Renames all tiers in all transcript objects of a corpus.
 If only certain transcripts should be affected set the parameter \code{filterTranscriptNames}. 
-In case that you want to select transcripts by using regular expressions use the function \code{act::search_meta} first.
+In case that you want to select transcripts by using regular expressions use the function \code{act::search_makefilter} first.
 }
 \details{
 The tiers will only be renamed if the resulting names preserve the uniqueness of the tier names.

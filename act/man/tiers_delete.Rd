@@ -19,7 +19,7 @@ Corpus object.
 \description{
 Deletes tiers in all transcript objects of a corpus.
 If only tiers in certain transcripts should be affected set the parameter \code{filterTranscriptNames}. 
-In case that you want to select tiers and/or transcripts by using regular expressions use the function \code{act::search_meta} first.
+In case that you want to select tiers and/or transcripts by using regular expressions use the function \code{act::search_makefilter} first.
 Results  will be reported in \code{@history} of the transcript objects.
 }
 \examples{

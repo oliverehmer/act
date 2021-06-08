@@ -147,8 +147,8 @@ search_results_import <- function(path,
 	#s@filter.section.endsec                    <- if(!is.na(endSec))   {if(!is.null(endSec))   {endSec}}   else {s@filter.section.endsec}
 	#s@filter.tier.include      <- ""
 	#s@filter.tier.exclude      <- ""
-	#s@filter.transcript.include <- if(!is.na(filterTranscriptInclude))   {if(!is.null(filterTranscriptInclude))   {filterTranscriptInclude}}   else {s@filter.transcript.include}
-	#s@filter.transcript.exclude <- if(!is.na(filterTranscriptExclude))   {if(!is.null(filterTranscriptExclude))   {filterTranscriptExclude}}   else {s@filter.transcript.exclude}
+	#s@filter.transcript.includeRegEx  <- if(!is.na(filterTranscriptInclude))   {if(!is.null(filterTranscriptInclude))   {filterTranscriptInclude}}   else {s@filter.transcript.includeRegEx }
+	#s@filter.transcript.excludeRegEx  <- if(!is.na(filterTranscriptExclude))   {if(!is.null(filterTranscriptExclude))   {filterTranscriptExclude}}   else {s@filter.transcript.excludeRegEx }
 	s@results <- temp
 	
 	return(s)

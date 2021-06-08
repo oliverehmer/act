@@ -2,7 +2,7 @@
 #'
 #' Delete empty annotations in a corpus object.
 #' If only certain transcripts or tiers should be affected set the parameter \code{filterTranscriptNames} and \code{filterTierNames}.
-#' In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_meta} first.
+#' In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_makefilter} first.
 #' 
 #' @param x Corpus object.
 #' @param trimBeforeCheck Logical; if \code{TRUE} leading and trailing spaces will be deleted before checking (as a consequence record sets that contain only spaces will be deleted, too).

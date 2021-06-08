@@ -35,7 +35,7 @@ corpus_export(
 \description{
 Exports all (or some) transcript objects in a corpus object to different annotation file formats.
 If only some transcripts or tiers should be affected set the parameter \code{filterTranscriptNames} and \code{filterTierNames}.
-In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_meta} first.
+In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_makefilter} first.
 }
 \examples{
 library(act)

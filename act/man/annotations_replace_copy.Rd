@@ -7,8 +7,9 @@
 annotations_replace_copy(
   x,
   pattern,
-  replacement = NA,
-  destTier = "",
+  replacement = NULL,
+  destTier = NULL,
+  addDestTierIfMissing = TRUE,
   filterTranscriptNames = NULL,
   filterTierNames = NULL,
   collapseString = " | "
@@ -21,7 +22,9 @@ annotations_replace_copy(
 
 \item{replacement}{Character string; replacement.}
 
-\item{destTier}{Character string; name of the tier to which the hit should be copied (if no copying is intended set to "").}
+\item{destTier}{Character string; name of the tier to which the hit should be copied (if no copying is intended set to NA).}
+
+\item{addDestTierIfMissing}{Logical; if \code{TRUE} the destination tier will be added if missing in the transcript object, if \code{FALSE} an error will be raised if the destination tier is missing.}
 
 \item{filterTranscriptNames}{Vector of character strings; names of the transcripts to be included.}
 
@@ -35,11 +38,12 @@ Corpus object.
 \description{
 The function searches within the contents of annotations and replaces the search hits. 
 In addition the search hit may be copied to another tier. 
-In case that there is no overlapping annotation in the destination tier a new annotation will be created (based on the time values of the original annotation). In case that there is an overlapping annotation in the destination tier, the search result will be added at the end.
+In case that there is NO overlapping annotation in the destination tier a new annotation will be created (based on the time values of the original annotation). 
+In case that there is an overlapping annotation in the destination tier, the search result will be added at the end.
 }
 \details{
 If only certain transcripts or tiers should be affected set the parameter \code{filterTranscriptNames} and \code{filterTierNames}.
-In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_meta} first.
+In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_makefilter} first.
 }
 \examples{
 library(act)

@@ -26,7 +26,7 @@ Corpus object.
 \description{
 Delete empty annotations in a corpus object.
 If only certain transcripts or tiers should be affected set the parameter \code{filterTranscriptNames} and \code{filterTierNames}.
-In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_meta} first.
+In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_makefilter} first.
 }
 \examples{
 library(act)

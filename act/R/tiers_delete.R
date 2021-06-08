@@ -2,7 +2,7 @@
 #' 
 #' Deletes tiers in all transcript objects of a corpus.
 #' If only tiers in certain transcripts should be affected set the parameter \code{filterTranscriptNames}. 
-#' In case that you want to select tiers and/or transcripts by using regular expressions use the function \code{act::search_meta} first.
+#' In case that you want to select tiers and/or transcripts by using regular expressions use the function \code{act::search_makefilter} first.
 #' Results  will be reported in \code{@history} of the transcript objects.
 #'
 #' @param x Corpus object.
@@ -27,6 +27,10 @@ tiers_delete <- function(x,
 	tiers_deleted_names_all <- c()
 	transcripts_modified_names <- c()
 	annotations_deleted_count_all <- 0
+	
+	 # x <- corpus2
+	 # tierNames<- "XXX"
+	 # filterTranscriptNames=NULL
 
 	#=== get the transcript names
 	#if none are given, take all names
@@ -73,12 +77,21 @@ tiers_delete <- function(x,
 			)
 		}
 	}
-		
-			
+
+	if (is.null(tiers_deleted_names_all)) {
+		tiers_deleted_names_all <- as.character()
+	}
+	if (is.null(annotations_deleted_count_all)) {
+		annotations_deleted_count_all <- as.character()
+	}
+	if (is.null(transcripts_modified_names)) {
+		transcripts_modified_names <- as.character()
+	}		
+	
 	x@history[[length(x@history)+1]] <- list(  
 		modification                 ="tiers_delete",
 		systime                      = Sys.time(),
-		tiers.deleted.count          = length(tiers_deleted_names),
+		tiers.deleted.count          = length(tiers_deleted_names_all),
 		tiers.deleted.names          = tiers_deleted_names_all,
 		annotations.deleted          = annotations_deleted_count_all,
 		transcripts.modified.count   = length(transcripts_modified_names),

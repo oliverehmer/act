@@ -6,7 +6,7 @@
 #' In case that there is an overlapping annotation in the destination tier, the search result will be added at the end. 
 #'
 #' If only certain transcripts or tiers should be affected set the parameter \code{filterTranscriptNames} and \code{filterTierNames}.
-#' In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_meta} first.
+#' In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_makefilter} first.
 #' 
 #' @param x Corpus object.
 #' @param pattern Character string; search pattern as regular expression.

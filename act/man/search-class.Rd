@@ -29,9 +29,9 @@ on the object.
 
 \item{\code{filter.transcript.names}}{Vector of character strings; names of transcripts to include in the search. If the value is \code{character()} or \code{""} filter will be ignored.}
 
-\item{\code{filter.transcript.include}}{Character string; Regular expression that defines which transcripts should be INcluded in the search (matching the name of the transcript).}
+\item{\code{filter.transcript.includeRegEx}}{Character string; Regular expression that defines which transcripts should be INcluded in the search (matching the name of the transcript).}
 
-\item{\code{filter.transcript.exclude}}{Character string; Regular expression that defines which transcripts should be EXcluded in the search (matching the name of the transcript).}
+\item{\code{filter.transcript.excludeRegEx}}{Character string; Regular expression that defines which transcripts should be EXcluded in the search (matching the name of the transcript).}
 
 \item{\code{filter.tier.names}}{Vector of character strings; names of tiers to include in the search. If the value is \code{character()} or \code{""} filter will be ignored.}
 

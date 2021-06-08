@@ -68,5 +68,5 @@ test <- act::search_sub(x=examplecorpus,
 test@results$subsearch
 }
 \seealso{
-\link{search_new}, \link{search_run}, \link{search_meta}
+\link{search_new}, \link{search_run}, \link{search_makefilter}
 }

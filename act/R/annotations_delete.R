@@ -2,10 +2,10 @@
 #' 
 #' Delete annotations in a corpus object.
 #' If only certain transcripts or tiers should be affected set the parameter \code{filterTranscriptNames} and \code{filterTierNames}.
-#' In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_meta} first.
+#' In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_makefilter} first.
 #'
 #' @param x Corpus object.
-#' @param filterContent Character string; regular expression; all annotations that match this expression will be deleted.
+#' @param pattern Character string; regular expression; all annotations that match this expression will be deleted.
 #' @param filterTranscriptNames Vector of character strings; names of the transcripts to be included. 
 #' @param filterTierNames Character string; names of the tiers to be included.
 #'
@@ -15,7 +15,7 @@
 #' @example inst/examples/annotations_delete.R
 
 annotations_delete <- function (x, 
-								filterContent="", 
+								pattern="", 
 								filterTranscriptNames=NULL, 
 								filterTierNames=NULL) {
 	
@@ -50,10 +50,10 @@ annotations_delete <- function (x,
 				}
 				
 				if (processThisRecordset) {
-					if(filterContent=="") {
+					if(pattern=="") {
 						annotations_deleted_ids <- c(annotations_deleted_ids,j)
 					} else {
-						if (stringr::str_detect(string=x@transcripts[[i]]@annotations$content[[j]], pattern=filterContent)) {
+						if (stringr::str_detect(string=x@transcripts[[i]]@annotations$content[[j]], pattern=pattern)) {
 							annotations_deleted_ids <- c(annotations_deleted_ids,j)
 						}
 					}
@@ -69,7 +69,7 @@ annotations_delete <- function (x,
 			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
 				modification             = "annotations_delete",
 				systime                   = Sys.time(),
-				filterContent             = filterContent,
+				pattern             = pattern,
 				annotations.deleted.count = length(annotations_deleted_ids)
 			)
 			
@@ -84,7 +84,7 @@ annotations_delete <- function (x,
 	x@history[[length(x@history)+1]] <-  list(
 		modification                    ="annotations_delete",
 		systime                         = Sys.time(),
-		filterContent                   =filterContent,
+		pattern                   =pattern,
 		transcripts.modified.count      =transcripts_modified_nr,
 		transcripts.modified.ids        =transcripts_modified_ids,
 		annotations.deleted.total.count =annotations_deleted_total_nr

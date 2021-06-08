@@ -30,7 +30,7 @@ Corpus object.
 Converts tier types between 'interval' and 'point' tier.  
 Applies to all tiers in all transcript objects of a corpus.
 If only certain transcripts or tiers should be affected set the parameter \code{filterTranscriptNames}. 
-In case that you want to select transcripts by using regular expressions use the function \code{act::search_meta} first.
+In case that you want to select transcripts by using regular expressions use the function \code{act::search_makefilter} first.
 }
 \details{
 Note: When converting from interval > point tier, the original end times of the annotations will be lost definitely.

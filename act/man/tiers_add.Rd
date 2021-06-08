@@ -41,7 +41,7 @@ Corpus object.
 \description{
 Adds a tiers in all transcript objects of a corpus.
 If tiers should be added only in certain transcripts, set the parameter \code{filterTranscriptNames}. 
-In case that you want to select transcripts by using regular expressions use the function \code{act::search_meta} first.
+In case that you want to select transcripts by using regular expressions use the function \code{act::search_makefilter} first.
 }
 \details{
 You can either insert the new tier at a specific position (e.g. 'absolutePosition=1') or in relation to a existing tier (e.g. destinationTier='speaker1').

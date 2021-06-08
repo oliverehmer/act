@@ -6,7 +6,7 @@
 \usage{
 annotations_delete(
   x,
-  filterContent = "",
+  pattern = "",
   filterTranscriptNames = NULL,
   filterTierNames = NULL
 )
@@ -14,7 +14,7 @@ annotations_delete(
 \arguments{
 \item{x}{Corpus object.}
 
-\item{filterContent}{Character string; regular expression; all annotations that match this expression will be deleted.}
+\item{pattern}{Character string; regular expression; all annotations that match this expression will be deleted.}
 
 \item{filterTranscriptNames}{Vector of character strings; names of the transcripts to be included.}
 
@@ -26,7 +26,7 @@ Corpus object.
 \description{
 Delete annotations in a corpus object.
 If only certain transcripts or tiers should be affected set the parameter \code{filterTranscriptNames} and \code{filterTierNames}.
-In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_meta} first.
+In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_makefilter} first.
 }
 \examples{
 library(act)
@@ -45,7 +45,7 @@ examplecorpus@transcripts[[1]]@annotations$content[hits]
 examplecorpus@transcripts[[1]]@annotations$content[-hits]
 
 # Run the function and delete the annotations that match the regular expression
-test <- act::annotations_delete (x=examplecorpus, filterContent=myRegEx)
+test <- act::annotations_delete (x=examplecorpus, pattern=myRegEx)
 
 # Compare how many data rows are in the first transcript in 
 # the example corpus and in the newly created test corpus:

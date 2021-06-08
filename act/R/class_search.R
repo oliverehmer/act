@@ -15,8 +15,8 @@
 #' @slot search.normalized logical. if \code{TRUE} the normalized annotations will be used for searching.
 #' @slot resultidprefix Character string; search results will be numbered consecutively; This character string will be placed before the consecutive numbers.
 #' @slot filter.transcript.names Vector of character strings; names of transcripts to include in the search. If the value is \code{character()} or \code{""} filter will be ignored.
-#' @slot filter.transcript.include Character string; Regular expression that defines which transcripts should be INcluded in the search (matching the name of the transcript).
-#' @slot filter.transcript.exclude Character string; Regular expression that defines which transcripts should be EXcluded in the search (matching the name of the transcript).
+#' @slot filter.transcript.includeRegEx  Character string; Regular expression that defines which transcripts should be INcluded in the search (matching the name of the transcript).
+#' @slot filter.transcript.excludeRegEx  Character string; Regular expression that defines which transcripts should be EXcluded in the search (matching the name of the transcript).
 #' @slot filter.tier.names Vector of character strings; names of tiers to include in the search. If the value is \code{character()} or \code{""} filter will be ignored.
 #' @slot filter.tier.include Character string; Regular expression that defines which tiers should be INcluded in the search (matching the name of the tier).
 #' @slot filter.tier.exclude Character string; Regular expression that defines which tiers should be EXcluded in the search (matching the name of the tier).
@@ -50,8 +50,8 @@ methods::setClass("search",
 				  	resultidprefix="character",
 				  	
 				  	filter.transcript.names="character",
-				  	filter.transcript.include="character",
-				  	filter.transcript.exclude="character",
+				  	filter.transcript.includeRegEx ="character",
+				  	filter.transcript.excludeRegEx ="character",
 				  	filter.tier.names="character",
 				  	filter.tier.include="character",
 				  	filter.tier.exclude="character",
@@ -83,8 +83,8 @@ methods::setClass("search",
 				  	resultidprefix="resultID",
 				  	
 				  	filter.transcript.names=character(),
-				  	filter.transcript.include="",
-				  	filter.transcript.exclude="",
+				  	filter.transcript.includeRegEx ="",
+				  	filter.transcript.excludeRegEx ="",
 				  	filter.tier.names=character(),
 				  	filter.tier.include="",
 				  	filter.tier.exclude="",
@@ -120,8 +120,8 @@ search_show <- function (object) {
 	cat("\n")
 	
 	cat("  filter.transcript.names    : ", paste("'", object@filter.transcript.names,"'",sep="", collapse=", "), fill=TRUE)
-	cat("  filter.transcript.include  : ", paste("'", object@filter.transcript.include,"'",sep="", collapse=""), fill=TRUE)
-	cat("  filter.transcript.exclude  : ", paste("'", object@filter.transcript.exclude,"'",sep="", collapse=""), fill=TRUE)
+	cat("  filter.transcript.includeRegEx   : ", paste("'", object@filter.transcript.includeRegEx ,"'",sep="", collapse=""), fill=TRUE)
+	cat("  filter.transcript.excludeRegEx   : ", paste("'", object@filter.transcript.excludeRegEx ,"'",sep="", collapse=""), fill=TRUE)
 	cat("  filter.tier.names          : ", paste("'", object@filter.tier.names,"'",sep="", collapse=", "), fill=TRUE)
 	cat("  filter.tier.include        : ", paste("'", object@filter.tier.include,"'",sep="", collapse=""), fill=TRUE)
 	cat("  filter.tier.exclude        : ", paste("'", object@filter.tier.exclude,"'",sep="", collapse=""), fill=TRUE)

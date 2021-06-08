@@ -19,7 +19,7 @@
 #'
 #' @return Search object.
 #' 
-#' @seealso \link{search_new}, \link{search_run}, \link{search_meta}
+#' @seealso \link{search_new}, \link{search_run}, \link{search_makefilter}
 #' 
 #' @export
 #'

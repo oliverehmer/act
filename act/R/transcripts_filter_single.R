@@ -2,7 +2,7 @@
 #' 
 #' Filter a transcript object and return the filtered transcript object.
 #' It is possible to filter out temporal sections and tiers.
-#' In case that you want to select tiers by using regular expressions use the function \code{act::search_meta} first.
+#' In case that you want to select tiers by using regular expressions use the function \code{act::search_makefilter} first.
 #' 
 #' @param t Transcript object.
 #' @param filterTierNames Vector of character strings; names of tiers to be remain in the transcripts. If left unspecified, all tiers will remain in the transcript exported.

@@ -2,7 +2,7 @@
 #' 
 #' Exports all (or some) transcript objects in a corpus object to different annotation file formats.
 #' If only some transcripts or tiers should be affected set the parameter \code{filterTranscriptNames} and \code{filterTierNames}.
-#' In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_meta} first. 
+#' In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_makefilter} first. 
 #'
 #' @param x Corpus object.
 #' @param outputFolder Character string; path to a folder where the transcription files will be saved. By default the forlder will be created recursively it does not exist.
