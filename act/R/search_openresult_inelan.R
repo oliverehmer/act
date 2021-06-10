@@ -7,7 +7,7 @@
 #' 
 #' WARNING: This function will overwrite existing .psfx files. 
 #' 
-#' Credits: Thanks to Han Sloetjes for Feedback on the structure of the temporary .pfsx files. He actually made the code work. 
+#' Credits: Thanks to Han Sloetjes for feedback on the structure of the temporary .pfsx files. He actually made the code work. 
 #' 
 #' @param x Corpus object.
 #' @param s Search object. 
@@ -117,6 +117,14 @@ search_openresult_inelan  <- function(x,
 	fileConn <- file(file.path.pfsx, open="wb")
 	writeBin(charToRaw(pfsx.1), fileConn, endian="little")
 	close(fileConn)
+
+	#wait until pfsx exists
+	for (i in 1:10) {
+		if(file.exists(file.path.pfsx)) {
+		break	
+		}
+		Sys.sleep(0.02)
+	}
 
 	#--- open eaf file
 	#cmd <- sprintf("open -a ELAN_6.0.app %s", shQuote(file.path.eaf))

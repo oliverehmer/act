@@ -88,8 +88,8 @@ search_new <- function(x,
 	
 	s@concordance.make          <- concordanceMake
 	s@concordance.width         <- if(!is.null(concordanceWidth))   {concordanceWidth}   else {s@concordance.width}
-	s@cuts.span.beforesec       <- cutSpanBeforesec
-	s@cuts.span.aftersec        <- cutSpanAftersec	
+	s@cuts.span.beforesec       <- as.double(cutSpanBeforesec)
+	s@cuts.span.aftersec        <- as.double(cutSpanAftersec)	
 	
 	#s@cuts.cutlist.mac               <- 
 	#s@cuts.cutlist.win               <- 

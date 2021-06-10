@@ -52,9 +52,11 @@
 #' 
 #' @param x Corpus object; Please note: all media paths for a transcript need to be given as a list in the corpus object in \code{corpus@transcripts[[ ]]@media.path} . You can use the respective media functions. . 
 #' @param s Search object.
+#' @param cutSpanBeforesec Double; Start the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
+#' @param cutSpanAftersec Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param outputFolder Character string; path to folder where files will be written.
 #' @param filterMediaInclude Character string; regular expression to match only some of the media files in \code{corpus@transcripts[[ ]]@media.path}.
-#' @param fastVideoPostioning Logical; If \code{TRUE} FFmpeg command using fast video positioning will be used \code{options()$act.ffmpeg.command.fastVideoPostioning}.
+#' @param fastVideoPostioning Logical; If \code{TRUE} the FFmpeg command will be using the parameter fast video positioning as specified in \code{options()$act.ffmpeg.command.fastVideoPostioning}.
 #' @param videoCodecCopy Logical; if \code{TRUE} FFMPEG will use the option *codec copy* for videos.
 #' @param audioCutsAsMP3 Logical; If \code{TRUE} audio cuts will be exported as '.mp3' files, using  \code{options()$act.ffmpeg.command.audioCutsAsMP3}.
 #' @param Panning Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.exportchannels.fromColumnName' .
@@ -66,6 +68,8 @@
 #' 
 search_cuts_media <- function(x, 
 							  s, 
+							  cutSpanBeforesec = NULL,
+							  cutSpanAftersec = NULL,
 							  outputFolder, 
 							  filterMediaInclude="", 
 							  fastVideoPostioning=TRUE, 
@@ -99,6 +103,12 @@ search_cuts_media <- function(x,
 		output_folder_cutlist <- "."
 	} else {
 		output_folder_cutlist <- normalizePath(outputFolder)
+	}
+	if (!is.null(cutSpanBeforesec)) 	{
+		s@cuts.span.beforesec       <- as.double(cutSpanBeforesec)
+	}
+	if (!is.null(cutSpanAftersec)) {
+		s@cuts.span.aftersec        <- as.double(cutSpanAftersec)	
 	}
 
 	#make total lists

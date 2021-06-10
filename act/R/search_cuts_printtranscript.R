@@ -10,6 +10,8 @@
 #'
 #' @param x Corpus object.
 #' @param s Search object.
+#' @param cutSpanBeforesec Double; Start the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
+#' @param cutSpanAftersec Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param l Layout object.
 #' @param outputFolder Character string; if parameter is not set, the print transcripts will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.txt' format.
 #'
@@ -19,7 +21,9 @@
 #' @example inst/examples/search_cuts_printtranscript.R
 #' 
 search_cuts_printtranscript <- function(x, 
-										s, 
+										s,
+										cutSpanBeforesec = NULL,
+										cutSpanAftersec = NULL,
 										l=NULL, 
 										outputFolder=NULL ) {
 	#x <- corpus
@@ -32,6 +36,12 @@ search_cuts_printtranscript <- function(x,
 	if (is.null(l)) 	{
 		l <- methods::new("layout")
 	}	
+	if (!is.null(cutSpanBeforesec)) 	{
+		s@cuts.span.beforesec       <- as.double(cutSpanBeforesec)
+	}
+	if (!is.null(cutSpanAftersec)) {
+		s@cuts.span.aftersec        <- as.double(cutSpanAftersec)	
+	}
 	
 	#--- check if output folder is given
 	destination_folder <- NULL

@@ -79,7 +79,6 @@ search_openresult_inpraat  <- function(x,
 	tx <- readLines(con= praatScriptPath, n=-1, warn=FALSE)
 	
 	#set values of variables
-	
 	tx  <- stringr::str_replace_all(string = tx, pattern = "PATHTEXTGRID",  replacement = path_textgrid)
 	tx  <- stringr::str_replace_all(string = tx, pattern = "PATHLONGSOUND", replacement = path_longsound)
 	tx  <- stringr::str_replace_all(string = tx, pattern = "SELSTARTSEC",   replacement = as.character(s@results[resultNr, ]$startSec))
@@ -91,10 +90,17 @@ search_openresult_inpraat  <- function(x,
 	tempScriptPath <- file.path(tempdir(), "temp.praat")
 	writeLines(tx, con=tempScriptPath)
 	
+	#wait until temporary script exists
+	for (i in 1:10) {
+		if(file.exists(tempScriptPath)) {
+			break	
+		}
+		Sys.sleep(0.02)
+	}
+
 	#send script
 	cmd <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", options()$act.path.sendpraat, tempScriptPath)
 	rslt=system(cmd, intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
-	
 	
 	# if execution of sendpraat resulted in an error, try to start praat
 	if (!is.null(attributes(rslt)) ) {
