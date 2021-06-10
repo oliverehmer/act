@@ -364,7 +364,7 @@ search_cuts_media <- function(x,
 			#make executable on a mac or a linux machine
 			if (file.exists(myFilepath)) {
 				if (Sys.info()["sysname"]=="Darwin") {
-					system(paste("chmod 755 ", myFilepath, sep=""))
+					system(paste("chmod 755 '", myFilepath, "'", sep=""))
 				}				
 			}
 		}
