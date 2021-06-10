@@ -7,6 +7,8 @@
 search_cuts_media(
   x,
   s,
+  cutSpanBeforesec = NULL,
+  cutSpanAftersec = NULL,
   outputFolder,
   filterMediaInclude = "",
   fastVideoPostioning = TRUE,
@@ -20,11 +22,15 @@ search_cuts_media(
 
 \item{s}{Search object.}
 
+\item{cutSpanBeforesec}{Double; Start the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.}
+
+\item{cutSpanAftersec}{Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.}
+
 \item{outputFolder}{Character string; path to folder where files will be written.}
 
 \item{filterMediaInclude}{Character string; regular expression to match only some of the media files in \code{corpus@transcripts[[ ]]@media.path}.}
 
-\item{fastVideoPostioning}{Logical; If \code{TRUE} FFmpeg command using fast video positioning will be used \code{options()$act.ffmpeg.command.fastVideoPostioning}.}
+\item{fastVideoPostioning}{Logical; If \code{TRUE} the FFmpeg command will be using the parameter fast video positioning as specified in \code{options()$act.ffmpeg.command.fastVideoPostioning}.}
 
 \item{videoCodecCopy}{Logical; if \code{TRUE} FFMPEG will use the option \emph{codec copy} for videos.}
 

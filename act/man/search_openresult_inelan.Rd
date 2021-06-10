@@ -29,7 +29,7 @@ Therefore you need to set the path to the ELAN executable in the option 'act.pat
 \details{
 WARNING: This function will overwrite existing .psfx files. 
 
-Credits: Thanks to Han Sloetjes for Feedback on the structure of the temporary .pfsx files. He actually made the code work.
+Credits: Thanks to Han Sloetjes for feedback on the structure of the temporary .pfsx files. He actually made the code work.
 }
 \examples{
 library(act)

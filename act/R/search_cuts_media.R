@@ -10,10 +10,7 @@
 #' * A cut list for for ALL search results will be stored in \code{s@cuts.cutlist.mac} to be used on MacOS and \code{s@cuts.cutlist.win} to be used on Windows.
 #' * Individual cut lists for EACH search result will be stored in additional columns in the data frame \code{s@results}.
 #' The cut lists that can be executed in the Terminal (Apple) or the Command Line Interface (Windows). 
-#' 
-#' \emph{Span} \cr
-#' If you want to extend the cut before or after each search result, you can modify \code{@cuts.span.beforesec} and \code{@cuts.span.aftersec} in your search object.
-#' 
+#'  
 #' \emph{Input media files}\cr
 #' The function will use all files in  \code{corpus@transcripts[[ ]]@media.path}.
 #' Therefore you will need to set the options \code{filterMediaInclude} filtering for which input media files you want to create the cuts.
@@ -70,7 +67,7 @@ search_cuts_media <- function(x,
 							  s, 
 							  cutSpanBeforesec = NULL,
 							  cutSpanAftersec = NULL,
-							  outputFolder, 
+							  outputFolder=NULL, 
 							  filterMediaInclude="", 
 							  fastVideoPostioning=TRUE, 
 							  videoCodecCopy=FALSE, 
@@ -99,7 +96,7 @@ search_cuts_media <- function(x,
 	helper_progress_set("Creating cutlist", max(1,nrow(s@results)))
 	
 	#--- if cut list should be saved - check it  output folder exists
-	if (missing(outputFolder)) {
+	if (is.null(outputFolder)) {
 		output_folder_cutlist <- "."
 	} else {
 		output_folder_cutlist <- normalizePath(outputFolder)

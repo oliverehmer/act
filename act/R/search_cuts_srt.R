@@ -9,6 +9,8 @@
 #'
 #' @param x Corpus object.
 #' @param s Search object.
+#' @param cutSpanBeforesec Double; Start the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
+#' @param cutSpanAftersec Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param outputFolder Character string; if parameter is not set, the srt subtitles will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.srt' format.
 #' @param speaker.show Logical; if \code{TRUE} name of speaker will be shown before the content of the annotation.
 #' @param speaker.width Integer; width of speaker abbreviation, -1 for full name without shortening.
@@ -23,6 +25,8 @@
 #' 
 search_cuts_srt <- function(x, 
 							s, 
+							cutSpanBeforesec = NULL,
+							cutSpanAftersec = NULL,
 							outputFolder=NULL, 
 							speaker.show=TRUE, 
 							speaker.width=3, 
@@ -32,6 +36,12 @@ search_cuts_srt <- function(x,
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		} else { if (class(s)[[1]]!="search")		{stop("Parameter 's' needs to be a search object.") 	} }
 	if (is.null(s@results$transcript.name)) 		{ stop("Data frame s@results does not contain column 'transcript.name'") 	}
 	
+	if (!is.null(cutSpanBeforesec)) 	{
+		s@cuts.span.beforesec       <- as.double(cutSpanBeforesec)
+	}
+	if (!is.null(cutSpanAftersec)) {
+		s@cuts.span.aftersec        <- as.double(cutSpanAftersec)	
+	}
 	
 	#--- check if output folder is given
 	destination_folder <- NULL
