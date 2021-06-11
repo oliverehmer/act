@@ -126,10 +126,16 @@ search_openresult_inelan  <- function(x,
 		Sys.sleep(0.02)
 	}
 
+	#--- open elan
+	cmd <- sprintf("open -a %s", shQuote(path.elan))
+	rslt <- system(cmd, wait=FALSE)
+
+	system('sleep 1 && ls', wait=FALSE)
+	
 	#--- open eaf file
-	#cmd <- sprintf("open -a ELAN_6.0.app %s", shQuote(file.path.eaf))
 	cmd <- sprintf("open -a %s %s", shQuote(path.elan), shQuote(file.path.eaf))
 	rslt <- system(cmd, wait=FALSE)
 
+	
 	
 }
