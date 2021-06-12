@@ -465,6 +465,7 @@ export_printtranscript <- function (t,
 	
 	if (collapse) {
 		output <- stringr::str_c(output, sep='\n', collapse = '\n')
+		output <-  stringr::str_c(c(output, '\n'), sep='', collapse = '')
 	}
 	
 	if (is.null(outputPath)) {
