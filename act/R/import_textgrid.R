@@ -58,7 +58,7 @@ import_textgrid <- function(filePath=NULL,
 	t@load.message 	           <- ""
 	t@modification.systime     <- character()
 	
-	if (!missing(filePath)) {
+	if (!is.null(filePath)) {
 		#--- check if file exists
 		if (!file.exists(filePath)) {
 			t@import.result    <- "error"

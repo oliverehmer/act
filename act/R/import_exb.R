@@ -63,7 +63,7 @@ import_exb <- function(filePath=NULL,
 	}
 	
 	#=== load file
-	if (!missing(filePath)) {
+	if (!is.null(filePath)) {
 		#--- check if file exists
 		if (!file.exists(filePath)) {
 			t@import.result 		<- "error"

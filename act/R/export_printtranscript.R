@@ -87,7 +87,12 @@ export_printtranscript <- function (t,
 	#--- filter 
 	t <- act::transcripts_filter_single(t, filterTierNames=filterTierNames, filterSectionStartsec = filterSectionStartsec, filterSectionEndsec = filterSectionEndsec)
 	#--- cure
-	t <- act::transcripts_cure_single(t, annotationsWithReversedTimes=TRUE, overlappingAnnotations=TRUE, annotationsWithTimesBelowZero=FALSE, missingTiers=FALSE, showWarning=TRUE)
+	t <- act::transcripts_cure_single(t, 
+									  annotationsWithReversedTimes=TRUE, 
+									  overlappingAnnotations=TRUE, 
+									  annotationsWithTimesBelowZero=FALSE, 
+									  missingTiers=FALSE, 
+									  showWarning=TRUE)
 
 	#--- get annotations from transcript
 	myAnnotations <- t@annotations

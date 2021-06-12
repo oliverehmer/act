@@ -71,10 +71,8 @@ corpus_new <- function(pathsAnnotationFiles,
 													  trim                 = namesTrim,
 													  defaultForEmptyNames = namesDefaultForEmptyNames)
 	#media paths
-	if (!missing(pathsMediaFiles)) {
-		if (!is.null(pathsMediaFiles)) {
-			x@paths.media.files <- gsub("/*$", "", pathsMediaFiles, perl=TRUE)
-		}
+	if (!is.null(pathsMediaFiles)) {
+		x@paths.media.files <- gsub("/*$", "", pathsMediaFiles, perl=TRUE)
 	}
 	#normalization matrix
 	act_replacementMatrix <- act::matrix_load(pathNormalizationMatrix, "UTF-8")

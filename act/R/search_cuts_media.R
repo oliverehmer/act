@@ -72,7 +72,7 @@ search_cuts_media <- function(x,
 							  fastVideoPostioning=TRUE, 
 							  videoCodecCopy=FALSE, 
 							  audioCutsAsMP3=FALSE, 
-							  Panning) {
+							  Panning=NULL) {
 	#x <- examplecorpus
 	#x <- corpus
 	#s <- mysearch
@@ -179,7 +179,7 @@ search_cuts_media <- function(x,
 					#====== PANNED
 					#if  CreatePannedVersions in the arguments if the functions is not set
 					CreatePannedVersions <- 0
-					if (!missing(Panning)) {
+					if (!is.null(Panning)) {
 						CreatePannedVersions <- Panning
 					} else { 
 						#check if channels are set in the search results
@@ -340,7 +340,7 @@ search_cuts_media <- function(x,
 	} else {
 		#--- save cutlists
 		# if output folder is given
-		if (!missing(outputFolder)) {
+		if (!is.null(outputFolder)) {
 			#-- make the destination folder, if it does not exist
 			output_folder_cutlist.sub <- file.path(output_folder_cutlist, s@name)
 			if (dir.exists(output_folder_cutlist.sub)==FALSE) 	{

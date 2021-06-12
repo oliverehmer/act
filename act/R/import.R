@@ -40,7 +40,7 @@ import <- function(..., transcriptName=NULL) {
 				return(NULL)
 			}	
 	
-		if (!missing(transcriptName)) {
+		if (!is.null(transcriptName)) {
 			test@name <- transcriptName
 		}
 	} else {
