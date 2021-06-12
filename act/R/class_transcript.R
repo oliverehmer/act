@@ -15,6 +15,7 @@
 	char.norm.bytier.end 	= as.integer(),
 	row.names 				= as.character(), 
 	stringsAsFactors        = FALSE)
+
 .emptyAnnotations$annotationID	<- as.integer(.emptyAnnotations$annotationID)
 .emptyAnnotations$startSec		<- as.double(.emptyAnnotations$startSec)
 .emptyAnnotations$endSec  		<- as.double(.emptyAnnotations$endSec)

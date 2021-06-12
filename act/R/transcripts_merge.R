@@ -1,186 +1,111 @@
 #' Merge several transcripts
 #' 
-#' Merges several transcripts. One transcript is the destination transcript (the transcript that will be updated). 
-#' The other transcripts are the update transcripts and contain the updates. 
+#' Merges several transcript objects in a corpus object.
+#' One transcript is the destination transcript (the transcript that will be updated and receives the new data). 
+#' The other transcripts are the update transcripts (they contain the data that will replace data in teh destination transcript). 
 #' The update transcripts need to contain a tier in which the update sections are marked with a specific character string.
 #' 
 #' You may chose between the following two options:
 #' - The update sections in the destination transcript will first be erased completely and then the updates will be filled in.
 #' - The update sections in the destination transcript will NOT be erased completely. Rater only the contents of tiers will be erased that are also present in the update tiers. e.g. if your destination transcript contains more tiers than the update transcripts, the contents of those tiers will be preserved in the destination tier during the update.
 #' 
-#' @param transDestination Transcript object; transcript that serves as destination (and will receive the updates).
-#' @param transUpdates List of transcript objects; transcript objects that will be inserted into the destination transcripts (entirely or in part).
+#' @param x Corpus object;
+#' @param destinationTranscriptName Character strings; name of transcript hat willl be updated. 
+#' @param updateTranscriptNames Vector of character strings; names of transcripts that contain the updates.
 #' @param identifierTier Character string;  regular expression that identifies the tier in which the sections are marked, that will be inserted into transDestination.
 #' @param identifierPattern Character string; regular expression that identifies the sections that will be inserted into transDestination.
 #' @param eraseUpdateSectionsCompletely Logical; if \code{TRUE} update sections in destination transcript will be erased completely, if \code{FALSE} update sections in the destination tier will not be erased completely but only the tiers that are present in the transUpdates be erased.
 #' 
 #' @return Transcript object
+#'  
+#' @seealso \link{transcripts_merge2}
+#' 
 #' @export
 #'
 #' @example inst/examples/transcripts_merge.R
 #' 
-transcripts_merge <- function (transDestination, 
-							   transUpdates, 
+transcripts_merge <- function (x,
+							   destinationTranscriptName, 
+							   updateTranscriptNames, 
 							   identifierTier="update",
 							   identifierPattern=".+",
 							   eraseUpdateSectionsCompletely=TRUE) {
 	
+	#x=examplecorpus
+	#act::info_summarized(x)
+	#destinationTranscriptName <- 'update_destination'
+	#updateTranscriptNames <- c('update_update1', 'update_update2')
+	#updateTranscriptNames <- c('update_update1', 'update_update2', 'SDAF', "xxx")
 	
+	if (missing(x))             					{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(destinationTranscriptName))			{stop("Name of destination transcript is missing (parameter: destinationTranscriptName")	}
+	if (missing(updateTranscriptNames))			    {stop("Name(s) of update transcript(s) are missing (parameter: updateTranscriptNames")	}
 	
+	#=== destination
+	# make sure it is (only) one destination transcript
+	if (length(destinationTranscriptName)==0) {
+		stop("Parameter 'destinationTranscriptName' needs to be the name of a transcript object in 'x'.")
+	} else if  (length(destinationTranscriptName)>1) {
+		stop("Parameter 'destinationTranscriptName' needs to contain the name of only ONE transcript object in 'x'.")
+	}
 	
+	#try to get destination transcript
+	#raise error if there is no such transcript
+	destinationTranscript <- x@transcripts[[destinationTranscriptName]]
+	if(length(destinationTranscript)<1) {
+		stop("Transcript object specified in 'destinationTranscriptName' not found in corpus object 'x'.")
+	}
 	
-	# x <- examplecorpus
-	# x<-corpus
-	# transDestination 	<- x@transcripts[['update_destination']]
-	# transDestination 	<- x@transcripts['update_destination']
-	# transUpdates 		<- x@transcripts[c('update_update1', 'update_update2')]
-	# transUpdates 		<- list(x@transcripts[['update_update1']], x@transcripts[['update_update2']])
-	# transUpdates		<- x@transcripts[['update_update1']]
-	# transUpdates		<- x@transcripts['update_update1']
-	# identifierTier <- "update"
-	# identifierPattern <- ".+"
-	# eraseUpdateSectionsCompletely <- TRUE
+	#===updates
+	if (length(updateTranscriptNames)==0) {
+		stop("Parameter 'updateTranscriptNames' needs to contain the name(s) of at leat one transcript object in 'x'.")
+	}
+	ids <- which(names(x@transcripts) %in% updateTranscriptNames)
+	if (length(ids)==0) {
+		stop("The transcript object(s) specified in 'updateTranscriptNames' were not found in transcript object in 'x'.")
+	}
+	if (length(ids)!=length(updateTranscriptNames)) {
+		missingTranscriptNames <- setdiff(updateTranscriptNames, names(x@transcripts)[ids] )
+		stop(paste("Not all transcript object(s) specified in 'updateTranscriptNames' were not found in transcript object in 'x'. Missing transcript names:", paste(missingTranscriptNames, sep=", ", collapse=", "), sep= " "))
+	}
+	updateTranscripts <- x@transcripts[ids]
+	
+	#=== get the merged trasncript
+	mergedT <- act::transcripts_merge2 (destinationTranscript=destinationTranscript, 
+										updateTranscripts=updateTranscripts, 
+										identifierTier=identifierTier,
+										identifierPattern=identifierPattern,
+										eraseUpdateSectionsCompletely=eraseUpdateSectionsCompletely) 
+	
 
-	if (missing(transDestination)) 	{stop("Transcript object in parameter 'transDestination' is missing.") 	}
-	if (missing(transUpdates)) 	{stop("Transcript object(s) in parameter 'transUpdates' is/are missing.") 	}
+	#=== delete  transcripts
+	x <- act::transcripts_delete(x, c(destinationTranscriptName, updateTranscriptNames))
 	
-	#check: transDestination
-	if(typeof(transDestination)=="list") {
-		if (length(transDestination)>1) {
-			stop("Parameter 'transDestination' may only be a single transcript object.") 
-		}
-		transDestination <- transDestination[[1]]
-	}
-	if (class(transDestination)!="transcript") 	{
-		stop("Parameter 'transDestination' needs to be a transcript object.") 
-	}
-	#--> result should be a single Object as accessed by [[]]
-	
-	#check: transUpdates
-	if(typeof(transUpdates)!="list") {
-		transUpdates <- list(transUpdates)
-	}
-	allAreTransripts <- TRUE
-	for (transUpdate in transUpdates) {
-		if(class(transUpdate)!="transcript") {
-			allAreTransripts <- FALSE
-		}
-	}
-	if (!allAreTransripts) 	{
-		stop("Parameter 'transUpdates' may only contain transcript objects.") 
-	}
-	#--> result should be a list
-	
-	#--- helper_tiers_merge_tables
-	tier.table <- act::helper_tiers_merge_tables(transDestination,transUpdates )
-	
-	#--- sort table with identifier tier in position 1	
-	tier.table <- act::helper_tiers_sort_table(tierTable=tier.table, sortVector=unique(c(identifierTier, tier.table$name)))
 
-	#--- tiers to object 
-	transDestination@tiers <- tier.table
 	
-	#--- get annotations of destinaton transcript
-	myAnnotations <- transDestination@annotations
+	#=== add destination transcript
+	mergedT@name <- destinationTranscriptName
+	#update modification info
+	mergedT@modification.systime <- Sys.time()
+	mergedT@history[[length(mergedT@history)+1]] <-	list( 
+		modification               = "transcripts_merge",
+		systime                    = Sys.time(),
+		destinationTranscriptName  = destinationTranscriptName,
+		updateTranscriptNames      = updateTranscriptNames
+	)
+	x <- act::transcripts_add(x, mergedT)
 	
-	#for all transcripts in updates
-	for (transUpdate in transUpdates) {
-
-		#skip transcript if update is empty
-		#get all annotations
-		myDestIntervals <- transUpdate@annotations
-		
-		#if tier identifier is specified, get first tiers that fits condition
-		if (!is.null(identifierTier)) {
-			#get all intervals in this tier
-			myDestIntervals <- myDestIntervals[stringr::str_detect(myDestIntervals$tier.name, identifierTier), ]
-			
-			#if a specifier in this tier is set,  select those that fit condition
-			if (!is.null(identifierPattern)) {
-				myDestIntervals <- myDestIntervals[stringr::str_detect(myDestIntervals$content, identifierPattern), ]
-			}
-		} else {
-			#auto create an update interval, starting with first and ending with last interval
-			startSec <- min(myDestIntervals$startSec)
-			endSec <- max(myDestIntervals$endSec)
-			myDestIntervals <- myDestIntervals[1:1,]
-			
-			myDestIntervals$startSec[1] 	<- startSec
-			myDestIntervals$endSec[1] 	<- endSec
-		}
-		
-		if(nrow(myDestIntervals)>0) {
-			#run through all update intervalls
-			for (i in 1:nrow(myDestIntervals)) {
-				myDestInterval <- myDestIntervals[i,]
-				
-				#get annotations form the update transcript
-				myAnnotationsUpdate <- transUpdate@annotations
-				myAnnotationsUpdate <- myAnnotationsUpdate[((myAnnotationsUpdate$startSec>=myDestInterval$startSec & myAnnotationsUpdate$startSec<=myDestInterval$endSec) | (myAnnotationsUpdate$endSec>myDestInterval$startSec & myAnnotationsUpdate$endSec<=myDestInterval$endSec) | (myAnnotationsUpdate$startSec<myDestInterval$startSec & myAnnotationsUpdate$endSec>myDestInterval$endSec)), ]
-				
-				#---truncate intervals that do no fall entirely into the intervall
-				#intervals that start before
-				for (j in 1:nrow(myAnnotationsUpdate)) {
-					myAnnotationsUpdate$startSec[j] <- max(myAnnotationsUpdate$startSec[j], myDestInterval$startSec)
-				}
-				
-				#intervals that end after
-				for (j in 1:nrow(myAnnotationsUpdate)) {
-					myAnnotationsUpdate$endSec[j] <- min(myAnnotationsUpdate$endSec[j], myDestInterval$endSec)
-				}
-				
-				#destination
-				if (eraseUpdateSectionsCompletely==TRUE) {
-					#for for all tiers
-					
-					#destination: get annotations outside of update region
-					myAnnotations <- myAnnotations[myAnnotations$startSec<myDestInterval$startSec | myAnnotations$endSec>myDestInterval$endSec,]
-					
-					#truncate intervals that reach into the update area
-					myAnnotations$endSec[myAnnotations$startSec<myDestInterval$startSec & myAnnotations$endSec>myDestInterval$startSec] <- myDestInterval$startSec
-					
-					#truncate intervals that reach out of the update area
-					myAnnotations$startSec[myAnnotations$startSec<myDestInterval$endSec & myAnnotations$endSec>myDestInterval$endSec] <- myDestInterval$endSec
-					
-				} else {
-					#for tiers that are in update transcript
-					
-					#get IDs of annotations in tiers that are also in the update file
-					myIDs_tiers <- which(myAnnotations$tier.name %in% transUpdate@tiers$name)
-					myIDS_times <- which(myAnnotations$startSec>myDestInterval$startSec & myAnnotations$endSec<myDestInterval$endSec)
-					myIDs_tiers_timesection <- intersect(myIDs_tiers, myIDS_times)
-					
-					#revove intervals that fall entirely into the update region
-					if (length(myIDs_tiers_timesection)>0) {
-						#remove intervals 
-						myAnnotations <- myAnnotations[-myIDs_tiers_timesection,]
-					}
-					#truncate intervals that reach into the update area
-					myIDs_tiers <- which(myAnnotations$tier.name %in% transUpdate@tiers$name)
-					myIDS_times <- which(myAnnotations$startSec<myDestInterval$startSec & myAnnotations$endSec>myDestInterval$startSec)
-					myIDs_tiers_timesection <- intersect(myIDs_tiers, myIDS_times)
-					myAnnotations$endSec[myIDs_tiers_timesection] <- myDestInterval$startSec
-					
-					#truncate intervals that reach out of the update area
-					myIDs_tiers <- which(myAnnotations$tier.name %in% transUpdate@tiers$name)
-					myIDS_times <- which(myAnnotations$startSec<myDestInterval$endSec & myAnnotations$endSec>myDestInterval$endSec)
-					myIDs_tiers_timesection <- intersect(myIDs_tiers, myIDS_times)
-					myAnnotations$startSec[myIDs_tiers_timesection] <- myDestInterval$endSec
-				}
-				
-				#merge update and destination transcript
-				myAnnotations <- rbind(myAnnotations, myAnnotationsUpdate)
-				
-			}
-		}
-	}
-	#assign new annotations to transcript
-	transDestination@annotations <- myAnnotations
+	#=== update history
+	x@history[[length(x@history)+1]] <- list(  
+		modification               = "transcripts_merge",
+		systime                    = Sys.time(),
+		destinationTranscriptName  = destinationTranscriptName,
+		updateTranscriptNames      = updateTranscriptNames
+	)
+	#=== return x
+	return(x)
 	
-	#change name & path
-	transDestination@name <- paste(transDestination@name, "_UPDATED",sep="")
-	transDestination@file.path <-""
 	
-	return(transDestination)
+	
 }
 
