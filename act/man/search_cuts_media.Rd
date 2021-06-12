@@ -14,7 +14,7 @@ search_cuts_media(
   fastVideoPostioning = TRUE,
   videoCodecCopy = FALSE,
   audioCutsAsMP3 = FALSE,
-  Panning
+  Panning = NULL
 )
 }
 \arguments{
