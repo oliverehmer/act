@@ -26,6 +26,14 @@ search_cuts_printtranscript <- function(x,
 										outputFolder=NULL ) {
 	#x <- corpus
 	#s <- mysearch
+	# x            = korpus 
+	# s            <- suche
+	# cutSpanBeforesec <- "/Users/oliverehmer/Desktop/suchergebnisse/"
+	# cutSpanAftersec <- NULL
+	# l<-NULL 
+	# outputFolder<-NULL 
+	# cutSpanBeforesec <- c(1,2)
+	#cutSpanBeforesec <- as.integer(1)
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		} else { if (class(s)[[1]]!="search")		{stop("Parameter 's' needs to be a search object.") 	} }
@@ -35,11 +43,24 @@ search_cuts_printtranscript <- function(x,
 		l <- methods::new("layout")
 	}	
 	if (!is.null(cutSpanBeforesec)) 	{
-		s@cuts.span.beforesec       <- as.double(cutSpanBeforesec)
+		if (length(cutSpanBeforesec)!=1) {
+			stop("Parameter 'cutSpanBeforesec' needs to contain only one element as a numeric value.") 
+		}
+		if (!is.numeric(cutSpanBeforesec)) {
+			stop("Parameter 'cutSpanBeforesec' needs to be a numeric value.") 
+		}
+		s@cuts.span.beforesec       <- cutSpanBeforesec
 	}
-	if (!is.null(cutSpanAftersec)) {
-		s@cuts.span.aftersec        <- as.double(cutSpanAftersec)	
+	if (!is.null(cutSpanAftersec)) 	{
+			if (length(cutSpanAftersec)!=1) {
+				stop("Parameter 'cutSpanAftersec' needs to contain only one element as a numeric value.") 
+			}
+			if (!is.numeric(cutSpanAftersec)) {
+				stop("Parameter 'cutSpanAftersec' needs to be a numeric value.") 
+			}
+		s@cuts.span.aftersec       <- cutSpanAftersec
 	}
+
 	
 	#--- check if output folder is given
 	destination_folder <- NULL

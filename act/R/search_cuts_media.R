@@ -102,10 +102,22 @@ search_cuts_media <- function(x,
 		output_folder_cutlist <- normalizePath(outputFolder)
 	}
 	if (!is.null(cutSpanBeforesec)) 	{
-		s@cuts.span.beforesec       <- as.double(cutSpanBeforesec)
+		if (length(cutSpanBeforesec)!=1) {
+			stop("Parameter 'cutSpanBeforesec' needs to contain only one element as a numeric value.") 
+		}
+		if (!is.numeric(cutSpanBeforesec)) {
+			stop("Parameter 'cutSpanBeforesec' needs to be a numeric value.") 
+		}
+		s@cuts.span.beforesec       <- cutSpanBeforesec
 	}
-	if (!is.null(cutSpanAftersec)) {
-		s@cuts.span.aftersec        <- as.double(cutSpanAftersec)	
+	if (!is.null(cutSpanAftersec)) 	{
+		if (length(cutSpanAftersec)!=1) {
+			stop("Parameter 'cutSpanAftersec' needs to contain only one element as a numeric value.") 
+		}
+		if (!is.numeric(cutSpanAftersec)) {
+			stop("Parameter 'cutSpanAftersec' needs to be a numeric value.") 
+		}
+		s@cuts.span.aftersec       <- cutSpanAftersec
 	}
 
 	#make total lists
