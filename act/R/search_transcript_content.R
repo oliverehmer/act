@@ -100,7 +100,8 @@ search_transcript_content <- function(t, s) {
 		if (!is.null(matches.df)) {
 			if (nrow(matches.df)>0)	{
 				#turn matrix into data frame
-				sResults <- as.data.frame(matches.df)
+				sResults <- data.frame(matches.df,  
+										  stringsAsFactors		= FALSE)
 				
 				#add column with length of hit
 				sResults <- cbind(sResults, hit.length=as.numeric(stringr::str_length(sResults$hit)))

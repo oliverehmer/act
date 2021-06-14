@@ -64,7 +64,8 @@ search_run <- function(x, s) {
 
 	if(is.null(temp)) {
 		myColNames <- c("transcript.name", "annotationID", "tier.name", "startSec","endSec", "content", "content.norm", "char.orig.bytime.start", "char.orig.bytime.end", "char.norm.bytime.start", "char.norm.bytime.end", "char.orig.bytier.start", "char.orig.bytier.end", "char.norm.bytier.start", "char.norm.bytier.end", "hit", "hit.nr" ,"hit.length", "hit.pos.fulltext", "hit.pos.content", "search.mode", "hit.span")
-		temp <- data.frame(matrix(ncol = length(myColNames), nrow = 0))
+		temp <- data.frame(matrix(ncol = length(myColNames), nrow = 0), 
+						   stringsAsFactors		= FALSE)
 		colnames(temp) <- myColNames	
 	}
 	

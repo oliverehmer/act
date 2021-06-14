@@ -41,7 +41,8 @@ search_transcript_fulltext <- function(t, s) {
 		p <- options()$act.separator_between_tiers
 		if (stringr::str_detect(myhit, stringr::fixed(p))) {
 			#check if separator ist not at the beginning of the hit
-			results <- as.data.frame(stringr::str_locate_all(myhit, stringr::fixed(p)))
+			results <- data.frame(stringr::str_locate_all(myhit, stringr::fixed(p)), 
+								  stringsAsFactors		= FALSE)
 			
 			#get rid of separators at the beginning
 			results <- results[!(results$start==1),]
@@ -59,7 +60,8 @@ search_transcript_fulltext <- function(t, s) {
 		p <- options()$act.separator_between_intervals
 		if (stringr::str_detect(myhit, stringr::fixed(p))) {
 			#check if separator ist not at the beginning of the hit
-			results <- as.data.frame(stringr::str_locate_all(myhit, stringr::fixed(p)))
+			results <- data.frame(stringr::str_locate_all(myhit, stringr::fixed(p)), 
+								  stringsAsFactors		= FALSE)
 			
 			#get rid of separators at the beginning
 			results <- results[!(results$start==1),]
@@ -101,7 +103,8 @@ search_transcript_fulltext <- function(t, s) {
 				hit 		  		<- 	unlist(stringr::str_extract_all(myFulltext, s@pattern))
 				hit.length			<- 	stringr::str_length(hit)
 				hit.nr		  		<-	c(1:length(hit))
-				hit.pos.fulltext	<- 	data.frame(stringr::str_locate_all(myFulltext, s@pattern))$start
+				hit.pos.fulltext	<- 	data.frame(stringr::str_locate_all(myFulltext, s@pattern), 
+												stringsAsFactors		= FALSE)$start
 				
 				#=== get original annotations
 				myAnnotations <- t@annotations
@@ -171,7 +174,8 @@ search_transcript_fulltext <- function(t, s) {
 				hit 		  		<- 	unlist(stringr::str_extract_all(myFulltext, s@pattern))
 				hit.length			<- 	stringr::str_length(hit)
 				hit.nr		  		<-	c(1:length(hit))
-				hit.pos.fulltext	<- 	data.frame(stringr::str_locate_all(myFulltext, s@pattern))$start
+				hit.pos.fulltext	<- 	data.frame(stringr::str_locate_all(myFulltext, s@pattern), 
+												stringsAsFactors		= FALSE)$start
 				
 				#=== get original annotations
 				myAnnotations <- t@annotations
@@ -257,7 +261,8 @@ search_transcript_fulltext <- function(t, s) {
 	
 	if(	is.null(mySearchResults)) {
 		myColNames <- c("annotationID", "tier.name", "startSec","endSec", "content", "content.norm", "char.orig.bytime.start", "char.orig.bytime.end", "char.norm.bytime.start", "char.norm.bytime.end", "char.orig.bytier.start", "char.orig.bytier.end", "char.norm.bytier.start", "char.norm.bytier.end", "hit", "hit.nr" ,"hit.length", "hit.pos.fulltext", "hit.pos.content", "search.mode", "hit.span")
-		mySearchResults <- data.frame(matrix(ncol = length(myColNames), nrow = 0))
+		mySearchResults <- data.frame(matrix(ncol = length(myColNames), nrow = 0), 
+									  stringsAsFactors		= FALSE)
 		colnames(mySearchResults) <- myColNames	
 	}
 	

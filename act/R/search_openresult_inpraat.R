@@ -39,12 +39,12 @@ search_openresult_inpraat  <- function(x,
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		} else { if (class(s)[[1]]!="search")		{stop("Parameter 's' needs to be a search object.") 	} }
 	if (missing(resultNr)) {stop("Number of the search result 'resultNr' is missing.") 	}
 	
-
+	
 	#--- check for sendpraat
 	if (file.exists(options()$act.path.sendpraat)==FALSE)	{
 		stop("Sendpraat not found. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
 	}
-
+	
 	#--- get  corresponding transcript
 	t <- x@transcripts[[s@results[resultNr, ]$transcript.name]]
 	if (is.null(t))	{
@@ -74,7 +74,7 @@ search_openresult_inpraat  <- function(x,
 	
 	#--- get path to praat script
 	praatScriptPath	<-	file.path(system.file("extdata", "praat", package="act"), "OpenSelectionInPraat.praat")
-
+	
 	#read script
 	tx <- readLines(con= praatScriptPath, n=-1, warn=FALSE)
 	
@@ -87,7 +87,8 @@ search_openresult_inpraat  <- function(x,
 	tx  <- stringr::str_replace_all(string = tx, pattern = "CLOSEAFTERPLAYING",     replacement = if (closeAfterPlaying) {as.character(1)} else {as.character(0)})
 	
 	#write temporary script
-	tempScriptPath <- file.path(tempdir(), "temp.praat")
+	#tempScriptPath <- file.path(tempdir(), "temp.praat")
+	tempScriptPath <- tempfile(pattern = "openresult", tmpdir = tempdir(), fileext = ".praat")
 	writeLines(tx, con=tempScriptPath)
 	
 	#wait until temporary script exists
@@ -97,21 +98,45 @@ search_openresult_inpraat  <- function(x,
 		}
 		Sys.sleep(0.02)
 	}
-
-	#send script
-	cmd <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", options()$act.path.sendpraat, tempScriptPath)
-	rslt=system(cmd, intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
 	
-	# if execution of sendpraat resulted in an error, try to start praat
-	if (!is.null(attributes(rslt)) ) {
-		if (file.exists(options()$act.path.praat)==FALSE)	{
-			stop("Praat is not running. Please start Praat first. To start Praat automatically indicate its location 'options(act.path.praat = ...)'.")
+	if(file.exists(tempScriptPath)) {
+		#-- execute script WITH waiting
+		#this works fine on mac
+		#cmd <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", shQuote(options()$act.path.sendpraat), tempScriptPath)
+		#rslt <- system(cmd, intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
+		
+		#this works fine on win
+		cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", shQuote(options()$act.path.sendpraat), tempScriptPath)
+		rslt <- system(cmd, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
+		
+		# if execution of sendpraat resulted in an error, try to start praat
+		#if intern =FALSE the values will be
+		#success rslt=1
+		#fail    rslt=0
+		#if intern=TRUE the following is needed
+		#if (!is.null(attributes(rslt)) ) {
+		
+		if (rslt==1){
+			if (file.exists(options()$act.path.praat)==FALSE)	{
+				stop("Praat is not running. Please start Praat first. To start Praat automatically indicate its location 'options(act.path.praat = ...)'.")
+			}
+			
+			#---works fine on mac
+			#start praat
+			#rslt <- system(paste ("open" , shQuote(options()$act.path.praat)), intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
+			#execute script again
+			#rslt = system(cmd, intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
+			
+			#start praat without waiting
+			cmd2 <- sprintf("%s", shQuote(options()$act.path.praat))
+			rslt <- system(cmd2, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=FALSE)
+			
+			#execute script again
+			cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", shQuote(options()$act.path.sendpraat), tempScriptPath)
+			rslt <- system(cmd, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
+			
 		}
-		rslt = system(paste ("open" , options()$act.path.praat), intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
-		rslt = system(cmd, intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
+		#delete temporary script
+		#file.remove(tempScriptPath)
 	}
-
-	#delete temporary script
-	if (file.exists(tempScriptPath))  {file.remove(tempScriptPath)}
-	
 }

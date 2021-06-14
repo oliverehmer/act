@@ -26,6 +26,9 @@ import_eaf <- function(filePath=NULL,
 					   fileContent=NULL, 
 					   transcriptName=NULL) {
 	
+	# filePath<- rstudioapi::selectFile()
+	# fileContent<-NULL
+	# transcriptName<-NULL
 	if (is.null(filePath) & is.null(fileContent)) {
 		stop("You need to pass as parameter eiter a file path to a TextGrid file (filePath) or the contents of a TextGrid file (fileContent) as parameter.")
 	}
@@ -107,11 +110,13 @@ import_eaf <- function(filePath=NULL,
 	regex_constraints <- '(?s)(<LINGUISTIC_TYPE)(.*?CONSTRAINTS="(.*?)")(.*?LINGUISTIC_TYPE_ID="(.*?)")(.*?/>)'
 	constraints <- stringr::str_match_all(myeaf.merge, regex_constraints)
 	constraints <- do.call(rbind, lapply(constraints, data.frame, stringsAsFactors=FALSE))
-	constraints <- as.data.frame(cbind(type.id=constraints[,6], constraint=constraints[,4]))
+	constraints <- data.frame(cbind(type.id=constraints[,6], 
+									constraint=constraints[,4]), 
+							  stringsAsFactors=FALSE)
 	if (nrow(constraints)==0) {
-		constraints <- data.frame(type.id=as.character("no-constraint"), constraint=as.character("No_Constraint"))
+		constraints <- data.frame(type.id=as.character("no-constraint"), constraint=as.character("No_Constraint"), stringsAsFactors=FALSE)
 	} else {
-		constraints <- rbind(constraints, c(type.id="no-constraint",constraint="No_Constraint"))
+		constraints <- rbind(constraints, c(type.id="no-constraint",constraint="No_Constraint"), stringsAsFactors=FALSE)
 	}
 	#View(constraints)
 	
@@ -122,14 +127,14 @@ import_eaf <- function(filePath=NULL,
 	timeslots <- stringr::str_match_all(timeorder, regex_timeslots)
 	timeslots <- do.call(rbind, lapply(timeslots, data.frame, stringsAsFactors=FALSE))
 	#View(timeslots)
-	timeslots <- as.data.frame(cbind(timeSlotID=timeslots[,3], value=timeslots[,6]))
+	timeslots <- data.frame(cbind(timeSlotID=timeslots[,3], value=timeslots[,6]), stringsAsFactors=FALSE)
 	timeslots$value <- as.double(timeslots$value)/1000
 	#View(timeslots)
 	
 	#=== extract annotations
 	#Split the entire eaf
 	#get position of beginning of "<tier"
-	pos.tier <- as.data.frame(stringr::str_locate_all(myeaf.merge, pattern="<TIER")[[1]] )
+	pos.tier <- data.frame(stringr::str_locate_all(myeaf.merge, pattern="<TIER")[[1]],stringsAsFactors=FALSE )
 	annotations.block <- c()
 	if (nrow(pos.tier)>0) {
 		pos.lingtype <- stringr::str_locate(myeaf.merge, pattern="<LINGUISTIC_TYPE")[1,1]
@@ -166,17 +171,25 @@ import_eaf <- function(filePath=NULL,
 	
 	if (is.null (tier.name)) {
 		#if there are no tiers in the file
-		tiers <- data.frame(tier.name=as.character(), tier.type.ref=as.character(), tier.parent.ref=as.character(), tier.hierarchy=as.character())
+		tiers <- data.frame(tier.name=as.character(), 
+							tier.type.ref=as.character(), 
+							tier.parent.ref=as.character(), 
+							tier.hierarchy=as.character(),
+							stringsAsFactors = FALSE)
 		
 	} else {
 		
-		tiers <- as.data.frame(cbind(tier.name=tier.name, tier.type.ref=tier.ling_type_ref, tier.parent.ref=tier.parent_ref, tier.hierarchy=NA))
+		tiers <- data.frame(cbind(tier.name=tier.name, 
+									 tier.type.ref=tier.ling_type_ref, 
+									 tier.parent.ref=tier.parent_ref, 
+									 tier.hierarchy=NA),
+							stringsAsFactors = FALSE)
 		#View(tiers)
 		
 		#construct the hierarchy of the tiers
 		tiers$tier.hierarchy[is.na(tiers$tier.parent.ref)]<- 1
 		hierarchy <- 0
-		i <- 1
+		
 		for (i in 1:nrow(tiers)) {
 			#exit loop if all tiers have already a place in the hierarcy   
 			if (!any(is.na(tiers$tier.hierarchy))) {
@@ -234,7 +247,7 @@ import_eaf <- function(filePath=NULL,
 			regex_ann_alignable <- '(?s)(<ALIGNABLE_ANNOTATION)(.*?ANNOTATION_ID="(.*?)")(.*?TIME_SLOT_REF1="(.*?)")(.*?TIME_SLOT_REF2="(.*?)">)(.*?<ANNOTATION_VALUE>(.*?)</ANNOTATION_VALUE>)'
 			constraints_ann_alignable <- c("Time_Subdivision",    "Included_In", "No_Constraint")
 			
-			#i <- 13
+			#i <- 1
 			#tiers[i,]
 			#annotations.block[i]
 			#i <- 3
@@ -249,7 +262,7 @@ import_eaf <- function(filePath=NULL,
 					annotations.tier <- do.call(rbind, lapply(annotations.tier, data.frame, stringsAsFactors=FALSE))
 					#View(annotations.tier)
 					if (nrow(annotations.tier)>0) {
-						annotations.tier <- cbind(         tier=tiers$tier.name[i], 
+						annotations.tier <- data.frame(cbind(         tier=tiers$tier.name[i], 
 														   type=tiers$tier.type[i],
 														   hierarchy=tiers$tier.hierarchy[i],
 														   id=annotations.tier[, 4], 
@@ -257,7 +270,8 @@ import_eaf <- function(filePath=NULL,
 														   ts1=NA,
 														   ts2=NA, 
 														   annotation.ref=annotations.tier[, 6], 
-														   annotation.previous=annotations.tier[, 8])
+														   annotation.previous=annotations.tier[, 8]),
+													   stringsAsFactors=FALSE)
 					}
 				} else {
 					myRegEx <- regex_ann_alignable
@@ -265,7 +279,7 @@ import_eaf <- function(filePath=NULL,
 					annotations.tier <- do.call(rbind, lapply(annotations.tier, data.frame, stringsAsFactors=FALSE))
 					#View(annotations.tier)
 					if (nrow(annotations.tier)>0) {
-						annotations.tier <- cbind(         tier=tiers$tier.name[i], 
+						annotations.tier <- data.frame(cbind(         tier=tiers$tier.name[i], 
 														   type=tiers$tier.type[i],
 														   hierarchy=tiers$tier.hierarchy[i],
 														   id=annotations.tier[, 4], 
@@ -273,11 +287,16 @@ import_eaf <- function(filePath=NULL,
 														   ts1=annotations.tier[, 6],
 														   ts2=annotations.tier[, 8], 
 														   annotation.ref=NA, 
-														   annotation.previous=NA)
+														   annotation.previous=NA),
+													   stringsAsFactors=FALSE)
 					}
 				}
 				if (nrow(annotations.tier)>0) {
-					annotations <- rbind(annotations, annotations.tier)
+					if (nrow(annotations)>0) {
+						annotations <- rbind(annotations, annotations.tier)
+					} else {
+						annotations <-  annotations.tier
+					}
 				}
 			}
 			#View(annotations)

@@ -57,7 +57,6 @@ annotations_matrix <- function(x,
 	#=== create named vector for replacement
 	mymatrix 		<- as.character(act_replacementMatrix$replace)
 	names(mymatrix) <- act_replacementMatrix$search
-	#as.data.frame(mymatrix)
 	
 	#=== check if the matrix works
 	out <- tryCatch(

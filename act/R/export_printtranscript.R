@@ -230,21 +230,25 @@ export_printtranscript <- function (t,
 							
 							if (openingBracketsJ.nr>0 ) {
 								#get positions and contents of brackets
-								bracket.i <- as.data.frame(stringr::str_locate_all(myAnnotations$text[i], "\\[.*?\\]"), stringsAsFactors = FALSE)
+								bracket.i <- data.frame(stringr::str_locate_all(myAnnotations$text[i], "\\[.*?\\]"), stringsAsFactors = FALSE)
 								bracket.i <- bracket.i[x, ]
 								bracket.i <- cbind(bracket.i, content=as.character(unlist(stringr::str_extract_all(myAnnotations$text[i], "\\[.*?\\]"))[x]), row.names = NULL) #mind the x
 								bracket.i <- cbind(bracket.i, bracketLength=stringr::str_length(bracket.i$content) , row.names = NULL)
 								bracket.i <- cbind(bracket.i, before=stringr::str_trim(stringr::str_sub(myAnnotations$text[i], bracket.i$start-1, bracket.i$start-1 )), row.names = NULL)
 								bracket.i <- cbind(bracket.i, after=stringr::str_trim(stringr::str_sub(myAnnotations$text[i], bracket.i$end+1, bracket.i$end+1 )), row.names = NULL)	
-								bracket.i <- cbind(bracket.i, posSpaceInside=as.data.frame(stringi::stri_locate(as.character(bracket.i$content), regex=" ", mode="last"))$start, row.names = NULL)
+								bracket.i <- cbind(bracket.i, 
+												   posSpaceInside=data.frame(
+												   	stringi::stri_locate(as.character(bracket.i$content), regex=" ", mode="last"), 
+												   	stringsAsFactors= FALSE)$start, 
+												   row.names = NULL)
 								
-								bracket.j <- as.data.frame(stringr::str_locate_all(myAnnotations$text[j], "\\[.*?\\]"), stringsAsFactors = FALSE)
+								bracket.j <- data.frame(stringr::str_locate_all(myAnnotations$text[j], "\\[.*?\\]"), stringsAsFactors = FALSE)
 								bracket.j <- bracket.j[1, ]
 								bracket.j <- cbind(bracket.j, content=as.character(unlist(stringr::str_extract_all(myAnnotations$text[j], "\\[.*?\\]"))[1]), row.names = NULL) #mind the 1
 								bracket.j <- cbind(bracket.j, bracketLength=stringr::str_length(bracket.j$content) , row.names = NULL)
 								bracket.j <- cbind(bracket.j, before=stringr::str_trim(stringr::str_sub(myAnnotations$text[j], bracket.j$start-1, bracket.j$start-1 )), row.names = NULL)
 								bracket.j <- cbind(bracket.j, after=stringr::str_trim(stringr::str_sub(myAnnotations$text[j], bracket.j$end+1, bracket.j$end+1 )), row.names = NULL) #mind the 1
-								bracket.j <- cbind(bracket.j, posSpaceInside=as.data.frame(stringi::stri_locate(as.character(bracket.j$content), regex=" ", mode="last"))$start, row.names = NULL)
+								bracket.j <- cbind(bracket.j, posSpaceInside=data.frame(stringi::stri_locate(as.character(bracket.j$content), regex=" ", mode="last"), stringsAsFactors= FALSE)$start, row.names = NULL)
 								
 								#something went wrong, probably missing closing bracket
 								if (is.null(bracket.i$bracketLength)) {		break}
@@ -387,7 +391,7 @@ export_printtranscript <- function (t,
 								bracket.i <- cbind(bracket.i, bracketLength=stringr::str_length(bracket.i$content) , row.names = NULL)
 								bracket.i <- cbind(bracket.i, before=stringr::str_trim(stringr::str_sub(text_i_wrapped, bracket.i$start-1, bracket.i$start-1 )), row.names = NULL)
 								bracket.i <- cbind(bracket.i, after=stringr::str_trim(stringr::str_sub(text_i_wrapped, bracket.i$end+1, bracket.i$end+1 )), row.names = NULL)	
-								bracket.i <- cbind(bracket.i, posSpaceInside=as.data.frame(stringi::stri_locate(as.character(bracket.i$content), regex=" ", mode="last"))$start, row.names = NULL)
+								bracket.i <- cbind(bracket.i, posSpaceInside=data.frame(stringi::stri_locate(as.character(bracket.i$content), regex=" ", mode="last"), stringsAsFactors		= FALSE)$start, row.names = NULL)
 								
 								
 							} #there are opening brackets in j

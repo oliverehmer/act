@@ -18,6 +18,7 @@
 # 
 # # Replace old names in search by new names
 # searchresults$resultID <- mynames
+# @keywords internal
 helper_makeNamesForSearch <- function(mySearchResults, 
 									  resultidprefix="result") {
 	
@@ -34,11 +35,12 @@ helper_makeNamesForSearch <- function(mySearchResults,
 # @param t transcript object; transcript for which you want to get the TextGrid
 #
 # @return Character string; path to TextGrid file.
-# 
+#
+#@keywords internal# 
 # 
 # @examples
 # print("")
-#
+
 helper_getTextGridForTranscript <- function(t) {
 	
 	if (missing(t)) 	{stop("Transcript object t is missing.") }	

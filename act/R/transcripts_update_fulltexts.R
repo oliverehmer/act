@@ -113,7 +113,16 @@ transcripts_update_fulltexts <- function(x,
 				if (nrow(myAnnotations)>0) 	{
 
 					#===add new cols
-					myAnnotations <- cbind.data.frame(myAnnotations, separator=as.character(""), char.separator=0, char.content.orig=0, char.content.norm=0, char.content.orig.plussep=0,char.content.norm.plussep=0, char.orig.bytime.start=0, char.norm.bytime.start=0 , stringsAsFactors = FALSE)
+					myAnnotations <- cbind.data.frame(myAnnotations, 
+													  separator=as.character(""), 
+													  char.separator=0, 
+													  char.content.orig=0, 
+													  char.content.norm=0, 
+													  char.content.orig.plussep=0,
+													  char.content.norm.plussep=0, 
+													  char.orig.bytime.start=0, 
+													  char.norm.bytime.start=0 , 
+													  stringsAsFactors = FALSE)
 					
 					#---------------------- by time
 					if (searchMode=="fulltext" | searchMode=="fulltext.bytime") {

@@ -151,14 +151,20 @@ import_exb <- function(filePath=NULL,
 			cumsums <- cumsum(rl$length)+1
 			rl$start <- c(0,cumsums[1:length(cumsums)-1])-1
 			rl$end <- rl$start + rl$length +1
-			nasequences <- data.frame(value=rl$values, start=rl$start, end=rl$end)
+			nasequences <- data.frame(value=rl$values, 
+									  start=rl$start, 
+									  end=rl$end, 
+									  stringsAsFactors		= FALSE)
 			nasequences <- nasequences[nasequences$value==TRUE,]
 			for (i in 1:nrow(nasequences)) {
 				timesequence <- seq(from = tsTime[nasequences$start[i]], to = tsTime[nasequences$end[i]], length.out = nasequences$end[i]-nasequences$start[i]+1)
 				tsTime[ nasequences$start[i]:nasequences$end[i]]<- timesequence
 			}
 		}
-		timeslots <- data.frame(id = tsID, value = as.double(tsTime), tsType=tsType, stringsAsFactors = FALSE)
+		timeslots <- data.frame(id = tsID, 
+								value = as.double(tsTime), 
+								tsType=tsType, 
+								stringsAsFactors = FALSE)
 		#View(timeslots)
 		
 		#--- set transcript length
@@ -171,7 +177,12 @@ import_exb <- function(filePath=NULL,
 		tier.category <- xml2::xml_attr(tiers, "category")
 		tier.type <- xml2::xml_attr(tiers, "type")
 		tier.displayName <- xml2::xml_attr(tiers, "display-name")
-		mytiers <- as.data.frame(cbind(tier.name, tier.speaker, tier.category, tier.type, tier.displayName))
+		mytiers <- data.frame(cbind(tier.name, 
+									tier.speaker, 
+									tier.category, 
+									tier.type, 
+									tier.displayName), 
+							  stringsAsFactors		= FALSE)
 		
 		#=== extract annotations
 		annotations <- data.frame(stringsAsFactors = FALSE)

@@ -152,10 +152,20 @@ search_concordance <- function(x,
 	temp <- s@results[,mynames]
 	
 	if (nrow(s@results)==0 ) {
-		concs 				  <- data.frame(concLeft2=character(), concLeft1=character(), concHit=character(), concRight1=character(), concRight2=character(), nrWordsLeft=integer(), nrWordsHitPosition=integer(), nrWordsHit=integer(), nrWordsRight=integer(), nrWordsTotal=integer())
+		concs 				  <- data.frame(concLeft2=character(), 
+								  concLeft1=character(), 
+								  concHit=character(), 
+								  concRight1=character(), 
+								  concRight2=character(), 
+								  nrWordsLeft=integer(), 
+								  nrWordsHitPosition=integer(), 
+								  nrWordsHit=integer(), 
+								  nrWordsRight=integer(), 
+								  nrWordsTotal=integer(), 
+								  stringsAsFactors		= FALSE)
 	} else {
 		concs			      <- t(apply(temp, MARGIN=1, x=x, search_concordance_single))
-		concs			      <- data.frame(concs)
+		concs			      <- data.frame(concs, stringsAsFactors		= FALSE)
 		colnames(concs) 	  <- conccolnames
 	}
 

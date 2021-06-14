@@ -57,16 +57,15 @@ search_openresult_inquicktime  <- function(x,
 	#--- get path to apple script
 	appleScriptPath	<- file.path(system.file("extdata", "applescript", package="act"), "PlayCutInQuicktime.scpt")
 	#appleScriptPath <- "/Users/oliverehmer/Desktop/PlayCutInQuicktime.scpt"
-	appleScriptPath <- normalizePath(appleScriptPath)
-	file.exists(appleScriptPath)
-	
-	startSec <- result$startSec - s@cuts.span.beforesec
-	endSec <- result$endSec + s@cuts.span.aftersec
-	durationSec <- endSec-startSec+0.3
-	
-	#execute script
-	cmd <- sprintf('osascript "%s" "%s" %s %s %s %s %s', appleScriptPath, pathMediaFile,  as.character(startSec), as.character(durationSec), if(play) {1} else {0}, if(closeAfterPlaying) {1} else {0}, if (bringQuicktimeToFront){1} else {0})
-	rslt=system(cmd, intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
-	
+	if (file.exists(appleScriptPath)) {
+		appleScriptPath <- normalizePath(appleScriptPath)
+		startSec <- result$startSec - s@cuts.span.beforesec
+		endSec <- result$endSec + s@cuts.span.aftersec
+		durationSec <- endSec-startSec+0.3
+		
+		#execute script
+		cmd <- sprintf('osascript "%s" "%s" %s %s %s %s %s', appleScriptPath, pathMediaFile,  as.character(startSec), as.character(durationSec), if(play) {1} else {0}, if(closeAfterPlaying) {1} else {0}, if (bringQuicktimeToFront){1} else {0})
+		rslt <- system(cmd, intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
+	}
 	return(TRUE)
 }
