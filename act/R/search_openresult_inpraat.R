@@ -105,38 +105,35 @@ search_openresult_inpraat  <- function(x,
 		#cmd <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", shQuote(options()$act.path.sendpraat), tempScriptPath)
 		#rslt <- system(cmd, intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
 		
-		#this works fine on win
+		#run script via sendpraat 
 		cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", shQuote(options()$act.path.sendpraat), tempScriptPath)
 		rslt <- system(cmd, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
-		
+
 		# if execution of sendpraat resulted in an error, try to start praat
 		#if intern =FALSE the values will be
 		#success rslt=1
 		#fail    rslt=0
 		#if intern=TRUE the following is needed
 		#if (!is.null(attributes(rslt)) ) {
-		
 		if (rslt==1){
 			if (file.exists(options()$act.path.praat)==FALSE)	{
 				stop("Praat is not running. Please start Praat first. To start Praat automatically indicate its location 'options(act.path.praat = ...)'.")
 			}
 			
-			#---works fine on mac
+			#---the following works fine on mac
 			#start praat
 			#rslt <- system(paste ("open" , shQuote(options()$act.path.praat)), intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
 			#execute script again
 			#rslt = system(cmd, intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
 			
 			#start praat without waiting
-			cmd2 <- sprintf("%s", shQuote(options()$act.path.praat))
-			rslt <- system(cmd2, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=FALSE)
-			
-			#execute script again
-			cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", shQuote(options()$act.path.sendpraat), tempScriptPath)
+			cmd2 <- sprintf("open %s", shQuote(options()$act.path.praat))
+			rslt <- system(cmd2, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
+
+			#run script via sendpraat 
 			rslt <- system(cmd, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
-			
 		}
 		#delete temporary script
-		#file.remove(tempScriptPath)
+		file.remove(tempScriptPath)
 	}
 }
