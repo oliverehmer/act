@@ -35,8 +35,8 @@ info_summarized <- function(...) {
 
 	if (!is.null(x)) {
 		#--- transcripts names
-		transcripts.names <- names(x@transcripts)
-		transcripts.count <- length(transcripts.names)
+		transcript.names <- names(x@transcripts)
+		transcript.count <- length(transcript.names)
 		
 		#--- length
 		length <- lapply(x@transcripts, "slot", name = "length.sec")
@@ -46,8 +46,8 @@ info_summarized <- function(...) {
 		#--- tiers
 		tiers       <- lapply(x@transcripts, "slot", name = "tiers")
 		temp        <- do.call("rbind", tiers)
-		tiers.names <- unique(temp$name)
-		tiers.count <- sum(unlist(lapply(tiers, nrow)))
+		tier.names <- unique(temp$name)
+		tier.count <- sum(unlist(lapply(tiers, nrow)))
 		
 		#---annotations 
 		annotations <- lapply(x@transcripts, "slot", name = "annotations")
@@ -55,12 +55,12 @@ info_summarized <- function(...) {
 		
 		#--- words org
 		content.org <- lapply(annotations,"[[", 5)
-		words.org.count <- lapply(content.org, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+		words.org.count <- lapply(content.org, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 		words.org.count <- sum(unlist(words.org.count))
 		
 		#--words norm
 		content.norm <- lapply(annotations,"[[", 6)
-		words.norm.count <- lapply(content.norm, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+		words.norm.count <- lapply(content.norm, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 		words.norm.count <- sum(unlist(words.norm.count))
 		
 		info <- list(length.formatted  = length.formatted,
@@ -68,26 +68,26 @@ info_summarized <- function(...) {
 					 words.org.count   = words.org.count,
 					 words.norm.count  = words.norm.count,
 					 annotations.count = annotations.count,
-					 tiers.count       = tiers.count,
-					 tiers.names       = tiers.names,
-					 transcripts.count = transcripts.count,
-					 transcripts.names = transcripts.names
+					 tier.count       = tier.count,
+					 tier.names       = tier.names,
+					 transcript.count = transcript.count,
+					 transcript.names = transcript.names
 		)
 	}
 	if (!is.null(t)) {
 		#--- tiers
-		tiers.names <- t@tiers$name
-		tiers.count <- nrow(t@tiers)
+		tier.names <- t@tiers$name
+		tier.count <- nrow(t@tiers)
 		
 		#--- annotations
 		annotations.count <- sum(nrow(t@annotations))
 		
 		#--- words org
-		words.org.count <- lapply(t@annotations$content, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+		words.org.count <- lapply(t@annotations$content, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 		words.org.count <- sum(unlist(words.org.count))
 		
 		#--- words norm
-		words.norm.count <- lapply(t@annotations$content.norm, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+		words.norm.count <- lapply(t@annotations$content.norm, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 		words.norm.count <- sum(unlist(words.norm.count))
 
 		info <- list(length.formatted  = helper_format_time(t@length.sec , addTimeInSeconds = TRUE),
@@ -95,8 +95,8 @@ info_summarized <- function(...) {
 					 words.org.count   = words.org.count,
 					 words.norm.count  = words.norm.count,					 
 					 annotations.count = annotations.count,
-					 tiers.count       = tiers.count,
-					 tiers.names       = tiers.names
+					 tier.count       = tier.count,
+					 tier.names       = tier.names
 					 )
 	}
 	return(info)

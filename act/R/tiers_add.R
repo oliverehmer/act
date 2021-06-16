@@ -214,8 +214,8 @@ tiers_add <- function( x,
 		tiers.added.count            = tiers_added_count_all,
 		transcripts.modified.count   = length(transcripts_modified_names),
 		transcripts.modified.names   = transcripts_modified_names,
-		tier.already.existed.in.transcripts.count = length(alreadyExistsInTranscripts),
-		tier.already.existed.in.transcripts.names = alreadyExistsInTranscripts
+		tier.already.existed.in.transcript.count = length(alreadyExistsInTranscripts),
+		tier.already.existed.in.transcript.names = alreadyExistsInTranscripts
 	)
 	
 	return (x)

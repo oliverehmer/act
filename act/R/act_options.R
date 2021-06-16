@@ -27,7 +27,7 @@ act.options.default <- list (
 	act.separator_between_intervals 		= "&",
 	act.separator_between_tiers				= "#",
 	act.separator_between_words				= "^\\s|\\|\\'|\\#|\\/|\\\\\\\\",
-	act.wordCount.regex 					= '(?<=[^|\\b])[A-z\\u00C0-\\u00FA\\-\\:]+(?=\\b|\\s|_|$)'
+	act.wordCountRegEx 					= '(?<=[^|\\b])[A-z\\u00C0-\\u00FA\\-\\:]+(?=\\b|\\s|_|$)'
 )
 
 #' Options of the package
@@ -77,7 +77,7 @@ act.options.default <- list (
 #' * \code{act.separator_between_intervals} Character; Single character that is used for separating intervals when creating the full text.
 #' * \code{act.separator_between_tiers} Character; Single character that is used for separating tiers when creating the full text.
 #' * \code{act.separator_between_words} Character string; regular expression with alternatives that count as separators between words. Used for preparing the concordance.
-#' * \code{act.wordCount.regex} Character string; regular expression that is used to count words.
+#' * \code{act.wordCountRegEx} Character string; regular expression that is used to count words.
 #'
 #' @return Nothing.
 #' @export
@@ -124,7 +124,7 @@ options_show <- function () {
 	cat("    act.separator_between_intervals                : ",paste("'", options()$act.separator_between_intervals, "'",sep="", collapse=""),fill=TRUE)
 	cat("    act.separator_between_tiers                    : ",paste("'", options()$act.separator_between_tiers, "'",sep="", collapse=""),fill=TRUE)
 	cat("    act.separator_between_words                    : ",paste("'", options()$act.separator_between_words, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.wordCount.regex                            : ",paste("'", options()$act.wordCount.regex, "'",sep="", collapse=""), fill=TRUE)
+	cat("    act.wordCountRegEx                            : ",paste("'", options()$act.wordCountRegEx, "'",sep="", collapse=""), fill=TRUE)
 }
 
 	
@@ -164,7 +164,7 @@ options_delete <- function() {
 	options(act.separator_between_intervals          = NULL)
 	options(act.separator_between_tiers              = NULL)
 	options(act.separator_between_words              = NULL)
-	options(act.wordCount.regex                      = NULL)
+	options(act.wordCountRegEx                      = NULL)
 }
 
 

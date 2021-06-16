@@ -18,8 +18,8 @@
 #' @slot filter.transcript.includeRegEx  Character string; Regular expression that defines which transcripts should be INcluded in the search (matching the name of the transcript).
 #' @slot filter.transcript.excludeRegEx  Character string; Regular expression that defines which transcripts should be EXcluded in the search (matching the name of the transcript).
 #' @slot filter.tier.names Vector of character strings; names of tiers to include in the search. If the value is \code{character()} or \code{""} filter will be ignored.
-#' @slot filter.tier.include Character string; Regular expression that defines which tiers should be INcluded in the search (matching the name of the tier).
-#' @slot filter.tier.exclude Character string; Regular expression that defines which tiers should be EXcluded in the search (matching the name of the tier).
+#' @slot filter.tier.includeRegEx Character string; Regular expression that defines which tiers should be INcluded in the search (matching the name of the tier).
+#' @slot filter.tier.excludeRegEx Character string; Regular expression that defines which tiers should be EXcluded in the search (matching the name of the tier).
 #' @slot filter.section.startsec Double; Time value in seconds, limiting the search to a certain time span in each transcript, defining the start of the search window.
 #' @slot filter.section.endsec Double; Time value in seconds, limiting the search to a certain time span in each transcript, defining the end of the search window.
 #' @slot concordance.make Logical; If a concordance should be created when the search is run.
@@ -53,8 +53,8 @@ methods::setClass("search",
 				  	filter.transcript.includeRegEx ="character",
 				  	filter.transcript.excludeRegEx ="character",
 				  	filter.tier.names="character",
-				  	filter.tier.include="character",
-				  	filter.tier.exclude="character",
+				  	filter.tier.includeRegEx="character",
+				  	filter.tier.excludeRegEx="character",
 				  	filter.section.startsec="numeric",
 				  	filter.section.endsec="numeric",
 				  	
@@ -86,8 +86,8 @@ methods::setClass("search",
 				  	filter.transcript.includeRegEx ="",
 				  	filter.transcript.excludeRegEx ="",
 				  	filter.tier.names=character(),
-				  	filter.tier.include="",
-				  	filter.tier.exclude="",
+				  	filter.tier.includeRegEx="",
+				  	filter.tier.excludeRegEx="",
 				  	filter.section.startsec=numeric(),
 				  	filter.section.endsec=numeric(),
 				  	
@@ -123,8 +123,8 @@ search_show <- function (object) {
 	cat("  filter.transcript.includeRegEx   : ", paste("'", object@filter.transcript.includeRegEx ,"'",sep="", collapse=""), fill=TRUE)
 	cat("  filter.transcript.excludeRegEx   : ", paste("'", object@filter.transcript.excludeRegEx ,"'",sep="", collapse=""), fill=TRUE)
 	cat("  filter.tier.names          : ", paste("'", object@filter.tier.names,"'",sep="", collapse=", "), fill=TRUE)
-	cat("  filter.tier.include        : ", paste("'", object@filter.tier.include,"'",sep="", collapse=""), fill=TRUE)
-	cat("  filter.tier.exclude        : ", paste("'", object@filter.tier.exclude,"'",sep="", collapse=""), fill=TRUE)
+	cat("  filter.tier.includeRegEx        : ", paste("'", object@filter.tier.includeRegEx,"'",sep="", collapse=""), fill=TRUE)
+	cat("  filter.tier.excludeRegEx        : ", paste("'", object@filter.tier.excludeRegEx,"'",sep="", collapse=""), fill=TRUE)
 	cat("  filter.section.startsec    : ", if (length(object@filter.section.startsec)==0) {"[not set]"} else {if (is.na(object@filter.section.startsec)){"[not set]"} else {object@ffilter.section.startsec}}, fill=TRUE)
 	cat("  filter.section.endsec      : ", if (length(object@filter.section.endsec)==0) {"[not set]"} else {if (is.na(object@filter.section.endsec)){"[not set]"} else {object@filter.section.endsec}}, fill=TRUE)
 	cat("\n")

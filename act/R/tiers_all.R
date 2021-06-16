@@ -47,12 +47,12 @@ tiers_all <- function(x, compact=TRUE) {
 			
 			#--- words org
 			content.org <- annotations$content
-			words.org.count <- lapply(content.org, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+			words.org.count <- lapply(content.org, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 			tiers$words.org.count[i] <- sum(unlist(words.org.count))
 			
 			#--- words norm
 			content.norm <- annotations$content.norm
-			words.norm.count <- lapply(content.norm, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+			words.norm.count <- lapply(content.norm, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 			tiers$words.norm.count[i] <- sum(unlist(words.norm.count))
 		}
 	}

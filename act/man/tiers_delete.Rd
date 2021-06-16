@@ -29,8 +29,8 @@ library(act)
 all.tiers <- act::info(examplecorpus)$tiers
 
 # tiers 'A' and 'B' occur 6 times in 6 transcripts
-all.tiers["A", "tiers.count"]
-all.tiers["B", "tiers.count"]
+all.tiers["A", "tier.count"]
+all.tiers["B", "tier.count"]
 
 # delete tiers
 tierNames <- c("A", "B")

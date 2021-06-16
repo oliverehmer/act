@@ -26,17 +26,13 @@ search_run <- function(x, s) {
 	#get transcripts and tiers to include
 	#x <- examplecorpus
 	#s <- mysearch
-	mymeta <- act::search_makefilter(     x,
-									filterTranscriptNames        =s@filter.transcript.names, 
-									filterTranscriptIncludeRegEx =s@filter.transcript.includeRegEx , 
-									filterTranscriptExcludeRegEx =s@filter.transcript.excludeRegEx ,
-									filterTierNames              =s@filter.tier.names,	
-									filterTierIncludeRegEx       =s@filter.tier.include,
-									filterTierExcludeRegEx       =s@filter.tier.exclude) 
-	
-	transcriptNames  <- mymeta$transcripts.names
-	tierNames        <- mymeta$tiers.names
-	
+	myfilter <- act::search_makefilter(x,
+									 filterTranscriptNames        =s@filter.transcript.names, 
+									 filterTranscriptIncludeRegEx =s@filter.transcript.includeRegEx , 
+								 	 filterTranscriptExcludeRegEx =s@filter.transcript.excludeRegEx ,
+									 filterTierNames              =s@filter.tier.names,	
+									 filterTierIncludeRegEx       =s@filter.tier.includeRegEx,
+									 filterTierExcludeRegEx       =s@filter.tier.excludeRegEx) 
 	
 	#=== normalization needed?
 	if (s@search.normalized) {	
@@ -45,17 +41,17 @@ search_run <- function(x, s) {
 		
 	#===  update full texts if full text search
 	if (s@search.mode=="fulltext" | s@search.mode=="fulltext.byTime" | s@search.mode=="fulltext.byTier" )  {
-		x <- act::transcripts_update_fulltexts(x, tierNames=tierNames) 
+		x <- act::transcripts_update_fulltexts(x, tierNames=myfilter$tier.names) 
 	}
 
 	#=== Search
-	helper_progress_set("Searching", length(transcriptNames))
+	helper_progress_set("Searching", length(myfilter$transcript.names))
 	if (s@search.mode=="fulltext" | s@search.mode=="fulltext.byTime" | s@search.mode=="fulltext.byTier" ) {
-		temp 	  			<-	lapply(x@transcripts[transcriptNames], search_transcript_fulltext, s=s)
+		temp 	  			<-	lapply(x@transcripts[myfilter$transcript.names], search_transcript_fulltext, s=s)
 		temp	  			<-	do.call("rbind", temp)
 		
 	} else if (s@search.mode=="content" ) {
-		temp 	  			<-	lapply(x@transcripts[transcriptNames], search_transcript_content, s=s)
+		temp 	  			<-	lapply(x@transcripts[myfilter$transcript.names], search_transcript_content, s=s)
 		temp	  			<-	do.call("rbind", temp)
 	} else {
 		#=== some user error

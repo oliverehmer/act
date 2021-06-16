@@ -5,8 +5,8 @@
 #' If you want to modify the layout of the print transcripts, create a new layout object with \code{mylayout <- methods::new("layout")}, modify the values in the \code{@slots} and pass it as argument \code{l} to the respective functions.
 #'
 #' @slot name Character string; Name of the layout.
-#' @slot filter.tier.include.regex Character string; as regular expression, tiers matching the expression will be included in the print transcript.
-#' @slot filter.tier.exclude.regex Character string; as regular expression, tiers matching the expression will be excluded from the print transcript.
+#' @slot filter.tier.includeRegEx Character string; as regular expression, tiers matching the expression will be included in the print transcript.
+#' @slot filter.tier.excludeRegEx Character string; as regular expression, tiers matching the expression will be excluded from the print transcript.
 #' @slot transcript.width Integer; width of transcript, -1 for no line wrapping.
 #' @slot speaker.width Integer; width of speaker abbreviation, -1 for full name without shortening.
 #' @slot speaker.ending Character string; string that is added at the end of the speaker name.
@@ -18,7 +18,7 @@
 #' @slot additionalline2.text Character string; Content of additional dummy line 2.
 #' @slot additionalline2.indent Logical; if \code{TRUE} the content of the dummy line 2 will be indented to begin where the content of the annotations start.
 #' @slot brackets.tryToAlign Logical; if \code{TRUE} act will try to align brackets [] for parallel speaking (Attention: experimental function; results may not satisfy).
-#' @slot pauseTier.regex Character string; regular expression to identify pause tier for auto formatting pauses.
+#' @slot pauseTierRegEx Character string; regular expression to identify pause tier for auto formatting pauses.
 #' @slot header.insert Logical; if \code{TRUE} a transcript header is inserted.
 #' @slot header.heading.fromColumnName Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the heading is taken (if \code{object@.header.insert==TRUE})
 #' @slot header.firstInfo.fromColumnName Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the first info is taken (if \code{object@.header.insert==TRUE})
@@ -28,8 +28,8 @@
 methods::setClass("layout", 
 				  representation(
 				  	name                            = "character",
-				  	filter.tier.include.regex       = "character",
-				  	filter.tier.exclude.regex       = "character",
+				  	filter.tier.includeRegEx       = "character",
+				  	filter.tier.excludeRegEx       = "character",
 				  	transcript.width 				= "numeric",
 				  	speaker.width    				= "numeric",
 				  	speaker.ending 					= "character",
@@ -41,7 +41,7 @@ methods::setClass("layout",
 				  	additionalline2.text            = "character",
 				  	additionalline2.indent          = "logical",
 				  	brackets.tryToAlign 			= "logical",
-				  	pauseTier.regex   				= "character",
+				  	pauseTierRegEx   				= "character",
 				  	header.insert 					= "logical",
 				  	header.heading.fromColumnName 	= "character",
 				  	header.firstInfo.fromColumnName = "character",
@@ -49,8 +49,8 @@ methods::setClass("layout",
 				  	arrow.shape  					= "character"
 				  ), prototype = list (
 				  	name                            = "StandardLayout",
-				  	filter.tier.include.regex       = character(),
-				  	filter.tier.exclude.regex       = character(),
+				  	filter.tier.includeRegEx       = character(),
+				  	filter.tier.excludeRegEx       = character(),
 				  	transcript.width 				= 65,
 				  	speaker.width    				= 3,
 				  	speaker.ending 					= ":  ",
@@ -62,7 +62,7 @@ methods::setClass("layout",
 				  	additionalline2.text            = "",
 				  	additionalline2.indent          = FALSE,
 				  	brackets.tryToAlign 			= TRUE,
-				  	pauseTier.regex   				= "",
+				  	pauseTierRegEx   				= "",
 				  	header.insert 					= TRUE,
 				  	header.heading.fromColumnName 	= "resultID",
 				  	header.firstInfo.fromColumnName = "header.firstinfo",
@@ -76,8 +76,8 @@ layout_show <- function (object) {
 	cat("layout object", fill=TRUE)
 	cat("  name                            : ", paste("'", object@name, "'",sep="", collapse=""),fill=TRUE)
 	cat("\n")
-	cat("  filter.tier.include.regex       : ", paste("'", object@filter.tier.include.regex, "'",sep="", collapse=""),fill=TRUE)
-	cat("  filter.tier.exclude.regex       : ", paste("'", object@filter.tier.exclude.regex, "'",sep="", collapse=""),fill=TRUE)
+	cat("  filter.tier.includeRegEx       : ", paste("'", object@filter.tier.includeRegEx, "'",sep="", collapse=""),fill=TRUE)
+	cat("  filter.tier.excludeRegEx       : ", paste("'", object@filter.tier.excludeRegEx, "'",sep="", collapse=""),fill=TRUE)
 	cat("\n")
 	cat("  transcript.width                : ", object@transcript.width, fill=TRUE)
 	cat("\n")
@@ -93,7 +93,7 @@ layout_show <- function (object) {
 	cat("  additionalline2.indent          : ", object@additionalline2.indent, fill=TRUE)
 	cat("\n")
 	cat("  brackets.tryToAlign             : ", object@brackets.tryToAlign, fill=TRUE)
-	cat("  pauseTier.regex                 : ", paste("'", object@pauseTier.regex, "'",sep="", collapse=""),fill=TRUE)
+	cat("  pauseTierRegEx                 : ", paste("'", object@pauseTierRegEx, "'",sep="", collapse=""),fill=TRUE)
 	cat("\n")
 	cat("  header.insert                   : ", object@header.insert, fill=TRUE)
 	cat("  header.heading.fromColumnName   : ", paste("'", object@header.heading.fromColumnName, "'",sep="", collapse=""),fill=TRUE)

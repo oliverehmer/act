@@ -14,9 +14,9 @@ If you want to modify the layout of the print transcripts, create a new layout o
 \describe{
 \item{\code{name}}{Character string; Name of the layout.}
 
-\item{\code{filter.tier.include.regex}}{Character string; as regular expression, tiers matching the expression will be included in the print transcript.}
+\item{\code{filter.tier.includeRegEx}}{Character string; as regular expression, tiers matching the expression will be included in the print transcript.}
 
-\item{\code{filter.tier.exclude.regex}}{Character string; as regular expression, tiers matching the expression will be excluded from the print transcript.}
+\item{\code{filter.tier.excludeRegEx}}{Character string; as regular expression, tiers matching the expression will be excluded from the print transcript.}
 
 \item{\code{transcript.width}}{Integer; width of transcript, -1 for no line wrapping.}
 
@@ -40,7 +40,7 @@ If you want to modify the layout of the print transcripts, create a new layout o
 
 \item{\code{brackets.tryToAlign}}{Logical; if \code{TRUE} act will try to align brackets [] for parallel speaking (Attention: experimental function; results may not satisfy).}
 
-\item{\code{pauseTier.regex}}{Character string; regular expression to identify pause tier for auto formatting pauses.}
+\item{\code{pauseTierRegEx}}{Character string; regular expression to identify pause tier for auto formatting pauses.}
 
 \item{\code{header.insert}}{Logical; if \code{TRUE} a transcript header is inserted.}
 

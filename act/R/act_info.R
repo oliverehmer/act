@@ -41,7 +41,7 @@ info <- function(...) {
 			transcript.name      =character(),
 			length.sec           =double(),
 			length.formatted     =character(),
-			tiers.count          =integer(),
+			tier.count          =integer(),
 			annotations.count    =integer(),
 			words.org.count      =integer(),
 			words.norm.count     =integer(),
@@ -59,19 +59,19 @@ info <- function(...) {
 			for (i in 1:length(x@transcripts)) {
 				#--- words org
 				content.org     <- x@transcripts[[i]]@annotations$content
-				words.org.count <- lapply(content.org, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+				words.org.count <- lapply(content.org, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 				words.org.count <- sum(unlist(words.org.count))
 				
 				#--- words norm
 				content.norm <- x@transcripts[[i]]@annotations$content.norm
-				words.norm.count <- lapply(content.norm, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+				words.norm.count <- lapply(content.norm, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 				words.norm.count <- sum(unlist(words.norm.count))
 				
 				myRow <- data.frame(
 					transcript.name      = x@transcripts[[i]]@name,
 					length.sec           = as.double(x@transcripts[[i]]@length.sec),
 					length.formatted     = helper_format_time(x@transcripts[[i]]@length.sec),
-					tiers.count          = as.integer(nrow(x@transcripts[[i]]@tiers)),
+					tier.count          = as.integer(nrow(x@transcripts[[i]]@tiers)),
 					annotations.count    = nrow(x@transcripts[[i]]@annotations),
 					words.org.count      = words.org.count, 
 					words.norm.count     = words.norm.count, 
@@ -95,22 +95,22 @@ info <- function(...) {
 		#--- Collapse by tier type
 		name.unique <- unique(temp$name)
 		temp2 <- data.frame(tier.name                  =character(),
-						  tiers.count                  =integer(),
-						  transcripts.count            =integer(),
-						  transcripts.names            =character(),
+						  tier.count                  =integer(),
+						  transcript.count            =integer(),
+						  transcript.names            =character(),
 						  annotations.count            =integer(),
 						  words.org.count              =integer(),
 						  words.norm.count             =integer(),
-						  interval.tiers.count         =integer(),
-						  interval.transcripts.count   =integer(),
-						  interval.transcripts.names   =character(),
+						  interval.tier.count         =integer(),
+						  interval.transcript.count   =integer(),
+						  interval.transcript.names   =character(),
 						  interval.annotations.count   =integer(),
 						  interval.words.org.count     =integer(),
 						  interval.words.norm.count    =integer(),
 						  
-						  text.tiers.count             =integer(),
-						  text.transcripts.count       =integer(),
-						  text.transcripts.names       =character(),
+						  text.tier.count             =integer(),
+						  text.transcript.count       =integer(),
+						  text.transcript.names       =character(),
 						  text.annotations.count       =integer(),
 						  text.tiers.words.org.count   =integer(),
 						  text.tiers.words.norm.count  =integer(),
@@ -124,23 +124,23 @@ info <- function(...) {
 				
 				myRow <- data.frame(
 					tier.name                         = name.unique[i],
-					tiers.count 		              = nrow(tiers.current),
-					transcripts.count                 = length(unique(tiers.current$transcript.name)),
-					transcripts.names                 = paste(unique(tiers.current$transcript.name), sep="|", collapse="|"),
+					tier.count 		              = nrow(tiers.current),
+					transcript.count                 = length(unique(tiers.current$transcript.name)),
+					transcript.names                 = paste(unique(tiers.current$transcript.name), sep="|", collapse="|"),
 					annotations.count                 = sum(tiers.current$annotations.count),
 					words.org.count                   = sum(tiers.current$words.org.count),
 					words.norm.count                  = sum(tiers.current$words.norm.count),
 					
-					interval.tiers.count              = nrow(tiers.current.interval),
-					interval.transcripts.count        = length(unique(tiers.current.interval$transcript.name)),
-					interval.transcripts.names        = paste(unique(tiers.current.interval$transcript.name), sep="|", collapse="|"),
+					interval.tier.count              = nrow(tiers.current.interval),
+					interval.transcript.count        = length(unique(tiers.current.interval$transcript.name)),
+					interval.transcript.names        = paste(unique(tiers.current.interval$transcript.name), sep="|", collapse="|"),
 					interval.annotations.count        = sum(tiers.current.interval$annotations.count),
 					interval.words.org.count          = sum(tiers.current.interval$words.org.count),
 					interval.words.norm.count         = sum(tiers.current.interval$words.norm.count),
 					
-					text.tiers.count                  = nrow(tiers.current.text),
-					text.transcripts.count            = length(unique(tiers.current.text$transcript.name)),
-					text.transcripts.names            = paste(unique(tiers.current.text$transcript.name), sep="|", collapse="|"),
+					text.tier.count                  = nrow(tiers.current.text),
+					text.transcript.count            = length(unique(tiers.current.text$transcript.name)),
+					text.transcript.names            = paste(unique(tiers.current.text$transcript.name), sep="|", collapse="|"),
 					text.annotations.count            = sum(tiers.current.text$annotations.count),
 					text.tiers.words.org.count        = sum(tiers.current.text$words.org.count),
 					text.tiers.words.norm.count       = sum(tiers.current.text$words.norm.count),
@@ -161,8 +161,8 @@ info <- function(...) {
 	# INFO about TRANSCRIPT
 	if (!is.null(t)) {
 		#--- tiers
-		tiers.names <- t@tiers$name
-		tiers.count <- nrow(t@tiers)
+		tier.names <- t@tiers$name
+		tier.count <- nrow(t@tiers)
 		
 		#--- tiers detailed
 		tiers.detailed <- t@tiers
@@ -172,10 +172,10 @@ info <- function(...) {
 			#--- number of annotations
 			tiers.detailed$annotations.count[i] <- length(ids)
 			#--- words org
-			words.org.count <- lapply(t@annotations$content[ids], FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+			words.org.count <- lapply(t@annotations$content[ids], FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 			tiers.detailed$words.org.count[i] <- sum(unlist(words.org.count))
 			#--- words norm
-			words.norm.count <- lapply(t@annotations$content.norm[ids], FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+			words.norm.count <- lapply(t@annotations$content.norm[ids], FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 			tiers.detailed$words.norm.count[i] <- sum(unlist(words.norm.count))
 		}
 
@@ -183,11 +183,11 @@ info <- function(...) {
 		annotations.count <- sum(nrow(t@annotations))
 		
 		#--- words org
-		words.org.count <- lapply(t@annotations$content, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+		words.org.count <- lapply(t@annotations$content, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 		words.org.count <- sum(unlist(words.org.count))
 		
 		#--- words norm
-		words.norm.count <- lapply(t@annotations$content.norm, FUN=stringr::str_count, pattern=options()$act.wordCount.regex)
+		words.norm.count <- lapply(t@annotations$content.norm, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 		words.norm.count <- sum(unlist(words.norm.count))
 		
 		info <- list(length.formatted  = helper_format_time(t@length.sec),
@@ -195,8 +195,8 @@ info <- function(...) {
 					 words.org.count   = words.org.count,
 					 words.norm.count  = words.norm.count,					 
 					 annotations.count = annotations.count,
-					 tiers.count       = tiers.count,
-					 tiers.names       = tiers.names,
+					 tier.count       = tier.count,
+					 tier.names       = tier.names,
 					 tiers.detailed    = tiers.detailed
 					 )
 		return(info)

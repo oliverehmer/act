@@ -56,7 +56,7 @@ The package uses the following options.
 * \code{act.separator_between_intervals} Character; Single character that is used for separating intervals when creating the full text.
 * \code{act.separator_between_tiers} Character; Single character that is used for separating tiers when creating the full text.
 * \code{act.separator_between_words} Character string; regular expression with alternatives that count as separators between words. Used for preparing the concordance.
-* \code{act.wordCount.regex} Character string; regular expression that is used to count words.
+* \code{act.wordCountRegEx} Character string; regular expression that is used to count words.
 }
 \examples{
 library(act)

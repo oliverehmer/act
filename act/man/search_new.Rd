@@ -12,11 +12,11 @@ search_new(
   name = "mysearch",
   resultidprefix = "result",
   filterTranscriptNames = NULL,
-  filterTranscriptInclude = NULL,
-  filterTranscriptExclude = NULL,
+  filterTranscriptIncludeRegEx = NULL,
+  filterTranscriptExcludeRegEx = NULL,
   filterTierNames = NULL,
-  filterTierInclude = NULL,
-  filterTierExclude = NULL,
+  filterTierIncludeRegEx = NULL,
+  filterTierExcludeRegEx = NULL,
   filterSectionStartsec = NULL,
   filterSectionEndsec = NULL,
   concordanceMake = TRUE,
@@ -41,15 +41,15 @@ search_new(
 
 \item{filterTranscriptNames}{Vector of character strings; names of transcripts to be included.}
 
-\item{filterTranscriptInclude}{Character string; as regular expression, limit search to certain transcripts matching the expression.}
+\item{filterTranscriptIncludeRegEx}{Character string; as regular expression, limit search to certain transcripts matching the expression.}
 
-\item{filterTranscriptExclude}{Character string; as regular expression, exclude certain transcripts matching the expression.}
+\item{filterTranscriptExcludeRegEx}{Character string; as regular expression, exclude certain transcripts matching the expression.}
 
 \item{filterTierNames}{Vector of character strings; names of tiers to be included.}
 
-\item{filterTierInclude}{Character string; as regular expression, limit search to certain tiers matching the expression.}
+\item{filterTierIncludeRegEx}{Character string; as regular expression, limit search to certain tiers matching the expression.}
 
-\item{filterTierExclude}{Character string; as regular expression, exclude certain tiers matching the expression.}
+\item{filterTierExcludeRegEx}{Character string; as regular expression, exclude certain tiers matching the expression.}
 
 \item{filterSectionStartsec}{Double; start time of region for search.}
 

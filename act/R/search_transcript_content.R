@@ -16,29 +16,60 @@ search_transcript_content <- function(t, s) {
 	
 	temp <- NULL
 	
-	#=== get matches
-	myAnnotations <- t@annotations
+	#=== TIER filter
+	#get all tier names from selected transcript
+	tiernames.all    <- t@tiers$name
+	if (is.null(tiernames.all)) {
+		tiernames.all <- as.character()
+	}
 	
+	#filter by tier names in search
+	filterTierNames <- as.character() 
+	if (!is.null(s@filter.tier.names)) {		
+		filterTierNames <- s@filter.tier.names
+	}
+	if (length(s@filter.tier.names)==0) {
+		filterTierNames <- tiernames.all
+	} else {
+		filterTierNames <- intersect(tiernames.all, filterTierNames)
+	}
+	#filter by regex in search
+	if (length(s@filter.tier.includeRegEx)!=0) {
+		if (s@filter.tier.includeRegEx!="") {
+			filterTierNames <- grep(pattern=s@filter.tier.includeRegEx, filterTierNames, value=TRUE)
+		}
+	}
+	if (length(s@filter.tier.excludeRegEx)!=0) {
+		if (s@filter.tier.excludeRegEx!="") {
+			filterTierNames <- filterTierNames[-grep(pattern=s@filter.tier.excludeRegEx, filterTierNames)]
+		}
+	}
+	myAnnotations <- t@annotations[t@annotations$tier.name %in% filterTierNames,]
+
 	#=== filter 
 	#---tiers
-	if(length(s@filter.tier.exclude)==0) {s@filter.tier.exclude <-""}
-	if(length(s@filter.tier.include)==0) {s@filter.tier.include <-""} 
+	#if(length(s@filter.tier.excludeRegEx)==0) {s@filter.tier.excludeRegEx <-""}
+	#if(length(s@filter.tier.includeRegEx)==0) {s@filter.tier.includeRegEx <-""} 
 	
-	include <- c(1:length(myAnnotations$content))
+	#include <- c(1:length(myAnnotations$content))
 	#if any filter is set
-	if (!s@filter.tier.exclude=="" | !s@filter.tier.include=="" ) 	{
-		#if include filter is set
-		if (s@filter.tier.include!="") {
-			include <- grep(s@filter.tier.include, myAnnotations$tier.name, ignore.case =TRUE, perl = TRUE)
-		}
+	#if (!s@filter.tier.excludeRegEx=="" | !s@filter.tier.includeRegEx=="" ) 	{
+	#	#if include filter is set
+	#	if (s@filter.tier.includeRegEx!="") {
+	#		include <- grep(s@filter.tier.includeRegEx, myAnnotations$tier.name, ignore.case =TRUE, perl = TRUE)
+	#	}
 		
-		#if exclude filter is set
-		if (!s@filter.tier.exclude=="") {
-			exclude	<- grep(s@filter.tier.exclude, myAnnotations$tier.name, ignore.case =TRUE, perl = TRUE)
-			include <- setdiff(include, exclude)
-		}
-		myAnnotations <- myAnnotations[include,]
-	}
+	#	#if exclude filter is set
+	#	if (!s@filter.tier.excludeRegEx=="") {
+	#		exclude	<- grep(s@filter.tier.excludeRegEx, myAnnotations$tier.name, ignore.case =TRUE, perl = TRUE)
+	#		include <- setdiff(include, exclude)
+	#	}
+	#	myAnnotations <- myAnnotations[include,]
+	#}
+
+	
+	
+	
 	
 	#--- time section
 	if (length(s@filter.section.startsec)!=0) {

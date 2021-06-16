@@ -35,9 +35,9 @@ on the object.
 
 \item{\code{filter.tier.names}}{Vector of character strings; names of tiers to include in the search. If the value is \code{character()} or \code{""} filter will be ignored.}
 
-\item{\code{filter.tier.include}}{Character string; Regular expression that defines which tiers should be INcluded in the search (matching the name of the tier).}
+\item{\code{filter.tier.includeRegEx}}{Character string; Regular expression that defines which tiers should be INcluded in the search (matching the name of the tier).}
 
-\item{\code{filter.tier.exclude}}{Character string; Regular expression that defines which tiers should be EXcluded in the search (matching the name of the tier).}
+\item{\code{filter.tier.excludeRegEx}}{Character string; Regular expression that defines which tiers should be EXcluded in the search (matching the name of the tier).}
 
 \item{\code{filter.section.startsec}}{Double; Time value in seconds, limiting the search to a certain time span in each transcript, defining the start of the search window.}
 

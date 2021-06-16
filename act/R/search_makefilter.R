@@ -130,7 +130,7 @@ search_makefilter <- function( x,
 	filterTranscriptNames <- filterTranscriptNames.new
 	
 	#store names in a named list
-	meta <- list(transcripts.names=filterTranscriptNames, tiers.names=filterTierNames)
+	meta <- list(transcript.names=filterTranscriptNames, tier.names=filterTierNames)
 	#return this
 	return(meta)
 }

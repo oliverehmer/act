@@ -11,8 +11,8 @@
 #' @param pattern Character string; search pattern as regular expression
 #' @param searchMode Character string; takes the following values: \code{content}, \code{fulltext} (=default, includes both full text modes), \code{fulltext.byTime}, \code{fulltext.byTier}.
 #' @param searchNormalized Logical; if \code{TRUE} function will search in the normalized content, if \code{FALSE} function will search in the original content.
-#' @param filterTierInclude Character string; limit search to tiers that match the regular expression
-#' @param filterTierExclude Character string; limit search to tiers that match the regular expression
+#' @param filterTierIncludeRegEx Character string; limit search to tiers that match the regular expression
+#' @param filterTierExcludeRegEx Character string; limit search to tiers that match the regular expression
 #' @param destinationColumn Character string; name of column where results of sub search will be stored
 #' @param deleteLinesWithNoResults Logical; if \code{TRUE} search results will be deleted for which the sub search does not give any results
 #' @param excludeHitsWithinSameTier Logical; if \code{TRUE} the function will not add hits from the same tier as the original search result; if \code{FALSE} hits from the same tier as the original search result will be included.
@@ -30,8 +30,8 @@ search_sub <- function(x,
 					   pattern, 
 					   searchMode=c("content", "fulltext", "fulltext.byTime", "fulltext.byTier"),
 					   searchNormalized=TRUE,
-					   filterTierInclude="", 
-					   filterTierExclude="", 
+					   filterTierIncludeRegEx="", 
+					   filterTierExcludeRegEx="", 
 					   destinationColumn="subsearch", 
 					   deleteLinesWithNoResults=FALSE, 
 					   excludeHitsWithinSameTier=TRUE) {
@@ -40,8 +40,8 @@ search_sub <- function(x,
 	#s <- mysearch
 	#pattern <- myRegEx
 	#destinationColumn <-"subsearch"
-	#filterTierInclude <-""
-	#filterTierExclude <-""
+	#filterTierIncludeRegEx <-""
+	#filterTierExcludeRegEx <-""
 	#deleteLinesWithNoResults <- FALSE
 	#excludeHitsWithinSameTier <- TRUE
 	
@@ -75,9 +75,9 @@ search_sub <- function(x,
 									  pattern=pattern, 
 									  searchMode=searchMode,
 									  searchNormalized=searchNormalized,
-									  filterTranscriptInclude=s@results$transcript.name[i], 
-									  filterTierInclude=filterTierInclude, 
-									  filterTierExclude=filterTierExclude, 
+									  filterTranscriptIncludeRegEx=s@results$transcript.name[i], 
+									  filterTierIncludeRegEx=filterTierIncludeRegEx, 
+									  filterTierExcludeRegEx=filterTierExcludeRegEx, 
 									  filterSectionStartsec=s@results$startSec[i], 
 									  filterSectionEndsec=s@results$endSec[i], 
 									  concordanceMake=FALSE)

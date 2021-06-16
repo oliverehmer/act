@@ -32,8 +32,8 @@ test@transcripts[["update_destination"]]@annotations
 
 # Compare the transcript in the original and in the modified corpus object. 
 # The update transcript objects are gone:
-act::info_summarized(examplecorpus)$transcripts.names
-act::info_summarized(test)$transcripts.names
+act::info_summarized(examplecorpus)$transcript.names
+act::info_summarized(test)$transcript.names
 	
 #Have a look at the history of the corpus object
 test@history

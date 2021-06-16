@@ -145,10 +145,10 @@ search_results_import <- function(path,
 	#s@search.normalized          <- searchNormalized
 	#s@filter.section.startsec                  <- if(!is.na(startSec)) {if(!is.null(startSec)) {startSec}} else {s@filter.section.startsec}
 	#s@filter.section.endsec                    <- if(!is.na(endSec))   {if(!is.null(endSec))   {endSec}}   else {s@filter.section.endsec}
-	#s@filter.tier.include      <- ""
-	#s@filter.tier.exclude      <- ""
-	#s@filter.transcript.includeRegEx  <- if(!is.na(filterTranscriptInclude))   {if(!is.null(filterTranscriptInclude))   {filterTranscriptInclude}}   else {s@filter.transcript.includeRegEx }
-	#s@filter.transcript.excludeRegEx  <- if(!is.na(filterTranscriptExclude))   {if(!is.null(filterTranscriptExclude))   {filterTranscriptExclude}}   else {s@filter.transcript.excludeRegEx }
+	#s@filter.tier.includeRegEx      <- ""
+	#s@filter.tier.excludeRegEx      <- ""
+	#s@filter.transcript.includeRegEx  <- if(!is.na(filterTranscriptIncludeRegEx))   {if(!is.null(filterTranscriptIncludeRegEx))   {filterTranscriptIncludeRegEx}}   else {s@filter.transcript.includeRegEx }
+	#s@filter.transcript.excludeRegEx  <- if(!is.na(filterTranscriptExcludeRegEx))   {if(!is.null(filterTranscriptExcludeRegEx))   {filterTranscriptExcludeRegEx}}   else {s@filter.transcript.excludeRegEx }
 	s@results <- temp
 	
 	return(s)

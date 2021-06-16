@@ -11,11 +11,11 @@
 #' @param name Character string; name of the search. Will be used, for example, as name of the sub folder when creating media cuts.
 #' @param resultidprefix Character string; prefix for the name of the consecutively numbered search results.
 #' @param filterTranscriptNames Vector of character strings; names of transcripts to be included. 
-#' @param filterTranscriptInclude Character string; as regular expression, limit search to certain transcripts matching the expression.
-#' @param filterTranscriptExclude Character string; as regular expression, exclude certain transcripts matching the expression.
+#' @param filterTranscriptIncludeRegEx Character string; as regular expression, limit search to certain transcripts matching the expression.
+#' @param filterTranscriptExcludeRegEx Character string; as regular expression, exclude certain transcripts matching the expression.
 #' @param filterTierNames Vector of character strings; names of tiers to be included. 
-#' @param filterTierInclude Character string; as regular expression, limit search to certain tiers matching the expression.
-#' @param filterTierExclude Character string; as regular expression, exclude certain tiers matching the expression.
+#' @param filterTierIncludeRegEx Character string; as regular expression, limit search to certain tiers matching the expression.
+#' @param filterTierExcludeRegEx Character string; as regular expression, exclude certain tiers matching the expression.
 #' @param filterSectionStartsec Double; start time of region for search.
 #' @param filterSectionEndsec Double; end time of region for search. 
 #' @param concordanceMake Logical; if \code{TRUE} concordance will be added to search results.
@@ -34,22 +34,22 @@
 #' 
 search_new <- function(x, 
 					   pattern, 
-					   searchMode=c("content", "fulltext", "fulltext.byTime", "fulltext.byTier"),
-					   searchNormalized=TRUE, 
-					   name="mysearch",  
-					   resultidprefix         ="result", 
+					   searchMode              = c("content", "fulltext", "fulltext.byTime", "fulltext.byTier"),
+					   searchNormalized        = TRUE, 
+					   name                    ="mysearch",  
+					   resultidprefix          ="result", 
 					   filterTranscriptNames   =NULL,
-					   filterTranscriptInclude =NULL, 
-					   filterTranscriptExclude =NULL, 
+					   filterTranscriptIncludeRegEx =NULL, 
+					   filterTranscriptExcludeRegEx =NULL, 
 					   filterTierNames=NULL,
-					   filterTierInclude=NULL, 
-					   filterTierExclude=NULL, 
+					   filterTierIncludeRegEx=NULL, 
+					   filterTierExcludeRegEx=NULL, 
 					   filterSectionStartsec=NULL, 
 					   filterSectionEndsec=NULL,  
 					   concordanceMake=TRUE, 
 					   concordanceWidth=NULL,
-					   cutSpanBeforesec =0,
-					   cutSpanAftersec =0,
+					   cutSpanBeforesec = 0,
+					   cutSpanAftersec = 0,
 					   runSearch=TRUE) {
 	
 	#=== capture original x
@@ -69,37 +69,29 @@ search_new <- function(x,
 
 	#=== create search object
 	s <- methods::new("search")
-	s@name          			<- name
-	s@pattern                   <- pattern
-	s@search.mode               <- searchMode
-	s@search.normalized         <- searchNormalized
-	s@resultidprefix            <- resultidprefix
+	s@name          					<- name
+	s@pattern                   		<- pattern
+	s@search.mode               		<- searchMode
+	s@search.normalized         		<- searchNormalized
+	s@resultidprefix            		<- resultidprefix
 	
-	s@filter.transcript.names   <- if(!is.null(filterTranscriptNames))     {filterTranscriptNames}     else {s@filter.transcript.names}
-	s@filter.transcript.includeRegEx  <- if(!is.null(filterTranscriptInclude))   {filterTranscriptInclude}   else {s@filter.transcript.includeRegEx }
-	s@filter.transcript.excludeRegEx  <- if(!is.null(filterTranscriptExclude))   {filterTranscriptExclude}   else {s@filter.transcript.excludeRegEx }
+	s@filter.transcript.names   		<- if(!is.null(filterTranscriptNames))  		{filterTranscriptNames}     	else {s@filter.transcript.names}
+	s@filter.transcript.includeRegEx	<- if(!is.null(filterTranscriptIncludeRegEx))   {filterTranscriptIncludeRegEx}  else {s@filter.transcript.includeRegEx }
+	s@filter.transcript.excludeRegEx	<- if(!is.null(filterTranscriptExcludeRegEx))   {filterTranscriptExcludeRegEx}  else {s@filter.transcript.excludeRegEx }
 	
-	s@filter.tier.names         <- if(!is.null(filterTierNames))           {filterTierNames}           else {s@filter.tier.names}
-	s@filter.tier.include       <- if(!is.null(filterTierInclude))         {filterTierInclude}         else {s@filter.tier.include}
-	s@filter.tier.exclude       <- if(!is.null(filterTierExclude))         {filterTierExclude}         else {s@filter.tier.exclude}
+	s@filter.tier.names         		<- if(!is.null(filterTierNames))        		{filterTierNames}           	else {s@filter.tier.names}
+	s@filter.tier.includeRegEx       	<- if(!is.null(filterTierIncludeRegEx)) 		{filterTierIncludeRegEx}        else {s@filter.tier.includeRegEx}
+	s@filter.tier.excludeRegEx       	<- if(!is.null(filterTierExcludeRegEx))         {filterTierExcludeRegEx}        else {s@filter.tier.excludeRegEx}
 	
-	s@filter.section.startsec   <- if(!is.null(filterSectionStartsec))     {filterSectionStartsec}     else {s@filter.section.startsec}
-	s@filter.section.endsec     <- if(!is.null(filterSectionEndsec))       {filterSectionEndsec}       else {s@filter.section.endsec}
+	s@filter.section.startsec   		<- if(!is.null(filterSectionStartsec))  		{filterSectionStartsec}     	else {s@filter.section.startsec}
+	s@filter.section.endsec     		<- if(!is.null(filterSectionEndsec))    		{filterSectionEndsec}       	else {s@filter.section.endsec}
 	
-	s@concordance.make          <- concordanceMake
-	s@concordance.width         <- if(!is.null(concordanceWidth))   {concordanceWidth}   else {s@concordance.width}
-	s@cuts.span.beforesec       <- as.double(cutSpanBeforesec)
-	s@cuts.span.aftersec        <- as.double(cutSpanAftersec)	
+	s@concordance.make          		<- concordanceMake
+	s@concordance.width         		<- if(!is.null(concordanceWidth))   {concordanceWidth}   else {s@concordance.width}
+	s@cuts.span.beforesec       		<- as.double(cutSpanBeforesec)
+	s@cuts.span.aftersec        		<- as.double(cutSpanAftersec)	
 	
-	#s@cuts.cutlist.mac               <- 
-	#s@cuts.cutlist.win               <- 
-	
-	s@x.name                     <- x@name
-
-	#s@results                   <- 
-	#s@results.nr                <- 
-	#s@results.tiers.nr          <- 
-	#s@results.transcripts.nr    <- 
+	s@x.name                    		<- x@name
 
 	#=== run the search
 	if (runSearch) {

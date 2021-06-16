@@ -53,11 +53,11 @@ table(t2@annotations$tier.name)
 # Use act::search_makefilter() first to get the tier names, 
 # in this case search for tiers with a capital 'I',
 # which is the second tier, called 'ISanti'
-mymeta <- act::search_makefilter(examplecorpus, 
+myfilter <- act::search_makefilter(examplecorpus, 
 				filterTranscriptNames=t2@name,
 				filterTierIncludeRegEx="I"
 				)
-t2 <- act::transcripts_filter_single(t1, filterTierNames=mymeta$tier.names)
+t2 <- act::transcripts_filter_single(t1, filterTierNames=myfilter$tier.names)
 t2@tiers
 table(t2@annotations$tier.name)
 

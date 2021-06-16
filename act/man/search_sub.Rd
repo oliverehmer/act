@@ -10,8 +10,8 @@ search_sub(
   pattern,
   searchMode = c("content", "fulltext", "fulltext.byTime", "fulltext.byTier"),
   searchNormalized = TRUE,
-  filterTierInclude = "",
-  filterTierExclude = "",
+  filterTierIncludeRegEx = "",
+  filterTierExcludeRegEx = "",
   destinationColumn = "subsearch",
   deleteLinesWithNoResults = FALSE,
   excludeHitsWithinSameTier = TRUE
@@ -28,9 +28,9 @@ search_sub(
 
 \item{searchNormalized}{Logical; if \code{TRUE} function will search in the normalized content, if \code{FALSE} function will search in the original content.}
 
-\item{filterTierInclude}{Character string; limit search to tiers that match the regular expression}
+\item{filterTierIncludeRegEx}{Character string; limit search to tiers that match the regular expression}
 
-\item{filterTierExclude}{Character string; limit search to tiers that match the regular expression}
+\item{filterTierExcludeRegEx}{Character string; limit search to tiers that match the regular expression}
 
 \item{destinationColumn}{Character string; name of column where results of sub search will be stored}
 

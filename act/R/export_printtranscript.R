@@ -69,17 +69,17 @@ export_printtranscript <- function (t,
 		filterTierNames<- t@tiers$name
 	}
 	#filter the filterTierNames by regular expressions
-	if (!is.null(l@filter.tier.include.regex)) {
-		if (length(l@filter.tier.include.regex)>0) {
-			if (l@filter.tier.include.regex!="") {
-				filterTierNames <- grep(pattern=l@filter.tier.include.regex, filterTierNames, value=TRUE)
+	if (!is.null(l@filter.tier.includeRegEx)) {
+		if (length(l@filter.tier.includeRegEx)>0) {
+			if (l@filter.tier.includeRegEx!="") {
+				filterTierNames <- grep(pattern=l@filter.tier.includeRegEx, filterTierNames, value=TRUE)
 			}
 		}
 	}
-	if (!is.null(l@filter.tier.exclude.regex)) {
-		if (length(l@filter.tier.exclude.regex)>0) {
-			if (l@filter.tier.exclude.regex!="") {
-				filterTierNames <- filterTierNames[-grep(pattern=l@filter.tier.exclude.regex, filterTierNames)]
+	if (!is.null(l@filter.tier.excludeRegEx)) {
+		if (length(l@filter.tier.excludeRegEx)>0) {
+			if (l@filter.tier.excludeRegEx!="") {
+				filterTierNames <- filterTierNames[-grep(pattern=l@filter.tier.excludeRegEx, filterTierNames)]
 			}
 		}
 	}
@@ -138,12 +138,12 @@ export_printtranscript <- function (t,
 	#===================================== speakers
 	#--- get tier names
 	tierNames 				<- as.character(unique(myAnnotations$tier.name))
-	if (l@pauseTier.regex=="") {
+	if (l@pauseTierRegEx=="") {
 		#if no pause filter -> get all names
 		tierNames_withoutPause <- tierNames
 	} else {
 		#if  pause filter -> get all names but the pause tier
-		tierNames_withoutPause	<- tierNames[setdiff(1:length(tierNames), grep(l@pauseTier.regex, tierNames, ignore.case =TRUE, perl = TRUE))]
+		tierNames_withoutPause	<- tierNames[setdiff(1:length(tierNames), grep(l@pauseTierRegEx, tierNames, ignore.case =TRUE, perl = TRUE))]
 	}
 	
 	# width of the speaker abbreviations (without end character)
@@ -163,9 +163,9 @@ export_printtranscript <- function (t,
 	included_speakers_pos <- !sameSpeaker_pos
 	
 	#--- pause tier ? --> set to ""
-	if (l@pauseTier.regex!="") {
+	if (l@pauseTierRegEx!="") {
 		#set pauses to ""
-		pauses_pos <- grep(l@pauseTier.regex, myAnnotations$speaker, ignore.case =TRUE, perl = TRUE)
+		pauses_pos <- grep(l@pauseTierRegEx, myAnnotations$speaker, ignore.case =TRUE, perl = TRUE)
 		myAnnotations$speaker[pauses_pos] <- ""
 		included_speakers_pos[pauses_pos] <- FALSE
 	}
