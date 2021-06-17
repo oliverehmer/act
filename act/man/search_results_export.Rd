@@ -10,7 +10,8 @@ search_results_export(
   sheetNameXLSX = "data",
   saveAsCSV = FALSE,
   encodingCSV = "UTF-8",
-  separatorCSV = ","
+  separatorCSV = ",",
+  overwrite = TRUE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ search_results_export(
 \item{encodingCSV}{Character string; text encoding for CSV files.}
 
 \item{separatorCSV}{Character; single character that is used to separate the columns.}
+
+\item{overwrite}{Logical; if \code{TRUE} existing files will be overwritten}
 }
 \description{
 Search results from a search object will be saved to a Excel-XLSX or a CSV (comma separated values) file.

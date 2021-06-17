@@ -45,7 +45,7 @@ search_openresult_inelan  <- function(x,
 	path.elan<- getOption("act.path.elan", default="")
 	if(path.elan=="") {
 		stop("ELAN not found. Please set the path to the ELAN executable in the option 'act.path.elan' using options(act.path.elan='PATHTOYOURELANEXECUTABLE')")
-	}else {
+	} else {
 		if(!file.exists(path.elan)) {
 			stop("ELAN not found. Please set the path to the ELAN executable in the option 'act.path.elan' using options(act.path.elan='PATHTOYOURELANEXECUTABLE')")
 		}	
@@ -128,7 +128,12 @@ search_openresult_inelan  <- function(x,
 	
 	if(file.exists(file.path.pfsx)) {
 		#--- open eaf file
-		cmd <- sprintf("open %s -a %s",  shQuote(file.path.eaf), shQuote(path.elan))
+		if (helper_detect_os()=="windows" ){
+			cmd <- sprintf("%s %s",   shQuote(path.elan), shQuote(file.path.eaf))
+		} else {
+			cmd <- sprintf("open %s -a %s",  shQuote(file.path.eaf), shQuote(path.elan))
+		}
+		#--- open file
 		rslt <- system(cmd, wait=FALSE)
 	}
 }

@@ -11,7 +11,7 @@
 #' @param play Logical; If \code{TRUE} selection will be played.
 #' @param closeAfterPlaying Logical; If \code{TRUE} TextGrid editor will be closed after playing (Currently non functional!)
 #' @param filterMediaFile Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is uncompressed audio > compressed audio.
-#' 
+#' @param delayBeforeOpen Double; Time in seconds before the section will be opened in Praat. This is useful if Praat opens but the section does not. In that case increase the delay. 
 #' @export
 #'
 #' @examples
@@ -29,7 +29,8 @@ search_openresult_inpraat  <- function(x,
 									   resultNr, 
 									   play=TRUE, 
 									   closeAfterPlaying=FALSE, 
-									   filterMediaFile=c('.*\\.(aiff|aif|wav)', '.*\\.mp3') ) {
+									   filterMediaFile=c('.*\\.(aiff|aif|wav)', '.*\\.mp3'), 
+									   delayBeforeOpen=0.5) {
 	
 	# result <- mysearch@results[1,]
 	# x <- examplecorpus
@@ -41,8 +42,12 @@ search_openresult_inpraat  <- function(x,
 	
 	
 	#--- check for sendpraat
-	if (file.exists(options()$act.path.sendpraat)==FALSE)	{
-		stop("Sendpraat not found. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
+	if (is.null(options()$act.path.praat)) {
+		stop("Path to sendpraat is not set found. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
+	} else {
+		if (file.exists(options()$act.path.sendpraat)==FALSE)	{
+			stop("Sendpraat not found. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
+		}
 	}
 	
 	#--- get  corresponding transcript
@@ -100,38 +105,46 @@ search_openresult_inpraat  <- function(x,
 	}
 	
 	if(file.exists(tempScriptPath)) {
-		#-- execute script WITH waiting
-		#this works fine on mac
-		#cmd <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", shQuote(options()$act.path.sendpraat), tempScriptPath)
-		#rslt <- system(cmd, intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
+		
+		#but produce a delay
+		Sys.sleep(delayBeforeOpen)
 		
 		#run script via sendpraat 
 		cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", shQuote(options()$act.path.sendpraat), tempScriptPath)
 		rslt <- system(cmd, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
-
+		
 		# if execution of sendpraat resulted in an error, try to start praat
 		#if intern =FALSE the values will be
-		#success rslt=1
-		#fail    rslt=0
-		#if intern=TRUE the following is needed
-		#if (!is.null(attributes(rslt)) ) {
+		#success rslt=0
+		#fail    rslt=1
 		if (rslt==1){
-			if (file.exists(options()$act.path.praat)==FALSE)	{
-				stop("Praat is not running. Please start Praat first. To start Praat automatically indicate its location 'options(act.path.praat = ...)'.")
+			if (is.null(options()$act.path.praat)) {
+				stop("Praat is not running. And the path to the your Praat executable is not set. Please start Praat first or indicate its location with 'options(act.path.praat = ...)'.")
+			} else {
+				if (file.exists(options()$act.path.praat)==FALSE)	{
+					stop("Praat is not running. Please start Praat first. To start Praat automatically indicate its location 'options(act.path.praat = ...)'.")
+				}
+			}
+		
+			#start praat 
+			if (helper_detect_os()=="windows") {
+				#start praat WITHOUT waiting for it to finish
+				cmd2 <- sprintf("%s", shQuote(options()$act.path.praat))
+				rslt <- system(cmd2, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=FALSE)
+				
+			} else {
+				#start praat WITH waiting
+				cmd2 <- sprintf("open %s", shQuote(options()$act.path.praat))
+				rslt <- system(cmd2, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
 			}
 			
-			#---the following works fine on mac
-			#start praat
-			#rslt <- system(paste ("open" , shQuote(options()$act.path.praat)), intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
-			#execute script again
-			#rslt = system(cmd, intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
+			#but produce a delay
+			Sys.sleep(delayBeforeOpen)
 			
-			#start praat without waiting
-			cmd2 <- sprintf("open %s", shQuote(options()$act.path.praat))
-			rslt <- system(cmd2, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
-
 			#run script via sendpraat 
+			cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", shQuote(options()$act.path.sendpraat), tempScriptPath)
 			rslt <- system(cmd, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
+			
 		}
 		#delete temporary script
 		file.remove(tempScriptPath)

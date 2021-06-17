@@ -99,7 +99,7 @@ search_cuts_media <- function(x,
 	if (is.null(outputFolder)) {
 		output_folder_cutlist <- "."
 	} else {
-		output_folder_cutlist <- normalizePath(outputFolder)
+		output_folder_cutlist <- normalizePath(outputFolder, winslash = "/")
 	}
 	if (!is.null(cutSpanBeforesec)) 	{
 		if (length(cutSpanBeforesec)!=1) {
@@ -246,10 +246,12 @@ search_cuts_media <- function(x,
 					
 					output_folder_result_all <- unique(output_folder_result_all)
 					if (length(output_folder_result_all)>0) {
-						cmd_makedir_win  <- stringr::str_flatten(stringr::str_replace_all('IF NOT EXIST "OUTFOLDER" ( md "OUTFOLDER" )', "OUTFOLDER", output_folder_result_all), collapse='\n')
+						#cmd_makedir_win  <- stringr::str_flatten(stringr::str_replace_all('IF NOT EXIST "OUTFOLDER" ( md "OUTFOLDER" )', "OUTFOLDER", output_folder_result_all), collapse='\n')
+						cmd_makedir_win  <- stringr::str_flatten(sprintf('IF NOT EXIST "%s" ( md "%s" )', output_folder_result_all, output_folder_result_all), collapse='\n')
 						cutlist_win <- c(cutlist_win, cmd_makedir_win)
 						
-						cmd_makedir_mac  <- stringr::str_flatten(stringr::str_replace_all('mkdir -p "OUTFOLDER"', "OUTFOLDER", output_folder_result_all), collapse='\n')
+						#cmd_makedir_mac  <- stringr::str_flatten(stringr::str_replace_all('mkdir -p "OUTFOLDER"', "OUTFOLDER", output_folder_result_all), collapse='\n')
+						cmd_makedir_mac  <- stringr::str_flatten(sprintf('mkdir -p "%s"', output_folder_result_all), collapse='\n')
 						cutlist_mac <- c(cutlist_mac, cmd_makedir_mac)
 					}
 					
@@ -284,11 +286,13 @@ search_cuts_media <- function(x,
 					#=== destination path
 					out_filepath <- rep("",3)
 					filename <- as.character(s@results[i, filename.fromColumnName])
+					
 					#replace everything that is not allowed in file names
 					filename <- stringr::str_replace_all(filename, '/', "_")
 					filename <- stringr::str_replace_all(filename, '\\\\', "_")
 					filename <- stringr::str_replace_all(filename, '^\\.', "")
-					out_filepath[1] <- file.path(output_folder_result[1], paste(filename, ".",      out_suffix, sep=""))
+					
+					out_filepath[1] <- file.path(output_folder_result[1], paste(filename, ".",     out_suffix, sep=""))
 					out_filepath[2] <- file.path(output_folder_result[2], paste(filename, "_ch1.", out_suffix, sep=""))
 					out_filepath[3] <- file.path(output_folder_result[3], paste(filename, "_ch2.", out_suffix, sep=""))
 					
@@ -298,16 +302,16 @@ search_cuts_media <- function(x,
 					endSec 		<- min(s@results$endSec[i] + s@cuts.span.aftersec, t@length.sec)
 					
 					#--- replace general place holders	
-					cmd <- 	stringr::str_replace_all(cmd, "INFILEPATH", 				input_paths[j])
 					cmd <- 	stringr::str_replace_all(cmd, "TIMESTART\\b", 			    as.character(startSec))
 					cmd <- 	stringr::str_replace_all(cmd, "TIMESTARTMINUS10SECONDS",	as.character(max(0, startSec - 10)))
 					cmd <- 	stringr::str_replace_all(cmd, "TIMEDURATION", 		     	as.character(endSec-startSec))
 					
+		
+					#--- file paths 
+					cmd    <- 	stringr::str_replace_all(cmd, "INFILEPATH", 				input_paths[j])
+					
 					#--- versions
-					cmd    <- rep(cmd,3)
-					cmd[1] <- 	stringr::str_replace_all(cmd[1], "OUTFILEPATH", out_filepath[1])			
-					cmd[2] <- 	stringr::str_replace_all(cmd[2], "OUTFILEPATH", out_filepath[2])
-					cmd[3] <- 	stringr::str_replace_all(cmd[3], "OUTFILEPATH", out_filepath[3])											
+					cmd    <-   rep(cmd,3)
 					
 					if (videoCodecCopy==TRUE) {
 						cmd[1]  <- 	stringr::str_replace_all(cmd[1], " OPTIONS ", " -c:v copy ")
@@ -319,6 +323,11 @@ search_cuts_media <- function(x,
 						cmd[3] <- 	stringr::str_replace_all(cmd[3], " OPTIONS ", " -af \"pan=1c|c0=c1\" ")
 					}
 					
+					cmd[1] <- 	stringr::str_replace_all(cmd[1], "OUTFILEPATH", out_filepath[1])			
+					cmd[2] <- 	stringr::str_replace_all(cmd[2], "OUTFILEPATH", out_filepath[2])
+					cmd[3] <- 	stringr::str_replace_all(cmd[3], "OUTFILEPATH", out_filepath[3])											
+					
+
 					#old panning options: c0=1.0*c0+0.0*c1
 					
 					#====== make the ffmpeg command block
@@ -328,25 +337,33 @@ search_cuts_media <- function(x,
 
 					#======  make some replacements
 					#for windows 
-					cutlist_win <-  stringr::str_flatten(cutlist_win)
-					cutlist_win <-  stringr::str_replace_all(cutlist_win, "/", "\\\\")
-					#for mac 
-					cutlist_mac <- stringr::str_replace_all(cutlist_mac, "\\\\", "/")
+					cutlist_win <- stringr::str_flatten(cutlist_win)
+					cutlist_win <- stringr::str_replace_all(cutlist_win, "/", "\\\\")
+
+					#for mac : I can not remember what this was useful for
+					#cutlist_mac <- stringr::str_replace_all(cutlist_mac, "\\\\", "/")
+					
+					
+					#--- assign to s@
+					#OLD for mac, add that it is an executable
+					#s@results[i, "cuts.cutlist.mac"] <- stringr::str_flatten(c("#!/bin/sh", cutlist_mac), collapse="\n")
+					
+					s@results[i, "cuts.cutlist.mac"] <- stringr::str_flatten(cutlist_mac, collapse="\n")
+					s@results[i, "cuts.cutlist.win"] <- stringr::str_flatten(cutlist_win, collapse="\n")
 					
 					#====== add blocks
 					#--- to collected lists
 					cutlist_total_mac <- c(cutlist_total_mac, cutlist_mac)
 					cutlist_total_win <- c(cutlist_total_win, cutlist_win)
-					
-					#--- to s
-					#for mac, add that it is an executable
-					s@results[i, "cuts.cutlist.mac"] <- stringr::str_flatten(c("#!/bin/sh", cutlist_mac), collapse="\n")
-					s@results[i, "cuts.cutlist.win"] <- stringr::str_flatten(cutlist_win,                 collapse="\n")
 				}
 			}
 		}
 	}
-
+	
+	#save to search object
+	s@cuts.cutlist.win <- stringr::str_flatten(cutlist_total_win, collapse="\n")
+	s@cuts.cutlist.mac <- stringr::str_flatten(cutlist_total_mac, collapse="\n")
+	
 	if (length(cutlist_win)==0) {
 		stop(c(myWarnings, "No cut list created."))
 	} else {
@@ -393,9 +410,6 @@ search_cuts_media <- function(x,
 	if (length(myWarnings)>0) { warning(myWarnings) }
 	
 	#=== return
-	s@cuts.cutlist.win <- stringr::str_flatten(cutlist_total_win, collapse="\n")
-	s@cuts.cutlist.mac <- stringr::str_flatten(cutlist_total_mac, collapse="\n")
-	
 	return(s)
 }
 

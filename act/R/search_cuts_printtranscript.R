@@ -65,7 +65,7 @@ search_cuts_printtranscript <- function(x,
 	#--- check if output folder is given
 	destination_folder <- NULL
 	if (!is.null(outputFolder)) {
-		destination_folder <- normalizePath(outputFolder)
+		destination_folder <- normalizePath(outputFolder, winslash = "/")
 		if (dir.exists(destination_folder)==FALSE) 	{
 			stop("Output folder does not exist.")
 		}
