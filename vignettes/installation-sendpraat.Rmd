@@ -1,0 +1,88 @@
+---
+title: "Installation *sendpraat*"
+author: "Oliver Ehmer"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_float: false
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Installation sendpraat}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+# English
+## Windows
+The sendpraat program for *Windows* can be downloaded from the *Praat* website. This is the direct link to the download page:
+<https://www.fon.hum.uva.nl/praat/sendpraat.html>
+
+The download is an .exe file that can be executed directly. Due to your computer's security settings, the program should first be run by double-clicking on it. A window will open, which will close immediately afterwards. If the program does not run, you must allow it to run by accepting it’s execution in the ‘security check windows’ that will open.
+
+## macOS
+The *sendpraat_carbon* program for *macOS* can be downloaded from the Praat website. This is the direct link to the download page:
+<https://www.fon.hum.uva.nl/praat/sendpraat.html>
+
+Once the file is downloaded, it must be made executable before the program can be used. This must be done in the *macOS* terminal. You can use the terminal window in RStudio to do this. Alternatively, a separate Terminal window can be opened. The terminal is located in the Applications/Utilities folder of your Mac. 
+
+##### (1) Determine current directory
+Enter the following command in the terminal:
+
+`pwd`
+
+You will get the path of the current directory.
+
+##### (2) Move the sendpraat_carbon file
+Move the *sendpraat_carbon* file to the current directory. You can use the Finder for this.
+
+##### (3) Making the sendpraat_carbon file executable
+Enter the following command in the terminal:
+
+`chmod 755 sendpraat_carbon`
+
+Check if it worked. To do this, enter the following command:
+
+`./sendpraat_carbon`
+
+If the execution was successful, you will get an output with various hints on how to use the program.
+
+##### (4) Move the sendpraat_carbon file
+Now move the sendpraat_carbon file to the "Applications" folder. You can use the Finder for this.
+
+# Deutsch
+## Windows
+Das Programm *sendpraat* für *Windows* kann auf der Internetseite von *Praat* heruntergeladen werden. Dies ist der direkte Link zur Downloadseite:
+<https://www.fon.hum.uva.nl/praat/sendpraat.html>
+
+Es handelt sich um eine .exe-Datei, die direkt ausführbar ist. Aufgrund der Sicherheitseinstellungen Ihres Computers sollte das Programm zunächst einmal durch Doppelklick ausgeführt werden. Es öffnet sich ein Fenster, das sofort darauf wieder geschlossen wird. Wenn das Programm nicht ausgeführt wird, müssen Sie in den folgenden Sicherheitsdialogen erlauben, dass es gestartet werden darf.
+
+## macOS
+Das Programm *sendpraat_carbon* für *macOS* kann auf der Internetseite von *Praat* heruntergeladen werden. Dies ist der direkte Link zur Downloadseite:
+<https://www.fon.hum.uva.nl/praat/sendpraat.html>
+
+Wenn die Datei heruntergeladen ist, muss diese ausführbar gemacht werden, bevor das Programm genutzt werden kann. Dies muss im *macOS* Terminal erfolgen. Sie können dafür das Terminal-Fenster in *RStudio* nutzen. Alternativ kann ein separates Terminal-Fenster geöffnet werden. Das Terminal liegt im Ordner „Programme/Dienstprogramme“ Ihres Mac. 
+
+##### (1) Aktuelles Verzeichnis ermitteln
+Geben Sie im Terminal den folgenden Befehl ein:
+
+`pwd`
+
+Sie erhalten den Pfad des aktuellen Verzeichnisses.
+
+##### (2) Verschieben der *sendpraat_carbon*-Datei
+Verschieben Sie die *sendpraat_carbon*-Datei in das aktuelle Verzeichnis. Sie können hierfür den Finder benutzen.
+
+##### (3) Ausführbarmachen der *sendpraat_carbon*-Datei
+Geben Sie den folgenden Befehl im Terminal ein:
+
+`chmod 755 sendpraat_carbon`
+
+Prüfen Sie, ob es funktioniert hat. Geben Sie hierfür den folgenden Befehl ein:
+
+`./sendpraat_carbon`
+
+Wenn die Ausführbarmachung erfolgreich war, erhalten Sie eine Ausgabe mit verschiedenen Hinweisen zur Nutzung des Programms.
+
+##### (4) Verschieben der *sendpraat_carbon*-Datei
+Verschieben Sie nun die *sendpraat_carbon*-Datei in den *Programme*-Ordner. Sie können hierfür den Finder benutzen.

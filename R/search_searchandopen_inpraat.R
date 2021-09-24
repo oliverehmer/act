@@ -4,7 +4,10 @@
 #' It first searches your corpus object and uses the first search hit. 
 #' The corresponding TextGrid will be opened in the 'Praat' TextGrid Editor and the search hit will be displayed.
 #' 
-#' To make this function work you need to set the path to the 'sendpraat' executable using 'options(act.path.sendpraat = ...)'.
+#' To make this function work you need to do two things first:
+#' - Install 'sendpraat' on your computer. To do so  follow the  instructions in the vignette 'installation-sendpraat'. Show the vignette with \code{vignette("installation-sendpraat")}.
+#' - Set the path to the 'sendpraat' executable correctly by using 'options(act.path.sendpraat = ...)'.
+#' 
 #' 
 #' @param x Corpus object.
 #' @param pattern Character string; search pattern as regular expression.
@@ -14,8 +17,8 @@
 #' @examples
 #' library(act)
 #' 
-#' # You can only use this functions if you have located the 'sendpraat' executable 
-#' # properly in the package options.
+#' # You can only use this functions if you have installed 
+#' # and located the 'sendpraat' executable properly in the package options.
 #' \dontrun{
 #' act::search_searchandopen_inpraat(x=examplecorpus, "pero")
 #' }

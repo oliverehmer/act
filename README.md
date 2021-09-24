@@ -51,9 +51,8 @@ Install the development version from GitHub:
 
 ```
 install.packages("remotes")
-remotes::install_github("oliverehmer/act/act")
+remotes::install_github("oliverehmer/act")
 ```
-Please note that the double 'act/act' is necessary.
 
 Load the package:
 ```

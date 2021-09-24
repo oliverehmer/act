@@ -43,8 +43,7 @@ Search object; cut lists will be stored in \code{s@cuts.cutlist.mac} and \code{s
 }
 \description{
 This function creates FFmpeg commands to cut media files for each search results.
-If you want to execute the commands (and cut the media files) you need to have FFmpeg installed on you computer.
-FFmpeg is available for free here: \code{https://ffmpeg.org} .
+If you want to execute the commands (and cut the media files) you need to have FFmpeg installed on you computer. To install FFmpeg you can follow the instructions given in the vignette 'installation-ffmpeg'. Show the vignette with \code{vignette("installation-ffmpeg")}.
 }
 \details{
 \emph{Cut lists}\cr
