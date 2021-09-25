@@ -190,6 +190,8 @@ export_printtranscript <- function (t,
 	#myAnnotations$text[21]
 	
 	#---- brackets
+	#i<-6
+	#myAnnotations$text[i]
 	if (l@brackets.tryToAlign 		== TRUE) {
 		for (i in 1:length(myAnnotations$text)) {
 			
@@ -207,15 +209,17 @@ export_printtranscript <- function (t,
 			if (startWithBracketI<=openingBracketsI.nr) {
 				
 				#search correspondance for each opening bracket
+				x<-1
 				for (x in startWithBracketI:openingBracketsI.nr) {
 					
-					#exit if next recourdset would be outside the data frame 
+					#exit if next recordset would be outside the data frame 
 					startSearching <- i+1
 					if (startSearching>length(myAnnotations$text)) {
 						break
 					}
 					
 					#start searching at the next dataset
+					j<-startSearching
 					for (j in startSearching:length(myAnnotations$text)) {
 						
 						#exit: if this recordset does not temporally overlap
@@ -272,7 +276,7 @@ export_printtranscript <- function (t,
 									difference <- abs(difference)
 									
 									if (bracket.i$after=="" | stringr::str_detect(bracket.i$after,"\\W")) {
-										#if content ends after ] or a non-word charater follows --> space immediately before ]
+										#if content ends after ] or a non-word character follows --> space immediately before ]
 										insert.pos <- bracket.i$end-1
 										insert.char <- " "
 										
@@ -314,7 +318,8 @@ export_printtranscript <- function (t,
 									}
 									new <- stringr::str_c(stringr::str_sub(myAnnotations$text[i], start=1, end=insert.pos), 
 														  strrep(insert.char, difference), 
-														  stringr::str_sub(myAnnotations$text[i], end=insert.pos+1, stringr::str_length(myAnnotations$text[i])), sep="",
+														  stringr::str_sub(myAnnotations$text[i], start=insert.pos+1, end=stringr::str_length(myAnnotations$text[i])), 
+														  sep="",
 														  collapse="")
 									myAnnotations$text[i] <- new
 									
@@ -403,6 +408,7 @@ export_printtranscript <- function (t,
 	} #if brackets need to be aligned
 	
 	#wrap and build entire text
+	#i<-7
 	for (i in 1:length(myAnnotations$text)) {
 		
 		if (i==100) {	text_exdent <- text_exdent +1 }
@@ -426,6 +432,7 @@ export_printtranscript <- function (t,
 		
 		#add line to entire text
 		text_all  <- c(text_all, text_line)
+		#print(text_all)
 		
 		#add additional  lines
 		if (l@additionalline1.insert == TRUE) {

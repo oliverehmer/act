@@ -34,7 +34,7 @@ corpus_import <- function(x,
 	#filterFilesInclude <- ""
 	#createFullText     <- TRUE 
 	#assignMedia        <- TRUE
-	
+	#x<-a
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
 	#filterFilesInclude<-""
 	
@@ -72,7 +72,7 @@ corpus_import <- function(x,
 	}
 	
 	#--- get only supported file formats 
-	supportedFileFormats <- "(?i)\\.(eaf|textgrid|exb)"
+	supportedFileFormats <- "(?i)\\.(eaf|exb|textgrid)"
 	paths.new <- unlist(paths.new[stringr::str_which(string=paths.new, pattern=supportedFileFormats, )		])
 	if (length(paths.new)==0) {
 		stop("No annotation files found. Please check 'x@paths.annotation.files'.")
@@ -80,6 +80,7 @@ corpus_import <- function(x,
 	
 	#--- make the names
 	transcript.names <- basename(paths.new)
+	transcript.names <- tools::file_path_sans_ext(transcript.names)
 	transcript.names.info <- helper_transcriptNames_make (transcriptNames           = transcript.names,
 														  searchPatterns            = x@import.modify.transcript.names$searchPatterns,
 														  searchReplacements        = x@import.modify.transcript.names$searchReplacements,

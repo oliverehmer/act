@@ -25,7 +25,12 @@ search_cuts_printtranscript <- function(x,
 										l=NULL, 
 										outputFolder=NULL ) {
 	#x <- corpus
-	#s <- mysearch
+	#s <- suche
+	#cutSpanBeforesec<-0
+	#cutSpanAftersec <- 0
+	#l<-NULL
+	#outputFolder<-NULL
+	
 	# x            = korpus 
 	# s            <- suche
 	# cutSpanBeforesec <- "/Users/oliverehmer/Desktop/suchergebnisse/"
@@ -89,6 +94,7 @@ search_cuts_printtranscript <- function(x,
 	helper_progress_set("Creating transcripts",max(1,nrow(s@results)))
 	
 	alltranscripts <- c()
+	#i<-1
 	if (nrow(s@results)>0) {
 		for (i in 1:nrow(s@results)) 	{
 			helper_progress_tick()
