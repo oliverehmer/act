@@ -1,8 +1,8 @@
 # act
 
-[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![](http://cranlogs.r-pkg.org/badges/grand-total/act)](https://CRAN.R-project.org/package=act)
-[![CRAN version](http://www.r-pkg.org/badges/version/act)](https://cran.r-project.org/package=act)
+[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![](https://cranlogs.r-pkg.org/badges/grand-total/act)](https://cran.r-project.org/package=act)
+[![CRAN version](https://www.r-pkg.org/badges/version/act)](https://cran.r-project.org/package=act)
 
 
 ## Aligned Corpus Toolkit (act) for R
@@ -29,14 +29,14 @@ Email: oliver.ehmer@romanistik.uni-freiburg.de
 
 Website: [http://www.oliverehmer.de](http://www.oliverehmer.de)
 
-Package website: [here](http://www.romanistik.uni-freiburg.de/ehmer/digitalhumanities.html/).
+Package website: [here](http://www.romanistik.uni-freiburg.de/ehmer/digitalhumanities.html).
 
-CRAN site: [here](https://cran.r-project.org/web/packages/act/index.html)
+CRAN site: [here](https://cran.r-project.org/package=act)
 
 ## How to cite
 Creating the act package took a lot of time and effort. Please cite it when you publish research.
 
-Ehmer, Oliver (2021). act: Aligned Corpus Toolkit. R package version 1.0.2. https://CRAN.R-project.org/package=act
+Ehmer, Oliver (2021). act: Aligned Corpus Toolkit. R package version 1.1.9. https://cran.r-project.org/package=act
 
 ## Installation
 To install the package in R use the following commands.
@@ -60,7 +60,7 @@ library(act)
 ```
 
 ## Supported Annotation tool formats
-* [Praat `.TextGrid`](http://www.fon.hum.uva.nl/praat/)
+* [Praat `.TextGrid`](https://www.fon.hum.uva.nl/praat/)
 * [ELAN `.eaf`](https://archive.mpi.nl/tla/elan)
 * [Exmaralda `.exb`](https://exmaralda.org/en/)
 
@@ -68,6 +68,6 @@ library(act)
 You might be interested in the following R packages, that functionally overlap with the act package.
 * `ExmaraldaR` on [GitHub](https://github.com/TimoSchuer/ExmaraldaR)
 * `FRelan` on [GitHub](https://github.com/langdoc/FRelan)
-* `phonfieldwork` on [CRAN](https://cran.r-project.org/web/packages/phonfieldwork/index.html) and [GitHub](https://github.com/ropensci/phonfieldwork)
+* `phonfieldwork` on [CRAN](https://cran.r-project.org/package=phonfieldwork) and [GitHub](https://github.com/ropensci/phonfieldwork)
 * `rPraat` on [CRAN](https://cran.r-project.org/package=rPraat) and [GitHub](https://github.com/bbTomas/rPraat)
 * `textgRid` on [CRAN](https://cran.r-project.org/package=textgRid)

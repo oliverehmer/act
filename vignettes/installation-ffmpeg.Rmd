@@ -29,7 +29,7 @@ If the above link does not work, an alternative link is available on the FFmpeg 
 ##### (2) Unzip
 The .zip file will be located in your Downloads folder after downloading. Find the file and extract it. (Right click on the file > "Extract all...")
 
- ![](images/image001.jpeg)
+ ![](images/image001.png)
 
 ##### (3) Rename the folder
 After unpacking, you will get a folder with the overall name of the original .zip file.
@@ -37,11 +37,11 @@ After unpacking, you will get a folder with the overall name of the original .zi
 Inside it, there is a subfolder with the same name.
 Rename this folder to ffmpeg (right click > "Rename".)
 
- ![](images/image002.jpeg)
+ ![](images/image002.png)
 
 This folder has two subfolders named doc and `bin`. The `doc` folder contains documentation, the `bin` folder contains various program files, among them the file `ffmpeg.exe` .
 
- ![](images/image003.jpeg)
+ ![](images/image003.png)
 
 ##### (4) Move the folder
 Move the newly renamed `ffmpeg` folder to the main level of your hard disk `C:\` .
@@ -54,45 +54,45 @@ The folder `ffmpeg` should now be on the main level of the hard disk C:\ and the
 
 (Note: You can also move the folder to another location, but then you will have to adjust the path accordingly in step (8)).
 
- ![](images/image004.jpeg)
+ ![](images/image004.png)
 
 ##### (5) Open Advanced System Properties
 In the search bar next to the Start menu icon, type `Advanced System Properties`.
 
- ![](images/image005.jpeg)
+ ![](images/image005.png)
 
 From the list of search results, select the “Advanced System Properties” app.
 
- ![](images/image006.jpeg)
+ ![](images/image006.png)
 
 The „System properties“ window opens.
 
- ![](images/image007.jpeg)
+ ![](images/image007.png)
 
 ##### (6) Open environment variables
 Select "Environment variables..." on this window.
 
- ![](images/image008.jpeg)
+ ![](images/image008.png)
 
 The "Environment variables" window opens.
 
- ![](images/image009.jpeg)
+ ![](images/image009.png)
 
 ##### (7) Changing the "Path" variable
 Click on the "Path" entry in the upper "User variables" area.
 Then select "Edit...".
 
- ![](images/image010.jpeg)
+ ![](images/image010.png)
 
 Another window opens.
 
- ![](images/image011.jpeg)
+ ![](images/image011.png)
 
 Select the "New" command here.
 
 One of the lines is then activated. Enter the following string: `C:\ffmpeg\bin`
 
- ![](images/image012.jpeg)
+ ![](images/image012.png)
 
 (This is the path to the folder where the program ffmpeg.exe is located).
 
@@ -106,25 +106,25 @@ Close the "System Properties" window with "OK”
 In the search bar next to the Start menu icon, type “Command Prompt.”
 
 
- ![](images/image013.jpeg)
+ ![](images/image013.png)
 
 Select the Command Prompt app from the list.
 
- ![](images/image014.jpeg)
+ ![](images/image014.png)
 
 A terminal window will open.
 
- ![](images/image015.jpeg)
+ ![](images/image015.png)
 
 Enter the following command: 
 
 `ffmpeg -version`
 
- ![](images/image016.jpeg)
+ ![](images/image016.png)
 
 If the installation was successful, you will receive the adjacent output with the version information.
 
- ![](images/image017.jpeg)
+ ![](images/image017.png)
 
 If an error occurs, you will receive the adjacent message that *FFmpeg* could not be found. 
 
@@ -132,7 +132,7 @@ In this case, restart the computer and try the steps in (9) again.
 
 If this does not help, check if the path in the environment variable "Path" is specified correctly and points to the folder where you saved `ffmpeg.exe` .
 
- ![](images/image018.jpeg)
+ ![](images/image018.png)
 
 ## macOS
 For installation on *macOS* the package manager *homebrew* can be used. The following steps are necessary for installation.
@@ -140,7 +140,7 @@ For installation on *macOS* the package manager *homebrew* can be used. The foll
 ##### (1) Installing XCode
 *XCode* can be installed for free via the Apple AppStore.
 
- ![](images/image019.jpeg)
+ ![](images/image019.png)
 
 ##### (2) Installing homebrew
 For installation, the terminal window in *RStudio* can be used. Alternatively, a separate Terminal window can be opened. The terminal is located in the Applications/Utilities folder of your Mac.
@@ -154,7 +154,7 @@ Enter the following command in the Terminal window to install *homebrew*.
 Then enter your account password and press Enter/Return.
 
 You should get the following display. Press Enter/Return again.
- ![](images/image020.jpeg)
+ ![](images/image020.png)
 
 Make sure that the installation is complete. It is only complete when the prompt appears again at the end of the process. 
 
@@ -192,7 +192,7 @@ Sollte der oben angegebenen Link nicht funktionieren, ist auf der Hauptseite von
 ##### (2) Entpacken
 Die .zip-Datei befindet sich nach dem Herunterladen in Ihrem Downloads Ordner. Finden Sie die Datei und entpacken Sie diese. (Rechtsklick auf die Datei > „Alle extrahieren...“)
 
- ![](images/image001.jpeg)
+ ![](images/image001.png)
 
 ##### (3) Umbenennen des Ordners
 Nach dem Entpacken erhalten Sie einen Ordner mit dem Gesamtnamen der ursprünglichen .zip-Datei.
@@ -200,11 +200,11 @@ Darin befindet sich ein Unterordner, der denselben Namen trägt.
 
 Benennen Sie diesen Ordner um in `ffmpeg` (Rechtsklick > „Umbenennen“
 
- ![](images/image002.jpeg)
+ ![](images/image002.png)
 
 In diesem Ordner befinden sich zwei Unterordner mit den Namen `doc` und `bin`. Der Ordner doc enthält eine Dokumentation, der Ordner `bin` enthält verschiedene Programmdateien, unter diesen die Datei `ffmpeg.exe` .
 
- ![](images/image003.jpeg)
+ ![](images/image003.png)
 
 ##### (4) Verschieben des Ordners
 Verschieben Sie den neu umbenannten Ordner `ffmpeg` auf die Hauptebene ihrer Festplatte `C:\` .
@@ -217,28 +217,28 @@ Danach müsste sich der Ordner ffmpeg auf der Hauptebene der Festplatte `C:\` be
 
 (Anmerkung: Sie können den Ordner auch an eine andere Stelle verschieben, müssen in Schritt (8) dann aber den Pfad entsprechend anpassen.)
 
- ![](images/image004.jpeg)
+ ![](images/image004.png)
 
 ##### (5) Erweiterte Systemeinstellungen öffnen
 Geben Sie in der Suchleiste neben dem Startmenüsymbol den Begriff `Erweiterte Systemeinstellungen` ein.
 
- ![](images/image005.jpeg)
+ ![](images/image005.png)
 
 Klicken Sie in der Liste der Suchergebnisse auf die App „Erweiterte Systemeinstellungen“.
 
- ![](images/image006.jpeg)
+ ![](images/image006.png)
 
 Es öffnet sich ein Fenster mit den „Systemeigenschaften“.
 
- ![](images/image007.jpeg)
+ ![](images/image007.png)
 
 ##### (6) Umgebungsvariablen öffnen
 Wählen Sie in diesem Fenster „Umgebungsvariablen...“.
 
- ![](images/image008.jpeg)
+ ![](images/image008.png)
 
 Es öffnet sich das Fenster „Umgebungsvariablen“.
- ![](images/image009.jpeg)
+ ![](images/image009.png)
 
 ##### (7) Verändern der Variable „Path“
 Klicken Sie im oberen Bereich „Benutzervariablen“ auf den Eintrag „Path“.
@@ -246,18 +246,18 @@ Klicken Sie im oberen Bereich „Benutzervariablen“ auf den Eintrag „Path“
 Wählen Sie dann „Bearbeiten...“.
 
 
- ![](images/image010.jpeg)
+ ![](images/image010.png)
 
 Es öffnet sich ein weiteres Fenster.
 
- ![](images/image011.jpeg)
+ ![](images/image011.png)
 
 Wählen Sie hier den Befehl „Neu“.
 
 Eine der Zeilen ist dann aktiviert. Tragen Sie hier die folgende Zeichenkette ein: 
 
 `C:\ffmpeg\bin`
- ![](images/image012.jpeg)
+ ![](images/image012.png)
 
 (Dies ist der Pfad zu dem Ordner, in dem das Programm `ffmpeg.exe` liegt.)
 
@@ -271,30 +271,30 @@ Schließen Sie das Fenster „Systemeigenschaften“ mit „OK“
 ##### (8) Testen der Installation
 Geben Sie in der Suchleiste neben dem Startmenüsymbol den Begriff `Eingabeaufforderung` ein.
 
- ![](images/image013.jpeg)
+ ![](images/image013.png)
 
 Klicken Sie auf die App „Eingabeaufforderung“ in der Liste.
 
- ![](images/image014.jpeg)
+ ![](images/image014.png)
 
 Es öffnet sich ein Terminal-Fenster.
 
- ![](images/image015.jpeg)
+ ![](images/image015.png)
 
 Geben Sie hier den folgenden Befehl ein:
 
 `ffmpeg -version`
 
- ![](images/image016.jpeg)
+ ![](images/image016.png)
 
 Wenn die Installation erfolgreich war, erhalten Sie die nebenstehende Ausgabe mit den Versionsinformationen. 
- ![](images/image017.jpeg)
+ ![](images/image017.png)
 
 Bei einem Fehler erhalten Sie die nebenstehende Nachricht, dass *FFmpeg* nicht gefunden werden konnte. In diesem Fall starten Sie den Computer neu und versuchen Sie die Schritte unter (9) nochmals.
 
 Wenn dies nicht hilft, prüfen Sie, ob der Pfad in der Umgebungsvariable „Path“ richtig angegeben ist und auf den Ordner zeigt, in dem sie die `ffmpeg.exe` gespeichert haben.
 
- ![](images/image018.jpeg)
+ ![](images/image018.png)
 
 ## macOS
 Für die Installation unter *macOS* kann der Paketmanager *homebrew* genutzt werden. Zur Installation sind die folgenden Schritte notwendig.
@@ -302,7 +302,7 @@ Für die Installation unter *macOS* kann der Paketmanager *homebrew* genutzt wer
 ##### (1) Installieren von XCode
 *XCode* kann kostenlos über den Apple *AppStore* installiert werden.
 
- ![](images/image019.jpeg)
+ ![](images/image019.png)
 
 ##### (2) Installieren von homebrew
 Zur Installation kann das Terminal-Fenster in *RStudio* genutzt werden. Alternativ kann ein separates Terminal-Fenster geöffnet werden. Das Terminal liegt im Ordner „Programme/Dienstprogramme“ Ihres Mac.
@@ -316,7 +316,7 @@ Geben Sie den folgenden Befehl in das Terminal-Fenster ein, um *homebrew* zu ins
 Geben Sie dann das Passwort Ihres Accounts ein und drücken Sie Enter/Return.
 
 Sie sollten die folgende Anzeige erhalten. Drücken Sie nochmals Enter/Return.
- ![](images/image020.jpeg)
+ ![](images/image020.png)
 
 Achten Sie darauf, dass die Installation komplett erfolgt. Diese ist erst komplett, wenn am Ende des Prozesses wieder die Eingabeaufforderung erscheint. 
 
