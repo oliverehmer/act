@@ -35,8 +35,8 @@ search_openresult_inquicktime  <- function(x,
 	# closeAfterPlaying <- TRUE
 
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		} else { if (class(s)[[1]]!="search")		{stop("Parameter 's' needs to be a search object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
 	if (missing(resultNr))                   {stop("Number of the search result 'resultNr' is missing.") 	}
 	if (Sys.info()["sysname"]!="Darwin")     {stop("You need to be on a Mac to use this function") 	}
 	

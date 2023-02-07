@@ -20,7 +20,7 @@ transcripts_update_normalization <- function(x,
 											 transcriptNames=NULL, 
 											 forceUpdate=FALSE){
 	#=== check data
-	if (missing(x)) 				{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (is.null(x@transcripts))     {
 		warning("No transcripts found in corpus object x.")	
 		return(x)

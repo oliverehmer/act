@@ -26,7 +26,7 @@ transcripts_add <- function(x,
 							createFullText=TRUE, 
 							assignMedia=TRUE) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (missing(...)) 	{stop("Missing transcript object(s) in parameter '...'.") 	} 
 	
 	#--- get list with all transcript objects from arguments
@@ -34,20 +34,20 @@ transcripts_add <- function(x,
 	transcripts.new <- list()
 	for (argument in arguments) {
 		#add all transcripts of a corpus
-		if (class(argument)[1]=="corpus"){
+		if (methods::is(argument,"corpus")) {
 			if (length(argument@transcripts)>0) {
 				transcripts.new <- c(transcripts.new, argument@transcripts)
 			}
 		}
 		#add transcript
-		if (class(argument)[1]=="transcript"){
+		if (methods::is(argument,"transcript")){
 			transcripts.new <- c(transcripts.new, argument)
 		}
 		
 		#add transcripts from a list
-		if (class(argument)[1]=="list"){
+		if (methods::is(argument, "list")){
 			for (element in argument) {
-				if (class(element)[1]=="transcript"){
+				if (methods::is(element,"transcript")){
 					transcripts.new <- c(transcripts.new, element)
 				}
 			}

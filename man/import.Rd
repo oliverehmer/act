@@ -20,7 +20,7 @@ Advice: In most situations it is more convenient to use \code{act::corpus_new}, 
 \details{
 Imports the contents of an annotation file and returns a transcript object.
 
-The input to this function in the parameter '...' may either be 
+The input to this function in the parameter '...' may either be
 (1) the path to an annotation file (Currently 'ELAN' .eaf, 'EXMARaLDA .exb and 'Praat' .TextGrid files),
 (2) the contents of an annotation file obtained from the \code{@file.content} or by reading the contents of the files directly with \code{read.lines()} or
 (3) a \code{rPraat} TextGrid object.

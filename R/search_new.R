@@ -60,7 +60,7 @@ search_new <- function(x,
 
 	#=== check x object
 	
-	if (missing(x))             	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (missing(pattern))			{stop("Pattern is missing.") 	}
 	if (is.null(x@transcripts)) 	{stop("No transcripts found in corpus object x.")	}
 

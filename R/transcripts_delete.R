@@ -13,7 +13,7 @@
 #' @example inst/examples/transcripts_delete.R
 transcripts_delete <- function(x, transcriptNames) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (missing(transcriptNames)) 	{stop("Parameter 'transcriptNames' is missing.") 	}
 	
 	transcripts.deleted.ids <- which(names(x@transcripts) %in% transcriptNames)
@@ -22,7 +22,7 @@ transcripts_delete <- function(x, transcriptNames) {
 	x@transcripts <-	x@transcripts[names(x@transcripts) %in% transcriptNames == FALSE]  
 	
 	
-	#--- do the report
+	#HISTORY corpus: update history
 	x@history[[length(x@history)+1]] <- list(
 		modification               = "transcripts_delete",
 		systime                    = Sys.time(),

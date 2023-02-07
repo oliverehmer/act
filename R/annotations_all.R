@@ -18,7 +18,7 @@
 #' nrow(allannotations)
 #' 
 annotations_all <- function(x) {
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	temp <- data.frame()
 	temp <- NULL
 	for (t in x@transcripts) {

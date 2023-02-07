@@ -32,7 +32,7 @@ export_printtranscript <- function (t,
 									header_firstinfo = "",
 									collapse=TRUE) {
 	#=== settings
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	} else { if (class(t)[[1]]!="transcript") 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
 	if (is.null(l)) 	{
 		l <- methods::new("layout")
 	}	
@@ -183,55 +183,56 @@ export_printtranscript <- function (t,
 	text_body_width   <- l@transcript.width - text_exdent
 	text_all <- c()	
 	
-	
 	myAnnotations$text <- myAnnotations$content
 	myAnnotations$text <- stringr::str_trim(myAnnotations$text)
-	myAnnotations$bracketsLeftAligned <- FALSE
+	myAnnotations$firstBracketIsAligned <- FALSE
+	myAnnotations$bracketAlignedWithAnnotationI <- 0
 	#myAnnotations$text[21]
 	
 	#---- brackets
 	#i<-6
 	#myAnnotations$text[i]
 	if (l@brackets.tryToAlign 		== TRUE) {
+		#each annotation
 		for (i in 1:length(myAnnotations$text)) {
 			
 			#check if the first bracket is already aligned
-			if (myAnnotations$bracketsLeftAligned[i]) {
+			if (myAnnotations$firstBracketIsAligned[i]) {
 				startWithBracketI <- 2					
 			} else { 
 				startWithBracketI <- 1	
 			}
 			
-			#check if text contains a bracket
+			#number of openingbrackets
 			openingBracketsI.nr 	<- 	stringr::str_count(myAnnotations$text[i], "\\[")
 			
-			#check if there are more brackets to be aligned
+			#all brackets in an annotation : check if there are more brackets to be aligned
 			if (startWithBracketI<=openingBracketsI.nr) {
 				
-				#search correspondance for each opening bracket
+				#search correspondence for each opening bracket
 				x<-1
 				for (x in startWithBracketI:openingBracketsI.nr) {
 					
-					#exit if next recordset would be outside the data frame 
+					#exit if next record set would be outside the data frame 
 					startSearching <- i+1
 					if (startSearching>length(myAnnotations$text)) {
 						break
 					}
 					
-					#start searching at the next dataset
+					#start: process all annotations following the current anotation i
 					j<-startSearching
 					for (j in startSearching:length(myAnnotations$text)) {
 						
-						#exit: if this recordset does not temporally overlap
+						#exit: if this annotation does not temporally overlap
 						if (myAnnotations$startSec[j]> myAnnotations$endSec[i]) {
 							break
 						} 
 						
-						#skip recordset : if it has already been move/aligned
-						if (!myAnnotations$bracketsLeftAligned[j]) {
+						#skip annotation : if it has already been moved/aligned
+						if (!myAnnotations$firstBracketIsAligned[j]) {
 							openingBracketsJ.nr <- 		stringr::str_count(myAnnotations$text[j], "\\[")
 							
-							
+							#if there are opening brackets that can still be aligned
 							if (openingBracketsJ.nr>0 ) {
 								#get positions and contents of brackets
 								bracket.i <- data.frame(stringr::str_locate_all(myAnnotations$text[i], "\\[.*?\\]"), stringsAsFactors = FALSE)
@@ -262,11 +263,9 @@ export_printtranscript <- function (t,
 								
 								#--- put j annotation j in the right place 
 								myAnnotations$text[j] <- stringr::str_flatten(c(strrep(" ", abs(bracket.i$start-bracket.j$start)), myAnnotations$text[j]) , collapse="")
-								myAnnotations$bracketsLeftAligned[j] <- TRUE
-								
-								
-								
-								#---- adjust length of brackets by inserting spaces
+								myAnnotations$firstBracketIsAligned[j] <- TRUE
+			
+								#---- adjust length of brackets by inserting spaces inside the brackets
 								#check which is the longer bracket
 								difference <- bracket.j$bracketLength - bracket.i$bracketLength
 								new <-""
@@ -372,13 +371,16 @@ export_printtranscript <- function (t,
 														  strrep(insert.char, difference), 
 														  stringr::str_sub(myAnnotations$text[j], insert.pos+1,  end=stringr::str_length(myAnnotations$text[j])), sep="",
 														  collapse="")
-									
-									
+						
 									myAnnotations$text[j] <- new
 								}
 								
-								#---- align j annotation
-								#wrap i without initioal or exdent
+								#### - the following sectionis where things go wrong
+								# 1) after the wrapping oof i, exery folloqing annotation should be again pre processed
+								# or
+								# 2) thw wrapping should be done manually by inserting spaces bases on where the brak was necessary
+								
+								#wrap i without initial or exdent
 								text_i_wrapped <- myAnnotations$text[i]
 								text_i_wrapped <-  stringi::stri_wrap(text_i_wrapped, width = text_body_width, indent=0, normalize=FALSE, whitespace_only=TRUE)
 								
@@ -387,7 +389,6 @@ export_printtranscript <- function (t,
 								
 								#joint text to long string
 								text_i_wrapped <- stringr::str_flatten(text_i_wrapped, collapse="")
-								
 								
 								#calculate positions of brackets again
 								bracket.i <- as.data.frame(stringr::str_locate_all(text_i_wrapped, "\\[.*?\\]"), stringsAsFactors = FALSE)
@@ -398,13 +399,15 @@ export_printtranscript <- function (t,
 								bracket.i <- cbind(bracket.i, after=stringr::str_trim(stringr::str_sub(text_i_wrapped, bracket.i$end+1, bracket.i$end+1 )), row.names = NULL)	
 								bracket.i <- cbind(bracket.i, posSpaceInside=data.frame(stringi::stri_locate(as.character(bracket.i$content), regex=" ", mode="last"), stringsAsFactors		= FALSE)$start, row.names = NULL)
 								
-								
 							} #there are opening brackets in j
-						} #recordset has already been aligned
-					} # j
-				} #next w
-			} #i bracket needs still to be processed
-		} #next i
+						} #annotation has already been aligned
+					} # end: all annotations following i
+					
+				} #end: all brackets in an annotation
+			} #all brackets in an annotation
+		
+		} #next annotation
+		
 	} #if brackets need to be aligned
 	
 	#wrap and build entire text

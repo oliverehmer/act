@@ -3,18 +3,20 @@
 #' @param t Transcript object; transcript to search in.
 #' @param s Search object.
 #' 
-#' @return Data.frame; data frame with search results.
+#' @return \code{Data.frame} data frame with search results.
 #' 
+#' @export
 #'   
-#' # @example inst/examples/search_transcript_fulltext.R
+#' @example inst/examples/search_transcript_fulltext.R
+#' 
 #' 
 search_transcript_fulltext <- function(t, s) {
 	#progress
 	helper_progress_tick()
 	
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	} else { if (class(t)[[1]]!="transcript") 	{stop("Parameter 't' needs to be a transcript object.") 	} }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		} else { if (class(s)[[1]]!="search")		{stop("Parameter 's' needs to be a search object.") 	} }
-
+	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
+	
 	mySearchResults 	 	<- NULL
 	mySearchResults.byTime	<- NULL
 	mySearchResults.byTier	<- NULL

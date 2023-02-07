@@ -30,13 +30,15 @@ search_openresult_inpraat(
 \item{delayBeforeOpen}{Double; Time in seconds before the section will be opened in Praat. This is useful if Praat opens but the section does not. In that case increase the delay.}
 }
 \description{
-The function remote controls 'Praat' by using 'sendpraat' and a 'Praat' script. 
+The function remote controls 'Praat' by using 'sendpraat' and a 'Praat' script.
 It opens a search result in the 'Praat' TextGrid Editor.
 }
 \details{
 To make this function work you need to do two things first:
-- Install 'sendpraat' on your computer. To do so  follow the  instructions in the vignette 'installation-sendpraat'. Show the vignette with \code{vignette("installation-sendpraat")}.
-- Set the path to the 'sendpraat' executable correctly by using 'options(act.path.sendpraat = ...)'.
+\itemize{
+\item Install 'sendpraat' on your computer. To do so  follow the  instructions in the vignette 'installation-sendpraat'. Show the vignette with \code{vignette("installation-sendpraat")}.
+\item Set the path to the 'sendpraat' executable correctly by using 'options(act.path.sendpraat = ...)'.
+}
 }
 \examples{
 library(act)

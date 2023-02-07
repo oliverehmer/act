@@ -26,7 +26,7 @@ export_eaf <- function(t,
 					   filterSectionEndsec = NULL, 
 					   createMediaLinks=TRUE) {
 	
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	} else { if (class(t)[[1]]!="transcript") 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
 	
 	#--- check if output folder exists
 	if (!is.null(outputPath)) {

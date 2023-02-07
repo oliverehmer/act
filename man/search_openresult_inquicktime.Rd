@@ -33,7 +33,7 @@ search_openresult_inquicktime(
 Logical; \code{TRUE} if media file has been played, or \code{FALSE} if not.
 }
 \description{
-The function remote controls 'Quicktime' by using an Apple Script. 
+The function remote controls 'Quicktime' by using an Apple Script.
 It opens a search result in 'Quicktime' and plays it.
 }
 \details{

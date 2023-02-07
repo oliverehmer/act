@@ -15,7 +15,7 @@ tiers_all(x, compact = TRUE)
 Data frame
 }
 \description{
-Merges tiers from all transcripts in a corpus and returns a data frame.
+Merges tiers from all transcripts in a corpus object into a data frame.
 }
 \examples{
 

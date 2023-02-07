@@ -33,12 +33,12 @@ media_assign(
 Corpus object.
 }
 \description{
-Searches for media files in folders and assigns the links to transcript objects in a corpus. 
-The function uses the name of the transcript to find the media files, 
+Searches for media files in folders and assigns the links to transcript objects in a corpus.
+The function uses the name of the transcript to find the media files,
 e.g. the function assumes that the annotation files have the same name as the media files, except from the suffix/the file type.
 }
 \details{
-Only the the file types set in \code{options()$act.fileformats.audio} and \code{options()$act.fileformats.video} will be recognized. 
+Only the the file types set in \code{options()$act.fileformats.audio} and \code{options()$act.fileformats.video} will be recognized.
 You can modify these options to recognize other media types.
 }
 \examples{

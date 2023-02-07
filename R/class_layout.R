@@ -28,8 +28,8 @@
 methods::setClass("layout", 
 				  representation(
 				  	name                            = "character",
-				  	filter.tier.includeRegEx       = "character",
-				  	filter.tier.excludeRegEx       = "character",
+				  	filter.tier.includeRegEx        = "character",
+				  	filter.tier.excludeRegEx        = "character",
 				  	transcript.width 				= "numeric",
 				  	speaker.width    				= "numeric",
 				  	speaker.ending 					= "character",
@@ -49,8 +49,8 @@ methods::setClass("layout",
 				  	arrow.shape  					= "character"
 				  ), prototype = list (
 				  	name                            = "StandardLayout",
-				  	filter.tier.includeRegEx       = character(),
-				  	filter.tier.excludeRegEx       = character(),
+				  	filter.tier.includeRegEx        = character(),
+				  	filter.tier.excludeRegEx        = character(),
 				  	transcript.width 				= 65,
 				  	speaker.width    				= 3,
 				  	speaker.ending 					= ":  ",
@@ -76,8 +76,8 @@ layout_show <- function (object) {
 	cat("layout object", fill=TRUE)
 	cat("  name                            : ", paste("'", object@name, "'",sep="", collapse=""),fill=TRUE)
 	cat("\n")
-	cat("  filter.tier.includeRegEx       : ", paste("'", object@filter.tier.includeRegEx, "'",sep="", collapse=""),fill=TRUE)
-	cat("  filter.tier.excludeRegEx       : ", paste("'", object@filter.tier.excludeRegEx, "'",sep="", collapse=""),fill=TRUE)
+	cat("  filter.tier.includeRegEx        : ", paste("'", object@filter.tier.includeRegEx, "'",sep="", collapse=""),fill=TRUE)
+	cat("  filter.tier.excludeRegEx        : ", paste("'", object@filter.tier.excludeRegEx, "'",sep="", collapse=""),fill=TRUE)
 	cat("\n")
 	cat("  transcript.width                : ", object@transcript.width, fill=TRUE)
 	cat("\n")
@@ -93,7 +93,7 @@ layout_show <- function (object) {
 	cat("  additionalline2.indent          : ", object@additionalline2.indent, fill=TRUE)
 	cat("\n")
 	cat("  brackets.tryToAlign             : ", object@brackets.tryToAlign, fill=TRUE)
-	cat("  pauseTierRegEx                 : ", paste("'", object@pauseTierRegEx, "'",sep="", collapse=""),fill=TRUE)
+	cat("  pauseTierRegEx                  : ", paste("'", object@pauseTierRegEx, "'",sep="", collapse=""),fill=TRUE)
 	cat("\n")
 	cat("  header.insert                   : ", object@header.insert, fill=TRUE)
 	cat("  header.heading.fromColumnName   : ", paste("'", object@header.heading.fromColumnName, "'",sep="", collapse=""),fill=TRUE)

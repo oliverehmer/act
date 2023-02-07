@@ -50,7 +50,7 @@ transcripts_merge2 <- function (destinationTranscript,
 		}
 		destinationTranscript <- destinationTranscript[[1]]
 	}
-	if (class(destinationTranscript)!="transcript") 	{
+	if (!methods::is(destinationTranscript,"transcript")) 	{
 		stop("Parameter 'destinationTranscript' needs to be a transcript object.") 
 	}
 	#--> result should be a single Object as accessed by [[]]
@@ -61,7 +61,7 @@ transcripts_merge2 <- function (destinationTranscript,
 	}
 	allAreTransripts <- TRUE
 	for (transUpdate in updateTranscripts) {
-		if(class(transUpdate)!="transcript") {
+		if(!methods::is(transUpdate,"transcript")) {
 			allAreTransripts <- FALSE
 		}
 	}
@@ -180,6 +180,15 @@ transcripts_merge2 <- function (destinationTranscript,
 	destinationTranscript@name <- paste(destinationTranscript@name, "_UPDATED",sep="")
 	destinationTranscript@file.path <-""
 	
+	#HISTORY transcript
+	destinationTranscript@modification.systime <- Sys.time()
+	destinationTranscript@history[[length(destinationTranscript@history)+1]] <-	list( 
+		modification               = "transcripts_merge",
+		systime                    = Sys.time(),
+		destinationTranscript      = destinationTranscript@name,
+		sourceTranscripts          = c(destinationTranscript, updateTranscripts)
+	)
+
 	return(destinationTranscript)
 }
 

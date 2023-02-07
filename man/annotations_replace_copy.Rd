@@ -36,9 +36,9 @@ annotations_replace_copy(
 Corpus object.
 }
 \description{
-The function searches within the contents of annotations and replaces the search hits. 
-In addition the search hit may be copied to another tier. 
-In case that there is NO overlapping annotation in the destination tier a new annotation will be created (based on the time values of the original annotation). 
+The function searches within the contents of annotations and replaces the search hits.
+In addition the search hit may be copied to another tier.
+In case that there is NO overlapping annotation in the destination tier a new annotation will be created (based on the time values of the original annotation).
 In case that there is an overlapping annotation in the destination tier, the search result will be added at the end.
 }
 \details{

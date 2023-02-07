@@ -129,7 +129,7 @@ transcript_show <- function (object) {
 	cat("    file.type                  : ", paste("'", object@file.type,"'", sep="", collapse=""), fill=TRUE)
 	cat("    file.content               : ", if(length(object@file.content)==0) {"[empty]"} else {"[check directly]"}, fill=TRUE)
 	cat("\n")
-	cat("    import.result                : ", paste("'", object@import.result, "'", sep="", collapse=""), fill=TRUE)
+	cat("    import.result              : ", paste("'", object@import.result, "'", sep="", collapse=""), fill=TRUE)
 	cat("    load.message               : ", paste("'", object@load.message, "'" , sep="", collapse=""), fill=TRUE)
 	cat("    media.path                 : ", if(length(object@media.path)==0) {"[empty]"} else {paste ("[check directly]", as.character(length(object@media.path)), " path(s)", sep= " ")}, fill=TRUE)
 	cat("\n")

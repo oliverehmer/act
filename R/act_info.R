@@ -26,9 +26,9 @@ info <- function(...) {
 	if(length(dots) == 0) {stop ("You need to pass a corpus object or a transcript object to this function.")}
 	x <- NULL
 	t <- NULL
-	if (class(dots[[1]])=="corpus") {
+	if (methods::is(dots[[1]],"corpus")) {
 		x <- dots[[1]]	
-	} else if (class(dots[[1]])=="transcript" ) {
+	} else if (methods::is(dots[[1]], "transcript" )) {
 		t <- dots[[1]]	
 	} else {
 		stop ("You need to pass a corpus object or a transcript object to this function. ")
@@ -41,7 +41,7 @@ info <- function(...) {
 			transcript.name      =character(),
 			length.sec           =double(),
 			length.formatted     =character(),
-			tier.count          =integer(),
+			tier.count           =integer(),
 			annotations.count    =integer(),
 			words.org.count      =integer(),
 			words.norm.count     =integer(),
@@ -71,7 +71,7 @@ info <- function(...) {
 					transcript.name      = x@transcripts[[i]]@name,
 					length.sec           = as.double(x@transcripts[[i]]@length.sec),
 					length.formatted     = helper_format_time(x@transcripts[[i]]@length.sec),
-					tier.count          = as.integer(nrow(x@transcripts[[i]]@tiers)),
+					tier.count           = as.integer(nrow(x@transcripts[[i]]@tiers)),
 					annotations.count    = nrow(x@transcripts[[i]]@annotations),
 					words.org.count      = words.org.count, 
 					words.norm.count     = words.norm.count, 
@@ -95,22 +95,22 @@ info <- function(...) {
 		#--- Collapse by tier type
 		name.unique <- unique(temp$name)
 		temp2 <- data.frame(tier.name                  =character(),
-						  tier.count                  =integer(),
-						  transcript.count            =integer(),
-						  transcript.names            =character(),
+						  tier.count                   =integer(),
+						  transcript.count             =integer(),
+						  transcript.names             =character(),
 						  annotations.count            =integer(),
 						  words.org.count              =integer(),
 						  words.norm.count             =integer(),
-						  interval.tier.count         =integer(),
-						  interval.transcript.count   =integer(),
-						  interval.transcript.names   =character(),
+						  interval.tier.count          =integer(),
+						  interval.transcript.count    =integer(),
+						  interval.transcript.names    =character(),
 						  interval.annotations.count   =integer(),
 						  interval.words.org.count     =integer(),
 						  interval.words.norm.count    =integer(),
 						  
-						  text.tier.count             =integer(),
-						  text.transcript.count       =integer(),
-						  text.transcript.names       =character(),
+						  text.tier.count              =integer(),
+						  text.transcript.count        =integer(),
+						  text.transcript.names        =character(),
 						  text.annotations.count       =integer(),
 						  text.tiers.words.org.count   =integer(),
 						  text.tiers.words.norm.count  =integer(),
@@ -118,29 +118,29 @@ info <- function(...) {
 		
 		if (length(name.unique)>0) {
 			for (i in 1:length(name.unique)) {
-				tiers.current                              <- temp[which(temp$name==name.unique[i]),]
-				tiers.current.interval                     <- temp[which(temp$name==name.unique[i] & temp$type=="IntervalTier"),]
-				tiers.current.text                         <- temp[which(temp$name==name.unique[i] & temp$type=="TextTier"),]
+				tiers.current                         <- temp[which(temp$name==name.unique[i]),]
+				tiers.current.interval                <- temp[which(temp$name==name.unique[i] & temp$type=="IntervalTier"),]
+				tiers.current.text                    <- temp[which(temp$name==name.unique[i] & temp$type=="TextTier"),]
 				
 				myRow <- data.frame(
 					tier.name                         = name.unique[i],
-					tier.count 		              = nrow(tiers.current),
-					transcript.count                 = length(unique(tiers.current$transcript.name)),
-					transcript.names                 = paste(unique(tiers.current$transcript.name), sep="|", collapse="|"),
+					tier.count 		                  = nrow(tiers.current),
+					transcript.count                  = length(unique(tiers.current$transcript.name)),
+					transcript.names                  = paste(unique(tiers.current$transcript.name), sep="|", collapse="|"),
 					annotations.count                 = sum(tiers.current$annotations.count),
 					words.org.count                   = sum(tiers.current$words.org.count),
 					words.norm.count                  = sum(tiers.current$words.norm.count),
 					
-					interval.tier.count              = nrow(tiers.current.interval),
-					interval.transcript.count        = length(unique(tiers.current.interval$transcript.name)),
-					interval.transcript.names        = paste(unique(tiers.current.interval$transcript.name), sep="|", collapse="|"),
+					interval.tier.count               = nrow(tiers.current.interval),
+					interval.transcript.count         = length(unique(tiers.current.interval$transcript.name)),
+					interval.transcript.names         = paste(unique(tiers.current.interval$transcript.name), sep="|", collapse="|"),
 					interval.annotations.count        = sum(tiers.current.interval$annotations.count),
 					interval.words.org.count          = sum(tiers.current.interval$words.org.count),
 					interval.words.norm.count         = sum(tiers.current.interval$words.norm.count),
 					
-					text.tier.count                  = nrow(tiers.current.text),
-					text.transcript.count            = length(unique(tiers.current.text$transcript.name)),
-					text.transcript.names            = paste(unique(tiers.current.text$transcript.name), sep="|", collapse="|"),
+					text.tier.count                   = nrow(tiers.current.text),
+					text.transcript.count             = length(unique(tiers.current.text$transcript.name)),
+					text.transcript.names             = paste(unique(tiers.current.text$transcript.name), sep="|", collapse="|"),
 					text.annotations.count            = sum(tiers.current.text$annotations.count),
 					text.tiers.words.org.count        = sum(tiers.current.text$words.org.count),
 					text.tiers.words.norm.count       = sum(tiers.current.text$words.norm.count),

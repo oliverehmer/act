@@ -17,7 +17,7 @@ search_playresults_inquicktime(x, s, bringQuicktimeToFront = FALSE)
 No return value.
 }
 \description{
-The function remote controls 'Quicktime' by using an Apple Script. 
+The function remote controls 'Quicktime' by using an Apple Script.
 It opens consecutively all search results in 'Quicktime' and plays them.
 }
 \details{

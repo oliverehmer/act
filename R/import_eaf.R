@@ -55,10 +55,10 @@ import_eaf <- function(filePath=NULL,
 	}
 	
 	t@file.type 			 <- "eaf"
-	t@file.encoding        <- "UTF-8"
+	t@file.encoding          <- "UTF-8"
 	t@import.result 		 <- "ok"
-	t@load.message 	     <- ""
-	t@modification.systime <- character()
+	t@load.message 	         <- ""
+	t@modification.systime   <- character()
 	#t@annotations				<- .emptyAnnotations
 
 	if (!is.null(filePath)) {
@@ -337,7 +337,12 @@ import_eaf <- function(filePath=NULL,
 				
 				#=mark which are the first and the last annotations in a group
 				annotations <- cbind(annotations, position=NA)
-				annotations$position[!is.na(annotations$annotation.ref) & is.na(annotations$annotation.previous)] <- 1# "first"
+				if (nrow(annotations)==1) {
+					annotations$position[1] <- 1 # "first"
+				} else {
+					annotations$position[!is.na(annotations$annotation.ref) & is.na(annotations$annotation.previous)] <- 1# "first"
+				}
+				
 				firstannotations <- which(annotations$position=="1") #"first"
 				for (i in firstannotations) {
 					counter <- 1
@@ -422,42 +427,46 @@ import_eaf <- function(filePath=NULL,
 				#run through all annotations
 				i <- 4
 				for (m in 1:nrow(tiers)) {
-					for (i in 1:(nrow(annotations)-1)) {
-						#print(i)
-						#check if the end value is empty
-						if (is.na(annotations$endSec[i])) {
-							#if we are lucky, the following annotation has a start value and we are done
-							if (!is.na(annotations$startSec[i+1])) {
-								annotations$endSec[i] <- annotations$startSec[i+1]
-							}
-							
-							#otherwise search for the next end value
-							counter <- 0
-							for (j in i:nrow(annotations)) {
-								if (!is.na(annotations$endSec[j])) {
-									break
+					if (nrow(annotations)>1) {
+	
+						for (i in 1:(nrow(annotations)-1)) {
+							#print(i)
+							#check if the end value is empty
+							if (is.na(annotations$endSec[i])) {
+								#if we are lucky, the following annotation has a start value and we are done
+								if (!is.na(annotations$startSec[i+1])) {
+									annotations$endSec[i] <- annotations$startSec[i+1]
+								}
+								
+								#otherwise search for the next end value
+								counter <- 0
+								for (j in i:nrow(annotations)) {
+									if (!is.na(annotations$endSec[j])) {
+										break
+									}
+								}
+								#the span that we need to calculate is this from: i startsec to j endsec
+								#how many annotations are spanned:  j-i+1
+								# we this need even one more timevalue for the sequence: j-i+2
+								if (!is.na(annotations$startSec[i]) & !is.na(annotations$endSec[j])) {
+									newTimes		<- seq(from=annotations$startSec[i], to=annotations$endSec[j], length.out=j-i+2)
+									newTimes.start	<- newTimes[1:length(newTimes)-1]
+									newTimes.end	<- newTimes[2:length(newTimes)]
+									
+									#assign new time values to annotations
+									l <- 0
+									for (k in i:j) {
+										l <- l+1
+										annotations$startSec[k] <- newTimes.start[l]
+										annotations$endSec[k] <- newTimes.end[l]
+										annotations[k, ]$ts1 <- "interpolated"
+										annotations[k, ]$ts2 <- "interpolated"				
+									}					
 								}
 							}
-							#the span that we need to calculate is this from: i startsec to j endsec
-							#how many annotations are spanned:  j-i+1
-							# we this need even one more timevalue for the sequence: j-i+2
-							if (!is.na(annotations$startSec[i]) &!is.na(annotations$endSec[j])) {
-								newTimes		<- seq(from=annotations$startSec[i], to=annotations$endSec[j], length.out=j-i+2)
-								newTimes.start	<- newTimes[1:length(newTimes)-1]
-								newTimes.end	<- newTimes[2:length(newTimes)]
-								
-								#assign new time values to annotations
-								l <- 0
-								for (k in i:j) {
-									l <- l+1
-									annotations$startSec[k] <- newTimes.start[l]
-									annotations$endSec[k] <- newTimes.end[l]
-									annotations[k, ]$ts1 <- "interpolated"
-									annotations[k, ]$ts2 <- "interpolated"				
-								}					
-							}
-						}
-					}			
+						}					
+
+					}
 					if (!any(is.na(c(annotations$startSec, annotations$endSec)))) {
 						break
 					}
@@ -468,6 +477,7 @@ import_eaf <- function(filePath=NULL,
 		
 		if (nrow(annotations)==0) {
 			#empty myAnnotations is already set at the beginning
+			myAnnotations <- data.frame()
 		} else {
 			annotationID <- c(1:nrow(annotations))
 			myAnnotations <- data.frame(
@@ -526,11 +536,13 @@ import_eaf <- function(filePath=NULL,
 			}
 			#make transcript 1 sec longer than last annotation
 			t@length.sec <- max( t@length.sec, as.double(annotations$startSec)+1, as.double(annotations$endSec)+1)
+			
+			#=== html conversion
+			myAnnotations$content      <- textutils::HTMLdecode(myAnnotations$content)
+			myAnnotations$tier.name    <- textutils::HTMLdecode(myAnnotations$tier.name)
+			
 		}
-		
 		#=== html conversion
-		myAnnotations$content      <- textutils::HTMLdecode(myAnnotations$content)
-		myAnnotations$tier.name    <- textutils::HTMLdecode(myAnnotations$tier.name)
 		tiers$tier.name     	   <- textutils::HTMLdecode(tiers$tier.name)
 	}
 	

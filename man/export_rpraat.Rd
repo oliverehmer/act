@@ -27,7 +27,7 @@ rPraat TextGrid object
 Advice: In most situations it is more convenient to use \code{act::corpus_export} for exporting annotation files.
 }
 \details{
-This function is to create compatibility with the \code{rPraat} package. 
+This function is to create compatibility with the \code{rPraat} package.
 It converts an act transcript to a rPraat TextGrid object.
 
 Credits: Thanks to Tomáš Bořil, the author of the rPraat package, for commenting on the exchange functions.

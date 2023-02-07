@@ -36,9 +36,9 @@ search_sub <- function(x,
 					   deleteLinesWithNoResults=FALSE, 
 					   excludeHitsWithinSameTier=TRUE) {
 	
-	#x <- examplecorpus
-	#s <- mysearch
-	#pattern <- myRegEx
+	#x <- corpus
+	#s <- suche
+	#pattern <- pattern.laugh
 	#destinationColumn <-"subsearch"
 	#filterTierIncludeRegEx <-""
 	#filterTierExcludeRegEx <-""
@@ -47,8 +47,8 @@ search_sub <- function(x,
 	
 	
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		} else { if (class(s)[[1]]!="search")		{stop("Parameter 's' needs to be a search object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
 	
 	if (destinationColumn=="") {
 		stop("Destination column name may not be empty.")

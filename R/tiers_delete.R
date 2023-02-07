@@ -21,11 +21,11 @@ tiers_delete <- function(x,
 						 tierNames, 
 						 filterTranscriptNames=NULL) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
 	tiers_deleted_count_all <- 0
 	tiers_deleted_names_all <- c()
-	transcripts_modified_names <- c()
+	transcripts_modified_ids <- c()
 	annotations_deleted_count_all <- 0
 	
 	 # x <- corpus2
@@ -50,7 +50,7 @@ tiers_delete <- function(x,
 		tiers.ids<- which(x@transcripts[[i]]@tiers$name %in% tierNames)
 		if(length(tiers.ids>0)) {
 			#remember name of the transcripts
-			transcripts_modified_names <- c(transcripts_modified_names, i)
+			transcripts_modified_ids <- c(transcripts_modified_ids, i)
 			
 			#delete tiers from the tier list
 			tiers_deleted_names <-  x@transcripts[[i]]@tiers$name[tiers.ids]
@@ -64,10 +64,8 @@ tiers_delete <- function(x,
 			annotations_deleted_count <- length(annotations.ids)
 			annotations_deleted_count_all <- annotations_deleted_count_all + annotations_deleted_count
 			
-			#reset transcript log
+			#HISTORY transcript
 			x@transcripts[[i]]@modification.systime <- Sys.time()
-			
-			#history
 			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
 				modification        = "tiers_delete",
 				systime             = Sys.time(),
@@ -84,18 +82,19 @@ tiers_delete <- function(x,
 	if (is.null(annotations_deleted_count_all)) {
 		annotations_deleted_count_all <- as.character()
 	}
-	if (is.null(transcripts_modified_names)) {
-		transcripts_modified_names <- as.character()
+	if (is.null(transcripts_modified_ids)) {
+		transcripts_modified_ids <- as.character()
 	}		
 	
+	#HISTORY corpus
 	x@history[[length(x@history)+1]] <- list(  
 		modification                 ="tiers_delete",
 		systime                      = Sys.time(),
 		tiers.deleted.count          = length(tiers_deleted_names_all),
 		tiers.deleted.names          = tiers_deleted_names_all,
 		annotations.deleted          = annotations_deleted_count_all,
-		transcripts.modified.count   = length(transcripts_modified_names),
-		transcripts.modified.names   = transcripts_modified_names
+		transcripts.modified.count   = length(transcripts_modified_ids),
+		transcripts.modified.names   = transcripts_modified_ids
 	)
 	
 	return (x)

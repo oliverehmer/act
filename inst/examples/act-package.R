@@ -1,8 +1,14 @@
 library(act)
 
-# ========== Example data 
-# The act package comes with some example data. 
-# The data is stored at the following location:
+# ========== Example data set
+# There is an example data set consisting of annotation files and corresponding 
+# media files. 
+# While the annotation files are copied to your computer when installing 
+# the media files are not.
+# You can either download the full data set from GitHub or decide to work 
+# only with the annotation files.
+
+# The example data set (only annotation files) is stored at the following location:
 path <- system.file("extdata", "examplecorpus", package="act")
 
 # Since this folder is quite difficult to access, you might consider copying the 
@@ -17,18 +23,20 @@ if (!dir.exists(path)) {dir.create(path)}
 file.copy(sourcepath, dirname(path), recursive=TRUE)
 }
 
-# The example files that come with the package do only contain annotation files.
-# Media files are not included.
-# The following lines will download the data and create a new folder called 
-# 'examplecorpus' in the folder 'path'.  
+# To download the full data set (including media files) from GitHub
+# use the following code.
+# In the first line specify an existing folder on your computer. 
+# The following lines will then download the example data set from GitHub 
+# and copy them to a sub folder called 'examplecorpus' in the folder 'path'.  
 # You will find the data there.
 \dontrun{
 path <- "EXISTING_FOLDER_ON_YOUR_COMPUTER"
-sourceurl <- 
-"http://www.romanistik.uni-freiburg.de/ehmer/files/digitalhumanities/act_examplecorpus.zip"
+path <- "/Users/oliverehmer/Desktop"
+sourceurl <- "https://github.com/oliverehmer/act_examplecorpus/archive/master.zip"
 temp <- tempfile()
 download.file(sourceurl, temp)
 unzip(zipfile=temp, exdir=path)
+path <- file.path(path, "act_examplecorpus-main")
 }
 
 # ========== Create a corpus object and load data

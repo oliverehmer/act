@@ -3,16 +3,18 @@
 #' @param t Transcript object; transcript to search in.
 #' @param s Search object.
 #' 
-#' @return Data.frame; data frame with search results.
+#' @return \code{Data.frame} data frame with search results.
+#' 
+#' @export
 #'  
-#' # @example inst/examples/search_transcript_content.R
+#' @example inst/examples/search_transcript_content.R
 #' 
 #' 
 search_transcript_content <- function(t, s) {
 	helper_progress_tick()
 	
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	} else { if (class(t)[[1]]!="transcript") 	{stop("Parameter 't' needs to be a transcript object.") 	} }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		} else { if (class(s)[[1]]!="search")		{stop("Parameter 's' needs to be a search object.") 	} }
+	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
 	
 	temp <- NULL
 	
@@ -95,7 +97,7 @@ search_transcript_content <- function(t, s) {
 					hits.pos			<- stringr::str_locate_all(myAnnotations$content.norm[indices], s@pattern)
 					hits.count 			<- stringr::str_count(myAnnotations$content.norm[indices], s@pattern)
 					hits.match			<- stringr::str_extract_all(myAnnotations$content.norm[indices], s@pattern)
-					annotationID 				<- myAnnotations$annotationID[indices]
+					annotationID 		<- myAnnotations$annotationID[indices]
 					matches.df 			<- cbind(annotationID=annotationID[1], hits.pos[[1]], hit.nr=1, hit=hits.match[[1]])
 					if (length(hits.pos)>1) {
 						for(j in 2:length(hits.pos)) {

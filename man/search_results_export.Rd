@@ -10,7 +10,7 @@ search_results_export(
   sheetNameXLSX = "data",
   saveAsCSV = FALSE,
   encodingCSV = "UTF-8",
-  separatorCSV = ",",
+  separatorCSV = ";",
   overwrite = TRUE
 )
 }
@@ -32,9 +32,11 @@ search_results_export(
 \description{
 Search results from a search object will be saved to a Excel-XLSX or a CSV (comma separated values) file.
 By default a XLSX file will be saved. If you want to save a CSV file, use \code{saveAsCSV=TRUE}.
-Please note: 
-- The function will '=' signs at the beginning of annotation by ".=". This is because the content would be interpreted as the beginning of a formula (leading to an error).
-- In the case of writing to an excel file, line breaks will be replaced by "|". This is because line breaks will lead to an error.
+Please note:
+\itemize{
+\item The function will '=' signs at the beginning of annotation by ".=". This is because the content would be interpreted as the beginning of a formula (leading to an error).
+\item In the case of writing to an excel file, line breaks will be replaced by "|". This is because line breaks will lead to an error.
+}
 }
 \examples{
 library(act)

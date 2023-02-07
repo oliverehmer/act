@@ -24,14 +24,14 @@ corpus_import(
 Corpus object.
 }
 \description{
-Scans all path specified in if \code{x@paths.annotation.files} for annotation files. 
-Supported file formats will be loaded as transcript objects into the corpus object. 
+Scans all path specified in if \code{x@paths.annotation.files} for annotation files.
+Supported file formats will be loaded as transcript objects into the corpus object.
 All previously loaded transcript objects will be deleted.
 }
 \details{
 If \code{assignMedia=TRUE} the paths defined in \code{x@paths.media.files} will be scanned for media files.
 Based on their file names the media files and annotations files will be matched.
-Only the the file types set in \code{options()$act.fileformats.audio} and \code{options()$act.fileformats.video} will be recognized. 
+Only the the file types set in \code{options()$act.fileformats.audio} and \code{options()$act.fileformats.video} will be recognized.
 You can modify these options to recognize other media types.
 
 See \code{@import.results} of the corpus object to check the results of importing the files.

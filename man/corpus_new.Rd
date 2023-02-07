@@ -55,7 +55,7 @@ Corpus object.
 }
 \description{
 Create a new corpus object and loads annotation files. Currently 'ELAN' .eaf, 'EXMARaLDA .exb and 'Praat' .TextGrid files are supported.
- 
+
 The parameter \code{pathsAnnotationFiles} defines where the annotation files are located.
 If \code{skipDoubleFiles=TRUE} duplicated files will be skipped, otherwise the will be renamed.
 If \code{importFiles=TRUE} the corpus object will be created but files will not be loaded. To load the files then call \link{corpus_import}.
@@ -63,7 +63,7 @@ If \code{importFiles=TRUE} the corpus object will be created but files will not 
 \details{
 The parameter \code{pathsMediaFiles} defines where the corresponding media files are located.
 If \code{assignMedia=TRUE} the paths defined in \code{x@paths.media.files} will be scanned for media files and will be matched to the transcript object based on their names.
-Only the the file types set in \code{options()$act.fileformats.audio} and \code{options()$act.fileformats.video} will be recognized. 
+Only the the file types set in \code{options()$act.fileformats.audio} and \code{options()$act.fileformats.video} will be recognized.
 You can modify these options to recognize other media types.
 
 See \code{@import.results} of the corpus object to check the results of importing the files.

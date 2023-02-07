@@ -29,10 +29,11 @@ helper_transcriptNames_make <- function(transcriptNames,
 	if (is.null(searchPatterns)) {
 		searchPatterns <- character()
 	}
+	
 	if (is.null(searchReplacements)) {
 		searchReplacements <- character()
 	}
-
+	
 	#--- let's start
 	names.original.ids  <- transcriptNames
 	names.ok.ids <- transcriptNames
@@ -44,7 +45,11 @@ helper_transcriptNames_make <- function(transcriptNames,
 		} else {
 			names(searchReplacements) <- searchPatterns
 			for (i in 1:length(searchReplacements)) {
-				names.ok.ids <-  stringr::str_replace_all(string=names.ok.ids, pattern=searchPatterns[i], replacement=searchReplacements[i])
+				if (searchPatterns[[i]]=="") {
+					
+				} else {
+					names.ok.ids <-  stringr::str_replace_all(string=names.ok.ids, pattern=searchPatterns[i], replacement=searchReplacements[i])
+				}
 			}
 		}
 	}	

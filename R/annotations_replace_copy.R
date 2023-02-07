@@ -24,21 +24,19 @@
 #' 
 annotations_replace_copy <- function (x, 
 									  pattern, 
-									  replacement=NULL, 
-									  destTier=NULL, 
-									  addDestTierIfMissing=TRUE,
-									  filterTranscriptNames=NULL, 
-									  filterTierNames=NULL, 
-									  collapseString=" | ") {
+									  replacement           = NULL, 
+									  destTier              = NULL, 
+									  addDestTierIfMissing  = TRUE,
+									  filterTranscriptNames = NULL, 
+									  filterTierNames       = NULL, 
+									  collapseString        = " | ") {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
-	transcripts_modified_nr <- 0
-	transcripts_modified_ids <- c()
-	
-	annotations_copied_nr <- 0
-	annotations_replaced_nr <- 0
-	annotations_copied_total_nr <- 0
+	transcripts_modified_ids      <- c()
+	annotations_copied_nr         <- 0
+	annotations_replaced_nr       <- 0
+	annotations_copied_total_nr   <- 0
 	annotations_replaced_total_nr <- 0
 	recodsets_copiederror_destinationtiermissingintranscript_nr <- 0
 	recodsets_copiederror_destinationtiermissingintranscript_ids <- c()
@@ -109,8 +107,8 @@ annotations_replace_copy <- function (x,
 						# COPY part
 						if (!destTierIsPresent) {
 							#keep track of annotations that could not be copied
-							recodsets.copiederror.tiermissingintranscript.count =recodsets_copiederror_destinationtiermissingintranscript_nr +1
-							recodsets.copiederror.tiermissingintranscript.ids   =unique(c(recodsets_copiederror_destinationtiermissingintranscript_ids, x@transcripts[[i]]@name))
+							recodsets.copiederror.tiermissingintranscript.count = recodsets_copiederror_destinationtiermissingintranscript_nr +1
+							recodsets.copiederror.tiermissingintranscript.ids   = unique(c(recodsets_copiederror_destinationtiermissingintranscript_ids, x@transcripts[[i]]@name))
 						} else {
 							#get record set in destination tier that possibly overlaps
 							temp <- (	x@transcripts[[i]]@annotations$tier.name==destTier) & (x@transcripts[[i]]@annotations$startSec < x@transcripts[[i]]@annotations$endSec[[j]]) & (x@transcripts[[i]]@annotations$endSec > x@transcripts[[i]]@annotations$startSec[[j]])
@@ -118,11 +116,11 @@ annotations_replace_copy <- function (x,
 							#if there is no overlapping record set on destination tier
 							if (length(which(temp, TRUE))==0) {
 								#create new record set
-								myrow <- x@transcripts[[i]]@annotations[j,]
-								myrow$tier.name     <- destTier
-								myrow$content      <- hits_merged
-								myrow$content.norm <- ""
-								myrow$annotationID       <- max(x@transcripts[[i]]@annotations$annotationID)+1
+								myrow                 <- x@transcripts[[i]]@annotations[j,]
+								myrow$tier.name       <- destTier
+								myrow$content         <- hits_merged
+								myrow$content.norm    <- ""
+								myrow$annotationID    <- max(x@transcripts[[i]]@annotations$annotationID)+1
 								
 								#add to table
 								x@transcripts[[i]]@annotations <- rbind(x@transcripts[[i]]@annotations, myrow)
@@ -156,42 +154,39 @@ annotations_replace_copy <- function (x,
 		
 		#update info for transcript
 		if (anyChanges) {
-			#update history
+			#HISTORY transcript
 			x@transcripts[[i]]@modification.systime <- Sys.time()
 			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
-				modification               ="annotations_search_replace_copy",
+				modification               = "annotations_search_replace_copy",
 				systime                    = Sys.time(),
-				annotations.replaced.count =annotations_replaced_nr,
-				annotations.copied.count   =annotations_copied_nr
+				annotations.replaced.count = annotations_replaced_nr,
+				annotations.copied.count   = annotations_copied_nr
 			)
-			
-			#increase counter for corpus object
-			transcripts_modified_nr <- transcripts_modified_nr +1
-			transcripts_modified_ids=c(transcripts_modified_ids, i)
-			annotations_replaced_total_nr = annotations_replaced_total_nr + annotations_replaced_nr
-			annotations_copied_total_nr = annotations_copied_total_nr + annotations_copied_nr
+			#increase counters for corpus object
+			transcripts_modified_ids      <- c(transcripts_modified_ids, i)
+			annotations_replaced_total_nr <- annotations_replaced_total_nr + annotations_replaced_nr
+			annotations_copied_total_nr   <- annotations_copied_total_nr + annotations_copied_nr
 		}
 	} #next transcript
 	
-	#update modification in corpus file
-	x@history[[length(x@history)+1]] <- list( modification                     ="annotations_search_replace_copy",
+	#HISTORY corpus
+	x@history[[length(x@history)+1]] <- list( modification                     = "annotations_search_replace_copy",
 											  systime                          = Sys.time(),
-											  pattern                          =pattern,
-											  replacement                      =replacement,
-											  destTier                         =destTier,
-											  addDestTierIfMissing             =addDestTierIfMissing,
-											  transcripts.modified.count       =transcripts_modified_nr,
-											  transcripts.modified.ids         =transcripts_modified_ids,
-											  annotations.replaced.total.count =annotations_replaced_total_nr,
-											  annotations.copied.total.count   =annotations_copied_total_nr)
-	
+											  pattern                          = pattern,
+											  replacement                      = replacement,
+											  destTier                         = destTier,
+											  addDestTierIfMissing             = addDestTierIfMissing,
+											  transcripts.modified.count       = length(transcripts_modified_ids),
+											  transcripts.modified.ids         = transcripts_modified_ids,
+											  annotations.replaced.total.count = annotations_replaced_total_nr,
+											  annotations.copied.total.count   = annotations_copied_total_nr)
 	if (recodsets_copiederror_destinationtiermissingintranscript_nr>0) {
 		x@history[[length(x@history)+1]] <-  list( 
-			modification                                        ="annotations_search_replace_copy",
+			modification                                        = "annotations_search_replace_copy",
 			systime                                             = Sys.time(),
 			recodsets.copiederror                               = "ERROR: the destination tier for copying was missing in some transcripts. No data copied.",
-			recodsets.copiederror.tiermissingintranscript.count =recodsets_copiederror_destinationtiermissingintranscript_nr,
-			recodsets.copiederror.tiermissingintranscript.ids   =recodsets_copiederror_destinationtiermissingintranscript_ids
+			recodsets.copiederror.tiermissingintranscript.count = recodsets_copiederror_destinationtiermissingintranscript_nr,
+			recodsets.copiederror.tiermissingintranscript.ids   = recodsets_copiederror_destinationtiermissingintranscript_ids
 		)
 		
 	}

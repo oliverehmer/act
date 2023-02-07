@@ -14,54 +14,71 @@ The package has numerous options that change the internal workings of the packag
 }
 \details{
 There are several options that change the way the package works. They are set globally.
-* Use \code{options(name.of.option = value)} to set an option.
-* Use \code{options()$name.of.option} to get the current value of an option.
-* Use \code{act::options_reset} to set all options to the default value.
-* Use \code{act::options_delete} to clean up and delete all option settings.
+\itemize{
+\item Use \code{options(name.of.option = value)} to set an option.
+\item Use \code{options()$name.of.option} to get the current value of an option.
+\item Use \code{act::options_reset} to set all options to the default value.
+\item Use \code{act::options_delete} to clean up and delete all option settings.
+}
 
 The package uses the following options.
 
 \emph{Program}
-* \code{act.excamplecorpusURL} character strings; where to download example media files.
-* \code{act.updateX} Logical; If \code{TRUE} the original corpus object 'x' passed passed to the search functions \code{search_new} and \code{search_run} will also be updated, in case that during the search fulltexts are created or the normalization is performed. 
-* \code{act.showprogress} logical; if \code{TRUE} a progress bar will be shown during (possibly) time consuming operations.
+\itemize{
+\item \code{act.excamplecorpusURL} character strings; where to download example media files.
+\item \code{act.updateX} Logical; If \code{TRUE} the original corpus object 'x' passed passed to the search functions \code{search_new} and \code{search_run} will also be updated, in case that during the search fulltexts are created or the normalization is performed.
+\item \code{act.showprogress} logical; if \code{TRUE} a progress bar will be shown during (possibly) time consuming operations.
+}
 
 \emph{Paths}
-* \code{act.path.praat} Character string; path to the 'Praat' executable on your computer. Only necessary if you use the functions to remote control Praat using Praat scripts.
-* \code{act.path.sendpraat} Character string; path to the 'sendpraat' executable on your computer. Only necessary if you use the functions to remote control Praat using Praat scripts.
-* \code{act.path.elan} Character string; path to the 'ELAN' executable on your computer. Only necessary if you want to open search results in ELAN.
+\itemize{
+\item \code{act.path.praat} Character string; path to the 'Praat' executable on your computer. Only necessary if you use the functions to remote control Praat using Praat scripts.
+\item \code{act.path.sendpraat} Character string; path to the 'sendpraat' executable on your computer. Only necessary if you use the functions to remote control Praat using Praat scripts.
+\item \code{act.path.elan} Character string; path to the 'ELAN' executable on your computer. Only necessary if you want to open search results in ELAN.
+}
 
 \emph{File formats}
-* \code{act.fileformats.video} Vector of character strings; Suffixes of video files that will be identified; default is 'c("mp4", "mov")'.
-* \code{act.fileformats.audio} Vector of character strings; Suffixes of audio files that will be identified; default is 'c("wav", "aif", "mp3")'.
+\itemize{
+\item \code{act.fileformats.video} Vector of character strings; Suffixes of video files that will be identified; default is 'c("mp4", "mov")'.
+\item \code{act.fileformats.audio} Vector of character strings; Suffixes of audio files that will be identified; default is 'c("wav", "aif", "mp3")'.
+}
 
 \emph{FFMPEG commands and options}
-* \code{act.ffmpeg.command} Character string; 'FFmpeg' command that is used for cutting video files.
-* \code{act.ffmpeg.command.fastVideoPostioning} Character string; 'FFmpeg' command that is used for cutting video files using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
-* \code{act.ffmpeg.command.audio} Character string; 'FFmpeg' command that is used for cutting/generating uncompressed audio files.
-* \code{act.ffmpeg.command.UsefastVideoPostioning} Logical; if \code{TRUE} the 'FFmpeg' option using fast video positioning (ant the respective commands as defined in the other options) will be used.
-* \code{act.ffmpeg.exportchannels.fromColumnName} Character string; Name of the column in the data frame \code{s@results} from information, which audio channel to export, will be taken.
+\itemize{
+\item \code{act.ffmpeg.command} Character string; 'FFmpeg' command that is used for cutting video files.
+\item \code{act.ffmpeg.command.fastVideoPostioning} Character string; 'FFmpeg' command that is used for cutting video files using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
+\item \code{act.ffmpeg.command.audio} Character string; 'FFmpeg' command that is used for cutting/generating uncompressed audio files.
+\item \code{act.ffmpeg.command.UsefastVideoPostioning} Logical; if \code{TRUE} the 'FFmpeg' option using fast video positioning (ant the respective commands as defined in the other options) will be used.
+\item \code{act.ffmpeg.exportchannels.fromColumnName} Character string; Name of the column in the data frame \code{s@results} from information, which audio channel to export, will be taken.
+}
 
 \emph{Import annotation files}
-* \code{act.import.readEmptyIntervals} Logical; if \code{TRUE} empty intervals in you annotation files will be read, if \code{FALSE} empty intervals will be skipped.
-* \code{act.import.scanSubfolders} Logical; if \code{TRUE} sub folders will also be scanned for annotation files; if \code{FALSE} only the main level of the folders specified in \code{paths.annotation.files} of your corpus object will be scanned. 
-* \code{act.import.storeFileContentInTranscript} if \code{TRUE} the contents of the original annotation file will be stored in \code{transcript@file.content}. Set to \code{FALSE} if you want to keep your corpus object small.
+\itemize{
+\item \code{act.import.readEmptyIntervals} Logical; if \code{TRUE} empty intervals in you annotation files will be read, if \code{FALSE} empty intervals will be skipped.
+\item \code{act.import.scanSubfolders} Logical; if \code{TRUE} sub folders will also be scanned for annotation files; if \code{FALSE} only the main level of the folders specified in \code{paths.annotation.files} of your corpus object will be scanned.
+\item \code{act.import.storeFileContentInTranscript} if \code{TRUE} the contents of the original annotation file will be stored in \code{transcript@file.content}. Set to \code{FALSE} if you want to keep your corpus object small.
+}
 
 \emph{Export}
-* \code{act.export.foldergrouping1.fromColumnName} Character string; Name of sub folders that will be created in the folder of the search result, level 1.
-* \code{act.export.foldergrouping2.fromColumnName}  Character string; Name of sub folders that will be created in the folder of the search result, level 2.
-* \code{act.export.filename.fromColumnName}  Character string; Name of the column from which the file names for exported files will be taken.
- 
+\itemize{
+\item \code{act.export.foldergrouping1.fromColumnName} Character string; Name of sub folders that will be created in the folder of the search result, level 1.
+\item \code{act.export.foldergrouping2.fromColumnName}  Character string; Name of sub folders that will be created in the folder of the search result, level 2.
+\item \code{act.export.filename.fromColumnName}  Character string; Name of the column from which the file names for exported files will be taken.
+}
+
 \emph{Miscellaneous}
-* \code{act.separator_between_intervals} Character; Single character that is used for separating intervals when creating the full text.
-* \code{act.separator_between_tiers} Character; Single character that is used for separating tiers when creating the full text.
-* \code{act.separator_between_words} Character string; regular expression with alternatives that count as separators between words. Used for preparing the concordance.
-* \code{act.wordCountRegEx} Character string; regular expression that is used to count words.
+\itemize{
+\item \code{act.separator_between_intervals} Character; Single character that is used for separating intervals when creating the full text.
+\item \code{act.separator_between_tiers} Character; Single character that is used for separating tiers when creating the full text.
+\item \code{act.separator_between_words} Character string; regular expression with alternatives that count as separators between words. Used for preparing the concordance.
+\item \code{act.wordCountRegEx} Character string; regular expression that is used to count words.
+}
 }
 \examples{
 library(act)
 \dontrun{
 act::options_show()
 }
+
 
 }

@@ -31,11 +31,13 @@ Search object;
 }
 \description{
 This function will call the following functions:
-- \code{act_cuts_printtranscript} to create print transcripts,
-- \code{act::cuts_media} to create FFmpeg cutlist to make media snippets,
-- \code{act::search_cuts_srt()} to create .srt subtitles,
+\itemize{
+\item \code{act_cuts_printtranscript} to create print transcripts,
+\item \code{act::cuts_media} to create FFmpeg cutlist to make media snippets,
+\item \code{act::search_cuts_srt()} to create .srt subtitles,
 for all  search results.
- 
+}
+
 For a detailed description including examples please refer to the documentation of the indidival functions.
 They also offer some more parameters than this functions. If you want to use those, call the functions individually.
 }

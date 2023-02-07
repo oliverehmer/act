@@ -18,11 +18,20 @@ search_results_import <- function(path,
 								  revertReplacements=TRUE,
 								  sheetNameXLSX="data", 
 								  encodingCSV="UTF-8", 
-								  separatorCSV=",") {
+								  separatorCSV=";") {
 	
 	filetype <- tools::file_ext(path)
 	if (filetype=="csv") {
-		temp <- utils::read.table(path, header = TRUE, sep = separatorCSV, fileEncoding = encodingCSV, encoding=encodingCSV )
+		#temp <- utils::read.table(path, header = TRUE, sep = separatorCSV, fileEncoding = encodingCSV, encoding=encodingCSV )
+
+		temp <- suppressWarnings(utils::read.csv( path,
+												  header = TRUE, 
+												  sep = separatorCSV, 
+												  fileEncoding = encodingCSV, 
+												  encoding=encodingCSV ))
+		
+
+			
 		if (is.null(temp$resultID)==FALSE){
 			rownames(temp)<- temp$resultID
 		}
@@ -44,7 +53,7 @@ search_results_import <- function(path,
 		temp$endSec		<-	gsub(",", "\\.", temp$endSec) 
 		
 		#replace = at he beginning of cells
-		searchString <-"^\\.="
+		searchString <-"^\\'="
 		replacementString <- "="
 		temp$content		<-	stringr::str_replace_all(temp$content, searchString, replacementString )
 		temp$content.norm	<-	stringr::str_replace_all(temp$content.norm,searchString, replacementString)	

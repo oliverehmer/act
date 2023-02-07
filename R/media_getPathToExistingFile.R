@@ -13,7 +13,7 @@
 media_getPathToExistingFile <- function(t, 
 										filterMediaFile=c('.*\\.(mp4|mov)', '.*\\.(aiff|aif|wav)', '.*\\.mp3')) {
 	
-	if (missing(t)) 		{stop("Transcript object in parameter 't' is missing.") 	} else { if (class(t)[[1]]!="transcript") 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
 	if (typeof(t)=="list")	{stop("Your transcript is of the wrong type (it is a list). Probably you have used single square brackets to access the transcript in your corpus object (corpus@transcripts[...]). Please use double square brackets (corpus@transcripts[[...]])")}
 	for (i in 1:length(filterMediaFile)) {
 		hits <- stringr::str_detect(t@media.path, filterMediaFile[i])

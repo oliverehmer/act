@@ -29,7 +29,7 @@ transcripts_cure_single <- function (t,
 									 missingTiers=TRUE, 
 									 showWarning=FALSE) {
 	
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	} else { if (class(t)[[1]]!="transcript") 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
 	
 	#--- annotationsWithReversedTimes
 	annotationsWithReversedTimes.deleted.count <- 0
@@ -140,7 +140,7 @@ transcripts_cure_single <- function (t,
 	}
 	#missingTiers.added.count
 	
-	#update history
+	#HISTORY transcript
 	t@modification.systime <- Sys.time()
 	t@history[[length(t@history)+1]] <-	list(
 		modification                                  = "transcripts_cure_single",
@@ -148,8 +148,8 @@ transcripts_cure_single <- function (t,
 		annotationsWithReversedTimes.deleted.count    = annotationsWithReversedTimes.deleted.count,      
 		annotationsWithTimesBelowZero.deleted.count   = annotationsWithTimesBelowZero.deleted.count,
 		annotationsWithTimesBelowZero.corrected.count = annotationsWithTimesBelowZero.corrected.count,
-		overlappingAnnotations.corrected.count		   = overlappingAnnotations.corrected.count,
-		missingTiers.added.count				       = missingTiers.added.count
+		overlappingAnnotations.corrected.count		  = overlappingAnnotations.corrected.count,
+		missingTiers.added.count				      = missingTiers.added.count
 	)
 	
 

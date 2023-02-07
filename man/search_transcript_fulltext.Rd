@@ -12,11 +12,20 @@ search_transcript_fulltext(t, s)
 \item{s}{Search object.}
 }
 \value{
-Data.frame; data frame with search results.
-
-  
-# @example inst/examples/search_transcript_fulltext.R
+\code{Data.frame} data frame with search results.
 }
 \description{
 Search in full text of a single transcript
+}
+\examples{
+library(act)
+
+# Search for the 1. Person Singular Pronoun in Spanish.
+# Only create the search object without running the search.
+mysearch <- act::search_new(x=examplecorpus, pattern= "yo", runSearch=FALSE)
+
+# Run the search
+df <- act::search_transcript_fulltext(t=examplecorpus@transcripts[[3]],
+                                      s=mysearch)
+nrow(df)
 }

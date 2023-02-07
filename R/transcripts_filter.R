@@ -28,12 +28,11 @@ transcripts_filter <- function (x,
 						   preserveTimes=TRUE, 
 						   sort=c("none", "tier>startSec", "startSec>tier")) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
 	tiers.deleted.count        <- 0
 	tiers.deleted.ids          <- c()
 	annotations.deleted.count  <- 0
-	transcripts.modified.count <- 0
 	transcripts.modified.ids   <- c()
 	transcripts.deleted.count  <- 0
 	transcripts.deleted.ids	   <- c()
@@ -48,30 +47,31 @@ transcripts_filter <- function (x,
 	}
 	
 	for (i in filterOnlyTheseTranscripts) {
-		x@transcripts[[i]] <- act::transcripts_filter_single(t                     = x@transcripts[[i]],
+		x@transcripts[[i]] <- act::transcripts_filter_single(t             = x@transcripts[[i]],
 													 filterTierNames       = filterTierNames, 
 													 filterSectionStartsec = filterSectionStartsec, 
 													 filterSectionEndsec   = filterSectionEndsec, 
 													 preserveTimes         = preserveTimes, 
 													 sort                  = sort)
-		h <- x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)]]
-
 		
+		#HISTORY transcript:
+		#realized in transcripts_filter_single
+		
+		h <- x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)]]
 		if (h$tiers.deleted.count>0 | h$annotations.deleted.count>0) {
-			transcripts.modified.count  <- transcripts.modified.count+1
 			transcripts.modified.ids    <- c(transcripts.modified.ids, i)
 			tiers.deleted.count         <- tiers.deleted.count        + h$tiers.deleted.count  
 			annotations.deleted.count   <- annotations.deleted.count  + h$annotations.deleted.count
 		}
-		
 	} #next transcript
 	
+	#HISTORY corpus: update history
 	x@history[[length(x@history)+1]] <- list(
 		modification               = "transcripts_filter",
 		systime                    = Sys.time(),
 		transcripts.deleted.count  = transcripts.deleted.count,
 		transcripts.deleted.ids    = transcripts.deleted.ids,
-		transcripts.modified.count = transcripts.modified.count,
+		transcripts.modified.count = length(transcripts.deleted.ids),
 		transcripts.modified.ids   = transcripts.modified.ids,
 		tiers.deleted.count        = tiers.deleted.count,
 		annotations.deleted.count  = annotations.deleted.count

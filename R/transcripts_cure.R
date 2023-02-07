@@ -32,14 +32,13 @@ transcripts_cure <- function (x,
 						 missingTiers=TRUE, 
 						 showWarning=FALSE) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
 	annotationsWithReversedTimes.deleted.count    <- 0     
 	annotationsWithTimesBelowZero.deleted.count   <- 0
 	annotationsWithTimesBelowZero.corrected.count <- 0
 	overlappingAnnotations.corrected.count		  <- 0
 	missingTiers.added.count				      <- 0
-	transcripts.cured.count                       <- 0
 	transcripts.cured.ids                         <- c()
 	
 	for (i in filterTranscriptNames) {
@@ -49,9 +48,11 @@ transcripts_cure <- function (x,
 												   annotationsWithTimesBelowZero=annotationsWithTimesBelowZero, 
 												   missingTiers=missingTiers, showWarning=showWarning)
 		
+		#HISTORY transcript:
+		# realized in transcript_cure_single
+		
 		h <- x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)]]
 		if (h$annotationsWithReversedTimes.deleted.count>0 | h$annotationsWithTimesBelowZero.deleted.count>0 | h$annotationsWithTimesBelowZero.corrected.count>0 | h$overlappingAnnotations.corrected.count>0 | h$missingTiers.added.count>0) {
-			transcripts.cured.count                       <- transcripts.cured.count+1
 			transcripts.cured.ids                         <- c(transcripts.cured.ids, i)
 			annotationsWithReversedTimes.deleted.count    <- annotationsWithReversedTimes.deleted.count   + h$annotationsWithReversedTimes.deleted.count   
 			annotationsWithTimesBelowZero.deleted.count   <- annotationsWithTimesBelowZero.deleted.count  + h$annotationsWithTimesBelowZero.deleted.count
@@ -61,10 +62,11 @@ transcripts_cure <- function (x,
 		}
 	} #next transcript
 	
+	#HISTORY corpus
 	x@history[[length(x@history)+1]] <- list(
 		modification                                  = "transcripts_cure",
 		systime                                       = Sys.time(),
-		transcripts.cured.count                       = transcripts.cured.count,
+		transcripts.cured.count                       = length(transcripts.cured.ids),
 		transcripts.cured.ids                         = transcripts.cured.ids,
 		annotationsWithReversedTimes.deleted.count    = annotationsWithReversedTimes.deleted.count,      
 		annotationsWithTimesBelowZero.deleted.count   = annotationsWithTimesBelowZero.deleted.count,

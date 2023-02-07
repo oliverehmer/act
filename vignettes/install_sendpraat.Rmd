@@ -1,5 +1,5 @@
 ---
-title: "Installation *sendpraat*"
+title: "Install sendpraat"
 author: "Oliver Ehmer"
 date: "`r Sys.Date()`"
 output:
@@ -8,7 +8,7 @@ output:
     toc_float: false
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Installation sendpraat}
+  %\VignetteIndexEntry{Install sendpraat}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

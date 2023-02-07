@@ -37,7 +37,7 @@ transcripts_merge <- function (x,
 	#updateTranscriptNames <- c('update_update1', 'update_update2')
 	#updateTranscriptNames <- c('update_update1', 'update_update2', 'SDAF', "xxx")
 	
-	if (missing(x))             					{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (missing(destinationTranscriptName))			{stop("Name of destination transcript is missing (parameter: destinationTranscriptName")	}
 	if (missing(updateTranscriptNames))			    {stop("Name(s) of update transcript(s) are missing (parameter: updateTranscriptNames")	}
 	
@@ -81,11 +81,10 @@ transcripts_merge <- function (x,
 	#=== delete  transcripts
 	x <- act::transcripts_delete(x, c(destinationTranscriptName, updateTranscriptNames))
 	
-
-	
 	#=== add destination transcript
 	mergedT@name <- destinationTranscriptName
-	#update modification info
+	
+	#HISTORY transcript
 	mergedT@modification.systime <- Sys.time()
 	mergedT@history[[length(mergedT@history)+1]] <-	list( 
 		modification               = "transcripts_merge",
@@ -95,17 +94,14 @@ transcripts_merge <- function (x,
 	)
 	x <- act::transcripts_add(x, mergedT)
 	
-	#=== update history
+	#HISTORY corpus
 	x@history[[length(x@history)+1]] <- list(  
 		modification               = "transcripts_merge",
 		systime                    = Sys.time(),
 		destinationTranscriptName  = destinationTranscriptName,
 		updateTranscriptNames      = updateTranscriptNames
 	)
-	#=== return x
+
 	return(x)
-	
-	
-	
 }
 

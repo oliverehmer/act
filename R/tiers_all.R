@@ -1,6 +1,6 @@
 #' All tiers in a corpus
 #'
-#' Merges tiers from all transcripts in a corpus and returns a data frame.
+#' Merges tiers from all transcripts in a corpus object into a data frame.
 #' 
 #' @param x Corpus object.
 #' @param compact Logical; if \code{TRUE} a condensed overview will be returned,  if \code{FALSE} a detailed overview will be returned.
@@ -22,7 +22,7 @@
 #' alltiers
 #' 
 tiers_all <- function(x, compact=TRUE) {
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
 	#=== base data
 	tiers <- data.frame()

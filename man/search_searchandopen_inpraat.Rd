@@ -12,14 +12,16 @@ search_searchandopen_inpraat(x, pattern)
 \item{pattern}{Character string; search pattern as regular expression.}
 }
 \description{
-The function remote controls 'Praat' by using 'sendpraat' and a 'Praat' script. 
-It first searches your corpus object and uses the first search hit. 
+The function remote controls 'Praat' by using 'sendpraat' and a 'Praat' script.
+It first searches your corpus object and uses the first search hit.
 The corresponding TextGrid will be opened in the 'Praat' TextGrid Editor and the search hit will be displayed.
 }
 \details{
 To make this function work you need to do two things first:
-- Install 'sendpraat' on your computer. To do so  follow the  instructions in the vignette 'installation-sendpraat'. Show the vignette with \code{vignette("installation-sendpraat")}.
-- Set the path to the 'sendpraat' executable correctly by using 'options(act.path.sendpraat = ...)'.
+\itemize{
+\item Install 'sendpraat' on your computer. To do so  follow the  instructions in the vignette 'installation-sendpraat'. Show the vignette with \code{vignette("installation-sendpraat")}.
+\item Set the path to the 'sendpraat' executable correctly by using 'options(act.path.sendpraat = ...)'.
+}
 }
 \examples{
 library(act)

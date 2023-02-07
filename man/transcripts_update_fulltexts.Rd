@@ -28,9 +28,11 @@ Corpus object.
 }
 \description{
 Creates/updates the full texts of the transcripts in a corpus.
-The full text may be created in two different ways: 
-- The contents of a transcription will be joined consecutively based on the time information. 
-- The contents of each tier will be joined consecutively, and then the next tier will be joined.
+The full text may be created in two different ways:
+\itemize{
+\item The contents of a transcription will be joined consecutively based on the time information.
+\item The contents of each tier will be joined consecutively, and then the next tier will be joined.
+}
 }
 \examples{
 library(act)

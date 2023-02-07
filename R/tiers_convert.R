@@ -27,7 +27,7 @@ tiers_convert <- function(x,
 						  filterTranscriptNames=NULL
 						  ) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
 	#=== get the transcript names
 	#if none are given, take all names
@@ -43,8 +43,7 @@ tiers_convert <- function(x,
 	tiers_converted_all <- c()
 	transcripts_modified_ids <- c()
 	for (i in filterTranscriptNames) {
-		#reset transcript log
-		x@transcripts[[i]]@modification.systime <- character()
+
 		
 		#get the tier names that should be affected
 		filterTierNamesCurrent <- x@transcripts[[i]]@tiers$name
@@ -86,20 +85,21 @@ tiers_convert <- function(x,
 				}
 			}
 		}
-		#report
-		x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
-			modification         ="tiers_convert",
-			systime               = Sys.time(),
-			result                =paste("OK:", length(tiers_converted_transcript), "tier(s) converted"),
-			tiers.converted.ids   =tiers_converted_transcript,
-			tiers.converted.count =length(tiers_converted_transcript)
-		)
-
+		
+		#HISTORY transcript
 		x@transcripts[[i]]@modification.systime <- Sys.time()
+		x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
+			modification          ="tiers_convert",
+			systime               = Sys.time(),
+			result                = paste("OK:", length(tiers_converted_transcript), "tier(s) converted"),
+			tiers.converted.ids   = tiers_converted_transcript,
+			tiers.converted.count = length(tiers_converted_transcript)
+		)
+		#increase counters for corpus object
 		tiers_converted_all <- c(tiers_converted_all, tiers_converted_transcript)
 	}
 	
-	#report
+	#HISTORY corpus
 	x@history[[length(x@history)+1]] <- list(  
 		modification               = "tiers_convert",
 		systime                    = Sys.time(),

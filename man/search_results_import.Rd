@@ -9,7 +9,7 @@ search_results_import(
   revertReplacements = TRUE,
   sheetNameXLSX = "data",
   encodingCSV = "UTF-8",
-  separatorCSV = ","
+  separatorCSV = ";"
 )
 }
 \arguments{

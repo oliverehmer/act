@@ -42,9 +42,9 @@ search_sub(
 Search object.
 }
 \description{
-This function starts from the results of a prior search and performs a sub search for a temporal co-occurence. 
-In the sub search all results from the prior search will be checked. 
-The sub search will check annotations in other tiers that temporally overlap with the original search result. 
+This function starts from the results of a prior search and performs a sub search for a temporal co-occurence.
+In the sub search all results from the prior search will be checked.
+The sub search will check annotations in other tiers that temporally overlap with the original search result.
 Those annotation will be checked if they match a search pattern.
 If so, the search hit of the sub search will be added to a new column in the original search results data frame.
 }

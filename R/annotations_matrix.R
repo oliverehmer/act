@@ -27,8 +27,8 @@ annotations_matrix <- function(x,
 							   path_replacementMatrixCSV, 
 							   filterTranscriptNames=NULL) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
-
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	
 	#=== get the transcript names
 	#if none are given, take all names
 	if (is.null(filterTranscriptNames)) {		
@@ -72,10 +72,9 @@ annotations_matrix <- function(x,
 	if (is.null(out)) 						{	stop("Replacement matrix seems to be containing invalid regular expressions.")		}
 	
 	#=== do the replacement
-	annotations_modified_nr <- 0
-	transcripts_modified_nr <- 0
+	annotations_modified_nr  <- 0
 	transcripts_modified_ids <- c()
-	annotations_modified_nr <- 0
+	
 	if (length(mymatrix)<1) {
 		warning("Replacement matrix is empty.")
 		
@@ -95,19 +94,27 @@ annotations_matrix <- function(x,
 			annotations_modified_nr <- annotations_modified_nr+length(which(stringr::str_detect(x@transcripts[[i]]@annotations$content, "update.*_B")))
 			if (annotations_modified_nr>0) {
 				x@transcripts[[i]]@annotations$content <- stringr::str_replace_all(x@transcripts[[i]]@annotations$content, mymatrix)  
-				transcripts_modified_nr <- transcripts_modified_nr+1
-				transcripts_modified_ids <- c(transcripts_modified_ids, i)
+				
+				#HISTORY transcript
+				x@transcripts[[i]]@modification.systime <- Sys.time()		
+				x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
+					modification               = "annotations_matrix",
+					systime                    = Sys.time(),
+					annotations.modified.count = annotations_modified_nr
+				)
+				#increase counters for corpus object
+				transcripts_modified_ids               <- c(transcripts_modified_ids, i)
 			}
-			x@transcripts[[i]]@modification.systime <- Sys.time()			
 		}
 	}
 	
+	#HISTORY corpus
 	x@history[[length(x@history)+1]] <- list(
-		modification                ="annotations_matrix",
+		modification                = "annotations_matrix",
 		systime                     = Sys.time(),
-		transcripts.modified.count  =transcripts_modified_nr,
-		transcripts.modified.ids    =transcripts_modified_ids,
-		annotations.modified.count  =annotations_modified_nr
+		transcripts.modified.count  = length(transcripts_modified_ids),
+		transcripts.modified.ids    = transcripts_modified_ids,
+		annotations.modified.count  = annotations_modified_nr
 	)
 	
 	return (x)

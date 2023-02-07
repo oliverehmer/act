@@ -17,8 +17,8 @@ annotations_matrix(x, path_replacementMatrixCSV, filterTranscriptNames = NULL)
 Corpus object.
 }
 \description{
-This functions performs a search and replace in the contents of an annotation. 
-A simple matrix consisting of two columns will be used. 
+This functions performs a search and replace in the contents of an annotation.
+A simple matrix consisting of two columns will be used.
 The first column of the matrix needs to contain the search string, the second column  the replacement string.
 The matrix needs to be in CSV format.
 }
@@ -45,8 +45,8 @@ examplecorpus@transcripts[[2]]@annotations$content[[3]]
 test@transcripts[[2]]@annotations$content[[3]]
 }
 \seealso{
-[matrix_load()] for loading the matrix 
-and [matrix_save()] for saving the matrix to a CSV file.
+\code{\link[=matrix_load]{matrix_load()}} for loading the matrix
+and \code{\link[=matrix_save]{matrix_save()}} for saving the matrix to a CSV file.
 
 If only certain transcripts or tiers should be affected set the parameter \code{filterTranscriptNames}.
 In case that you want to select transcripts  by using regular expressions use the function \code{act::search_makefilter} first.

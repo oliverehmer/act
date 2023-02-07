@@ -27,8 +27,8 @@ transcripts_rename <- function(x,
 							   trim                = FALSE,
 							   stopIfNotUnique     = TRUE ) {
 	
-	if (is.null(x)) {stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
-
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	
 	#--- check
 	if (is.null(searchPatterns)) {
 		searchPatterns <- character()
@@ -67,7 +67,7 @@ transcripts_rename <- function(x,
 	#--- rename
 	x <- act::helper_transcriptNames_set(x, transcript.names.info$names.ok.ids)
 	
-	#--- do the report
+	#HISTORY corpus: update history
 	x@history[[length(x@history)+1]] <- list(
 		modification               = "transcripts_rename",
 		systime                    = Sys.time(),

@@ -29,7 +29,7 @@ corpus_export <-  function(x,
 						   createOutputfolder=TRUE,
 						   l=NULL) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
 	if (missing(outputFolder)) { stop("No output folder specified in parameter 'outputFolder'") }
 	

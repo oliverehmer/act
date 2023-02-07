@@ -25,9 +25,10 @@ info_summarized <- function(...) {
 	if(length(dots) == 0) {stop ("You need to pass a corpus object or a transcript object to this function.")}
 	x <- NULL
 	t <- NULL
-	if (class(dots[[1]])=="corpus") {
+	
+	if (methods::is(dots[[1]],"corpus")) {
 		x <- dots[[1]]	
-	} else if (class(dots[[1]])=="transcript" ) {
+	} else if (methods::is(dots[[1]], "transcript" )) {
 		t <- dots[[1]]	
 	} else {
 		stop ("You need to pass a corpus object or a transcript object to this function. ")
@@ -46,8 +47,8 @@ info_summarized <- function(...) {
 		#--- tiers
 		tiers       <- lapply(x@transcripts, "slot", name = "tiers")
 		temp        <- do.call("rbind", tiers)
-		tier.names <- unique(temp$name)
-		tier.count <- sum(unlist(lapply(tiers, nrow)))
+		tier.names  <- unique(temp$name)
+		tier.count  <- sum(unlist(lapply(tiers, nrow)))
 		
 		#---annotations 
 		annotations <- lapply(x@transcripts, "slot", name = "annotations")
@@ -68,10 +69,10 @@ info_summarized <- function(...) {
 					 words.org.count   = words.org.count,
 					 words.norm.count  = words.norm.count,
 					 annotations.count = annotations.count,
-					 tier.count       = tier.count,
-					 tier.names       = tier.names,
-					 transcript.count = transcript.count,
-					 transcript.names = transcript.names
+					 tier.count        = tier.count,
+					 tier.names        = tier.names,
+					 transcript.count  = transcript.count,
+					 transcript.names  = transcript.names
 		)
 	}
 	if (!is.null(t)) {
@@ -95,8 +96,8 @@ info_summarized <- function(...) {
 					 words.org.count   = words.org.count,
 					 words.norm.count  = words.norm.count,					 
 					 annotations.count = annotations.count,
-					 tier.count       = tier.count,
-					 tier.names       = tier.names
+					 tier.count        = tier.count,
+					 tier.names        = tier.names
 					 )
 	}
 	return(info)

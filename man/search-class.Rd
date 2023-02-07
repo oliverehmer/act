@@ -8,10 +8,10 @@
 This object defines the properties of a search in act.
 It also contains the results of this search in a specific corpus, if the search has already been run. (Note that you can also create a search without running it immediately).
 A search object can be run on different corpora.
- 
+
 Some of the slots are defined by the user.
-Other slots are \code{[READ ONLY]}, which means that they can be accessed by the user but 
-should not be changed. They contain values that are filled when you execute functions 
+Other slots are \code{[READ ONLY]}, which means that they can be accessed by the user but
+should not be changed. They contain values that are filled when you execute functions
 on the object.
 }
 \section{Slots}{

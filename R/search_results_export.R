@@ -19,11 +19,16 @@
 #'
 #' @example inst/examples/search_import_export.R
 #' 
-search_results_export <- function(s, path, sheetNameXLSX="data", saveAsCSV=FALSE, encodingCSV="UTF-8", separatorCSV=",", overwrite=TRUE) {
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		} else { if (class(s)[[1]]!="search")		{stop("Parameter 's' needs to be a search object.") 	} }
+search_results_export <- function(s, 
+								  path, 
+								  sheetNameXLSX="data", 
+								  saveAsCSV=FALSE, 
+								  encodingCSV="UTF-8", 
+								  separatorCSV=";", 
+								  overwrite=TRUE) {
 	
+	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
 	
-
 	#check colnames
 	mycolnames <- colnames(s@results)
 	necessarycolnames <- c("resultID", "transcript.name", "annotationID",  "tier.name", "startSec", "endSec", "content", "content.norm", "hit", "hit.nr", "hit.length", "hit.pos.content", "hit.pos.fulltext", "search.mode", "hit.span")
@@ -38,7 +43,7 @@ search_results_export <- function(s, path, sheetNameXLSX="data", saveAsCSV=FALSE
 	
 	#replace = at he beginning of cells
 	searchString <-"^="
-	replacementString <- ".="
+	replacementString <- "\\'="
 	s@results$content		<-	stringr::str_replace_all(s@results$content, searchString, replacementString )
 	s@results$content.norm	<-	stringr::str_replace_all(s@results$content.norm,searchString, replacementString)	
 	s@results$hit			<-	stringr::str_replace_all(s@results$hit, searchString, replacementString )
@@ -68,7 +73,13 @@ search_results_export <- function(s, path, sheetNameXLSX="data", saveAsCSV=FALSE
 			if (file.exists(path)) {
 				warning("Unable to overwrite existing file. No .csv file written")
 			} else {
-				utils::write.table(s@results, file = path, sep = separatorCSV, col.names = colnames(s@results), row.names=FALSE, qmethod = "double", fileEncoding= encodingCSV)
+				utils::write.table(s@results, 
+								   file = path, 
+								   sep = separatorCSV, 
+								   col.names = colnames(s@results), 
+								   row.names=FALSE, 
+								   qmethod = "double", 
+								   fileEncoding= encodingCSV)
 			}
 		} else {
 			warning("Destination file already exists. No .csv file written")

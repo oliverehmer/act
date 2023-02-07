@@ -70,7 +70,7 @@ Search object.
 }
 \description{
 Creates a new search object and runs the search in a corpus object.
-Only 'x' and 'pattern' are obligatory. 
+Only 'x' and 'pattern' are obligatory.
 The other arguments can be left to their default values.
 }
 \examples{

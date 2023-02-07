@@ -36,7 +36,7 @@ CRAN site: [here](https://cran.r-project.org/package=act)
 ## How to cite
 Creating the act package took a lot of time and effort. Please cite it when you publish research.
 
-Ehmer, Oliver (2021). act: Aligned Corpus Toolkit. R package version 1.1.9. https://cran.r-project.org/package=act
+Ehmer, Oliver (2021). act: Aligned Corpus Toolkit. R package version 1.2.2. https://cran.r-project.org/package=act
 
 ## Installation
 To install the package in R use the following commands.
@@ -59,12 +59,15 @@ Load the package:
 library(act)
 ```
 
-## Supported Annotation tool formats
+## Supported annotation tool formats
 * [Praat `.TextGrid`](https://www.fon.hum.uva.nl/praat/)
 * [ELAN `.eaf`](https://archive.mpi.nl/tla/elan)
 * [Exmaralda `.exb`](https://exmaralda.org/en/)
 
 ## Related R packages 
+An example data set including anntoation and media files is available:
+* Download a ZIP file at [GitHub] (https://github.com/oliverehmer/act_examplecorpus)
+
 You might be interested in the following R packages, that functionally overlap with the act package.
 * `ExmaraldaR` on [GitHub](https://github.com/TimoSchuer/ExmaraldaR)
 * `FRelan` on [GitHub](https://github.com/langdoc/FRelan)

@@ -15,13 +15,15 @@ import_rpraat(rPraatTextGrid, transcriptName = NULL)
 Transcript object.
 }
 \description{
-This function is to create compatibility with the \code{rPraat} package. 
+This function is to create compatibility with the \code{rPraat} package.
 It converts a 'rPraat' TextGrid object into an act transcript object.
 }
 \details{
 Please note:
-- Time values of annotations in TextGrids may be below 0 seconds. Negative time values will be recognized corretly in the first place. When exporting transcript object to other formats like 'ELAN' .eaf, 'EXMARaLDA' .exb ect. annotations that are completely before 0 sec will be deleted, annotations that start before but end after 0 sec will be truncated. Please see also the function \code{act::transcripts_cure_single}.  
-- TextGrids and contained tiers may start and end at different times. These times do not need to match each other. The act package does not support start and end times of TextGrids and tiers and will. The default start of a TextGrid will be 0 seconds or the lowest value in case that annotations start below 0 seconds.
+\itemize{
+\item Time values of annotations in TextGrids may be below 0 seconds. Negative time values will be recognized corretly in the first place. When exporting transcript object to other formats like 'ELAN' .eaf, 'EXMARaLDA' .exb ect. annotations that are completely before 0 sec will be deleted, annotations that start before but end after 0 sec will be truncated. Please see also the function \code{act::transcripts_cure_single}.
+\item TextGrids and contained tiers may start and end at different times. These times do not need to match each other. The act package does not support start and end times of TextGrids and tiers and will. The default start of a TextGrid will be 0 seconds or the lowest value in case that annotations start below 0 seconds.
+}
 
 Credits: Thanks to Tomáš Bořil, the author of the rPraat package, for commenting on the exchange functions.
 }

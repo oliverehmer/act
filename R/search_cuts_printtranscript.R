@@ -40,8 +40,8 @@ search_cuts_printtranscript <- function(x,
 	# cutSpanBeforesec <- c(1,2)
 	#cutSpanBeforesec <- as.integer(1)
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		} else { if (class(s)[[1]]!="search")		{stop("Parameter 's' needs to be a search object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
 	if (is.null(s@results$transcript.name)) 		{ stop("Data frame s@results does not contain column 'transcript.name'") 	}
 	
 	if (is.null(l)) 	{

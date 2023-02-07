@@ -24,20 +24,20 @@ helper_tiers_merge_tables <- function (...) {
 	# accepted values: tier table, transcript, list of transcripts
 	tiers.table.merged <- data.frame(stringsAsFactors = FALSE)
 	for (argument in arguments) {
-		if (class(argument)=="data.frame") {
+		if (methods::is(argument,"data.frame")) {
 			if (all(c("name", "type", "position") %in% colnames(argument))) {
 				tiers.table.merged <- rbind(tiers.table.merged, argument)	
 			}
 		}
-		if (class(argument)=="transcript") {
+		if (methods::is(argument,"transcript")) {
 			tiers.table.merged <- rbind(tiers.table.merged, argument@tiers)
 		}
-		if (class(argument)=="list") {
+		if (methods::is(argument,"list")) {
 			for (i in argument) {
-				if (class(i)=="transcript") {
+				if (methods::is(i,"transcript")) {
 					tiers.table.merged <- rbind(tiers.table.merged, i@tiers)
 				}
-				if (class(i)=="data.frame") {
+				if (methods::is(i,"data.frame")) {
 					if (all(c("name", "type", "position") %in% colnames(i))) {
 						tiers.table.merged <- rbind(tiers.table.merged, i)	
 					}

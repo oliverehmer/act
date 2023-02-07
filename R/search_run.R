@@ -20,9 +20,9 @@ search_run <- function(x, s) {
 	temp <- NULL
 	start.time <- Sys.time()
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		} else { if (class(s)[[1]]!="search")		{stop("Parameter 's' needs to be a search object.") 	} }
-
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
+	
 	#get transcripts and tiers to include
 	#x <- examplecorpus
 	#s <- mysearch
@@ -83,7 +83,7 @@ search_run <- function(x, s) {
 		s@results[, fctr.cols] <- sapply(s@results[, fctr.cols], as.character)
 		
 		if (s@concordance.make)	{
-			helper_progress_set("Concor dancing",max(1,nrow(s@results)))
+			helper_progress_set("Concordance",max(1,nrow(s@results)))
 			s	<- act::search_concordance(x, s, searchNormalized=s@search.normalized)
 		}
 	}

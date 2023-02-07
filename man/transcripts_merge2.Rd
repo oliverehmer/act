@@ -27,14 +27,16 @@ transcripts_merge2(
 Transcript object
 }
 \description{
-Merges several transcripts. One transcript is the destination transcript (the transcript that will be updated). 
-The other transcripts are the update transcripts and contain the updates. 
+Merges several transcripts. One transcript is the destination transcript (the transcript that will be updated).
+The other transcripts are the update transcripts and contain the updates.
 The update transcripts need to contain a tier in which the update sections are marked with a specific character string.
 }
 \details{
 You may chose between the following two options:
-- The update sections in the destination transcript will first be erased completely and then the updates will be filled in.
-- The update sections in the destination transcript will NOT be erased completely. Rater only the contents of tiers will be erased that are also present in the update tiers. e.g. if your destination transcript contains more tiers than the update transcripts, the contents of those tiers will be preserved in the destination tier during the update.
+\itemize{
+\item The update sections in the destination transcript will first be erased completely and then the updates will be filled in.
+\item The update sections in the destination transcript will NOT be erased completely. Rater only the contents of tiers will be erased that are also present in the update tiers. e.g. if your destination transcript contains more tiers than the update transcripts, the contents of those tiers will be preserved in the destination tier during the update.
+}
 }
 \examples{
 library(act)

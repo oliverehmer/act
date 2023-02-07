@@ -26,13 +26,10 @@ tiers_rename <- function(x,
 						 searchReplacement, 
 						 filterTranscriptNames=NULL) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
-	transcripts_modified_nr <- 0
 	transcripts_modified_ids <- c()
-	transcripts_problematic_nr <- 0
 	transcripts_problematic_ids <- c()
-	
 	tiers_renamed_nr <- 0
 	tiers_problematic_nr <- 0
 	
@@ -62,7 +59,8 @@ tiers_rename <- function(x,
 		tiers_after$name 	<- stringr::str_replace_all(x@transcripts[[i]]@tiers$name, searchPattern, searchReplacement)
 		
 		if(length(setdiff(tiers_before$name, tiers_after$name))==0) {
-			#no changes at all
+			#HISTORY transcript:
+			x@transcripts[[i]]@modification.systime <- character()
 			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
 				modification        = "tiers_rename",
 				systime             = Sys.time(),
@@ -72,12 +70,14 @@ tiers_rename <- function(x,
 				tiers.after.names   = tiers_after$name
 			)
 														 
-			x@transcripts[[i]]@modification.systime <- character()
+
 			
 		} else {
 			#check if new names are unique
 			if (max(table(tiers_after$name))>1) {
 				#non-unique names
+				#HISTORY transcript:
+				x@transcripts[[i]]@modification.systime <- Sys.time()
 				x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
 					modification                    = "tiers_rename",
 					systime                          = Sys.time(),
@@ -88,16 +88,15 @@ tiers_rename <- function(x,
 					tiers.before.names               = tiers_before$name,
 					tiers.after.names                = tiers_after$name
 				)
-				x@transcripts[[i]]@modification.systime <- Sys.time()
+
 				
 				#counter for corpus object
 				tiers_problematic_nr <- tiers_problematic_nr + length(setdiff(tiers_before$name, tiers_after$name))
-				
-				transcripts_problematic_nr <- transcripts_problematic_nr + 1
 				transcripts_problematic_ids <- c(transcripts_problematic_ids, i)
 				
 			} else {
 				#all names only 1 occurrence (they are unique!)
+				#HISTORY transcript
 				x@transcripts[[i]]@modification.systime <- Sys.time()
 				x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
 					modification         ="tiers_rename",
@@ -109,29 +108,29 @@ tiers_rename <- function(x,
 					tiers.before.names   =tiers_before$name,
 					tiers.after.names    =tiers_after$name
 				)
-				
-				#counter for corpus object
+				#increase counters for corpus object
 				tiers_renamed_nr <- tiers_renamed_nr + length(setdiff(tiers_after$name, tiers_before$name))
-				transcripts_modified_nr <- transcripts_modified_nr +1
 				transcripts_modified_ids <- c(transcripts_modified_ids,i)
 				
 				#set new values in tiers list
 				x@transcripts[[i]]@tiers <- tiers_after
 				rownames(x@transcripts[[i]]@tiers) <- x@transcripts[[i]]@tiers$name
 				
-				#aset new names in annotations
+				#set new names in annotations
 				x@transcripts[[i]]@annotations$tier.name <- stringr::str_replace_all(x@transcripts[[i]]@annotations$tier.name, searchPattern, searchReplacement)
 			}
 		}
 	}
+	
+	#HISTORY corpus
 	x@history[[length(x@history)+1]] <- list(  
 		modification                  ="tiers_rename",
 		systime                       = Sys.time(),
 		tiers.renamed.count           =tiers_renamed_nr,
 		tiers.problematic.count       =tiers_problematic_nr,
-		transcripts.modified.count    =transcripts_modified_nr,
+		transcripts.modified.count    =length(transcripts_modified_ids),
 		transcripts.modified.ids      =transcripts_modified_ids,
-		transcripts.problematic.count =transcripts_problematic_nr,
+		transcripts.problematic.count =length(transcripts_problematic_ids),
 		transcripts.problematic.ids   =transcripts_problematic_ids
 	)
 	

@@ -40,7 +40,7 @@ Corpus object.
 }
 \description{
 Adds a tiers in all transcript objects of a corpus.
-If tiers should be added only in certain transcripts, set the parameter \code{filterTranscriptNames}. 
+If tiers should be added only in certain transcripts, set the parameter \code{filterTranscriptNames}.
 In case that you want to select transcripts by using regular expressions use the function \code{act::search_makefilter} first.
 }
 \details{

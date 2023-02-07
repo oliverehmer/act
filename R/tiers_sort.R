@@ -25,9 +25,8 @@ tiers_sort <- function(x,
 					   addMissingTiers=FALSE, 
 					   deleteTiersThatAreNotInTheSortVector=FALSE) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
-
-	transcripts_modified_nr <- 0
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	
 	transcripts_modified_ids <- c()
 	
 	#=== get the transcript names
@@ -64,9 +63,10 @@ tiers_sort <- function(x,
 		
 		#if there are changes
 		if(anyChanges) {
-			#write changes to transcipt log
+			#HISTORY transcript
+			x@transcripts[[i]]@modification.systime <- Sys.time()
 			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
-				modification       = "tiers_reorder",
+				modification        = "tiers_reorder",
 				systime             = Sys.time(),
 				tiers.orderchanged  = tiers_orderofcopiedtiershaschanged,
 				tiers.deleted.count = length(tiers_deleted),
@@ -76,10 +76,7 @@ tiers_sort <- function(x,
 				tiers.before        = tiers_before$name,
 				tiers.after         = tiers_after$name
 			)
-			x@transcripts[[i]]@modification.systime <- Sys.time()
-			
-			#remember values for corpus object
-			transcripts_modified_nr <- transcripts_modified_nr + 1
+			#increase counters for corpus object
 			transcripts_modified_ids <- c(transcripts_modified_ids, i)
 			
 			#apply changes
@@ -91,10 +88,12 @@ tiers_sort <- function(x,
 		}
 		
 	}
+	
+	#HISTORY corpus
 	x@history[[length(x@history)+1]] <- list(  
 		modification               = "tiers_sort",
 		systime                    = Sys.time(),
-		transcripts.modified.count = transcripts_modified_nr,
+		transcripts.modified.count = length(transcripts_modified_ids),
 		transcripts.modified.ids   = transcripts_modified_ids
 		)
 	

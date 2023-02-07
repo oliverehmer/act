@@ -1,12 +1,12 @@
 act.options.default <- list (
 	#--- do not reset
-	act.excamplecorpusURL                   = " http://www.romanistik.uni-freiburg.de/ehmer/files/digitalhumanities/act_examplecorpus.zip",
-	act.updateX                             = TRUE,
-	act.showprogress				    	= TRUE,
+	act.excamplecorpusURL                      = " http://www.romanistik.uni-freiburg.de/ehmer/files/digitalhumanities/act_examplecorpus.zip",
+	act.updateX                                = TRUE,
+	act.showprogress				    	   = TRUE,
 	
-	act.path.praat					    	= "",
-	act.path.sendpraat					    = "",
-	act.path.elan                           = "",
+	act.path.praat					       	   = "",
+	act.path.sendpraat					       = "",
+	act.path.elan                              = "",
 
 	act.fileformats.video                      = c("mp4", "mov"),
 	act.fileformats.audio                      = c("wav", "aif", "aiff", "mp3"),
@@ -16,20 +16,28 @@ act.options.default <- list (
 	act.ffmpeg.command.audioCutsAsMP3          = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPAT" -hide_banner',
 	act.ffmpeg.exportchannels.fromColumnName       = "channels", 
 	
-	act.import.readEmptyIntervals 			= FALSE,
-	act.import.scanSubfolders                 = TRUE,
-	act.import.storeFileContentInTranscript   = TRUE,
+	act.import.readEmptyIntervals 			   = FALSE,
+	act.import.scanSubfolders                  = TRUE,
+	act.import.storeFileContentInTranscript    = TRUE,
 	
-	act.export.foldergrouping1.fromColumnName 		= "resultID",
-	act.export.foldergrouping2.fromColumnName 		= "",
-	act.export.filename.fromColumnName 			    = "resultID",
+	act.export.foldergrouping1.fromColumnName  = "resultID",
+	act.export.foldergrouping2.fromColumnName  = "",
+	act.export.filename.fromColumnName 		   = "resultID",
 	
-	act.separator_between_intervals 		= "&",
-	act.separator_between_tiers				= "#",
-	act.separator_between_words				= "^\\s|\\|\\'|\\#|\\/|\\\\\\\\",
-	act.wordCountRegEx 					= '(?<=[^|\\b])[A-z\\u00C0-\\u00FA\\-\\:]+(?=\\b|\\s|_|$)'
+	act.separator_between_intervals 		   = "&",
+	act.separator_between_tiers				   = "#",
+	act.separator_between_words				   = "^\\s|\\|\\'|\\#|\\/|\\\\\\\\",
+	act.wordCountRegEx 					       = '(?<=[^|\\b])[A-z\\u00C0-\\u00FA\\-\\:]+(?=\\b|\\s|_|$)'
 )
 
+
+
+
+
+
+#' 
+#' 
+#' 
 #' Options of the package
 #'
 #' The package has numerous options that change the internal workings of the package.
@@ -88,6 +96,8 @@ act.options.default <- list (
 #' act::options_show()
 #' }
 #' 
+#' 
+
 options_show <- function () {
 	cat("options", fill=TRUE)
 	cat("  Program", fill=TRUE)

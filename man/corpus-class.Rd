@@ -5,7 +5,7 @@
 \alias{corpus-class}
 \title{Corpus object}
 \description{
-This is the main object the act package uses. 
+This is the main object the act package uses.
 It collects the annotations and meta data from loaded annotation files.
 }
 \details{

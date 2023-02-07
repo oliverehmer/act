@@ -24,10 +24,12 @@ Imports the contents of a 'EXMARaLDA' .exb file and returns a transcript object.
 The source is either the path to a .exb file or the contents of a .exb file obtained from the \code{@file.content} of an existing transcript object.
 If you pass 'fileContent' you need to pass 'transcriptName' as parameter, too.
 
-Please note: 
-- 'EXMARaLDA' allows for empty time slots without a time values. Missing values will be interpolated during the import. You will not be able to recognize interpolated values in the data.  
-- Meta data for tiers (such as the display name etc.) will not be imported.
-- Media files are referenced not by their path but only as file names in .exb files. The names will be imported but will not work as paths in act.
+Please note:
+\itemize{
+\item 'EXMARaLDA' allows for empty time slots without a time values. Missing values will be interpolated during the import. You will not be able to recognize interpolated values in the data.
+\item Meta data for tiers (such as the display name etc.) will not be imported.
+\item Media files are referenced not by their path but only as file names in .exb files. The names will be imported but will not work as paths in act.
+}
 }
 \examples{
 library(act)

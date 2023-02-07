@@ -37,7 +37,7 @@ tiers_add <- function( x,
 					   filterTranscriptNames=NULL,
 					   skipIfTierAlreadyExists=TRUE) {
 	
-	if (missing(x)) 	   {stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (missing(tierName))  									{stop("Parameter 'tierName' is missing.") 		}
 	if (!is.null(absolutePosition) & !is.null(destinationTier)) {stop("You mey define either 'absolutePosition' or 'destinationTier', not both.") 			}
 	
@@ -67,7 +67,7 @@ tiers_add <- function( x,
 	
 	#=== counters
 	tiers_added_count_all <- 0
-	transcripts_modified_names <- c()
+	transcripts_modified_ids <- c()
 	alreadyExistsInTranscripts <- c()
 	
 	#=== run through the transcripts
@@ -178,7 +178,7 @@ tiers_add <- function( x,
 				#set to object
 				x@transcripts[[i]]@tiers <- newTable
 				
-				#history
+				#HISTORY transcript
 				x@transcripts[[i]]@modification.systime <- Sys.time()
 				x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
 					modification        = "tiers_add",
@@ -186,12 +186,9 @@ tiers_add <- function( x,
 					tier.name           = newRow$name,
 					tier.position       = newRow$position
 				)
-				
-				#remember name of the transcripts
-				transcripts_modified_names <- c(transcripts_modified_names, i)
-				
-				#increase the counter
-				tiers_added_count_all <- tiers_added_count_all +1
+				#increase counters for corpus object
+				transcripts_modified_ids      <- c(transcripts_modified_ids, i)
+				tiers_added_count_all			<- tiers_added_count_all +1
 			}
 		}
 	}
@@ -207,13 +204,13 @@ tiers_add <- function( x,
 		}
 	}
 	
-	#history
+	#HISTORY corpus
 	x@history[[length(x@history)+1]] <- list(  
 		modification                 ="tiers_add",
 		systime                      = Sys.time(),
 		tiers.added.count            = tiers_added_count_all,
-		transcripts.modified.count   = length(transcripts_modified_names),
-		transcripts.modified.names   = transcripts_modified_names,
+		transcripts.modified.count   = length(transcripts_modified_ids),
+		transcripts.modified.names   = transcripts_modified_ids,
 		tier.already.existed.in.transcript.count = length(alreadyExistsInTranscripts),
 		tier.already.existed.in.transcript.names = alreadyExistsInTranscripts
 	)

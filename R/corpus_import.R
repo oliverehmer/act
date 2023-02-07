@@ -35,7 +35,7 @@ corpus_import <- function(x,
 	#createFullText     <- TRUE 
 	#assignMedia        <- TRUE
 	#x<-a
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	#filterFilesInclude<-""
 	
 	#--- check if files and folders exist

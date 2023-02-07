@@ -12,7 +12,7 @@
 #' 
 helper_transcriptNames_set <- function(x, transcriptNames) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
 	#--- get names from objects in list
 	names.original.ids <- c(unlist(lapply(x@transcripts, "slot", name = "name")), use.names=FALSE)

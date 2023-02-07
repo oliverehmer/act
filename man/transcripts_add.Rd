@@ -30,9 +30,9 @@ Corpus object
 Add a single or multiple transcript objects to a corpus object.
 }
 \details{
-The name of the transcript objects have to be unique in the act package. 
+The name of the transcript objects have to be unique in the act package.
 The \code{@name} attribute of each transcript object will be set as identifier in the list of transcripts in the corpus object.
-By default, transcripts with non unique names will be renamed. 
+By default, transcripts with non unique names will be renamed.
 If you prefer to import.skip.double.files, set the parameter \code{skipDuplicates=TRUE}.
 Skipped/renamed transcripts will be reported in
 }

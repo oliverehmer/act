@@ -18,15 +18,17 @@ Transcript object.
 }
 \description{
 Advice: In most situations it is more convenient to use \code{act::corpus_new}, \code{act::corpus_import} for importing annotation files.
- 
+
 Imports the contents of a 'ELAN' .eaf file and returns a transcript object.
 The input to this function is either the path to an .eaf file or the contents of a .eaf file obtained from the \code{@file.content} of an existing transcript object by \code{readLines()}.
 If you pass 'fileContent' you need to pass 'transcriptName' as parameter, too.
 }
 \details{
 Please note:
-- 'ELAN' offers a variety of tier types, some including dependencies from other tiers. Therefore not all annotations do actually have a time value. Missing values will be detected in the superordinate tier or will be interpolated. You will not be able to recognize interpolated values in the annotations.  
-- Please also note that dependencies between tiers in you .eaf file are not reflected in the transcript object within the act package.
+\itemize{
+\item 'ELAN' offers a variety of tier types, some including dependencies from other tiers. Therefore not all annotations do actually have a time value. Missing values will be detected in the superordinate tier or will be interpolated. You will not be able to recognize interpolated values in the annotations.
+\item Please also note that dependencies between tiers in you .eaf file are not reflected in the transcript object within the act package.
+}
 }
 \examples{
 library(act)

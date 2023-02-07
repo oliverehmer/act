@@ -24,17 +24,15 @@ transcripts_filter_single <- function (t,
 							   preserveTimes=TRUE, 
 							   sort=c("none", "tier>startSec", "startSec>tier")) {
 	#=== settings
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	} else { if (class(t)[[1]]!="transcript") 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
 	
 	#--- tiers
-	tiers.deleted.count<- 0
 	tiers.deleted.ids <- c()
 	annotations.deleted.count <- 0
 	if (nrow(t@annotations)>0) {
 		if (!is.null(filterTierNames)) {
 			if (length(filterTierNames)>0) {
 				tiers.deleted.ids <- setdiff( t@tiers$name, filterTierNames)
-				tiers.deleted.count <- length(tiers.deleted.ids)
 				#tier names
 				ids <- which(t@tiers$name %in% filterTierNames)
 				t@tiers <- t@tiers[ids, ]
@@ -105,12 +103,12 @@ transcripts_filter_single <- function (t,
 		}
 	}
 	
-	#update history
+	#HISTORY transcript
 	t@modification.systime <- Sys.time()
 	t@history[[length(t@history)+1]] <-	list(
 		modification              = "transcripts_filter_single",
 		systime                   = Sys.time(),
-		tiers.deleted.count       = tiers.deleted.count,
+		tiers.deleted.count       = length(tiers.deleted.ids),
 		tiers.deleted.ids         = tiers.deleted.ids,
 		annotations.deleted.count = annotations.deleted.count
 	)

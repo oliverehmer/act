@@ -20,12 +20,12 @@
 #' examplecorpus <- act::transcripts_update_fulltexts(x=examplecorpus)
 #' 
 transcripts_update_fulltexts <- function(x,
-										 searchMode=c("fulltext", "fulltext.bytier", "fulltext.bytime"),
-										 transcriptNames=NULL, 
-										 tierNames=NULL, 
-										 forceUpdate = FALSE) {
+										 searchMode      = c("fulltext", "fulltext.bytier", "fulltext.bytime"),
+										 transcriptNames = NULL, 
+										 tierNames       = NULL, 
+										 forceUpdate     = FALSE) {
 	#=== check x object
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (is.null(x@transcripts)) 	{
 		warning("No transcripts found in corpus object x.")	
 		return(x)
@@ -40,6 +40,7 @@ transcripts_update_fulltexts <- function(x,
 	#=== check which transcripts need an update
 	transcriptNames.update <- c()
 	for (i in transcriptNames) {
+		
 		#=== check if update is necessary
 		updateThis <- FALSE
 		if (forceUpdate) {

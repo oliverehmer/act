@@ -20,9 +20,8 @@ annotations_delete_empty <- function (x,
 									  filterTranscriptNames=NULL, 
 									  filterTierNames=NULL) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		} else { if (class(x)[[1]]!="corpus") 		{stop("Parameter 'x' needs to be a corpus object.") 	} }
+	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
-	transcripts_modified_nr <- 0
 	transcripts_modified_ids <- c()
 	annotations_deleted_total_nr <- 0
 	
@@ -67,30 +66,25 @@ annotations_delete_empty <- function (x,
 		
 		if (length(annotations_deleted_ids)>0) {
 			x@transcripts[[i]]@annotations <- x@transcripts[[i]]@annotations[-annotations_deleted_ids, ]
-			
-			#update info for transcript
+
+			#HISTORY transcript
 			x@transcripts[[i]]@modification.systime <- Sys.time()
-			
-			#update modification info
 			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
 				modification              = "annotations_delete_empty",
 				systime                    = Sys.time(),
 				annotations.deleted.count  = length(annotations_deleted_ids)
 			)
-			
-			#increase counter for corpus object
-			transcripts_modified_nr <- transcripts_modified_nr +1
-			transcripts_modified_ids=c(transcripts_modified_ids, i)
-			annotations_deleted_total_nr = annotations_deleted_total_nr + length(annotations_deleted_ids)
+			#increase counters for corpus object
+			transcripts_modified_ids     <- c(transcripts_modified_ids, i)
+			annotations_deleted_total_nr <- annotations_deleted_total_nr + length(annotations_deleted_ids)
 		}
-		
 	} #next transcript
 	
-	#update history
+	#HISTORY corpus
 	x@history[[length(x@history)+1]] <- list(  
-		modification                     ="annotations_delete_empty",
+		modification                     = "annotations_delete_empty",
 		systime                          = Sys.time(),
-		transcripts.modified.count       = transcripts_modified_nr,
+		transcripts.modified.count       = length(transcripts_modified_ids),
 		transcripts.modified.ids         = transcripts_modified_ids,
 		annotations.deleted.total.count  = annotations_deleted_total_nr
 	)

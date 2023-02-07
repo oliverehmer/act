@@ -35,10 +35,12 @@ Corpus object;
 \description{
 Transcript object may contain errors, e.g. because of defect annotation input files or user modifications.
 This function may cure some of these errors in all transcript objects of a corpus.
-- Annotations with reversed times: annotations with \code{endSec} lower than \code{startSec} will be deleted.
-- Overlapping annotations: earlier annotations will end where the next annotation starts.
-- Annotations below 0 sec: Annotations that are starting and ending before 0 sec will be deleted; Annotations starting before but ending after 0 sec will be truncated.
-- Missing tiers: Tiers that are present in the annotations but missing in the list of tiers in \code{@tiers} of the transcript object will be added.
+\itemize{
+\item Annotations with reversed times: annotations with \code{endSec} lower than \code{startSec} will be deleted.
+\item Overlapping annotations: earlier annotations will end where the next annotation starts.
+\item Annotations below 0 sec: Annotations that are starting and ending before 0 sec will be deleted; Annotations starting before but ending after 0 sec will be truncated.
+\item Missing tiers: Tiers that are present in the annotations but missing in the list of tiers in \code{@tiers} of the transcript object will be added.
+}
 }
 \examples{
 library(act)

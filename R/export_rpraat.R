@@ -24,7 +24,7 @@ export_rpraat <- function(t,
 						  filterSectionStartsec = NULL, 
 						  filterSectionEndsec = NULL) {
 	
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	} else { if (class(t)[[1]]!="transcript") 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
 	
 	#=== Get data
 	#--- Filter and cure transcript
