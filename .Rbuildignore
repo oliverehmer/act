@@ -1,6 +1,9 @@
+^\.DS_Store$
+^.DS_Store$
+.DS_Store.*
+.*_Store.*
 ^doc$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^Meta$
 README.md
-.DS_Store$

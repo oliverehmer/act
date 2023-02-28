@@ -41,16 +41,16 @@ search_new <- function(x,
 					   filterTranscriptNames        = NULL,
 					   filterTranscriptIncludeRegEx = NULL, 
 					   filterTranscriptExcludeRegEx = NULL, 
-					   filterTierNames=NULL,
-					   filterTierIncludeRegEx=NULL, 
-					   filterTierExcludeRegEx=NULL, 
-					   filterSectionStartsec=NULL, 
-					   filterSectionEndsec=NULL,  
-					   concordanceMake=TRUE, 
-					   concordanceWidth=NULL,
-					   cutSpanBeforesec = 0,
-					   cutSpanAftersec = 0,
-					   runSearch=TRUE) {
+					   filterTierNames              = NULL,
+					   filterTierIncludeRegEx       = NULL, 
+					   filterTierExcludeRegEx       = NULL, 
+					   filterSectionStartsec        = NULL, 
+					   filterSectionEndsec          = NULL,  
+					   concordanceMake              = TRUE, 
+					   concordanceWidth             = NULL,
+					   cutSpanBeforesec             = 0,
+					   cutSpanAftersec              = 0,
+					   runSearch                    = TRUE) {
 	
 	#=== capture original x
 	captured_x <- substitute(x)

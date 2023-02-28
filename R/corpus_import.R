@@ -13,7 +13,6 @@
 #' To get a detailed overview of the corpus object use \code{act::info(x)}, for a summary use \code{act::info_summarized(x)}.
 #' 
 #' @param x Corpus object.
-#' @param filterFilesInclude Character string; Regular expression which files should be loaded. 
 #' @param createFullText Logical; if \code{TRUE} full text will be created.
 #' @param assignMedia Logical; if \code{TRUE} the folder(s) specified in \code{@paths.media.files} of your corpus object will be scanned for media. 
 #'
@@ -26,17 +25,14 @@
 #' @example inst/examples/corpus_import.R
 #' 
 corpus_import <- function(x, 
-						  filterFilesInclude = "", 
 						  createFullText     = TRUE, 
 						  assignMedia        = TRUE) {
 	
 	 
-	#filterFilesInclude <- ""
 	#createFullText     <- TRUE 
 	#assignMedia        <- TRUE
 	#x<-a
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	#filterFilesInclude<-""
 	
 	#--- check if files and folders exist
 	paths <- x@paths.annotation.files
@@ -63,12 +59,20 @@ corpus_import <- function(x,
 		#if it is a directory
 		if(dir.exists(path)) {
 			#get all files in folders
-			paths.sub <- list.files(path, recursive=getOption("act.import.scanSubfolders", TRUE), pattern=filterFilesInclude, ignore.case=TRUE,  full.names=TRUE)
+			paths.sub <- list.files(path, recursive=getOption("act.import.scanSubfolders", TRUE), ignore.case=TRUE,  full.names=TRUE)
 			paths.new <- c(paths.new, paths.sub)
 		} else {
 			#it must be a file
 			paths.new <- c(paths.new, path)
 		}
+	}
+
+	#include/exclude
+	if (length(x@import.include)!=0) {
+		paths.new <- paths.new[grep(pattern=x@import.include, 	basename(paths.new))]
+	}
+	if (length(x@import.exclude)!=0) {
+		paths.new <- paths.new[!grepl(pattern=x@import.exclude, 	basename(paths.new))]
 	}
 	
 	#--- get only supported file formats 

@@ -30,6 +30,38 @@ transcripts_filter <- function (x,
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
+	
+	#--- check parameter 'filterTierNames'
+	if (!is.null(filterTierNames)) {
+		if (length(filterTierNames)>0) {
+			if (!is.vector(filterTierNames)) {
+				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+			}
+			if (!is.atomic(filterTierNames)) {
+				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+			}
+			if (!is.character(filterTierNames)) {
+				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+			}
+		}
+	}
+	#--- check parameter 'filterTranscriptNames'
+	if (!is.null(filterTranscriptNames)) {
+		if (length(filterTranscriptNames)>0) {
+			if (!is.vector(filterTranscriptNames)) {
+				{stop("Parameter 'filterTranscriptNames' needs to be a vector containing names of tiers.") 	}
+			}
+			if (!is.atomic(filterTranscriptNames)) {
+				{stop("Parameter 'filterTranscriptNames' needs to be a vector containing names of tiers.") 	}
+			}
+			if (!is.character(filterTranscriptNames)) {
+				{stop("Parameter 'filterTranscriptNames' needs to be a vector containing names of tiers.") 	}
+			}
+		}
+	}	
+	
+	
+	
 	tiers.deleted.count        <- 0
 	tiers.deleted.ids          <- c()
 	annotations.deleted.count  <- 0
@@ -37,7 +69,7 @@ transcripts_filter <- function (x,
 	transcripts.deleted.count  <- 0
 	transcripts.deleted.ids	   <- c()
 	if (!is.null(filterTranscriptNames)) {
-		x@transcripts <- x@transcripts[[filterTranscriptNames]]
+		x@transcripts <- x@transcripts[filterTranscriptNames]
 		transcripts.deleted.count <- length(filterTranscriptNames)
 		transcripts.deleted.ids<- filterTranscriptNames
 	}

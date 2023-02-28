@@ -33,6 +33,8 @@ methods::setClass("corpus",
 				  	paths.media.files                     = "character",
 				  	normalization.matrix                  = "data.frame",
 				  	import.skip.double.files              = "logical",
+				  	import.include                        = "character",
+				  	import.exclude                        = "character",
 				  	import.modify.transcript.names        = "list",
 				  	import.results                        = "data.frame",
 				  	history                               = "list"
@@ -43,6 +45,8 @@ methods::setClass("corpus",
 				  	paths.media.files                     = character(),
 				  	normalization.matrix                  = data.frame(search=character(), replace=character(), description=character(), stringsAsFactors		= FALSE),
 				  	import.skip.double.files              = TRUE,
+				  	import.include                        = character(),
+				  	import.exclude                        = character(),
 				  	import.modify.transcript.names        = list(   searchPatterns       = character(),
 																	searchReplacements   = character(),
 																	toUpperCase          = FALSE,
@@ -64,6 +68,8 @@ corpus_show <- function (object) {
 	cat("\n")
 	cat("  normalization.matrix           : ", '[check directly]', nrow(object@normalization.matrix), 'row(s)', fill=TRUE)
 	cat("  import.skip.double.files       : ", object@import.skip.double.files, fill=TRUE)
+	cat("  import.include                 : ", object@import.include, fill=TRUE)
+	cat("  import.exclude                 : ", object@import.exclude, fill=TRUE)
 	cat("  import.modify.transcript.names : ", '[check directly]', fill=TRUE)
 	cat("  import.results                 : ", '[check directly]', nrow(object@import.results), 'message(s)', fill=TRUE)
 	cat("  history                        : ", '[check directly]', fill=TRUE)

@@ -26,11 +26,27 @@ transcripts_filter_single <- function (t,
 	#=== settings
 	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
 	
+	#--- check parameter 'filterTierNames'
+	if (!is.null(filterTierNames)) {
+		if (length(filterTierNames)>0) {
+			if (!is.vector(filterTierNames)) {
+				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+			}
+			if (!is.atomic(filterTierNames)) {
+				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+			}
+			if (!is.character(filterTierNames)) {
+				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+			}
+		}
+	}	
+	
 	#--- tiers
 	tiers.deleted.ids <- c()
 	annotations.deleted.count <- 0
-	if (nrow(t@annotations)>0) {
-		if (!is.null(filterTierNames)) {
+	
+
+	if (!is.null(filterTierNames)) {
 			if (length(filterTierNames)>0) {
 				tiers.deleted.ids <- setdiff( t@tiers$name, filterTierNames)
 				#tier names
@@ -42,7 +58,6 @@ transcripts_filter_single <- function (t,
 				t@annotations <- t@annotations[t@annotations$tier.name %in% filterTierNames, ]
 				annotations.deleted.count <- annotations.deleted.count - nrow( t@annotations)
 			}
-		}
 	}
 	
 	#--- time
