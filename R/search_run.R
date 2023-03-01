@@ -49,8 +49,7 @@ search_run <- function(x, s) {
 		#	(A) transcript contents have been modified
 		#	(B) another tier filter has been selected
 		x <- act::transcripts_update_fulltexts(x, 
-											   tierNames   = myfilter$tier.names,
-											   forceUpdate = forceUpdate) 
+											   tierNames   = myfilter$tier.names) 
 	}
 	
 

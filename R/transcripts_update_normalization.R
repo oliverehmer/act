@@ -16,9 +16,9 @@
 #' examplecorpus <- act::transcripts_update_normalization(x=examplecorpus)
 #' 
 transcripts_update_normalization <- function(x, 
-											 path_replacementMatrixCSV="", 
-											 transcriptNames=NULL, 
-											 forceUpdate=FALSE){
+											 path_replacementMatrixCSV = "", 
+											 transcriptNames           = NULL, 
+											 forceUpdate               = FALSE){
 	#=== check data
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (is.null(x@transcripts))     {
