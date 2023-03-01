@@ -22,7 +22,7 @@
 #' @param createFullText Logical; if \code{TRUE} full text will be created.
 #' @param assignMedia Logical; if \code{TRUE} the folder(s) specified in \code{@paths.media.files} of your corpus object will be scanned for media.
 #' @param pathNormalizationMatrix Character string; path to the replacement matrix used for normalizing the annotations; if argument left open, the default normalization matrix of the package will be used.  
-#' @param namesInclude Vector of character strings; Only files matching this regular expression imported into the corpus.
+#' @param namesInclude Vector of character strings; Only files matching this regular expression will be imported into the corpus.
 #' @param namesExclude Vector of character strings; Files matching this regular expression will be skipped and not imported into the corpus.
 #' @param namesSearchPatterns Vector of character strings; Search pattern as regular expression. Leave empty for no search-replace in the names.
 #' @param namesSearchReplacements Vector of character strings; Replacements for search. Leave empty for no search-replace in the names.

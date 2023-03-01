@@ -4,17 +4,10 @@
 \alias{corpus_import}
 \title{Import annotation files into corpus object}
 \usage{
-corpus_import(
-  x,
-  filterFilesInclude = "",
-  createFullText = TRUE,
-  assignMedia = TRUE
-)
+corpus_import(x, createFullText = TRUE, assignMedia = TRUE)
 }
 \arguments{
 \item{x}{Corpus object.}
-
-\item{filterFilesInclude}{Character string; Regular expression which files should be loaded.}
 
 \item{createFullText}{Logical; if \code{TRUE} full text will be created.}
 

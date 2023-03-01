@@ -44,19 +44,15 @@ search_run <- function(x, s) {
 		
 	#===  update full texts if full text search
 	if (s@search.mode=="fulltext" | s@search.mode=="fulltext.byTime" | s@search.mode=="fulltext.byTier" )  {
-		#force the update if tier filters are set
-		if (s@filter.tier.includeRegEx!='' | s@filter.tier.excludeRegEx!='' | length(s@filter.tier.names!=0)) {
-			x <- act::transcripts_update_fulltexts(x, 
-												   tierNames=myfilter$tier.names,
-												   forceUpdate = TRUE) 
-			
-		} else {
-			x <- act::transcripts_update_fulltexts(x, 
-												   tierNames=myfilter$tier.names) 
-			
-		}
-		
+		#if the fulltext really needs an update will be checked in the function
+		# chekcing if 
+		#	(A) transcript contents have been modified
+		#	(B) another tier filter has been selected
+		x <- act::transcripts_update_fulltexts(x, 
+											   tierNames   = myfilter$tier.names,
+											   forceUpdate = forceUpdate) 
 	}
+	
 
 	#=== Search
 	helper_progress_set("Searching", length(myfilter$transcript.names))

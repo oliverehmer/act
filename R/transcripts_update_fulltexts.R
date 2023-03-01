@@ -42,6 +42,10 @@ transcripts_update_fulltexts <- function(x,
 	for (i in transcriptNames) {
 		
 		#=== check if update is necessary
+		#- if update is forced
+		#- if transcript content has been modified since last update
+		#- if tier filter has been changed
+		
 		updateThis <- FALSE
 		if (forceUpdate) {
 			updateThis <- TRUE			

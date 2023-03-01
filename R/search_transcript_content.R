@@ -36,17 +36,21 @@ search_transcript_content <- function(t, s) {
 		}	
 	}
 	#filter by regex in search
-	if (length(s@filter.tier.includeRegEx)!=0) {
-		if (s@filter.tier.includeRegEx!="") {
-			filterTierNames <- grep(pattern=s@filter.tier.includeRegEx, filterTierNames, value=TRUE)
+		if (!is.null(s@filter.tier.includeRegEx)){
+			if (length(s@filter.tier.includeRegEx)!=0) {
+				if (s@filter.tier.includeRegEx!="") {
+					filterTierNames <- grep(pattern=s@filter.tier.includeRegEx, filterTierNames, value=TRUE)
+				}
+			}	
 		}
-	}
-	if (length(s@filter.tier.excludeRegEx)!=0) {
-		if (s@filter.tier.excludeRegEx!="") {
-			#search for tier to exclude
-			i <- grep(pattern=s@filter.tier.excludeRegEx, filterTierNames)
-			if (length(i)>0) {
-				filterTierNames <- filterTierNames[-i]
+	if (!is.null(s@filter.tier.excludeRegEx)){
+		if (length(s@filter.tier.excludeRegEx)!=0) {
+			if (s@filter.tier.excludeRegEx!="") {
+				#search for tier to exclude
+				i <- grep(pattern=s@filter.tier.excludeRegEx, filterTierNames)
+				if (length(i)>0) {
+					filterTierNames <- filterTierNames[-i]
+				}
 			}
 		}
 	}

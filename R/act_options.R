@@ -68,7 +68,6 @@ act.options.default <- list (
 #' * \code{act.ffmpeg.command} Character string; 'FFmpeg' command that is used for cutting video files.
 #' * \code{act.ffmpeg.command.fastVideoPostioning} Character string; 'FFmpeg' command that is used for cutting video files using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
 #' * \code{act.ffmpeg.command.audio} Character string; 'FFmpeg' command that is used for cutting/generating uncompressed audio files.
-#' * \code{act.ffmpeg.command.UsefastVideoPostioning} Logical; if \code{TRUE} the 'FFmpeg' option using fast video positioning (ant the respective commands as defined in the other options) will be used.
 #' * \code{act.ffmpeg.exportchannels.fromColumnName} Character string; Name of the column in the data frame \code{s@results} from information, which audio channel to export, will be taken.
 #' 
 #' \emph{Import annotation files}
@@ -117,7 +116,6 @@ options_show <- function () {
 	cat("    act.ffmpeg.command                             : ",paste("'", options()$act.ffmpeg.command,"'",sep="", collapse=""), fill=TRUE)
 	cat("    act.ffmpeg.command.fastVideoPostioning         : ",paste("'", options()$act.ffmpeg.command.fastVideoPostioning, "'",sep="", collapse=""),fill=TRUE)
 	cat("    act.ffmpeg.command.audio                       : ",paste("'", options()$act.ffmpeg.command.audio, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.ffmpeg.command.UsefastVideoPostioning      : ",paste("'", options()$act.ffmpeg.command.UsefastVideoPostioning, "'",sep="", collapse=""),fill=TRUE)
 	cat("    act.ffmpeg.exportchannels.fromColumnName       : ",paste("'", options()$act.ffmpeg.exportchannels.fromColumnName, "'",sep="", collapse=""),fill=TRUE)
 	cat("", fill=TRUE)
 	cat("  Import annotation files", fill=TRUE)

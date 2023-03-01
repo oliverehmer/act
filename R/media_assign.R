@@ -31,10 +31,11 @@ media_assign <- function(x,
 						 transcriptNames    = NULL, 
 						 deleteExistingMedia= TRUE, 
 						 onlyUniqueFiles    = TRUE) {
-	
+	#x <-corpus
 	#searchPaths        <- NULL 
 	#searchInSubfolders <- TRUE 
 	#filterFile         <- ""
+	#filterFile         <- "mp4"
 	#transcriptNames    <- NULL 
 	#deleteExistingMedia<- TRUE 
 	#onlyUniqueFiles    <- TRUE
@@ -48,7 +49,7 @@ media_assign <- function(x,
 		paths <- x@paths.media.files
 		paths.dont.exist <- which(!file.exists(paths))
 		if (length(paths.dont.exist)>0) {
-			message <- c(message, sprintf("%s of %s media path(s) in 'x@paths.media.files' do not exist.", length(paths.dont.exist), length(x@paths.media.files)))
+			message <- c(message, sprintf("%s of %s media path(s) in 'x@paths.media.files' do(s) not exist.", length(paths.dont.exist), length(x@paths.media.files)))
 			m       <- stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
 			message <- stringr::str_c(message,"\n", m, collapse="\n")
 			
@@ -58,7 +59,7 @@ media_assign <- function(x,
 		paths <- searchPaths
 		paths.dont.exist <- which(!file.exists(paths))
 		if (length(paths.dont.exist)>0) {
-			message <- c(message, sprintf("%s of %s media path(s) in the parameter 'searchPaths' do not exist.", length(paths.dont.exist), length(x@paths.media.files)))
+			message <- c(message, sprintf("%s of %s media path(s) in the parameter 'searchPaths' do(s) not exist.", length(paths.dont.exist), length(x@paths.media.files)))
 			m       <- stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
 			message <- stringr::str_c(message,"\n", m, collapse="\n")
 			
@@ -119,12 +120,16 @@ media_assign <- function(x,
 	if (is.null(transcriptNames)) {transcriptNames <- names(x@transcripts)}
 
 	#--- set progress bar
-	helper_progress_set("Assigning media", length(transcriptNames))
+	if (exists('helper_progress_set')) {
+		helper_progress_set("Assigning media", length(transcriptNames))
+	}
 	
 	#--- run through transcripts in the corpus file
 	for (nameTranscript in transcriptNames) {
 		#update progress bar
-		helper_progress_tick()
+		if (exists('helper_progress_tick')) {
+			helper_progress_tick()
+		}
 		
 		#get transcript name
 		nameTranscript	<- x@transcripts[[nameTranscript]]@name

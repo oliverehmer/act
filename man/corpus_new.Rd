@@ -13,6 +13,8 @@ corpus_new(
   createFullText = TRUE,
   assignMedia = TRUE,
   pathNormalizationMatrix = NULL,
+  namesInclude = character(),
+  namesExclude = character(),
   namesSearchPatterns = character(),
   namesSearchReplacements = character(),
   namesToUpperCase = FALSE,
@@ -37,6 +39,10 @@ corpus_new(
 \item{assignMedia}{Logical; if \code{TRUE} the folder(s) specified in \code{@paths.media.files} of your corpus object will be scanned for media.}
 
 \item{pathNormalizationMatrix}{Character string; path to the replacement matrix used for normalizing the annotations; if argument left open, the default normalization matrix of the package will be used.}
+
+\item{namesInclude}{Vector of character strings; Only files matching this regular expression will be imported into the corpus.}
+
+\item{namesExclude}{Vector of character strings; Files matching this regular expression will be skipped and not imported into the corpus.}
 
 \item{namesSearchPatterns}{Vector of character strings; Search pattern as regular expression. Leave empty for no search-replace in the names.}
 

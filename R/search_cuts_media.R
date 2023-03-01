@@ -64,14 +64,14 @@
 #' 
 search_cuts_media <- function(x, 
 							  s, 
-							  cutSpanBeforesec = NULL,
-							  cutSpanAftersec = NULL,
-							  outputFolder=NULL, 
-							  filterMediaInclude="", 
-							  fastVideoPostioning=TRUE, 
-							  videoCodecCopy=FALSE, 
-							  audioCutsAsMP3=FALSE, 
-							  Panning=NULL) {
+							  cutSpanBeforesec    = NULL,
+							  cutSpanAftersec     = NULL,
+							  outputFolder        = NULL, 
+							  filterMediaInclude  = "", 
+							  fastVideoPostioning = TRUE, 
+							  videoCodecCopy      = FALSE, 
+							  audioCutsAsMP3      = FALSE, 
+							  Panning             = NULL) {
 	#x <- examplecorpus
 	#x <- corpus
 	#s <- mysearch
@@ -271,12 +271,17 @@ search_cuts_media <- function(x,
 					cmd <- options()$act.ffmpeg.command.main
 					
 					#if it is a video file and fast positioning is used
-					if (out_suffix %in% options()$act.act.fileformats.video & fastVideoPostioning) {
+					#print("----")
+					#print(j)
+					#print(out_suffix)
+					#print(fastVideoPostioning)
+					if (out_suffix %in% options()$act.fileformats.video & fastVideoPostioning) {
+						#print(cmd)
 						cmd <- options()$act.ffmpeg.command.fastVideoPostioning
 					} 
 					
 					#if it is a audio file and should be converted to mp3
-					if (out_suffix %in% options()$act.act.fileformats.audio & audioCutsAsMP3) {
+					if (out_suffix %in% options()$act.fileformats.audio & audioCutsAsMP3) {
 						cmd <- options()$act.ffmpeg.command.audioCutsAsMP3
 						#replace destination file extension with mp3
 						out_suffix <- "mp3"

@@ -48,7 +48,6 @@ The package uses the following options.
 \item \code{act.ffmpeg.command} Character string; 'FFmpeg' command that is used for cutting video files.
 \item \code{act.ffmpeg.command.fastVideoPostioning} Character string; 'FFmpeg' command that is used for cutting video files using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
 \item \code{act.ffmpeg.command.audio} Character string; 'FFmpeg' command that is used for cutting/generating uncompressed audio files.
-\item \code{act.ffmpeg.command.UsefastVideoPostioning} Logical; if \code{TRUE} the 'FFmpeg' option using fast video positioning (ant the respective commands as defined in the other options) will be used.
 \item \code{act.ffmpeg.exportchannels.fromColumnName} Character string; Name of the column in the data frame \code{s@results} from information, which audio channel to export, will be taken.
 }
 
