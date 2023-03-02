@@ -67,10 +67,10 @@ corpus_new <- function(pathsAnnotationFiles,
 	#--- assign the parameters
 	x@name                                  <- name
 	x@import.skip.double.files              <- skipDoubleFiles
-	x@import.include                        <- namesInclude
-	x@import.exclude                        <- namesExclude
+	x@import.names.include                        <- namesInclude
+	x@import.names.exclude                        <- namesExclude
 	x@paths.annotation.files                <- gsub("/*$", "", pathsAnnotationFiles, perl=TRUE)
-	x@import.modify.transcript.names        <- list(  searchPatterns       = namesSearchPatterns,
+	x@import.names.modify        <- list(  searchPatterns       = namesSearchPatterns,
 													  searchReplacements   = namesSearchReplacements,
 													  toUpperCase          = namesToUpperCase,
 													  toLowerCase          = namesToLowerCase,

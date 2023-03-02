@@ -64,12 +64,12 @@ transcripts_add <- function(x,
 	#--- correct the names
 	transcript.names      <- act::helper_transcriptNames_get(x)
 	transcript.names.info <- helper_transcriptNames_make (transcriptNames           = transcript.names,
-														  searchPatterns            = x@import.modify.transcript.names$searchPatterns,
-														  searchReplacements        = x@import.modify.transcript.names$searchReplacements,
-														  toUpperCase               = x@import.modify.transcript.names$toUpperCase,
-														  toLowerCase               = x@import.modify.transcript.names$toLowerCase,
-														  trim                      = x@import.modify.transcript.names$trim,
-														  defaultForEmptyNames      = x@import.modify.transcript.names$defaultForEmptyNames)
+														  searchPatterns            = x@import.names.modify$searchPatterns,
+														  searchReplacements        = x@import.names.modify$searchReplacements,
+														  toUpperCase               = x@import.names.modify$toUpperCase,
+														  toLowerCase               = x@import.names.modify$toLowerCase,
+														  trim                      = x@import.names.modify$trim,
+														  defaultForEmptyNames      = x@import.names.modify$defaultForEmptyNames)
 	
 	#--- set the new names
 	x<- act::helper_transcriptNames_set(x, transcript.names.info$names.ok.ids)

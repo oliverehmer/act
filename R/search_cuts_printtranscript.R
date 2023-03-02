@@ -65,7 +65,10 @@ search_cuts_printtranscript <- function(x,
 			}
 		s@cuts.span.aftersec       <- cutSpanAftersec
 	}
-
+	
+	if (!options()$act.export.filename.fromColumnName %in% colnames(s@results)) {
+		stop("The column defined in the option 'options()$act.export.filename.fromColumnName' does not exist in the data.frame with the search results.")
+	}
 	
 	#--- check if output folder is given
 	destination_folder <- NULL

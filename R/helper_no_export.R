@@ -124,7 +124,7 @@ helper_progress_set <- function(title, total) {
 			if(exists("pb", envir=act.environment)) {
 				title <- stringr::str_pad(title, width=24, side="right", pad=" ")
 				act.environment$pb <- progress::progress_bar$new(
-					format = paste("  ", title, "[:bar] :percent missing: :eta", sep=""),
+					format = paste("  ", title, "[:bar] :percent (:eta left)", sep=""),
 					total = total, 
 					clear = FALSE, 
 					show_after = 0,

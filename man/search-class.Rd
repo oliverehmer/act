@@ -25,7 +25,9 @@ on the object.
 
 \item{\code{search.normalized}}{logical. if \code{TRUE} the normalized annotations will be used for searching.}
 
-\item{\code{resultidprefix}}{Character string; search results will be numbered consecutively; This character string will be placed before the consecutive numbers.}
+\item{\code{resultid.prefix}}{Character string; search results will be numbered consecutively; This character string will be placed before the consecutive numbers.}
+
+\item{\code{resultid.start}}{Integer; search results will be numbered consecutively; This is the start number of the identifiers.}
 
 \item{\code{filter.transcript.names}}{Vector of character strings; names of transcripts to include in the search. If the value is \code{character()} or \code{""} filter will be ignored.}
 

@@ -56,7 +56,8 @@
 #' @param videoCodecCopy Logical; if \code{TRUE} FFMPEG will use the option *codec copy* for videos.
 #' @param audioCutsAsMP3 Logical; If \code{TRUE} audio cuts will be exported as '.mp3' files, using  \code{options()$act.ffmpeg.command.audioCutsAsMP3}.
 #' @param Panning Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.exportchannels.fromColumnName' .
-#' 
+#' @param filename.append.medianame Logical; if \code{TRUE} the file name of the original media file will be appended to the snippet(s).
+#' @param filename.append.separator Character string; characters that separate the result id and the media file name.
 #' @return Search object; cut lists will be stored in \code{s@cuts.cutlist.mac} and \code{s@cuts.cutlist.win}.
 #' @export
 #'
@@ -64,14 +65,16 @@
 #' 
 search_cuts_media <- function(x, 
 							  s, 
-							  cutSpanBeforesec    = NULL,
-							  cutSpanAftersec     = NULL,
-							  outputFolder        = NULL, 
-							  filterMediaInclude  = "", 
-							  fastVideoPostioning = TRUE, 
-							  videoCodecCopy      = FALSE, 
-							  audioCutsAsMP3      = FALSE, 
-							  Panning             = NULL) {
+							  cutSpanBeforesec               = NULL,
+							  cutSpanAftersec                = NULL,
+							  outputFolder                   = NULL, 
+							  filterMediaInclude             = "", 
+							  fastVideoPostioning            = TRUE, 
+							  videoCodecCopy                 = FALSE, 
+							  audioCutsAsMP3                 = FALSE, 
+							  Panning                        = NULL,
+							  filename.append.medianame      = FALSE,
+							  filename.append.separator      = "__") {
 	#x <- examplecorpus
 	#x <- corpus
 	#s <- mysearch
@@ -88,7 +91,10 @@ search_cuts_media <- function(x,
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
 	if (is.null(s@results$transcript.name))       	{ stop("Data frame s@results does not contain column 'transcript.name'.") 	}
 	if (nrow(s@results)==0) 	                    { stop("Data frame s@results does not contain any search results (data frame with 0 rows)") 	}
-
+	if (!options()$act.export.filename.fromColumnName %in% colnames(s@results)) {
+		stop("The column defined in the option 'options()$act.export.filename.fromColumnName' does not exist in the data.frame with the search results.")
+	}
+	
 	myWarnings <- c()
 
 	#set progress bar	
@@ -124,7 +130,7 @@ search_cuts_media <- function(x,
 	cutlist_total_win <- c()
 	
 	i <- 1
-	#for each search result
+	#--------------- for each search result
 	for (i in 1:nrow(s@results)) 	{
 		#update progress bar
 		helper_progress_tick()
@@ -157,11 +163,11 @@ search_cuts_media <- function(x,
 					input_paths <- input_paths[grep(pattern=filterMediaInclude, input_paths)]
 				}
 		
-				#for each media file
+				#--------------- for each media file
 				j <- 1
 				for (j in 1:length(input_paths)) {
 					#====== file name of original
-					myMediaFileName <- stringr::str_to_lower(basename(tools::file_path_sans_ext(   input_paths[j])))
+					myMediaFileName <- stringr::str_to_lower(tools::file_path_sans_ext(basename(input_paths[j])))
 					
 					#====== FOLDERS
 					output_folder_result <- rep(output_folder_cutlist, 3)
@@ -291,6 +297,10 @@ search_cuts_media <- function(x,
 					out_filepath <- rep("",3)
 					filename <- as.character(s@results[i, filename.fromColumnName])
 					
+					if (filename.append.medianame==TRUE) {
+						filename = paste0(filename, filename.append.separator, myMediaFileName)
+					}
+					
 					#replace everything that is not allowed in file names
 					filename <- stringr::str_replace_all(filename, '/', "_")
 					filename <- stringr::str_replace_all(filename, '\\\\', "_")
@@ -310,7 +320,6 @@ search_cuts_media <- function(x,
 					cmd <- 	stringr::str_replace_all(cmd, "TIMESTARTMINUS10SECONDS",	as.character(max(0, startSec - 10)))
 					cmd <- 	stringr::str_replace_all(cmd, "TIMEDURATION", 		     	as.character(endSec-startSec))
 					
-		
 					#--- file paths 
 					cmd    <- 	stringr::str_replace_all(cmd, "INFILEPATH", 				input_paths[j])
 					
@@ -346,7 +355,6 @@ search_cuts_media <- function(x,
 
 					#for mac : I can not remember what this was useful for
 					#cutlist_mac <- stringr::str_replace_all(cutlist_mac, "\\\\", "/")
-					
 					
 					#--- assign to s@
 					#OLD for mac, add that it is an executable

@@ -68,11 +68,11 @@ corpus_import <- function(x,
 	}
 
 	#include/exclude
-	if (length(x@import.include)!=0) {
-		paths.new <- paths.new[grep(pattern=x@import.include, 	basename(paths.new))]
+	if (length(x@import.names.include)!=0) {
+		paths.new <- paths.new[grep(pattern=x@import.names.include, 	basename(paths.new))]
 	}
-	if (length(x@import.exclude)!=0) {
-		paths.new <- paths.new[!grepl(pattern=x@import.exclude, 	basename(paths.new))]
+	if (length(x@import.names.exclude)!=0) {
+		paths.new <- paths.new[!grepl(pattern=x@import.names.exclude, 	basename(paths.new))]
 	}
 	
 	#--- get only supported file formats 
@@ -86,12 +86,12 @@ corpus_import <- function(x,
 	transcript.names <- basename(paths.new)
 	transcript.names <- tools::file_path_sans_ext(transcript.names)
 	transcript.names.info <- helper_transcriptNames_make (transcriptNames           = transcript.names,
-														  searchPatterns            = x@import.modify.transcript.names$searchPatterns,
-														  searchReplacements        = x@import.modify.transcript.names$searchReplacements,
-														  toUpperCase               = x@import.modify.transcript.names$toUpperCase,
-														  toLowerCase               = x@import.modify.transcript.names$toLowerCase,
-														  trim                      = x@import.modify.transcript.names$trim,
-														  defaultForEmptyNames      = x@import.modify.transcript.names$defaultForEmptyNames
+														  searchPatterns            = x@import.names.modify$searchPatterns,
+														  searchReplacements        = x@import.names.modify$searchReplacements,
+														  toUpperCase               = x@import.names.modify$toUpperCase,
+														  toLowerCase               = x@import.names.modify$toLowerCase,
+														  trim                      = x@import.names.modify$trim,
+														  defaultForEmptyNames      = x@import.names.modify$defaultForEmptyNames
 	)
 	
 	

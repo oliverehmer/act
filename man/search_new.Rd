@@ -10,7 +10,8 @@ search_new(
   searchMode = c("content", "fulltext", "fulltext.byTime", "fulltext.byTier"),
   searchNormalized = TRUE,
   name = "mysearch",
-  resultidprefix = "result",
+  resultid.prefix = "result",
+  resultid.start = 1,
   filterTranscriptNames = NULL,
   filterTranscriptIncludeRegEx = NULL,
   filterTranscriptExcludeRegEx = NULL,
@@ -37,7 +38,9 @@ search_new(
 
 \item{name}{Character string; name of the search. Will be used, for example, as name of the sub folder when creating media cuts.}
 
-\item{resultidprefix}{Character string; prefix for the name of the consecutively numbered search results.}
+\item{resultid.prefix}{Character string; search results will be numbered consecutively; This character string will be placed before the consecutive numbers.}
+
+\item{resultid.start}{Integer; search results will be numbered consecutively; This is the start number of the identifiers.}
 
 \item{filterTranscriptNames}{Vector of character strings; names of transcripts to be included.}
 

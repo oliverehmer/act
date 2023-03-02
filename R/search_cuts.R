@@ -15,6 +15,7 @@
 #' @param cutSpanAftersec Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param l Layout object.
 #' @param outputFolder Character string; if parameter is not set, the print transcripts will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.txt' format.
+
 #'
 #' @return Search object; 
 #' @export
@@ -24,9 +25,9 @@
 search_cuts <- function(x, 
 						s,
 						cutSpanBeforesec = NULL,
-						cutSpanAftersec = NULL,
-						l=NULL, 
-						outputFolder=NULL ) {
+						cutSpanAftersec  = NULL,
+						l                = NULL, 
+						outputFolder     = NULL) {
 	#x <- corpus
 	#s <- mysearch
 	

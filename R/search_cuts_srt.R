@@ -36,6 +36,10 @@ search_cuts_srt <- function(x,
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
 	if (is.null(s@results$transcript.name)) 		{ stop("Data frame s@results does not contain column 'transcript.name'") 	}
 	
+	if (!options()$act.export.filename.fromColumnName %in% colnames(s@results)) {
+		stop("The column defined in the option 'options()$act.export.filename.fromColumnName' does not exist in the data.frame with the search results.")
+	}
+	
 	if (!is.null(cutSpanBeforesec)) 	{
 		if (length(cutSpanBeforesec)!=1) {
 			stop("Parameter 'cutSpanBeforesec' needs to contain only one element as a numeric value.") 

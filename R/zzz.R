@@ -1,7 +1,7 @@
 #=== progress bar in new environment
 act.environment    <- new.env()
 act.environment$pb <- progress::progress_bar$new(
-	format = "  Default  [:bar] :percent missing: :eta",
+	format = "  Default  [:bar] :percent (:eta left)",
 	total = NA, 
 	clear = FALSE, 
 	show_after = 0,
