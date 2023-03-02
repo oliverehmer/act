@@ -9,7 +9,8 @@
 #' @param searchMode Character string; takes the following values: \code{content}, \code{fulltext} (=default, includes both full text modes), \code{fulltext.byTime}, \code{fulltext.byTier}.
 #' @param searchNormalized Logical; if \code{TRUE} function will search in the normalized content, if \code{FALSE} function will search in the original content.
 #' @param name Character string; name of the search. Will be used, for example, as name of the sub folder when creating media cuts.
-#' @param resultidprefix Character string; prefix for the name of the consecutively numbered search results.
+#' @param resultid.prefix Character string; search results will be numbered consecutively; This character string will be placed before the consecutive numbers.
+#' @param resultid.start Integer; search results will be numbered consecutively; This is the start number of the identifiers.
 #' @param filterTranscriptNames Vector of character strings; names of transcripts to be included. 
 #' @param filterTranscriptIncludeRegEx Character string; as regular expression, limit search to certain transcripts matching the expression.
 #' @param filterTranscriptExcludeRegEx Character string; as regular expression, exclude certain transcripts matching the expression.
@@ -37,7 +38,8 @@ search_new <- function(x,
 					   searchMode                   = c("content", "fulltext", "fulltext.byTime", "fulltext.byTier"),
 					   searchNormalized             = TRUE, 
 					   name                         = "mysearch",  
-					   resultidprefix               = "result", 
+					   resultid.prefix              = "result",
+					   resultid.start               = 1,
 					   filterTranscriptNames        = NULL,
 					   filterTranscriptIncludeRegEx = NULL, 
 					   filterTranscriptExcludeRegEx = NULL, 
@@ -73,7 +75,8 @@ search_new <- function(x,
 	s@pattern                   		<- pattern
 	s@search.mode               		<- searchMode
 	s@search.normalized         		<- searchNormalized
-	s@resultidprefix            		<- resultidprefix
+	s@resultid.prefix            		<- resultid.prefix
+	s@resultid.start            		<- resultid.start
 	
 	s@filter.transcript.names   		<- if(!is.null(filterTranscriptNames))  		{filterTranscriptNames}     	else {s@filter.transcript.names}
 	s@filter.transcript.includeRegEx	<- if(!is.null(filterTranscriptIncludeRegEx))   {filterTranscriptIncludeRegEx}  else {s@filter.transcript.includeRegEx }

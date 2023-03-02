@@ -13,7 +13,8 @@
 #' @slot pattern Character string; search pattern as a regular expression.
 #' @slot search.mode Character string; defines if the original contents of the annotations should be searched or if the full texts should be searched. Slot takes the following values: \code{content}, \code{fulltext} (=default, includes both full text modes), \code{fulltext.byTime}, \code{fulltext.byTier}. 
 #' @slot search.normalized logical. if \code{TRUE} the normalized annotations will be used for searching.
-#' @slot resultidprefix Character string; search results will be numbered consecutively; This character string will be placed before the consecutive numbers.
+#' @slot resultid.prefix Character string; search results will be numbered consecutively; This character string will be placed before the consecutive numbers.
+#' @slot resultid.start Integer; search results will be numbered consecutively; This is the start number of the identifiers.
 #' @slot filter.transcript.names Vector of character strings; names of transcripts to include in the search. If the value is \code{character()} or \code{""} filter will be ignored.
 #' @slot filter.transcript.includeRegEx  Character string; Regular expression that defines which transcripts should be INcluded in the search (matching the name of the transcript).
 #' @slot filter.transcript.excludeRegEx  Character string; Regular expression that defines which transcripts should be EXcluded in the search (matching the name of the transcript).
@@ -47,8 +48,8 @@ methods::setClass("search",
 				  	pattern="character",
 				  	search.mode="character",
 				  	search.normalized="logical",
-				  	resultidprefix="character",
-				  	
+				  	resultid.prefix="character",
+				  	resultid.start = "numeric",
 				  	filter.transcript.names="character",
 				  	filter.transcript.includeRegEx ="character",
 				  	filter.transcript.excludeRegEx ="character",
@@ -80,7 +81,8 @@ methods::setClass("search",
 				  	pattern="",
 				  	search.mode="fulltext",
 				  	search.normalized=TRUE,
-				  	resultidprefix="resultID",
+				  	resultid.prefix="resultID",
+				  	resultid.start=1,
 				  	
 				  	filter.transcript.names=character(),
 				  	filter.transcript.includeRegEx ="",
@@ -116,7 +118,9 @@ search_show <- function (object) {
 	cat("  pattern                       : ", paste("'", object@pattern,"'",sep="", collapse=""), fill=TRUE)
 	cat("  search.mode                   : ", object@search.mode, fill=TRUE)
 	cat("  search.normalized             : ", object@search.normalized, fill=TRUE)
-	cat("  resultidprefix                : ", paste("'", object@resultidprefix,"'",sep="", collapse=""), fill=TRUE)
+	cat("  resultid.prefix               : ", paste("'", object@resultid.prefix,"'",sep="", collapse=""), fill=TRUE)
+	cat("  resultid.start                : ", paste("'", object@resultid.start,"'",sep="", collapse=""), fill=TRUE)
+
 	cat("\n")
 	
 	cat("  filter.transcript.names       : ", paste("'", object@filter.transcript.names,"'",sep="", collapse=", "), fill=TRUE)

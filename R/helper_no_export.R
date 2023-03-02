@@ -19,8 +19,8 @@ helper_detect_os <- function(){
 # Make names for search results
 #
 # @param mySearchResults Data frame; data frame containing search results.
-# @param resultidprefix Character string; prefix for the name of the consecutively numbered search results.
-# 
+# @param resultid.prefix Character string; prefix for the name of the consecutively numbered search results.
+# @param resultid.start Integer; start number of results 
 # @return Vector of character strings; names created for the search results.
 # @export
 #
@@ -32,18 +32,20 @@ helper_detect_os <- function(){
 # searchresults <- act::search_corpus(examplecorpus, pattern=myRegEx, concordanceMake=FALSE)
 # 
 # # Make custom names
-# mynames <- act::search_names(searchresults, resultidprefix="yo")
+# mynames <- act::search_names(searchresults, resultid.prefix="yo")
 # 
 # # Replace old names in search by new names
 # searchresults$resultID <- mynames
 # @keywords internal
 helper_makeNamesForSearch <- function(mySearchResults, 
-									  resultidprefix="result") {
+									  resultid.prefix = "result",
+									  resultid.start  = 1) {
 	
-	myFormat <- paste(resultidprefix, "%0", nchar(toString(nrow(mySearchResults))), "d", sep="")
-	myNames <- sprintf(myFormat, 1:nrow(mySearchResults))
+	myFormat <- paste(resultid.prefix, "%0", nchar(toString(nrow(mySearchResults)-1+resultid.start)), "d", sep="")
+	myNames <- sprintf(myFormat, resultid.start:(nrow(mySearchResults)+resultid.start-1))
 	return (myNames)
 }
+
 
 
 # Gets the path of a .TextGrid for a transcript

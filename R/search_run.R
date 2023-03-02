@@ -84,7 +84,7 @@ search_run <- function(x, s) {
 		s@results      <- 	cbind(resultID=as.character(), s@results)
 	} else	{
 		#=== add names for results
-		resultID      <- 	helper_makeNamesForSearch(s@results, s@resultidprefix)
+		resultID      <- 	helper_makeNamesForSearch(s@results, s@resultid.prefix, s@resultid.start)
 		s@results      <- 	cbind(resultID, s@results)
 		
 		#=== turn factors into strings
