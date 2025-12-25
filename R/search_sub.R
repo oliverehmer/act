@@ -84,7 +84,7 @@ search_sub <- function(x,
 									  filterSectionEndsec         =s@results$endsec[i], 
 									  concordanceMake             =FALSE)
 		searchResults.sub <- search.sub@results
-	#	View(searchResults.sub)
+	#View(searchResults.sub)
 		
 		#add information to new column
 		if (length(searchResults.sub)==0) {

@@ -89,7 +89,7 @@ search_stills <- function (	x,
 			filterSectionEndsec          = s@results$endsec[i]
 		)
 		#View(s.stills@results)
-		View(x@transcripts[[s@results$transcriptName[i]]]@annotations)
+		#View(x@transcripts[[s@results$transcriptName[i]]]@annotations)
 		
 		#save stills values to main search
 		if(nrow(s.stills@results) > 0) {

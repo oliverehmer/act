@@ -38,7 +38,7 @@ annotations_insert_from_search_to_tier <- function (x,
 	#	filterTranscriptNames <- NULL 
 	#	filterTierNames       <- NULL 
 	#	collapseString        <- " | "
-	#	View(s@results)
+	#View(s@results)
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s,"search")   )	{stop("Parameter 's' needs to be a search object.") } }
