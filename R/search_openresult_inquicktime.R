@@ -58,7 +58,7 @@ search_openresult_inquicktime  <- function(x,
 	appleScriptPath	<- file.path(system.file("extdata", "applescript", package="act"), "PlayCutInQuicktime.scpt")
 	#appleScriptPath <- "/Users/oliverehmer/Desktop/PlayCutInQuicktime.scpt"
 	if (file.exists(appleScriptPath)) {
-		appleScriptPath <- normalizePath(appleScriptPath, winslash = "/")
+		appleScriptPath <- normalizePath(appleScriptPath, winslash = "/", mustWork = FALSE)
 		startsec <- result$startsec - s@cuts.span.beforesec
 		endsec <- result$endsec + s@cuts.span.aftersec
 		durationSec <- endsec-startsec+0.3

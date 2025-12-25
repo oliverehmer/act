@@ -157,7 +157,7 @@ search_cuts_media <- function(x,
 	if (is.null(folderOutput)) {
 		out_folder_main <- "."
 	} else {
-		out_folder_main <- normalizePath(folderOutput, winslash = "/")
+		out_folder_main <- normalizePath(folderOutput, winslash = "/", mustWork = FALSE)
 	}
 	#---- . total cut lists ----
 	mac_cutlist <- c()
