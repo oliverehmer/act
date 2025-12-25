@@ -48,7 +48,7 @@ In case that you want to select transcripts and/or tiers by using regular expres
 \examples{
 library(act)
 
-# Have a look at the first transcript in the examplecorpus:
+# Have a look at the first transcript in the example corpus:
 printtranscript <- act::export_txt(examplecorpus@transcripts[[1]])
 cat(printtranscript)
 # In line 01 there is the word "UN".
@@ -58,7 +58,7 @@ test <- act::annotations_replace_copy(x=examplecorpus,
 									  pattern="\\\\bUN\\\\b",
 									  replacement="XXX")
 
-# Have a look at the first transcript in the corprus object test:
+# Have a look at the first transcript in the corpus object test:
 printtranscript <- act::export_txt(test@transcripts[[1]])
 cat(printtranscript)
 # In line 01 there is now "XXX" instead of "UN"

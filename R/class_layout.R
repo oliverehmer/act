@@ -83,9 +83,6 @@ layout_show <- function (object) {
 }
 methods::setMethod("show", signature = "layout", definition = layout_show)
 
-
-
-
 methods::setMethod(
 	"initialize",
 	"layout",

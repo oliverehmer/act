@@ -23,9 +23,24 @@ transcripts_filter_single <- function (t,
 							   filterSectionEndsec   = NULL, 
 							   timesPreserve         = TRUE, 
 							   sort=c("none", "tier>startsec", "startsec>tier")) {
+	
+	if(is.null(filterTierNames) & is.null(filterSectionStartsec) & is.null(filterSectionEndsec) ){
+		return(t)
+	}
+	
+	if (1==2) {
+	# t <- examplecorpus@transcripts[[1]]# NULL 
+	#	filterTierNames       <- NULL 
+	#	filterSectionStartsec <- NULL
+	#	filterSectionEndsec   <- NULL 
+	#	timesPreserve         = TRUE 
+	#	sort<-c("none", "tier>startsec", "startsec>tier")
+	#	t<-examplecorpus@transcripts[[1]]
+	#	View(t@annotations)
+	}
 	#=== settings
 	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
-	
+
 	#--- check parameter 'filterTierNames'
 	if (!is.null(filterTierNames)) {
 		if (length(filterTierNames)>0) {
@@ -45,19 +60,18 @@ transcripts_filter_single <- function (t,
 	tiersDeleted.ids <- c()
 	annotations.deleted.count <- 0
 	
-
 	if (!is.null(filterTierNames)) {
-			if (length(filterTierNames)>0) {
-				tiersDeleted.ids <- setdiff( t@tiers$name, filterTierNames)
-				#tier names
-				ids <- which(t@tiers$name %in% filterTierNames)
-				t@tiers <- t@tiers[ids, ]
-				
-				#annotations
-				annotations.deleted.count <- annotations.deleted.count + nrow( t@annotations) 
-				t@annotations <- t@annotations[t@annotations$tierName %in% filterTierNames, ]
-				annotations.deleted.count <- annotations.deleted.count - nrow( t@annotations)
-			}
+		if (length(filterTierNames)>0) {
+			tiersDeleted.ids <- setdiff( t@tiers$name, filterTierNames)
+			#tier names
+			ids <- which(t@tiers$name %in% filterTierNames)
+			t@tiers <- t@tiers[ids, ]
+			
+			#annotations
+			annotations.deleted.count <- annotations.deleted.count + nrow( t@annotations) 
+			t@annotations <- t@annotations[t@annotations$tierName %in% filterTierNames, ]
+			annotations.deleted.count <- annotations.deleted.count - nrow( t@annotations)
+		}
 	}
 	
 	#--- time

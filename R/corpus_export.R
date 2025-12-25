@@ -30,15 +30,20 @@ corpus_export <-  function(x,
 						   createFolderOutput=TRUE,
 						   l=NULL) {
 	
-	#x<-corpus3
-	#folderOutput  <-  '/Users/oliverehmer/Desktop/_OUT/bah/annotationfiles/'
-	#formats<-c("docx", "eaf", "edl", exb","srt","textgrid", "txt")
-	#print(i)
-	#formats<-"eaf"
-	#folderOutput<-"/Users/oliverehmer/Desktop/export/"
-	#filterTierNames<-NULL
-	#createMediaLinks <- FALSE
-	#l<- layout_spa_icas
+	if (1==2) {
+		
+		#x<-examplecorpus
+		#folderOutput  <-  '/Users/oliverehmer/Desktop/test'
+		#formats<-c("docx", "eaf","exb", "edl", "srt", "textgrid", "txt")
+		#formats<-c("txt")
+		#print(i)
+		#formats<-"eaf"
+		#folderOutput<-"/Users/oliverehmer/Desktop/export/"
+		#filterTierNames<-NULL
+		#createMediaLinks <- FALSE
+		#l<- layout_spa_icas
+	}
+	
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
@@ -105,8 +110,5 @@ corpus_export <-  function(x,
 			pathOutput <- file.path(folderOutput, paste(x@transcripts[[i]]@name, "srt", sep="."))
 			act::export_srt(t=x@transcripts[[i]], pathOutput=pathOutput, filterTierNames=filterTierNames)
 		}
-		
-
-		
 	}
 }

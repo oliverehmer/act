@@ -34,13 +34,14 @@ t2 <- act::transcripts_filter_single(t1, filterSectionEndsec=8)
 cbind(t2@annotations$startsec,t2@annotations$endsec) 
 
 # set start and end of section
-t2 <- act::transcripts_filter_single(t1, filterSectionStartsec=6, filterSectionEndsec=8)
+t2 <- act::transcripts_filter_single(t1, 
+  filterSectionStartsec=6,
+  filterSectionEndsec=8)
 cbind(t2@annotations$startsec,t2@annotations$endsec) 
 
 # set start and end of section, start new times from 0
 t2 <- act::transcripts_filter_single(t1, 
  filterSectionStartsec=6, 
- filterSectionEndsec=8,
- preserveTime=FALSE)
+ filterSectionEndsec=8)
 cbind(t2@annotations$startsec,t2@annotations$endsec) 
 

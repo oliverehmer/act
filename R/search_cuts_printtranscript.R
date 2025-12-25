@@ -32,8 +32,8 @@ search_cuts_printtranscript <- function(x,
 										cutSpanAftersec    = 0,
 										folderOutput       = NULL ) {
 	if (1==2) {
-		x <- corpus
-		s <- s
+		x <- examplecorpus
+		s <- mysearch
 		l<-NULL
 		exportTxt <- TRUE
 		exportDocx <- TRUE
@@ -98,8 +98,9 @@ search_cuts_printtranscript <- function(x,
 	myWarnings <- ""
 	
 	#create sub folders for text
-	dir.create(file.path(folder.destination, "transcripts"), showWarnings = FALSE)
-	
+	if(!is.null(folder.destination)) {
+		dir.create(file.path(folder.destination, "transcripts"), showWarnings = FALSE)
+	}
 	helper_progress_set("Creating transcripts",max(1,nrow(s@results)))
 	
 	trans.txt.all <- c()
@@ -258,8 +259,7 @@ search_cuts_printtranscript <- function(x,
 					path.template <- system.file("extdata", "docx", "template_transcript.docx", package="act")	
 				}
 				
-				#
-				folder.input <- file.path(folder.destination, collection)
+				#merge
 				folder.input <- folder.destination
 				result <- merge_docx (folderInput        = folder.input,
 									  pathTemplateInput  = path.template,  

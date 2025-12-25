@@ -11,7 +11,9 @@ merge_docx(folderInput, pathTemplateInput, pathOutput = NULL, recursive = TRUE)
 
 \item{pathTemplateInput}{Character string; Path to .docx file used as a template, where the other files will be inserted.}
 
-\item{folderOutput}{Logical;  if \code{TRUE} folderInut will be searched recursively.}
+\item{pathOutput}{Character string; Optional. Output path were to save result. If parameter is not set, the print transcripts will only be returned.}
+
+\item{recursive}{Logical;  if \code{TRUE} folder input will be searched recursively.}
 }
 \value{
 merged .docx in \link{officeR} format,
@@ -19,34 +21,6 @@ merged .docx in \link{officeR} format,
 \description{
 Loads all .docx files in a folder and merges them to a singe .docx file.
 }
-\examples{
-library(act)
-
-# Search
-mysearch <- act::search_new(examplecorpus, pattern="yo")
-
-# Create print transcripts for all search results
-test <- act::search_cuts_printtranscript (x=examplecorpus, s=mysearch)
-
-# Display all print transcripts on screen from @cuts.printtranscripts
-cat(test@cuts.printtranscripts)
-
-# Display all print transcripts from results data frame
-cat(test@results[,mysearch@cuts.column.printtranscript])
-cat(test@results[,mysearch@cuts.column.printtranscript])
-
-# Only single print transcript from results data frame
-cat(test@results[1,mysearch@cuts.column.printtranscript])
-
-# Create print transcript snippets including 1 sec before and 5 sec after
-mysearch@cuts.span.beforesec =1
-mysearch@cuts.span.aftersec = 5
-test <- act::search_cuts_printtranscript (x=examplecorpus,
-s=mysearch)
-
-# Display all transcript snippets on screen
-cat(test@results[,mysearch@cuts.column.printtranscript])
-}
 \seealso{
-\code{search_cuts_printtranscript}, \link{export_docx}
+\link{export_docx}
 }

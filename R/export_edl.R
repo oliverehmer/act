@@ -29,6 +29,14 @@ export_edl <- function(t,
 					   filterSectionStartsec = NULL,
 					   filterSectionEndsec   = NULL, 
 					   fps                   = 50) {
+	if (1==3) {
+	#	t  <- examplecorpus@transcripts[[i]]
+	#	pathOutput            <- '/Users/oliverehmer/Desktop/test.edl' #NULL
+	#	filterTierNames       <- NULL
+	#	filterSectionStartsec <- NULL
+	#	filterSectionEndsec   <- NULL 
+	#	fps                   <- 50
+	}
 	
 	resolveColors <- c("ResolveColorBlue",
 					   "ResolveColorCyan",
@@ -59,7 +67,16 @@ export_edl <- function(t,
 	
 	#=== Get data
 	#--- Filter and cure transcript
-	t <- act::transcripts_filter_single(t, filterTierNames=filterTierNames, filterSectionStartsec = filterSectionStartsec, filterSectionEndsec = filterSectionEndsec, sort="tier>startsec")
+	t <- act::transcripts_filter_single(t, 
+										filterTierNames       = filterTierNames, 
+										filterSectionStartsec = filterSectionStartsec, 
+										filterSectionEndsec   = filterSectionEndsec, 
+										sort="tier>startsec")
+	
+	if (nrow(t@annotations)==0) {
+		return('')
+	}
+	
 	t <- act::transcripts_cure_single(t, annotationsTimesReversed=TRUE, annotationsOverlap=TRUE, annotationsTimesBelowZero=TRUE, tiersMissing=FALSE, warning=TRUE)
 	
 	#--- function for formatting times
@@ -78,10 +95,18 @@ export_edl <- function(t,
 	#---- times formatted/as frames ----
 	t@annotations$duration.frames <- as.integer(round((t@annotations$endsec - t@annotations$startsec)  * fps))
 	t@annotations$start.formatted <- hhmmssframes(t@annotations$startsec,fps)  
-	t@annotations$end.formatted <- hhmmssframes(t@annotations$endsec,fps) 
+	t@annotations$end.formatted   <- hhmmssframes(t@annotations$endsec,fps) 
 	
+	
+	#error if tierNames is NULL
+	if (is.null(filterTierNames)) {
+		filterTierNames <- t@tiers$name
+	}
+	
+	#filter tiers only if tier filter makes sense
 	tiers <- t@tiers[t@tiers$name %in% filterTierNames,]
-	if (nrow(tiers)>0 & nrow(t@annotations)>0) {
+
+	if (nrow(tiers)>0 && nrow(t@annotations)>0) {
 		#---- colors ----
 		t@tiers$color <- resolveColors[1:nrow(tiers)]
 		
@@ -118,7 +143,7 @@ export_edl <- function(t,
 		#join with header
 		header <- sprintf('TITLE: %s\nFCM: NON-DROP FRAME\n\n', t@name)
 		
-		text<-paste0(header, text)
+		text <- paste0(header, text)
 		
 		#cat(text)
 		#print(text)

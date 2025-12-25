@@ -35,12 +35,11 @@ export_docx_styles_load <- function(path      = NULL,
 	#						  fileEncoding = encoding, 
 	#						  quote        = "")
 	#read csv
-	library(readr)
-	temp <- read_delim(path, 
+	temp <- readr::read_delim(path, 
 					   delim = ";",
-					   locale = locale(encoding = encoding),
+					   locale = readr::locale(encoding = encoding),
 					   quote = "",
-					   col_types = cols(.default = col_character()))
+					   col_types = readr::cols(.default = readr::col_character()))
 	
 	
 	

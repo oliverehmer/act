@@ -5,17 +5,15 @@
 #' 
 #' @param folderInput Character string; Path to a existing folder containing the .docx files
 #' @param pathTemplateInput Character string; Path to .docx file used as a template, where the other files will be inserted.
-#' @param folderOutput Character string; Optional. Output path were to save result. If parameter is not set, the print transcripts will only be returned.
-#' @param folderOutput Logical;  if \code{TRUE} folderInut will be searched recursively.
+#' @param pathOutput Character string; Optional. Output path were to save result. If parameter is not set, the print transcripts will only be returned.
+#' @param recursive Logical;  if \code{TRUE} folder input will be searched recursively.
 #' 
 #' @return merged .docx in \link{officeR} format,  
 #' 
 #' @export
 #' 
-#' @seealso \code{search_cuts_printtranscript}, \link{export_docx}
+#' @seealso \link{export_docx}
 #' 
-#' @example inst/examples/search_cuts_printtranscript.R
-#'
 #'
 #==== FUNCTIONS ====
 merge_docx <- function(folderInput, 

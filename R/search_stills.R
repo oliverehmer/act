@@ -10,9 +10,10 @@
 #' @param searchNormalized Logical; if \code{TRUE} function will search in the normalized content, if \code{FALSE} function will search in the original content.
 #' @param filterTierNames Vector of character strings; names of tiers to be included. 
 #' @param filterTierIncludeRegex Character string; as regular expression, limit search to certain tiers matching the expression.
-#' @param filterTierIncludeRegex Character string; as regular expression, exclude some tiers from search matching the expression.
+#' @param filterTierExcludeRegex Character string; as regular expression, exclude some tiers from search matching the expression.
 #' @param resultids Vector of Integer; By default all results in the search object will be processed.  if \code{resultids} is set, still will only be searched for the results specified. 
 #' @param stillsFolder Character string; name of the sub folder where to store the stills. folder will be created recursively
+#' 
 #' 
 #' @return Search object.
 #' 

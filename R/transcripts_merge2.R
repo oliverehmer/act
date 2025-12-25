@@ -13,7 +13,6 @@
 #' @param identifierTier Character string;  regular expression that identifies the tier in which the sections are marked, that will be inserted into destinationTranscript.
 #' @param identifierPattern Character string; regular expression that identifies the sections that will be inserted into destinationTranscript.
 #' @param eraseCompletely Logical; if \code{TRUE} update sections in destination transcript will be erased completely, if \code{FALSE} update sections in the destination tier will not be erased completely but only the tiers that are present in the updateTranscripts be erased.
-#' @param pathOverview Character string; path where comparison of tiers is saved as .xlsx file; if \code{NA} no .xlsx file will be exported.
 #' 
 #' @return Transcript object
 #' 
@@ -27,21 +26,20 @@ transcripts_merge2 <- function (destinationTranscript,
 								updateTranscripts, 
 								identifierTier        = "update",
 								identifierPattern     = ".+",
-								eraseCompletely       = TRUE,
-								pathOverview         =NA) {
-	
-	# x <- examplecorpus
-	# x<-corpus
-	# destinationTranscript 	<- x@transcripts[['update_destination']]
-	# destinationTranscript 	<- x@transcripts['update_destination']
-	# updateTranscripts 		<- x@transcripts[c('update_update1', 'update_update2')]
-	# updateTranscripts 		<- list(x@transcripts[['update_update1']], x@transcripts[['update_update2']])
-	# updateTranscripts		<- x@transcripts[['update_update1']]
-	# updateTranscripts		<- x@transcripts['update_update1']
-	# identifierTier <- "update"
-	# identifierPattern <- ".+"
-	# eraseCompletely <- TRUE
-	
+								eraseCompletely       = TRUE) {
+
+
+		#destinationTranscript 	<- x@transcripts[['update_destination']]
+		#destinationTranscript 	<- x@transcripts['update_destination']
+		#updateTranscripts 		<- x@transcripts[c('update_update1', 'update_update2')]
+		#updateTranscripts 		<- list(x@transcripts[['update_update1']], x@transcripts[['update_update2']])
+		#updateTranscripts		<- x@transcripts[['update_update1']]
+		#updateTranscripts		<- x@transcripts['update_update1']
+		#identifierTier <- "update"
+		#identifierPattern <- ".+"
+		#eraseCompletely <- TRUE
+		#pathOverview <- "/Users/oliverehmer/Library/CloudStorage/OneDrive-Persönlich/Corpus/corpus_work/update/out_destination_updated/tier_comparison_update_destination.xlsx"
+
 	
 	#x<-corpus
 	#destinationTranscriptName <- 'destination'
@@ -207,69 +205,9 @@ transcripts_merge2 <- function (destinationTranscript,
 		sourceTranscripts          = c(destinationTranscript, updateTranscripts)
 	)
 	
-	# ==== TIER comparison ====
-	if (!is.na(pathOverview)) {
-		if(file.exists(basename(pathOverview))) {
-			library(dplyr)
-			library(openxlsx)
 
-			#---- .prepare  Excel-Export ----
-			wb <- openxlsx::createWorkbook()
-			openxlsx::addWorksheet(wb, "comparison")
-			
-			# Styles
-			titel_style  <- createStyle(fontSize = 12, textDecoration = "bold", fgFill = "#D9D9D9", halign = "left")
-			error_style  <- createStyle(fontColour = "#FFFFFF", fgFill = "#FF0000")
-			
-			row_pos <- 1
-			
-			
-			#---- .create Table ---
-			df <- helper_make_comparison_table(t.destination@tiers$name, t.update@tiers$name)
-			
-			#write Table 
-			openxlsx::writeData(wb, sheet = 1, x = df, startRow = row_pos, colNames = TRUE)
-			openxlsx::addStyle(wb, sheet = 1, style = titel_style, rows = row_pos, cols = 1:ncol(df), gridExpand = TRUE)
-			
-			#mark errors
-			error_locs <- which(df$equal == "ERROR")
-			if (length(error_locs) > 0) {
-				equal_col <- which(names(df) == "equal")
-				excel_rows <- row_pos + error_locs  # keine +1 nötig, weil Header schon in row_pos
-				openxlsx::addStyle(wb, sheet = 1, style = error_style,
-								   rows = excel_rows, cols = equal_col,
-								   gridExpand = FALSE, stack = TRUE)
-			}
-			
-			
-			openxlsx::setColWidths(wb, sheet = "comparison", cols = 1:4, widths = "auto")
-			
-			#save
-			openxlsx::saveWorkbook(wb, pathOverview, overwrite = TRUE)	
-		}
-	}
 	return(destinationTranscript)
 }
 
 
-
-#---- .function for comparison ----
-helper_make_comparison_table <- function(names.destination, names.update) {
-	df2 <- data.frame(key = names.destination, names.destination = names.destination)
-	df3 <- data.frame(key = names.update, names.update = names.update)
-	
-	full_join(df2, df3, by = "key") %>%
-		arrange(key) %>%
-		rowwise() %>%
-		mutate(equal = {
-			vals <- c_across(c("names.destination", "names.update"))
-			if (any(is.na(vals))) {
-				FALSE
-			} else {
-				length(unique(vals)) == 1
-			}
-		}) %>%
-		ungroup() %>%
-		mutate(equal = ifelse(equal, "", "ERROR"))
-}
 

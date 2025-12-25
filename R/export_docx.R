@@ -66,19 +66,19 @@ export_docx <- function (   t,
 	# 
 	
 	if (1==2) {
-		#t <- corpus@transcripts[[1]]
-		i<-1
-		t <- corpus@transcripts[[s@results$transcriptName[i ]]]
-		l <- l
-		pathOutput             <- '/Users/oliverehmer/Downloads/text.docx'
-		filterTierNames        <- NULL
-		filterSectionStartsec  <- s@results$startsec[i]
-		filterSectionEndsec    <- s@results$endsec[i]
-		insertArrowAnnotationID<- s@results$annotationID[i]
-		headerTitle            <- s@results$header.title[i]
-		headerSubtitle         <- s@results$header.subtitle[i]
-		headerInsertSource     <- FALSE
-		layerNames             <- c("transcript.translation", "transcript.space")
+	#	#t <- corpus@transcripts[[1]]
+	#	i<-1
+	#	t <- corpus@transcripts[[s@results$transcriptName[i ]]]
+	#	l <- l
+	#	pathOutput             <- '/Users/oliverehmer/Downloads/text.docx'
+	#	filterTierNames        <- NULL
+	#	filterSectionStartsec  <- s@results$startsec[i]
+	#	filterSectionEndsec    <- s@results$endsec[i]
+	#	insertArrowAnnotationID<- s@results$annotationID[i]
+	#	headerTitle            <- s@results$header.title[i]
+	#	headerSubtitle         <- s@results$header.subtitle[i]
+	#	headerInsertSource     <- FALSE
+	#	layerNames             <- c("transcript.translation", "transcript.space")
 	}
 	
 	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
@@ -117,7 +117,7 @@ export_docx <- function (   t,
 	}
 	#layers: check if all layers to be shown are defined
 	if (!is.null(layerNames)) {
-		if (any(is.na(layerNames))) {s
+		if (any(is.na(layerNames))) {
 			stop("At least one of your layers in 'layerNames' is NA.")
 		} else {
 			missingLayers <- setdiff(layerNames, colnames(t@annotations))

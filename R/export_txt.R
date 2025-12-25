@@ -39,6 +39,24 @@ export_txt <- function (t,
 						headerDescription       = NULL,
 						headerInsertSource      = TRUE,
 						collapse                = TRUE) {
+	
+	if (1==3) {
+	#	library(act)
+	#	t<-examplecorpus@transcripts[[1]]
+	#	l                       <- NULL 
+	#	pathOutput              <- NULL 
+	#	filterTierNames         <- NULL 
+	#	filterSectionStartsec   <- NULL 
+	#	filterSectionEndsec     <- NULL  
+	#	insertArrowAnnotationID <- "" 
+	#	headerPreface           <- NULL 
+	#	headerTitle             <- NULL 
+	#	headerSubtitle          <- NULL
+	#	headerDescription       <- NULL
+	#	headerInsertSource      <- TRUE
+	#	collapse                <- TRUE
+	}
+	
 	#==== SETTINGS ====
 	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
 	if (missing(l)) 	{
@@ -109,7 +127,10 @@ export_txt <- function (t,
 	}
 	
 	#---- filter data ----
-	t <- act::transcripts_filter_single(t, filterTierNames=filterTierNames, filterSectionStartsec = filterSectionStartsec, filterSectionEndsec = filterSectionEndsec)
+	t <- act::transcripts_filter_single(t, 
+										filterTierNames       = filterTierNames, 
+										filterSectionStartsec = filterSectionStartsec, 
+										filterSectionEndsec   = filterSectionEndsec)
 	
 	#---- cure data ----
 	t <- act::transcripts_cure_single(t, 
@@ -477,7 +498,10 @@ export_txt <- function (t,
 	output <- text_all
 	
 	#==== header
+
 	if (l@header.insert==TRUE) {
+		header <- ''
+		
 		#preface
 		if (!is.null(headerPreface)) {
 			if (!is.na(headerPreface)) {
@@ -521,6 +545,7 @@ export_txt <- function (t,
 	}
 	
 	if (!is.null(pathOutput)) {
+		#pathOutput<-'/Users/oliverehmer/Desktop/test.txt'
 		fileConn <- file(pathOutput)
 		writeLines(output, fileConn)
 		close(fileConn)

@@ -30,7 +30,9 @@ search_stills(
 
 \item{filterTierNames}{Vector of character strings; names of tiers to be included.}
 
-\item{filterTierIncludeRegex}{Character string; as regular expression, exclude some tiers from search matching the expression.}
+\item{filterTierIncludeRegex}{Character string; as regular expression, limit search to certain tiers matching the expression.}
+
+\item{filterTierExcludeRegex}{Character string; as regular expression, exclude some tiers from search matching the expression.}
 
 \item{resultids}{Vector of Integer; By default all results in the search object will be processed.  if \code{resultids} is set, still will only be searched for the results specified.}
 

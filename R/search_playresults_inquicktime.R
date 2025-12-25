@@ -29,10 +29,10 @@ search_playresults_inquicktime <- function(x,
 		}
 		cat("==== Result: ", i, "\n")
 		cat("transcriptName: ", s@results[i, ]$transcriptName, "\n")
-		cat("tierName      : ", s@results[i, ]$tierName, "\n")	
-		cat("startsec       : ", s@results[i, ]$startsec, "\n")
-		cat("endsec         : ", s@results[i, ]$endsec, "\n")
-		cat("content        : ", s@results[i, ]$content, "\n")
+		cat("tier.name     : ", s@results[i, ]$tier.name, "\n")	
+		cat("startsec      : ", s@results[i, ]$startsec, "\n")
+		cat("endsec        : ", s@results[i, ]$endsec, "\n")
+		cat("content       : ", s@results[i, ]$content, "\n")
 		if ("printtranscript" %in% colnames(s@results)) {
 			cat("\n")	
 			cat(s@results$printtranscript[i])

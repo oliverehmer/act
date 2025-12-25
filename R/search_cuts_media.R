@@ -99,20 +99,20 @@ search_cuts_media <- function(x,
 {
 	#for testing
 	if (1==2) {
-		x					<- corpus
-		s					<- s
-		exportMedia         <- TRUE
-		exportStills        <- TRUE
-		exportThumbnail     <- TRUE
-		cutSpanBeforesec    <- NULL
-		cutSpanAftersec     <- NULL
-		folderOutput		<- "/Users/oliverehmer/Library/CloudStorage/OneDrive-Persönlich/Sequences/_new"
-		filterMediaInclude  <- ""
-		videoFastPositioning<- TRUE
-		videoCodecCopy 	    <- FALSE
-		audioAsMP3 	        <- FALSE
-		panning			    <- NULL
-		exportStills        <- TRUE
+#		x					<- corpus
+#		s					<- s
+#		exportMedia         <- TRUE
+#		exportStills        <- TRUE
+#		exportThumbnail     <- TRUE
+#		cutSpanBeforesec    <- NULL
+#		cutSpanAftersec     <- NULL
+#		folderOutput		<- "/Users/oliverehmer/Library/CloudStorage/OneDrive-Persönlich/Sequences/_new"
+#		filterMediaInclude  <- ""
+#		videoFastPositioning<- TRUE
+#		videoCodecCopy 	    <- FALSE
+#		audioAsMP3 	        <- FALSE
+#		panning			    <- NULL
+#		exportStills        <- TRUE
 	}
 	
 	#==== CHECKS ====

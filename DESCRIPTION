@@ -1,7 +1,7 @@
 Package: act
 Type: Package
 Title: Aligned Corpus Toolkit
-Version: 2.2.7
+Version: 2.3.0
 Date: 2025-12-25
 Authors@R: person("Oliver", "Ehmer", email = "oliver.ehmer@uos.de", role = c("aut", "cre"))
 Maintainer: Oliver Ehmer <oliver.ehmer@uos.de>
@@ -10,7 +10,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: TRUE
 RoxygenNote: 7.3.3
-Imports: fs, methods, srt, stringr, stringi, tools, textutils, utils, progress, XML, xml2, officer, openxlsx
+Imports: fs, dplyr, methods, srt, stringr, stringi, tools, textutils, utils, progress, XML, xml2, officer, openxlsx, readr, glue
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
