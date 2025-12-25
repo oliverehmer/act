@@ -12,7 +12,8 @@
 #' @param updateTranscripts List of transcript objects; transcript objects that will be inserted into the destination transcripts (entirely or in part).
 #' @param identifierTier Character string;  regular expression that identifies the tier in which the sections are marked, that will be inserted into destinationTranscript.
 #' @param identifierPattern Character string; regular expression that identifies the sections that will be inserted into destinationTranscript.
-#' @param eraseUpdateSectionsCompletely Logical; if \code{TRUE} update sections in destination transcript will be erased completely, if \code{FALSE} update sections in the destination tier will not be erased completely but only the tiers that are present in the updateTranscripts be erased.
+#' @param eraseCompletely Logical; if \code{TRUE} update sections in destination transcript will be erased completely, if \code{FALSE} update sections in the destination tier will not be erased completely but only the tiers that are present in the updateTranscripts be erased.
+#' @param pathOverview Character string; path where comparison of tiers is saved as .xlsx file; if \code{NA} no .xlsx file will be exported.
 #' 
 #' @return Transcript object
 #' 
@@ -23,10 +24,11 @@
 #' @example inst/examples/transcripts_merge2.R
 #' 
 transcripts_merge2 <- function (destinationTranscript, 
-							   updateTranscripts, 
-							   identifierTier="update",
-							   identifierPattern=".+",
-							   eraseUpdateSectionsCompletely=TRUE) {
+								updateTranscripts, 
+								identifierTier        = "update",
+								identifierPattern     = ".+",
+								eraseCompletely       = TRUE,
+								pathOverview         =NA) {
 	
 	# x <- examplecorpus
 	# x<-corpus
@@ -38,8 +40,21 @@ transcripts_merge2 <- function (destinationTranscript,
 	# updateTranscripts		<- x@transcripts['update_update1']
 	# identifierTier <- "update"
 	# identifierPattern <- ".+"
-	# eraseUpdateSectionsCompletely <- TRUE
-
+	# eraseCompletely <- TRUE
+	
+	
+	#x<-corpus
+	#destinationTranscriptName <- 'destination'
+	#destinationTranscript <- x@transcripts[[destinationTranscriptName]]
+	
+	#updateTranscriptNames <- c('A')
+	#updateTranscripts <- x@transcripts[ids]
+	
+	#identifierTier='status-progress'
+	#identifierPattern=".+"
+	#eraseCompletely<-TRUE
+	
+	
 	if (missing(destinationTranscript)) 	{stop("Transcript object in parameter 'destinationTranscript' is missing.") 	}
 	if (missing(updateTranscripts)) 	{stop("Transcript object(s) in parameter 'updateTranscripts' is/are missing.") 	}
 	
@@ -71,20 +86,23 @@ transcripts_merge2 <- function (destinationTranscript,
 	#--> result should be a list
 	
 	#--- helper_tiers_merge_tables
-	tier.table <- act::helper_tiers_merge_tables(destinationTranscript,updateTranscripts )
+	tierTable <- act::helper_tiers_merge_tables(destinationTranscript,updateTranscripts )
 	
 	#--- sort table with identifier tier in position 1	
-	tier.table <- act::helper_tiers_sort_table(tierTable=tier.table, sortVector=unique(c(identifierTier, tier.table$name)))
-
+	sortVector <- unique(c(identifierTier, tierTable$name))
+	tierTable  <- act::helper_tiers_sort_table( tierTable = tierTable, 
+												sortVector = sortVector 
+	)
+	
 	#--- tiers to object 
-	destinationTranscript@tiers <- tier.table
+	destinationTranscript@tiers <- tierTable
 	
 	#--- get annotations of destinaton transcript
-	myAnnotations <- destinationTranscript@annotations
+	ann <- destinationTranscript@annotations
 	
 	#for all transcripts in updates
 	for (transUpdate in updateTranscripts) {
-
+		
 		#skip transcript if update is empty
 		#get all annotations
 		myDestIntervals <- transUpdate@annotations
@@ -92,7 +110,7 @@ transcripts_merge2 <- function (destinationTranscript,
 		#if tier identifier is specified, get first tiers that fits condition
 		if (!is.null(identifierTier)) {
 			#get all intervals in this tier
-			myDestIntervals <- myDestIntervals[stringr::str_detect(myDestIntervals$tier.name, identifierTier), ]
+			myDestIntervals <- myDestIntervals[stringr::str_detect(myDestIntervals$tierName, identifierTier), ]
 			
 			#if a specifier in this tier is set,  select those that fit condition
 			if (!is.null(identifierPattern)) {
@@ -100,12 +118,12 @@ transcripts_merge2 <- function (destinationTranscript,
 			}
 		} else {
 			#auto create an update interval, starting with first and ending with last interval
-			startSec <- min(myDestIntervals$startSec)
-			endSec <- max(myDestIntervals$endSec)
+			startsec <- min(myDestIntervals$startsec)
+			endsec <- max(myDestIntervals$endsec)
 			myDestIntervals <- myDestIntervals[1:1,]
 			
-			myDestIntervals$startSec[1] 	<- startSec
-			myDestIntervals$endSec[1] 	<- endSec
+			myDestIntervals$startsec[1] 	<- startsec
+			myDestIntervals$endsec[1] 	<- endsec
 		}
 		
 		if(nrow(myDestIntervals)>0) {
@@ -114,67 +132,67 @@ transcripts_merge2 <- function (destinationTranscript,
 				myDestInterval <- myDestIntervals[i,]
 				
 				#get annotations form the update transcript
-				myAnnotationsUpdate <- transUpdate@annotations
-				myAnnotationsUpdate <- myAnnotationsUpdate[((myAnnotationsUpdate$startSec>=myDestInterval$startSec & myAnnotationsUpdate$startSec<=myDestInterval$endSec) | (myAnnotationsUpdate$endSec>myDestInterval$startSec & myAnnotationsUpdate$endSec<=myDestInterval$endSec) | (myAnnotationsUpdate$startSec<myDestInterval$startSec & myAnnotationsUpdate$endSec>myDestInterval$endSec)), ]
+				annUpdate <- transUpdate@annotations
+				annUpdate <- annUpdate[((annUpdate$startsec>=myDestInterval$startsec & annUpdate$startsec<=myDestInterval$endsec) | (annUpdate$endsec>myDestInterval$startsec & annUpdate$endsec<=myDestInterval$endsec) | (annUpdate$startsec<myDestInterval$startsec & annUpdate$endsec>myDestInterval$endsec)), ]
 				
 				#---truncate intervals that do no fall entirely into the intervall
 				#intervals that start before
-				for (j in 1:nrow(myAnnotationsUpdate)) {
-					myAnnotationsUpdate$startSec[j] <- max(myAnnotationsUpdate$startSec[j], myDestInterval$startSec)
+				for (j in 1:nrow(annUpdate)) {
+					annUpdate$startsec[j] <- max(annUpdate$startsec[j], myDestInterval$startsec)
 				}
 				
 				#intervals that end after
-				for (j in 1:nrow(myAnnotationsUpdate)) {
-					myAnnotationsUpdate$endSec[j] <- min(myAnnotationsUpdate$endSec[j], myDestInterval$endSec)
+				for (j in 1:nrow(annUpdate)) {
+					annUpdate$endsec[j] <- min(annUpdate$endsec[j], myDestInterval$endsec)
 				}
 				
 				#destination
-				if (eraseUpdateSectionsCompletely==TRUE) {
+				if (eraseCompletely==TRUE) {
 					#for for all tiers
 					
 					#destination: get annotations outside of update region
-					myAnnotations <- myAnnotations[myAnnotations$startSec<myDestInterval$startSec | myAnnotations$endSec>myDestInterval$endSec,]
+					ann <- ann[ann$startsec<myDestInterval$startsec | ann$endsec>myDestInterval$endsec,]
 					
 					#truncate intervals that reach into the update area
-					myAnnotations$endSec[myAnnotations$startSec<myDestInterval$startSec & myAnnotations$endSec>myDestInterval$startSec] <- myDestInterval$startSec
+					ann$endsec[ann$startsec<myDestInterval$startsec & ann$endsec>myDestInterval$startsec] <- myDestInterval$startsec
 					
 					#truncate intervals that reach out of the update area
-					myAnnotations$startSec[myAnnotations$startSec<myDestInterval$endSec & myAnnotations$endSec>myDestInterval$endSec] <- myDestInterval$endSec
+					ann$startsec[ann$startsec<myDestInterval$endsec & ann$endsec>myDestInterval$endsec] <- myDestInterval$endsec
 					
 				} else {
 					#for tiers that are in update transcript
 					
 					#get IDs of annotations in tiers that are also in the update file
-					myIDs_tiers <- which(myAnnotations$tier.name %in% transUpdate@tiers$name)
-					myIDS_times <- which(myAnnotations$startSec>myDestInterval$startSec & myAnnotations$endSec<myDestInterval$endSec)
+					myIDs_tiers <- which(ann$tierName %in% transUpdate@tiers$name)
+					myIDS_times <- which(ann$startsec>myDestInterval$startsec & ann$endsec<myDestInterval$endsec)
 					myIDs_tiers_timesection <- intersect(myIDs_tiers, myIDS_times)
 					
 					#revove intervals that fall entirely into the update region
 					if (length(myIDs_tiers_timesection)>0) {
 						#remove intervals 
-						myAnnotations <- myAnnotations[-myIDs_tiers_timesection,]
+						ann <- ann[-myIDs_tiers_timesection,]
 					}
 					#truncate intervals that reach into the update area
-					myIDs_tiers <- which(myAnnotations$tier.name %in% transUpdate@tiers$name)
-					myIDS_times <- which(myAnnotations$startSec<myDestInterval$startSec & myAnnotations$endSec>myDestInterval$startSec)
+					myIDs_tiers <- which(ann$tierName %in% transUpdate@tiers$name)
+					myIDS_times <- which(ann$startsec<myDestInterval$startsec & ann$endsec>myDestInterval$startsec)
 					myIDs_tiers_timesection <- intersect(myIDs_tiers, myIDS_times)
-					myAnnotations$endSec[myIDs_tiers_timesection] <- myDestInterval$startSec
+					ann$endsec[myIDs_tiers_timesection] <- myDestInterval$startsec
 					
 					#truncate intervals that reach out of the update area
-					myIDs_tiers <- which(myAnnotations$tier.name %in% transUpdate@tiers$name)
-					myIDS_times <- which(myAnnotations$startSec<myDestInterval$endSec & myAnnotations$endSec>myDestInterval$endSec)
+					myIDs_tiers <- which(ann$tierName %in% transUpdate@tiers$name)
+					myIDS_times <- which(ann$startsec<myDestInterval$endsec & ann$endsec>myDestInterval$endsec)
 					myIDs_tiers_timesection <- intersect(myIDs_tiers, myIDS_times)
-					myAnnotations$startSec[myIDs_tiers_timesection] <- myDestInterval$endSec
+					ann$startsec[myIDs_tiers_timesection] <- myDestInterval$endsec
 				}
 				
 				#merge update and destination transcript
-				myAnnotations <- rbind(myAnnotations, myAnnotationsUpdate)
+				ann <- rbind(ann, annUpdate)
 				
 			}
 		}
 	}
 	#assign new annotations to transcript
-	destinationTranscript@annotations <- myAnnotations
+	destinationTranscript@annotations <- ann
 	
 	#change name & path
 	destinationTranscript@name <- paste(destinationTranscript@name, "_UPDATED",sep="")
@@ -188,7 +206,70 @@ transcripts_merge2 <- function (destinationTranscript,
 		destinationTranscript      = destinationTranscript@name,
 		sourceTranscripts          = c(destinationTranscript, updateTranscripts)
 	)
+	
+	# ==== TIER comparison ====
+	if (!is.na(pathOverview)) {
+		if(file.exists(basename(pathOverview))) {
+			library(dplyr)
+			library(openxlsx)
 
+			#---- .prepare  Excel-Export ----
+			wb <- openxlsx::createWorkbook()
+			openxlsx::addWorksheet(wb, "comparison")
+			
+			# Styles
+			titel_style  <- createStyle(fontSize = 12, textDecoration = "bold", fgFill = "#D9D9D9", halign = "left")
+			error_style  <- createStyle(fontColour = "#FFFFFF", fgFill = "#FF0000")
+			
+			row_pos <- 1
+			
+			
+			#---- .create Table ---
+			df <- helper_make_comparison_table(t.destination@tiers$name, t.update@tiers$name)
+			
+			#write Table 
+			openxlsx::writeData(wb, sheet = 1, x = df, startRow = row_pos, colNames = TRUE)
+			openxlsx::addStyle(wb, sheet = 1, style = titel_style, rows = row_pos, cols = 1:ncol(df), gridExpand = TRUE)
+			
+			#mark errors
+			error_locs <- which(df$equal == "ERROR")
+			if (length(error_locs) > 0) {
+				equal_col <- which(names(df) == "equal")
+				excel_rows <- row_pos + error_locs  # keine +1 nötig, weil Header schon in row_pos
+				openxlsx::addStyle(wb, sheet = 1, style = error_style,
+								   rows = excel_rows, cols = equal_col,
+								   gridExpand = FALSE, stack = TRUE)
+			}
+			
+			
+			openxlsx::setColWidths(wb, sheet = "comparison", cols = 1:4, widths = "auto")
+			
+			#save
+			openxlsx::saveWorkbook(wb, pathOverview, overwrite = TRUE)	
+		}
+	}
 	return(destinationTranscript)
+}
+
+
+
+#---- .function for comparison ----
+helper_make_comparison_table <- function(names.destination, names.update) {
+	df2 <- data.frame(key = names.destination, names.destination = names.destination)
+	df3 <- data.frame(key = names.update, names.update = names.update)
+	
+	full_join(df2, df3, by = "key") %>%
+		arrange(key) %>%
+		rowwise() %>%
+		mutate(equal = {
+			vals <- c_across(c("names.destination", "names.update"))
+			if (any(is.na(vals))) {
+				FALSE
+			} else {
+				length(unique(vals)) == 1
+			}
+		}) %>%
+		ungroup() %>%
+		mutate(equal = ifelse(equal, "", "ERROR"))
 }
 

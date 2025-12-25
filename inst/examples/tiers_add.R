@@ -13,7 +13,7 @@ x@transcripts[[1]]@tiers
 # --- Add new interval tier in position 2
 x <- act::tiers_add(examplecorpus,
 					tierName="TEST",
-					absolutePosition=2)
+					positionAbsolute=2)
 #check results
 x@history[length(x@history)]
 #have a look at the first transcript

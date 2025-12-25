@@ -10,11 +10,12 @@ search_sub(
   pattern,
   searchMode = c("content", "fulltext", "fulltext.byTime", "fulltext.byTier"),
   searchNormalized = TRUE,
-  filterTierIncludeRegEx = "",
-  filterTierExcludeRegEx = "",
+  filterTierIncludeRegex = "",
+  filterTierExcludeRegex = "",
   destinationColumn = "subsearch",
-  deleteLinesWithNoResults = FALSE,
-  excludeHitsWithinSameTier = TRUE
+  deleteEmptyLines = FALSE,
+  excludeHitsInSameTier = TRUE,
+  collapseString = " | "
 )
 }
 \arguments{
@@ -28,15 +29,17 @@ search_sub(
 
 \item{searchNormalized}{Logical; if \code{TRUE} function will search in the normalized content, if \code{FALSE} function will search in the original content.}
 
-\item{filterTierIncludeRegEx}{Character string; limit search to tiers that match the regular expression}
+\item{filterTierIncludeRegex}{Character string; limit search to tiers that match the regular expression}
 
-\item{filterTierExcludeRegEx}{Character string; limit search to tiers that match the regular expression}
+\item{filterTierExcludeRegex}{Character string; limit search to tiers that match the regular expression}
 
 \item{destinationColumn}{Character string; name of column where results of sub search will be stored}
 
-\item{deleteLinesWithNoResults}{Logical; if \code{TRUE} search results will be deleted for which the sub search does not give any results}
+\item{deleteEmptyLines}{Logical; if \code{TRUE} search results will be deleted for which the sub search does not give any results}
 
-\item{excludeHitsWithinSameTier}{Logical; if \code{TRUE} the function will not add hits from the same tier as the original search result; if \code{FALSE} hits from the same tier as the original search result will be included.}
+\item{excludeHitsInSameTier}{Logical; if \code{TRUE} the function will not add hits from the same tier as the original search result; if \code{FALSE} hits from the same tier as the original search result will be included.}
+
+\item{collapseString}{Character string; Characters that will be used to separate multiple search hits}
 }
 \value{
 Search object.

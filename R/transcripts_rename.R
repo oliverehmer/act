@@ -8,10 +8,10 @@
 #' @param newTranscriptNames Vector of character strings; new names for the transcripts. If left open, the current names in the corpus object will be taken as basis. 
 #' @param searchPatterns Character string; Search pattern as regular expression applied to the names of the transcripts.
 #' @param searchReplacements Character string; String to replace the hits of the search.
-#' @param toUpperCase Logical; Convert transcript names all to upper case.
-#' @param toLowerCase Logical; Convert transcript names all to lower case.
+#' @param toUpper Logical; Convert transcript names all to upper case.
+#' @param toLower Logical; Convert transcript names all to lower case.
 #' @param trim Logical; Remove leading and trailing spaces in names.
-#' @param stopIfNotUnique Logical; If \code{TRUE} the function will stop if replacement would lead to non-unique names; If \code{FALSE} names will be automatically changed to be unique. 
+#' @param stopNonUnique Logical; If \code{TRUE} the function will stop if replacement would lead to non-unique names; If \code{FALSE} names will be automatically changed to be unique. 
 #'
 #' @return Corpus object
 #' @export 
@@ -22,10 +22,10 @@ transcripts_rename <- function(x,
 							   newTranscriptNames  = NULL, 
 							   searchPatterns      = NULL, 
 							   searchReplacements  = NULL, 
-							   toUpperCase         = FALSE,
-							   toLowerCase         = FALSE,
+							   toUpper         = FALSE,
+							   toLower         = FALSE,
 							   trim                = FALSE,
-							   stopIfNotUnique     = TRUE ) {
+							   stopNonUnique     = TRUE ) {
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
@@ -38,10 +38,10 @@ transcripts_rename <- function(x,
 	}
 	
 	#---get names
-	oldTranscriptNames <- act::helper_transcriptNames_get(x)
+	oldtranscriptNames <- act::helper_transcript_names_get(x)
 	
 	if (is.null(newTranscriptNames)) 	{
-		newTranscriptNames <- oldTranscriptNames
+		newTranscriptNames <- oldtranscriptNames
 	} else {
 		if (length(newTranscriptNames)!=length(x@transcripts)) {
 			stop(paste("Parameter 'newTranscriptNames' is not of the same length as list of trasncripts in the corpus: ", length(newTranscriptNames),":",length(x@transcripts),sep= " ", collapse=" "))	
@@ -49,30 +49,30 @@ transcripts_rename <- function(x,
 	}
 	
 	#--- perform the rename operations
-	transcript.names.info <- helper_transcriptNames_make(transcriptNames      = newTranscriptNames,
+	transcriptNames.info <- helper_transcript_names_make(transcriptNames      = newTranscriptNames,
 														searchPatterns       = searchPatterns,
 														searchReplacements   = searchReplacements,
-														toUpperCase          = toUpperCase,
-														toLowerCase          = toLowerCase,
+														toUpper          = toUpper,
+														toLower          = toLower,
 														trim                 = trim,
-														defaultForEmptyNames = "no_name")
+														defaultEmpty = "no_name")
 	
 	#--- check if there were duplicated names
-	if (stopIfNotUnique) {
-		if(length(transcript.names.info$duplicated.ids)>0) {
+	if (stopNonUnique) {
+		if(length(transcriptNames.info$duplicated.ids)>0) {
 			stop("Transcript names would not be unique after renaming. Nothing renamed.")	
 		}
 	}
 	
 	#--- rename
-	x <- act::helper_transcriptNames_set(x, transcript.names.info$names.ok.ids)
+	x <- act::helper_transcript_names_set(x, transcriptNames.info$names.ok.ids)
 	
 	#HISTORY corpus: update history
 	x@history[[length(x@history)+1]] <- list(
 		modification               = "transcripts_rename",
 		systime                    = Sys.time(),
-		transcripts.renamed.ids    = setdiff(oldTranscriptNames, names(x@transcripts)),
-		transcripts.renamed.count  = length(setdiff(oldTranscriptNames, names(x@transcripts)))
+		transcripts.renamed.ids    = setdiff(oldtranscriptNames, names(x@transcripts)),
+		transcripts.renamed.count  = length(setdiff(oldtranscriptNames, names(x@transcripts)))
 	)
 	
 	return(x)

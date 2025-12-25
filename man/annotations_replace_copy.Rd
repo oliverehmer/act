@@ -9,7 +9,7 @@ annotations_replace_copy(
   pattern,
   replacement = NULL,
   destTier = NULL,
-  addDestTierIfMissing = TRUE,
+  destTierAddMissing = TRUE,
   filterTranscriptNames = NULL,
   filterTierNames = NULL,
   collapseString = " | "
@@ -24,7 +24,7 @@ annotations_replace_copy(
 
 \item{destTier}{Character string; name of the tier to which the hit should be copied (if no copying is intended set to NA).}
 
-\item{addDestTierIfMissing}{Logical; if \code{TRUE} the destination tier will be added if missing in the transcript object, if \code{FALSE} an error will be raised if the destination tier is missing.}
+\item{destTierAddMissing}{Logical; if \code{TRUE} the destination tier will be added if missing in the transcript object, if \code{FALSE} an error will be raised if the destination tier is missing.}
 
 \item{filterTranscriptNames}{Vector of character strings; names of the transcripts to be included.}
 
@@ -49,7 +49,7 @@ In case that you want to select transcripts and/or tiers by using regular expres
 library(act)
 
 # Have a look at the first transcript in the examplecorpus:
-printtranscript <- act::export_printtranscript(examplecorpus@transcripts[[1]])
+printtranscript <- act::export_txt(examplecorpus@transcripts[[1]])
 cat(printtranscript)
 # In line 01 there is the word "UN".
 
@@ -59,7 +59,7 @@ test <- act::annotations_replace_copy(x=examplecorpus,
 									  replacement="XXX")
 
 # Have a look at the first transcript in the corprus object test:
-printtranscript <- act::export_printtranscript(test@transcripts[[1]])
+printtranscript <- act::export_txt(test@transcripts[[1]])
 cat(printtranscript)
 # In line 01 there is now "XXX" instead of "UN"
 
@@ -69,7 +69,7 @@ for (t in examplecorpus@transcripts) {
 	examplecorpus <- act::tiers_sort(x=examplecorpus,
 	sortVector=sortVector,
 	filterTranscriptNames=t@name,
-	addMissingTiers=TRUE)
+	tiersAddMissing=TRUE)
 }
 # Check that the first transcript now contains the newTier
 examplecorpus@transcripts[[1]]@tiers
@@ -82,7 +82,7 @@ test <- act::annotations_replace_copy(x=examplecorpus,
 									  destTier = "newTier")
 
 # Have a look again at the first transcript in the corpus object test.
-printtranscript <- act::export_printtranscript(test@transcripts[[1]])
+printtranscript <- act::export_txt(test@transcripts[[1]])
 cat(printtranscript)
 # In line 01 you see that "UN" has been replaced by "YYY.
 # In line 02 you see that it has been copied to the tier "newTier".
@@ -92,7 +92,7 @@ cat(printtranscript)
 test <- act::annotations_replace_copy(x=examplecorpus,
 									  pattern="\\\\bUN\\\\b",
 									  destTier = "newTier")
-printtranscript <- act::export_printtranscript(test@transcripts[[1]])
+printtranscript <- act::export_txt(test@transcripts[[1]])
 cat(printtranscript)
 # In line 01 you see that "UN" has been maintained.
 # In line 02 you see that "UN" it has been copied to the tier "newTier".

@@ -45,7 +45,7 @@ annotations_delete <- function (x,
 				#check if this tier is to be included
 				processThisRecordset <- TRUE
 				if (!is.null(filterTierNames)) {
-					processThisRecordset <- x@transcripts[[i]]@annotations$tier.name[[j]] %in% filterTierNames
+					processThisRecordset <- x@transcripts[[i]]@annotations$tierName[[j]] %in% filterTierNames
 				}
 				
 				if (processThisRecordset) {

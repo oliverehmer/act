@@ -5,14 +5,13 @@
 #' 
 #' Some of the slots are defined by the user.
 #' Some slots report results, such as \code{@import.results} and \code{@history} and .
-#' Other slots are settings and are used when performing functions on the corpus oibject.
-#' To change the normalization matrix use \code{x@normalization.matrix <- act::matrix_load(path="...")}
-#'
+#' Other slots are settings and are used when performing functions on the corpus object.
+#' 
 #' @slot name Character string; Name of the corpus.
 #' @slot transcripts List of transcript objects; Each annotation file that has been load is stored in this list as a transcript object.
 #' @slot paths.annotation.files Vector of character strings; Path(s) to one or several folders where your annotation files are located. 
 #' @slot paths.media.files Vector of character strings; Path(s) to one or several folders where your media files are located. 
-#' @slot normalization.matrix Data.frame; Replacement matrix used for normalizing the annotations. 
+#' @slot normalization.matrix Data.frame; Replacement matrix used for normalizing the annotations. To change the normalization matrix use \code{x@normalization.matrix <- act::matrix_load(path="...")}
 #' @slot import.skip.double.files Logical; if \code{TRUE} files with the same names will be skipped (only one of them will be loaded), if \code{FALSE} transcripts will be renamed to make the names unique. 
 #' @slot import.names.include Vector of character strings; Only files matching this regular expression will be imported into the corpus.
 #' @slot import.names.exclude Vector of character strings; Files matching this regular expression will be skipped and not imported into the corpus.
@@ -46,15 +45,15 @@ methods::setClass("corpus",
 				  	paths.annotation.files                = character(),
 				  	paths.media.files                     = character(),
 				  	normalization.matrix                  = data.frame(search=character(), replace=character(), description=character(), stringsAsFactors		= FALSE),
-				  	import.skip.double.files              = TRUE,
+				    import.skip.double.files              = TRUE,
 				  	import.names.include                  = character(),
 				  	import.names.exclude                  = character(),
-				  	import.names.modify        = list(  searchPatterns       = character(),
+				  	import.names.modify                   = list(  searchPatterns       = character(),
 														searchReplacements   = character(),
-														toUpperCase          = FALSE,
-														toLowerCase          = FALSE,
+														toUpper          = FALSE,
+														toLower          = FALSE,
 														trim                 = TRUE,
-														defaultForEmptyNames = "no_name"),
+														defaultEmpty = "no_name"),
 				  	import.results                        = data.frame(),
 				  	history                               = list()
 				  )
@@ -65,8 +64,8 @@ corpus_show <- function (object) {
 	cat("corpus object", fill=TRUE)
 	cat("  name                           : ", object@name, fill=TRUE)
 	cat("\n")
-	cat("  paths.annotation.files         : ", length(object@paths.annotation.files), "folder(s)", fill=TRUE)
-	cat("  paths.media.files              : ", length(object@paths.media.files), "folder(s)", fill=TRUE)
+	cat("  paths.annotation.files         : ", length(object@paths.annotation.files), fill=TRUE)
+	cat("  paths.media.files              : ", length(object@paths.media.files), fill=TRUE)
 	cat("\n")
 	cat("  normalization.matrix           : ", '[check directly]', nrow(object@normalization.matrix), 'row(s)', fill=TRUE)
 	cat("  import.skip.double.files       : ", object@import.skip.double.files, fill=TRUE)
@@ -86,8 +85,8 @@ corpus_show <- function (object) {
 	cat("  words.norm.count               : ", info$words.norm.count, fill=TRUE)
 	cat("  length.formatted               : ", info$length.formatted, fill=TRUE)
 	cat()
-	#cat("  transcript.names              : ", paste("'", info$transcript.names,"'",sep="", collapse=", "), fill=TRUE)
-	#cat("  tier.names                    : ", paste("'", info$tier.names,"'",sep="", collapse=", "), fill=TRUE)
+	#cat("  transcriptNames              : ", paste("'", info$transcriptNames,"'",sep="", collapse=", "), fill=TRUE)
+	#cat("  tierNames                    : ", paste("'", info$tierNames,"'",sep="", collapse=", "), fill=TRUE)
 	#cat("  length.sec                    : ", info$length.sec, fill=TRUE)
 }
 

@@ -9,7 +9,7 @@ mymatrix <- act::matrix_load(path)
 mymatrix
 
 # Apply matrix to examplecorpus
-test <- act::annotations_matrix(x=examplecorpus, path_replacementMatrixCSV=path)
+test <- act::annotations_matrix(x=examplecorpus, pathReplacementMatrix=path)
 
 # Compare some annotations in the original examplecorpus object and
 # in the modified corpus object test

@@ -2,18 +2,18 @@
 #' 
 #' Transcript object may contain errors, e.g. because of defect annotation input files or user modifications.
 #' This function may cure some of these errors in all transcript objects of a corpus.
-#' - Annotations with reversed times: annotations with \code{endSec} lower than \code{startSec} will be deleted.
+#' - Annotations with reversed times: annotations with \code{endsec} lower than \code{startsec} will be deleted.
 #' - Overlapping annotations: earlier annotations will end where the next annotation starts.
 #' - Annotations below 0 sec: Annotations that are starting and ending before 0 sec will be deleted; Annotations starting before but ending after 0 sec will be truncated.
 #' - Missing tiers: Tiers that are present in the annotations but missing in the list of tiers in \code{@tiers} of the transcript object will be added.
 #' 
 #' @param x Corpus object.
 #' @param filterTranscriptNames Vector of character strings; names of the transcripts to be included. 
-#' @param annotationsWithReversedTimes Logical; If \code{TRUE} annotations with reversed times will be deleted 
-#' @param annotationsWithTimesBelowZero Logical; If \code{TRUE} annotations before 0 sec will be corrected. 
-#' @param overlappingAnnotations Logical; If \code{TRUE} overlapping annotations will be corrected. 
-#' @param missingTiers Logical; If \code{TRUE} tiers missing in \code{@tiers} slot of the transcript object will be added. 
-#' @param showWarning Logical; If \code{TRUE} a warning notice will be shown upon correction. 
+#' @param annotationsTimesReversed Logical; If \code{TRUE} annotations with reversed times will be deleted 
+#' @param annotationsTimesBelowZero Logical; If \code{TRUE} annotations before 0 sec will be corrected. 
+#' @param annotationsOverlap Logical; If \code{TRUE} overlapping annotations will be corrected. 
+#' @param tiersMissing Logical; If \code{TRUE} tiers missing in \code{@tiers} slot of the transcript object will be added. 
+#' @param warning Logical; If \code{TRUE} a warning notice will be shown upon correction. 
 #'
 #' @return Corpus object; 
 #' 
@@ -26,39 +26,39 @@
 #' 
 transcripts_cure <- function (x, 
 						 filterTranscriptNames=NULL, 
-						 annotationsWithReversedTimes=TRUE, 
-						 overlappingAnnotations=TRUE, 
-						 annotationsWithTimesBelowZero=TRUE, 
-						 missingTiers=TRUE, 
-						 showWarning=FALSE) {
+						 annotationsTimesReversed=TRUE, 
+						 annotationsOverlap=TRUE, 
+						 annotationsTimesBelowZero=TRUE, 
+						 tiersMissing=TRUE, 
+						 warning=FALSE) {
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
-	annotationsWithReversedTimes.deleted.count    <- 0     
-	annotationsWithTimesBelowZero.deleted.count   <- 0
-	annotationsWithTimesBelowZero.corrected.count <- 0
-	overlappingAnnotations.corrected.count		  <- 0
-	missingTiers.added.count				      <- 0
+	annotationsTimesReversed.deleted.count    <- 0     
+	annotationsTimesBelowZero.deleted.count   <- 0
+	annotationsTimesBelowZero.corrected.count <- 0
+	annotationsOverlap.corrected.count		  <- 0
+	tiersMissing.added.count				      <- 0
 	transcripts.cured.ids                         <- c()
 	
 	for (i in filterTranscriptNames) {
 		x@transcripts[[i]] <- act::transcripts_cure_single(x@transcripts[[i]], 
-												   annotationsWithReversedTimes=annotationsWithReversedTimes, 
-												   overlappingAnnotations=overlappingAnnotations, 
-												   annotationsWithTimesBelowZero=annotationsWithTimesBelowZero, 
-												   missingTiers=missingTiers, showWarning=showWarning)
+												   annotationsTimesReversed=annotationsTimesReversed, 
+												   annotationsOverlap=annotationsOverlap, 
+												   annotationsTimesBelowZero=annotationsTimesBelowZero, 
+												   tiersMissing=tiersMissing, warning=warning)
 		
 		#HISTORY transcript:
 		# realized in transcript_cure_single
 		
 		h <- x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)]]
-		if (h$annotationsWithReversedTimes.deleted.count>0 | h$annotationsWithTimesBelowZero.deleted.count>0 | h$annotationsWithTimesBelowZero.corrected.count>0 | h$overlappingAnnotations.corrected.count>0 | h$missingTiers.added.count>0) {
+		if (h$annotationsTimesReversed.deleted.count>0 | h$annotationsTimesBelowZero.deleted.count>0 | h$annotationsTimesBelowZero.corrected.count>0 | h$annotationsOverlap.corrected.count>0 | h$tiersMissing.added.count>0) {
 			transcripts.cured.ids                         <- c(transcripts.cured.ids, i)
-			annotationsWithReversedTimes.deleted.count    <- annotationsWithReversedTimes.deleted.count   + h$annotationsWithReversedTimes.deleted.count   
-			annotationsWithTimesBelowZero.deleted.count   <- annotationsWithTimesBelowZero.deleted.count  + h$annotationsWithTimesBelowZero.deleted.count
-			annotationsWithTimesBelowZero.corrected.count <- annotationsWithTimesBelowZero.corrected.count+ h$annotationsWithTimesBelowZero.corrected.count
-			overlappingAnnotations.corrected.count		  <- overlappingAnnotations.corrected.count       + h$overlappingAnnotations.corrected.count
-			missingTiers.added.count				      <- missingTiers.added.count                     + h$missingTiers.added.count
+			annotationsTimesReversed.deleted.count    <- annotationsTimesReversed.deleted.count   + h$annotationsTimesReversed.deleted.count   
+			annotationsTimesBelowZero.deleted.count   <- annotationsTimesBelowZero.deleted.count  + h$annotationsTimesBelowZero.deleted.count
+			annotationsTimesBelowZero.corrected.count <- annotationsTimesBelowZero.corrected.count+ h$annotationsTimesBelowZero.corrected.count
+			annotationsOverlap.corrected.count		  <- annotationsOverlap.corrected.count       + h$annotationsOverlap.corrected.count
+			tiersMissing.added.count				      <- tiersMissing.added.count                     + h$tiersMissing.added.count
 		}
 	} #next transcript
 	
@@ -68,11 +68,11 @@ transcripts_cure <- function (x,
 		systime                                       = Sys.time(),
 		transcripts.cured.count                       = length(transcripts.cured.ids),
 		transcripts.cured.ids                         = transcripts.cured.ids,
-		annotationsWithReversedTimes.deleted.count    = annotationsWithReversedTimes.deleted.count,      
-		annotationsWithTimesBelowZero.deleted.count   = annotationsWithTimesBelowZero.deleted.count,
-		annotationsWithTimesBelowZero.corrected.count = annotationsWithTimesBelowZero.corrected.count,
-		overlappingAnnotations.corrected.count		  = overlappingAnnotations.corrected.count,
-		missingTiers.added.count				      = missingTiers.added.count
+		annotationsTimesReversed.deleted.count    = annotationsTimesReversed.deleted.count,      
+		annotationsTimesBelowZero.deleted.count   = annotationsTimesBelowZero.deleted.count,
+		annotationsTimesBelowZero.corrected.count = annotationsTimesBelowZero.corrected.count,
+		annotationsOverlap.corrected.count		  = annotationsOverlap.corrected.count,
+		tiersMissing.added.count				      = tiersMissing.added.count
 	)
 	return (x)
 }

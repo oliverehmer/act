@@ -1,0 +1,10 @@
+act.style.name;act.style.scope;act.style.type;act.regex;docx.template.type;docx.template.name;comment
+header.preface;default;header;;paragraph;transcript_header_preface;default style, line may not be deleted, but you may edit the value of column doc.template.name to fit to your template
+header.title;default;header;;paragraph;transcript_header_title;default style, line may not be deleted, but you may edit the value of column doc.template.name to fit to your template
+header.subtitle;default;header;;paragraph;transcript_header_subtitle;default style, line may not be deleted, but you may edit the value of column doc.template.name to fit to your template
+header.info;default;header;;paragraph;transcript_header_info;default style, line may not be deleted, but you may edit the value of column doc.template.name to fit to your template
+body.default;default;body;;paragraph;transcript_body_default;default style, line may not be deleted, but you may edit the value of column doc.template.name to fit to your template
+body.translation;user;column;\btranslation\b;paragraph;transcript_body_translation;user style, currently not used in act
+body.space;user;column;\bspace\b;paragraph;transcript_body_space;user style, currently not used in act
+body.section;user;tier;\bcut\b;paragraph;transcript_body_section;user style, currently not used in act
+highlight;user;character;\bspace\b;character;transcript_highlight;user style, currently not used in act

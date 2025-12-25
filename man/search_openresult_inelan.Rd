@@ -4,21 +4,16 @@
 \alias{search_openresult_inelan}
 \title{Open a search result in 'ELAN'}
 \usage{
-search_openresult_inelan(
-  x,
-  s,
-  resultNr,
-  openOriginalEafFileIfAvailable = FALSE
-)
+search_openresult_inelan(x, s, resultid, openOriginal = FALSE)
 }
 \arguments{
 \item{x}{Corpus object.}
 
 \item{s}{Search object.}
 
-\item{resultNr}{Integer; Number of the search result (row in the data frame \code{s@results}) to be opened.}
+\item{resultid}{Integer; Number of the search result (row in the data frame \code{s@results}) to be opened.}
 
-\item{openOriginalEafFileIfAvailable}{Logical; if \code{TRUE} the function will check if the original annotation file was an .eaf file and if it still exists in the original location. If so, the function will not create a temporary .eaf file but open the original file. Warning: The original .pfsx file (if it exists) will be overwritten.}
+\item{openOriginal}{Logical; if \code{TRUE} the function will check if the original annotation file was an .eaf file and if it still exists in the original location. If so, the function will not create a temporary .eaf file but open the original file. Warning: The original .pfsx file (if it exists) will be overwritten.}
 }
 \description{
 The function creates an temporary .eaf file and a .psfx file that locates the search hit.
@@ -39,7 +34,7 @@ mysearch <- act::search_new(x=examplecorpus, pattern = "yo")
 # You can only use this function if you have installed ELAN on our computer.
 \dontrun{
 options(act.path.elan='PATHTOYOURELANEXECUTABLE')
-act::search_openresult_inelan(x=examplecorpus, s=mysearch, resultNr=1, TRUE)
+act::search_openresult_inelan(x=examplecorpus, s=mysearch, resultid=1, TRUE)
 }
 
 }

@@ -6,10 +6,10 @@
 #' In case that you want to select transcripts by using regular expressions use the function \code{act::search_makefilter} first.
 
 #' @param x Corpus object.
-#' @param sortVector Vector of character strings; regular expressions to match the tier names. The order within the vector presents the new order of the tiers. Use "\\*" (=two backslashes and a star) to indicate where tiers that are not present in the sort vector but in the transcript should be inserted.
+#' @param sortVector Vector of character strings; regular expressions to match the tier names. The order within the vector presents the new order of the tiers. Use "\\\\*" (=two backslashes and a star) to indicate where tiers that are not present in the sort vector but in the transcript should be inserted.
 #' @param filterTranscriptNames Vector of character strings; names of the transcripts to be included. 
-#' @param addMissingTiers Logical; if \code{TRUE} all tiers that are given in 'the 'sortVector' but are missing in the transcripts will be added.
-#' @param deleteTiersThatAreNotInTheSortVector Logical; if \code{TRUE} tiers that are not matched by the regular expressions in 'sortVector' will be deleted. Otherwise the will be inserted at the end of the table or at the position defined by '"\\*' in  'sortVector.
+#' @param tiersAddMissing Logical; if \code{TRUE} all tiers that are given in 'the 'sortVector' but are missing in the transcripts will be added.
+#' @param tiersDelete Logical; if \code{TRUE} tiers that are not matched by the regular expressions in 'sortVector' will be deleted. Otherwise the will be inserted at the end of the table or at the position defined by '"\\*' in  'sortVector.
 #'
 #' @return Corpus object.
 #' 
@@ -22,8 +22,8 @@
 tiers_sort <- function(x, 
 					   sortVector, 
 					   filterTranscriptNames=NULL,
-					   addMissingTiers=FALSE, 
-					   deleteTiersThatAreNotInTheSortVector=FALSE) {
+					   tiersAddMissing=FALSE, 
+					   tiersDelete=FALSE) {
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
@@ -43,7 +43,7 @@ tiers_sort <- function(x,
 	#for (t in corpus@transcripts) {
 	for (i in filterTranscriptNames) {
 		tiers_before 	<- x@transcripts[[i]]@tiers
-		tiers_after 	<- act::helper_tiers_sort_table(x@transcripts[[i]]@tiers, sortVector, addMissingTiers, deleteTiersThatAreNotInTheSortVector)
+		tiers_after 	<- act::helper_tiers_sort_table(x@transcripts[[i]]@tiers, sortVector, tiersAddMissing, tiersDelete)
 		tiers_deleted 	<- setdiff(tiers_before$name, tiers_after$name)
 		tiers_added 	<- setdiff(tiers_after$name, tiers_before$name)
 		
@@ -69,8 +69,8 @@ tiers_sort <- function(x,
 				modification        = "tiers_reorder",
 				systime             = Sys.time(),
 				tiers.orderchanged  = tiers_orderofcopiedtiershaschanged,
-				tiers.deleted.count = length(tiers_deleted),
-				tiers.deleted       = tiers_deleted,
+				tiersDeleted.count = length(tiers_deleted),
+				tiersDeleted       = tiers_deleted,
 				tiers.added.count   = length(tiers_added),
 				tiers.added         = tiers_added,
 				tiers.before        = tiers_before$name,
@@ -84,7 +84,7 @@ tiers_sort <- function(x,
 			x@transcripts[[i]]@tiers <- tiers_after
 			
 			#copy only what is contained in new list
-			x@transcripts[[i]]@annotations <- x@transcripts[[i]]@annotations[ (x@transcripts[[i]]@annotations$tier.name %in% x@transcripts[[i]]@tiers$name) , ]
+			x@transcripts[[i]]@annotations <- x@transcripts[[i]]@annotations[ (x@transcripts[[i]]@annotations$tierName %in% x@transcripts[[i]]@tiers$name) , ]
 		}
 		
 	}

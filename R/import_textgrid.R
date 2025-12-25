@@ -16,7 +16,7 @@
 #' 
 #' @return Transcript object.
 #' 
-#' @seealso \code{corpus_import}, \code{corpus_new}, \code{import}, \code{import_eaf}, \code{import_exb}, \code{import_rpraat} 
+#' @seealso \link{corpus_import}, \link{corpus_new}, \link{import}, \link{import_eaf}, \link{import_exb}, \link{import_rpraat} 
 #' 
 #' @export
 #'
@@ -117,7 +117,7 @@ import_textgrid <- function(filePath=NULL,
 			return(t)
 		}
 	}
-	if(getOption("act.import.storeFileContentInTranscript", default=TRUE)) {
+	if(getOption("act.import.storefileContentInTranscript", default=TRUE)) {
 		t@file.content <- mytg
 	}
 	
@@ -135,8 +135,8 @@ import_textgrid <- function(filePath=NULL,
 	regex_tierinfo <- '(?<!Object\\s)(?:class\\s=\\s")(.+?)(?s:\\".*?name\\s=\\s")(.*?)(?s:\\".*?xmin\\s=)(.*\\d)(?s:.*?xmax\\s=)(.*\\d)(?s:.*?(?:intervals|points):\\ssize\\s=)(.*\\d)'
 	tierinfo <- stringr::str_match_all(mytg.merge, regex_tierinfo)
 	tierinfo <- do.call(rbind, lapply(tierinfo, data.frame, stringsAsFactors=FALSE))
-	colnames(tierinfo) <- c("none","type","tier.name", "xmin","xmax","size")
-	tierinfo <- tierinfo[,c("type","tier.name","xmin","xmax","size")]
+	colnames(tierinfo) <- c("none","type","tierName", "xmin","xmax","size")
+	tierinfo <- tierinfo[,c("type","tierName","xmin","xmax","size")]
 	
 	tierinfo$xmin <- as.double(tierinfo$xmin)
 	tierinfo$xmax <- as.double(tierinfo$xmax)
@@ -147,12 +147,12 @@ import_textgrid <- function(filePath=NULL,
 		t@tiers        <- .emptyTiers
 	} else {
 		#---create unique tierNames
-		if (length(tierinfo$tier.name[duplicated(tierinfo$tier.name)])>0) {
-			tierinfo$tier.name <- make.unique(tierinfo$tier.name)
+		if (length(tierinfo$tierName[duplicated(tierinfo$tierName)])>0) {
+			tierinfo$tierName <- make.unique(tierinfo$tierName)
 			t@import.result 		<- "ok"
 			t@load.message   <- "Some tiers have been renamed since their names were not unique."
 		}
-		alltierNames <- rep(tierinfo$tier.name, tierinfo$size)
+		alltierNames <- rep(tierinfo$tierName, tierinfo$size)
 		
 		#== extract info
 		regex_main <- '(?:(?:intervals|points)\\s*\\[)(.*\\d)(?:\\]:*[\\r\\n\\s]*(?:xmin|number|time)\\s=)(.*\\d)(?:(?:[\\r\\n\\s]*xmax\\s=)(.*\\d)){0,1}(?:[\\r\\n\\s]*(?:text|mark)\\s=\\s")((.|\\r|\\n)*?)(?="[\\r\\n\\s]*(?:item\\s*\\[\\d|intervals\\s*\\[\\d|points\\s*\\[\\d|$))'
@@ -160,14 +160,14 @@ import_textgrid <- function(filePath=NULL,
 
 		#bind all rows together and rename columns
 		tiercontent <- do.call(rbind, lapply(tiercontent, data.frame, stringsAsFactors=FALSE))
-		colnames(tiercontent) <- c("none1","intervalnr","startSec","endSec", "content","none6")
+		colnames(tiercontent) <- c("none1","intervalnr","startsec","endsec", "content","none6")
 		
 		#replace double "" from praat TextGrids
 		tiercontent$content <- stringr::str_replace_all(tiercontent$content, "\"\"", "\"")
 		
 		#check if actual and calculated values are the same
 		if(	length(alltierNames)!=nrow(tiercontent) ) 	{
-			t@import.result 		<- "Error"
+			t@import.result  <- "Error"
 			t@load.message   <- "Unkown error."
 			return(t)
 		}
@@ -180,9 +180,9 @@ import_textgrid <- function(filePath=NULL,
 			t@annotations <- data.frame(
 				annotationID = as.integer(annotationID),
 				
-				tier.name = alltierNames,
-				startSec  = round(as.double(tiercontent$startSec),15),
-				endSec    = round(as.double(tiercontent$endSec),15),
+				tierName = alltierNames,
+				startsec  = round(as.double(tiercontent$startsec),15),
+				endsec    = round(as.double(tiercontent$endsec),15),
 				content   = as.character(tiercontent$content),
 				
 				content.norm            = as.character(""),
@@ -200,8 +200,8 @@ import_textgrid <- function(filePath=NULL,
 	
 			#===set correct column format
 			t@annotations$annotationID	<- as.integer(t@annotations$annotationID)
-			t@annotations$startSec		<- as.double(t@annotations$startSec)
-			t@annotations$endSec  		<- as.double(t@annotations$endSec)
+			t@annotations$startsec		<- as.double(t@annotations$startsec)
+			t@annotations$endsec  		<- as.double(t@annotations$endsec)
 			t@annotations$content  		<- as.character(t@annotations$content)
 			
 			#=== get rid of empty intervals
@@ -212,10 +212,10 @@ import_textgrid <- function(filePath=NULL,
 			
 			if (nrow(t@annotations)>0) 		{
 				#=== sort transcript by start times
-				t@annotations <- t@annotations[order(t@annotations$startSec, t@annotations$tier.name), ]
+				t@annotations <- t@annotations[order(t@annotations$startsec, t@annotations$tierName), ]
 				
-				#=== set endSec of points to startSec
-				t@annotations$endSec[is.na(t@annotations$endSec)] <- t@annotations$startSec[is.na(t@annotations$endSec)]
+				#=== set endsec of points to startsec
+				t@annotations$endsec[is.na(t@annotations$endsec)] <- t@annotations$startsec[is.na(t@annotations$endsec)]
 				
 				#=== set annotations.id again
 				t@annotations$annotationID <- c(1:nrow(t@annotations))
@@ -226,7 +226,7 @@ import_textgrid <- function(filePath=NULL,
 		}
 		
 		#=== tiers to object
-		t@tiers <- act::helper_tiers_new_table(tierNames=tierinfo$tier.name, tierTypes=tierinfo$type)
+		t@tiers <- act::helper_tiers_new_table(tierNames=tierinfo$tierName, tierTypes=tierinfo$type)
 	}
 	
 	t@history <- list( 

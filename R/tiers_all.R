@@ -28,7 +28,7 @@ tiers_all <- function(x, compact=TRUE) {
 	tiers <- data.frame()
 	for (t in x@transcripts) {
 		if (nrow(t@tiers)>0) {
-			tiers <- rbind(tiers, cbind(transcript.name=rep(t@name,nrow(t@tiers)),  t@tiers))	
+			tiers <- rbind(tiers, cbind(transcriptName=rep(t@name,nrow(t@tiers)),  t@tiers))	
 		}
 	}
 	
@@ -39,11 +39,11 @@ tiers_all <- function(x, compact=TRUE) {
 		for (i in 1:nrow(tiers)) {
 			
 			#--- count annotations
-			ids <- which(x@transcripts[[tiers$transcript.name[i]]]@annotations$tier.name==tiers$name[i])
+			ids <- which(x@transcripts[[tiers$transcriptName[i]]]@annotations$tierName==tiers$name[i])
 			tiers$annotations.count[i]<- length(ids)
 			
 			#--- get annotations
-			annotations <- x@transcripts[[tiers$transcript.name[i]]]@annotations[ids,]
+			annotations <- x@transcripts[[tiers$transcriptName[i]]]@annotations[ids,]
 			
 			#--- words org
 			content.org <- annotations$content

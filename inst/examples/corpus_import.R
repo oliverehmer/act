@@ -15,4 +15,4 @@ examplecorpus <- act::corpus_import(x=examplecorpus)
 
 # Creating the full texts may take a long time.
 # If you do NOT want to create the full texts immediately use the following command:
-examplecorpus <- act::corpus_import(x=examplecorpus, createFullText=FALSE )
+examplecorpus <- act::corpus_import(x=examplecorpus, createFulltext=FALSE )

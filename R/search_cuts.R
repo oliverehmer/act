@@ -14,7 +14,7 @@
 #' @param cutSpanBeforesec Double; Start the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param cutSpanAftersec Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param l Layout object.
-#' @param outputFolder Character string; if parameter is not set, the print transcripts will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.txt' format.
+#' @param folderOutput Character string; if parameter is not set, the print transcripts will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.txt' format.
 
 #'
 #' @return Search object; 
@@ -27,33 +27,33 @@ search_cuts <- function(x,
 						cutSpanBeforesec = NULL,
 						cutSpanAftersec  = NULL,
 						l                = NULL, 
-						outputFolder     = NULL) {
+						folderOutput     = NULL) {
 	#x <- corpus
 	#s <- mysearch
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
 	
-	if (is.null(s@results$transcript.name)) 		{ stop("Data frame s@results does not contain column 'transcript.name'") 	}
+	if (is.null(s@results$transcriptName)) 		{ stop("Data frame s@results does not contain column 'transcriptName'") 	}
 
 	s <- act::search_cuts_printtranscript(x=x,
 										  s=s,
 										  cutSpanBeforesec=cutSpanBeforesec,
 										  cutSpanAftersec=cutSpanAftersec,
 										  l=l,
-										  outputFolder=outputFolder)
+										  folderOutput=folderOutput)
 	
 	s <- act::search_cuts_media(x=x,
 								s=s,
 								cutSpanBeforesec=cutSpanBeforesec,
 								cutSpanAftersec=cutSpanAftersec,
-								outputFolder=outputFolder)
+								folderOutput=folderOutput)
 
 	s <- act::search_cuts_srt(x=x,
 							  s=s,
 							  cutSpanBeforesec=cutSpanBeforesec,
 							  cutSpanAftersec=cutSpanAftersec,
-							  outputFolder=outputFolder)
+							  folderOutput=folderOutput)
 	
 	#=== give modified results back
 	return(s)

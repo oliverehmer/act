@@ -12,7 +12,7 @@
 #' @param pattern Character string; search pattern as regular expression.
 #' @param replacement Character string; replacement.
 #' @param destTier Character string; name of the tier to which the hit should be copied (if no copying is intended set to NA).
-#' @param addDestTierIfMissing Logical; if \code{TRUE} the destination tier will be added if missing in the transcript object, if \code{FALSE} an error will be raised if the destination tier is missing.
+#' @param destTierAddMissing Logical; if \code{TRUE} the destination tier will be added if missing in the transcript object, if \code{FALSE} an error will be raised if the destination tier is missing.
 #' @param filterTranscriptNames Vector of character strings; names of the transcripts to be included. 
 #' @param filterTierNames Character string; names of the tiers to be included.
 #' @param collapseString Character string; will be used to collapse multiple search results into one string.
@@ -26,7 +26,7 @@ annotations_replace_copy <- function (x,
 									  pattern, 
 									  replacement           = NULL, 
 									  destTier              = NULL, 
-									  addDestTierIfMissing  = TRUE,
+									  destTierAddMissing  = TRUE,
 									  filterTranscriptNames = NULL, 
 									  filterTierNames       = NULL, 
 									  collapseString        = " | ") {
@@ -38,8 +38,8 @@ annotations_replace_copy <- function (x,
 	annotations_replaced_nr       <- 0
 	annotations_copied_total_nr   <- 0
 	annotations_replaced_total_nr <- 0
-	recodsets_copiederror_destinationtiermissingintranscript_nr <- 0
-	recodsets_copiederror_destinationtiermissingintranscript_ids <- c()
+	recodsets_copiederror_destinationTiermissingintranscript_nr <- 0
+	recodsets_copiederror_destinationTiermissingintranscript_ids <- c()
 	#i <- 1
 	#x <- corpus
 	
@@ -47,7 +47,7 @@ annotations_replace_copy <- function (x,
 	if (!is.null(destTier)) {
 		destTier <- as.character(destTier)
 		if (destTier=="") {
-			destTier<-"DestinationTier"
+			destTier<-"destinationTier"
 		}
 	}
 	
@@ -63,7 +63,7 @@ annotations_replace_copy <- function (x,
 	if (is.null(filterTranscriptNames)) {	filterTranscriptNames <- names(x@transcripts)	}
 	
 	# Add the destination tier if it is missing and should be added
-	if (!is.null(destTier) & addDestTierIfMissing) {
+	if (!is.null(destTier) & destTierAddMissing) {
 		x <- act::tiers_add(x, tierName = destTier)
 	}
 	
@@ -91,7 +91,7 @@ annotations_replace_copy <- function (x,
 				#check if this tier is to be included
 				processThisRecordset <- TRUE
 				if (!is.null(filterTierNames)) {
-					processThisRecordset <- x@transcripts[[i]]@annotations$tier.name[[j]] %in% filterTierNames.current
+					processThisRecordset <- x@transcripts[[i]]@annotations$tierName[[j]] %in% filterTierNames.current
 				}
 				
 				if (processThisRecordset) {
@@ -107,17 +107,17 @@ annotations_replace_copy <- function (x,
 						# COPY part
 						if (!destTierIsPresent) {
 							#keep track of annotations that could not be copied
-							recodsets.copiederror.tiermissingintranscript.count = recodsets_copiederror_destinationtiermissingintranscript_nr +1
-							recodsets.copiederror.tiermissingintranscript.ids   = unique(c(recodsets_copiederror_destinationtiermissingintranscript_ids, x@transcripts[[i]]@name))
+							recodsets.copiederror.tiermissingintranscript.count = recodsets_copiederror_destinationTiermissingintranscript_nr +1
+							recodsets.copiederror.tiermissingintranscript.ids   = unique(c(recodsets_copiederror_destinationTiermissingintranscript_ids, x@transcripts[[i]]@name))
 						} else {
 							#get record set in destination tier that possibly overlaps
-							temp <- (	x@transcripts[[i]]@annotations$tier.name==destTier) & (x@transcripts[[i]]@annotations$startSec < x@transcripts[[i]]@annotations$endSec[[j]]) & (x@transcripts[[i]]@annotations$endSec > x@transcripts[[i]]@annotations$startSec[[j]])
+							temp <- (	x@transcripts[[i]]@annotations$tierName==destTier) & (x@transcripts[[i]]@annotations$startsec < x@transcripts[[i]]@annotations$endsec[[j]]) & (x@transcripts[[i]]@annotations$endsec > x@transcripts[[i]]@annotations$startsec[[j]])
 							
 							#if there is no overlapping record set on destination tier
 							if (length(which(temp, TRUE))==0) {
 								#create new record set
 								myrow                 <- x@transcripts[[i]]@annotations[j,]
-								myrow$tier.name       <- destTier
+								myrow$tierName       <- destTier
 								myrow$content         <- hits_merged
 								myrow$content.norm    <- ""
 								myrow$annotationID    <- max(x@transcripts[[i]]@annotations$annotationID)+1
@@ -175,18 +175,18 @@ annotations_replace_copy <- function (x,
 											  pattern                          = pattern,
 											  replacement                      = replacement,
 											  destTier                         = destTier,
-											  addDestTierIfMissing             = addDestTierIfMissing,
+											  destTierAddMissing             = destTierAddMissing,
 											  transcripts.modified.count       = length(transcripts_modified_ids),
 											  transcripts.modified.ids         = transcripts_modified_ids,
 											  annotations.replaced.total.count = annotations_replaced_total_nr,
 											  annotations.copied.total.count   = annotations_copied_total_nr)
-	if (recodsets_copiederror_destinationtiermissingintranscript_nr>0) {
+	if (recodsets_copiederror_destinationTiermissingintranscript_nr>0) {
 		x@history[[length(x@history)+1]] <-  list( 
 			modification                                        = "annotations_search_replace_copy",
 			systime                                             = Sys.time(),
 			recodsets.copiederror                               = "ERROR: the destination tier for copying was missing in some transcripts. No data copied.",
-			recodsets.copiederror.tiermissingintranscript.count = recodsets_copiederror_destinationtiermissingintranscript_nr,
-			recodsets.copiederror.tiermissingintranscript.ids   = recodsets_copiederror_destinationtiermissingintranscript_ids
+			recodsets.copiederror.tiermissingintranscript.count = recodsets_copiederror_destinationTiermissingintranscript_nr,
+			recodsets.copiederror.tiermissingintranscript.ids   = recodsets_copiederror_destinationTiermissingintranscript_ids
 		)
 		
 	}

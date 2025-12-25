@@ -53,7 +53,7 @@ on the object.
 
 \item{\code{cuts.span.aftersec}}{Double; Seconds how much the cuts (media and print transcripts) should end after the end of the search hit.}
 
-\item{\code{cuts.column.srt}}{Character string; name of  destination column in the search results data frame where the srt substitles will be inserted; column will be created if not present in data frame; set to "" for no insertion.}
+\item{\code{cuts.column.srt}}{Character string; name of  destination column in the search results data frame where the .srt subtitles will be inserted; column will be created if not present in data frame; set to "" for no insertion.}
 
 \item{\code{cuts.column.printtranscript}}{Character string; name of  destination column in the search results data frame where the print transcripts will be inserted; column will be created if not present in data frame; set to "" for no insertion.}
 
@@ -102,4 +102,7 @@ mysearch <- act::search_new(examplecorpus, pattern=myRegEx, searchMode="fulltext
 mysearch
 mysearch@results$hit
 
+}
+\seealso{
+\link{act::export_docx}, \link{act::export_docx},
 }

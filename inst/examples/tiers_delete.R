@@ -14,4 +14,4 @@ x <- act::tiers_delete(examplecorpus, tierNames=tierNames)
 x@history[length(x@history)]
 
 # tiers 'A' and 'B' do not occur anymore
-act::info(x)$tiers$tier.name
+act::info(x)$tiers$tierName

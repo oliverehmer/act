@@ -4,14 +4,14 @@
 \alias{matrix_save}
 \title{Save replacement matrix}
 \usage{
-matrix_save(replacementMatrix, path, myFileEncoding = "UTF-8")
+matrix_save(replacementMatrix, path, encoding = "UTF-8")
 }
 \arguments{
 \item{replacementMatrix}{Data frame; replacement matrix.}
 
 \item{path}{Character string; path where the matrix will be saved.}
 
-\item{myFileEncoding}{Character string; encoding of the file.}
+\item{encoding}{Character string; encoding of the file.}
 }
 \value{
 nothing

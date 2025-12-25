@@ -13,7 +13,7 @@
 #' To get a detailed overview of the corpus object use \code{act::info(x)}, for a summary use \code{act::info_summarized(x)}.
 #' 
 #' @param x Corpus object.
-#' @param createFullText Logical; if \code{TRUE} full text will be created.
+#' @param createFulltext Logical; if \code{TRUE} full text will be created.
 #' @param assignMedia Logical; if \code{TRUE} the folder(s) specified in \code{@paths.media.files} of your corpus object will be scanned for media. 
 #'
 #' @return Corpus object.
@@ -25,13 +25,13 @@
 #' @example inst/examples/corpus_import.R
 #' 
 corpus_import <- function(x, 
-						  createFullText     = TRUE, 
+						  createFulltext     = TRUE, 
 						  assignMedia        = TRUE) {
 	
 	 
-	#createFullText     <- TRUE 
+	#createFulltext     <- TRUE 
 	#assignMedia        <- TRUE
-	#x<-a
+	#x<-corpus
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
 	#--- check if files and folders exist
@@ -48,7 +48,8 @@ corpus_import <- function(x,
 	if (length(paths)==0) {
 		message <- c(message, "  No existing input paths.")
 		message <- paste(message, sep='\n', collapse='\n')
-		stop(message)
+		warning(paste(unique(message),sep="\n", collapse="\n"))
+		return(x)
 	} 
 	
 	#--- make list of all file paths
@@ -68,40 +69,45 @@ corpus_import <- function(x,
 	}
 
 	#include/exclude
-	if (length(x@import.names.include)!=0) {
-		paths.new <- paths.new[grep(pattern=x@import.names.include, 	basename(paths.new))]
+	if (!is.null(x@import.names.include)) {
+		if (!length(x@import.names.include)==0) {
+			paths.new <- paths.new[grep(pattern=x@import.names.include, 	basename(paths.new))]
+		}
 	}
-	if (length(x@import.names.exclude)!=0) {
-		paths.new <- paths.new[!grepl(pattern=x@import.names.exclude, 	basename(paths.new))]
+	if (!is.null(x@import.names.exclude)) {
+		if (!length(x@import.names.exclude)==0) {
+			paths.new <- paths.new[!grepl(pattern=x@import.names.exclude, 	basename(paths.new))]
+		}
 	}
 	
 	#--- get only supported file formats 
-	supportedFileFormats <- "(?i)\\.(eaf|exb|textgrid)"
+	supportedFileFormats <- "(?i)\\.(eaf|exb|srt|textgrid)"
 	paths.new <- unlist(paths.new[stringr::str_which(string=paths.new, pattern=supportedFileFormats, )		])
 	if (length(paths.new)==0) {
 		stop("No annotation files found. Please check 'x@paths.annotation.files'.")
 	}
 	
 	#--- make the names
-	transcript.names <- basename(paths.new)
-	transcript.names <- tools::file_path_sans_ext(transcript.names)
-	transcript.names.info <- helper_transcriptNames_make (transcriptNames           = transcript.names,
+	transcriptNames <- basename(paths.new)
+	transcriptNames <- tools::file_path_sans_ext(transcriptNames)
+	transcriptNames.info <- helper_transcript_names_make (transcriptNames           = transcriptNames,
+														  extractPatterns           = x@import.names.modify$extractPatterns,
 														  searchPatterns            = x@import.names.modify$searchPatterns,
 														  searchReplacements        = x@import.names.modify$searchReplacements,
-														  toUpperCase               = x@import.names.modify$toUpperCase,
-														  toLowerCase               = x@import.names.modify$toLowerCase,
+														  toUpper               = x@import.names.modify$toUpper,
+														  toLower               = x@import.names.modify$toLower,
 														  trim                      = x@import.names.modify$trim,
-														  defaultForEmptyNames      = x@import.names.modify$defaultForEmptyNames
+														  defaultEmpty      = x@import.names.modify$defaultEmpty
 	)
 	
-	
 	results <- data.frame( file.name         = basename(paths.new),
-						   transcript.name   = transcript.names.info$names.ok.ids,
+						   transcriptName   = transcriptNames.info$names.ok.ids,
 						   status            = "load",
 						   message           = "",
-						   duplicated        = duplicated(transcript.names),
-						   file.path         = paths.new, 
+						   duplicated        = duplicated(transcriptNames),
+						   filePath         = paths.new, 
 						   stringsAsFactors  = FALSE)
+#View(results)
 
 	#--- how to deal with double transcripts 
 	if (any(results$duplicated)) {
@@ -110,9 +116,9 @@ corpus_import <- function(x,
 			results$status[results$duplicated]            <- "skipped"
 			results$message[results$duplicated]           <- "Non-unique transcript names"
 		} else {
-			transcript.name.old <- results$transcript.name
-			results$transcript.name <- make.unique(results$transcript.name)
-			results$message[results$transcript.name!=transcript.name.old]           <- "Renamed because of non-unique transcript names"
+			transcriptName.old <- results$transcriptName
+			results$transcriptName <- make.unique(results$transcriptName)
+			results$message[results$transcriptName!=transcriptName.old]           <- "Renamed because of non-unique transcript names"
 		}
 	}
 
@@ -130,8 +136,8 @@ corpus_import <- function(x,
 			#import only the files that are to be loaded (and not skipped)
 			if (results$status[i]=="load") {
 				#import file
-				new.transcript <- act::import(filePath=results$file.path[i], 
-											  transcriptName=results$transcript.name[i])
+				new.transcript <- act::import(filePath=results$filePath[i], 
+											  transcriptName=results$transcriptName[i])
 				
 				if (is.null(new.transcript)) {
 					results$status[i]  <- "error"
@@ -164,33 +170,34 @@ corpus_import <- function(x,
 			}
 		}
 	}
-	
+
 	#--- add results to corpus
 	#View(results)
 	#test
 	x@import.results <- results
-	
+
 	#--- update history
 	x@history[[length(x@history)+1]] <- list(
 		modification  ="corpus_import",
 		systime       = Sys.time(),
 		results       = "See 'x@import.results'"
 	)
-	
+
 	#--- add transcripts to corpus
 	if (length(test)==0) {
 		stop("No annotation files found in input path(s).")	
 	} else {
-		x <- act::transcripts_add(x, 
+		x <- act::transcripts_add(x=x, 
 								 test, 
-								 createFullText=createFullText, 
+								 createFulltext=createFulltext, 
 								 assignMedia=assignMedia)
 	}
-	
+
 	#--- show warnings
 	if (length(message)>0){
-		warning(paste(message,sep="\n", collapse="\n"))
+		warning(paste(unique(message),sep="\n", collapse="\n"))
 	}
+
 	
 	return(x)
 }

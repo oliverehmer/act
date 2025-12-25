@@ -32,6 +32,6 @@ library(act)
 	mycutlist <- mysearch@results$cuts.cutlist.win[[1]]
 	cat(mycutlist)
 	
-	# It is, however, more convenient to specify the argument 'outputFolder' in order to get
+	# It is, however, more convenient to specify the argument 'folderOutput' in order to get
 	# the cut list as a (executable) file/batch list.
 }

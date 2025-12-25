@@ -23,7 +23,7 @@ search_concordance <- function(x,
 		hit.pos.fulltext    <- 	strtoi(mySR["hit.pos.fulltext"])
 		hit.pos.content    	<- 	strtoi(mySR["hit.pos.content"])
 		hit.length	    	<-	strtoi(mySR["hit.length"])
-		myTName	<-	as.character(mySR["transcript.name"])
+		myTName	<-	as.character(mySR["transcriptName"])
 		
 		#update progress bar
 		helper_progress_tick()
@@ -34,7 +34,7 @@ search_concordance <- function(x,
 			hit.pos 				<- hit.pos.fulltext
 			
 			#get the full text
-			if (as.character(mySR["search.mode"]) =="byTier") {
+			if (as.character(mySR["searchMode"]) =="byTier") {
 				if (s@search.normalized==TRUE) {
 					myFulltext     <- x@transcripts[[myTName]]@fulltext.bytier.norm
 				} else  {

@@ -1,21 +1,19 @@
 Package: act
 Type: Package
 Title: Aligned Corpus Toolkit
-Version: 1.3.0
-Date: 2023-03-03
+Version: 2.2.5
+Date: 2025-12-25
 Authors@R: person("Oliver", "Ehmer", email = "oliver.ehmer@uos.de", role = c("aut", "cre"))
 Maintainer: Oliver Ehmer <oliver.ehmer@uos.de>
 Description: The Aligned Corpus Toolkit (act) is designed for linguists that work with time aligned transcription data. It offers functions to import and export various annotation file formats ('ELAN' .eaf, 'EXMARaLDA .exb and 'Praat' .TextGrid files), create print transcripts in the style of conversation analysis, search transcripts (span searches across multiple annotations, search in normalized annotations, make concordances etc.), export and re-import search results (.csv and 'Excel' .xlsx format), create cuts for the search results (print transcripts, audio/video cuts using 'FFmpeg' and video sub titles in 'Subrib title' .srt format), modify the data in a corpus (search/replace, delete, filter etc.), interact with 'Praat' using 'Praat'-scripts, and exchange data with the 'rPraat' package. The package is itself written in R and may be expanded by other users.
 License: GPL-3
 Encoding: UTF-8
 LazyData: TRUE
-RoxygenNote: 7.2.3
-Imports: methods, stringr, stringi, tools, textutils, utils, progress,
-        XML, xml2, openxlsx
+RoxygenNote: 7.3.3
+Imports: fs, methods, srt, stringr, stringi, tools, textutils, utils, progress, XML, xml2, officer, openxlsx
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 URL: http://www.oliverehmer.de, https://github.com/oliverehmer/act
 NeedsCompilation: no
-Packaged: 2023-03-01 11:15:03 UTC; oliverehmer
 Author: Oliver Ehmer [aut, cre]

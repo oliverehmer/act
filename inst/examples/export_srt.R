@@ -15,5 +15,5 @@ path <- file.path("PATH_TO_AN_EXISTING_FOLDER_ON_YOUR_COMPUTER",
 }
 
 # Export
-act::export_srt(t=t, outputPath=path)
+act::export_srt(t=t, pathOutput=path)
 

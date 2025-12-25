@@ -7,10 +7,13 @@
 search_cuts_printtranscript(
   x,
   s,
-  cutSpanBeforesec = NULL,
-  cutSpanAftersec = NULL,
   l = NULL,
-  outputFolder = NULL
+  exportTxt = TRUE,
+  exportDocx = TRUE,
+  headerInsertSource = TRUE,
+  cutSpanBeforesec = 0,
+  cutSpanAftersec = 0,
+  folderOutput = NULL
 )
 }
 \arguments{
@@ -18,13 +21,19 @@ search_cuts_printtranscript(
 
 \item{s}{Search object.}
 
+\item{l}{Layout object.}
+
+\item{exportTxt}{Logical; If \code{TRUE} .docx transcript will be exported.}
+
+\item{exportDocx}{Logical; If \code{TRUE} .txt transcript will be exported.}
+
+\item{headerInsertSource}{Logical; if \code{TRUE} standard information about the source and location of the sequence will be inserted after the heading.}
+
 \item{cutSpanBeforesec}{Double; Start the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.}
 
 \item{cutSpanAftersec}{Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.}
 
-\item{l}{Layout object.}
-
-\item{outputFolder}{Character string; if parameter is not set, the print transcripts will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.txt' format.}
+\item{folderOutput}{Character string; if parameter is not set, the print transcripts will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.txt' format.}
 }
 \value{
 Search object;

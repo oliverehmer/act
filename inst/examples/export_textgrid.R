@@ -15,5 +15,5 @@ path <- file.path("PATH_TO_AN_EXISTING_FOLDER_ON_YOUR_COMPUTER",
 }
 
 # Export
-act::export_textgrid(t=t, outputPath=path)
+act::export_textgrid(t=t, pathOutput=path)
 

@@ -7,11 +7,11 @@
 search_makefilter(
   x,
   filterTranscriptNames = NULL,
-  filterTranscriptIncludeRegEx = NULL,
-  filterTranscriptExcludeRegEx = NULL,
+  filterTranscriptIncludeRegex = NULL,
+  filterTranscriptExcludeRegex = NULL,
   filterTierNames = NULL,
-  filterTierIncludeRegEx = NULL,
-  filterTierExcludeRegEx = NULL
+  filterTierIncludeRegex = NULL,
+  filterTierExcludeRegex = NULL
 )
 }
 \arguments{
@@ -19,15 +19,15 @@ search_makefilter(
 
 \item{filterTranscriptNames}{Vector of character strings; Names of the transcripts that you want to include; to include all transcripts in the corpus object leave parameter empty or set to  \code{character()} or \code{""}.}
 
-\item{filterTranscriptIncludeRegEx}{Character string; as regular expression, include transcripts matching the expression.}
+\item{filterTranscriptIncludeRegex}{Character string; as regular expression, include transcripts matching the expression.}
 
-\item{filterTranscriptExcludeRegEx}{Character string; as regular expression, exclude transcripts matching the expression.}
+\item{filterTranscriptExcludeRegex}{Character string; as regular expression, exclude transcripts matching the expression.}
 
 \item{filterTierNames}{Vector of character strings; Names of the tiers that you want to include; to include all tiers in the corpus object leave parameter empty or set to  \code{character()} or \code{""}.}
 
-\item{filterTierIncludeRegEx}{Character string; as regular expression, include tiers matching the expression.}
+\item{filterTierIncludeRegex}{Character string; as regular expression, include tiers matching the expression.}
 
-\item{filterTierExcludeRegEx}{Character string; as regular expression, exclude tiers matching the expression.}
+\item{filterTierExcludeRegex}{Character string; as regular expression, exclude tiers matching the expression.}
 }
 \value{
 List of character vectors. \code{$filterTranscriptNames} contains all transcript names in the corpus matching the expressions, \code{$filterTierNames} contains all tier names in the corpus matching the expressions.
@@ -44,26 +44,26 @@ This functions is useful if you want to use functions of the package such as \co
 library(act)
 
 # Search all transcripts that have "ARG" (ignoring case sensitivity) in their name
-myfilter <- act::search_makefilter(x=examplecorpus, filterTranscriptIncludeRegEx="(?i)arg")
-myfilter$transcript.names
+myfilter <- act::search_makefilter(x=examplecorpus, filterTranscriptIncludeRegex="(?i)arg")
+myfilter$transcriptNames
 
 # Search all transcripts that don't have "ARG" in their name
-myfilter <- act::search_makefilter(x=examplecorpus, filterTranscriptExcludeRegEx="ARG")
-myfilter$transcript.names
+myfilter <- act::search_makefilter(x=examplecorpus, filterTranscriptExcludeRegex="ARG")
+myfilter$transcriptNames
 
 # Search all tiers that have an "A" or an "a" in their name
-myfilter <- act::search_makefilter(x=examplecorpus, filterTierIncludeRegEx="(?i)A")
-myfilter$tier.names
+myfilter <- act::search_makefilter(x=examplecorpus, filterTierIncludeRegex="(?i)A")
+myfilter$tierNames
 
 # Search all tiers that have a capital "A" in their name
-myfilter <- act::search_makefilter(x=examplecorpus, filterTierIncludeRegEx="A")
-myfilter$tier.names
+myfilter <- act::search_makefilter(x=examplecorpus, filterTierIncludeRegex="A")
+myfilter$tierNames
 
 # In which transcripts do these tiers occur?
-myfilter$transcript.names
+myfilter$transcriptNames
 
 # Let's check the first of the transcripts, if this is really the case...
-examplecorpus@transcripts[[myfilter$transcript.names[1]]]@tiers
+examplecorpus@transcripts[[myfilter$transcriptNames[1]]]@tiers
 
 }
 \seealso{

@@ -45,24 +45,26 @@ The package uses the following options.
 
 \emph{FFMPEG commands and options}
 \itemize{
-\item \code{act.ffmpeg.command} Character string; 'FFmpeg' command that is used for cutting video files.
-\item \code{act.ffmpeg.command.fastVideoPostioning} Character string; 'FFmpeg' command that is used for cutting video files using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
-\item \code{act.ffmpeg.command.audio} Character string; 'FFmpeg' command that is used for cutting/generating uncompressed audio files.
+\item \code{act.ffmpeg.command.main} Character string; 'FFmpeg' command that is used for cutting media files (audio & video).
+\item \code{act.ffmpeg.command.main.fast} Character string; 'FFmpeg' command that is used for cutting video files using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
+\item \code{act.ffmpeg.command.audioAsMP3} Character string; 'FFmpeg' command that is used for cutting/generating compressed audio files as mp3 (for other audio, the main command is used).
+\item \code{act.ffmpeg.command.images} Character string; 'FFmpeg' command that is used for extracting still images.
+\item \code{act.ffmpeg.command.images.fast} Character string; 'FFmpeg' command that is used for extracting still images using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
 \item \code{act.ffmpeg.exportchannels.fromColumnName} Character string; Name of the column in the data frame \code{s@results} from information, which audio channel to export, will be taken.
 }
 
 \emph{Import annotation files}
 \itemize{
 \item \code{act.import.readEmptyIntervals} Logical; if \code{TRUE} empty intervals in you annotation files will be read, if \code{FALSE} empty intervals will be skipped.
-\item \code{act.import.scanSubfolders} Logical; if \code{TRUE} sub folders will also be scanned for annotation files; if \code{FALSE} only the main level of the folders specified in \code{paths.annotation.files} of your corpus object will be scanned.
-\item \code{act.import.storeFileContentInTranscript} if \code{TRUE} the contents of the original annotation file will be stored in \code{transcript@file.content}. Set to \code{FALSE} if you want to keep your corpus object small.
+\item \code{act.import.scanSubfolders} Logical; if \code{TRUE} sub folders will also be scanned for annotation files; if \code{FALSE} only the main level of the folders specified in \code{pathsAnnotationFiles} of your corpus object will be scanned.
+\item \code{act.import.storefileContentInTranscript} if \code{TRUE} the contents of the original annotation file will be stored in \code{transcript@file.content}. Set to \code{FALSE} if you want to keep your corpus object small.
 }
 
 \emph{Export}
 \itemize{
-\item \code{act.export.foldergrouping1.fromColumnName} Character string; Name of sub folders that will be created in the folder of the search result, level 1.
-\item \code{act.export.foldergrouping2.fromColumnName}  Character string; Name of sub folders that will be created in the folder of the search result, level 2.
-\item \code{act.export.filename.fromColumnName}  Character string; Name of the column from which the file names for exported files will be taken.
+\item \code{act.export.filename.fromColumnName} Character string; Name of the column from which the file names for exported files will be taken.
+\item \code{act.export.folder.grouping1.fromColumnName} Character string; Name of sub folders that will be created in the folder of the search result, level 1.
+\item \code{act.export.folder.grouping2.fromColumnName} Character string; Name of sub folders that will be created in the folder of the search result, level 2.
 }
 
 \emph{Miscellaneous}
@@ -71,6 +73,8 @@ The package uses the following options.
 \item \code{act.separator_between_tiers} Character; Single character that is used for separating tiers when creating the full text.
 \item \code{act.separator_between_words} Character string; regular expression with alternatives that count as separators between words. Used for preparing the concordance.
 \item \code{act.wordCountRegEx} Character string; regular expression that is used to count words.
+\item \code{act.pauseIdentifierGATRegEx} Character string; regular expression that is used to identify pauses in GAT transcription
+\item 
 }
 }
 \examples{

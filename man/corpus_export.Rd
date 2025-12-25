@@ -6,31 +6,31 @@
 \usage{
 corpus_export(
   x,
-  outputFolder,
+  folderOutput,
   filterTranscriptNames = NULL,
   filterTierNames = NULL,
-  formats = c("eaf", "exb", "srt", "textgrid", "printtranscript"),
+  formats = c("docx", "eaf", "exb", "edl", "srt", "textgrid", "txt"),
   createMediaLinks = TRUE,
-  createOutputfolder = TRUE,
+  createFolderOutput = TRUE,
   l = NULL
 )
 }
 \arguments{
 \item{x}{Corpus object.}
 
-\item{outputFolder}{Character string; path to a folder where the transcription files will be saved. By default the forlder will be created recursively it does not exist.}
+\item{folderOutput}{Character string; path to a folder where the transcription files will be saved. By default the forlder will be created recursively it does not exist.}
 
 \item{filterTranscriptNames}{Vector of character strings; names of transcripts to be included. If left unspecified, all transcripts will be exported.}
 
 \item{filterTierNames}{Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.}
 
-\item{formats}{Vector with one or more character strings; output formats, accepted values: 'eaf', 'exb', 'srt', 'textgrid', 'printtranscript'. If left unspecified, all supported formats will be exported.}
+\item{formats}{Vector with one or more character strings; output formats, accepted values: 'eaf', 'exb', and 'textgrid', 'srt' and 'edl', 'docx' and 'txt'. If left unspecified, all supported formats will be exported.}
 
 \item{createMediaLinks}{Logical; if \code{TRUE} media links will be created (affects only 'eaf' and 'exb' files).}
 
-\item{createOutputfolder}{Logical; if \code{TRUE} the outputfolder will be created recursively in case that it does not exist.}
+\item{createFolderOutput}{Logical; if \code{TRUE} the output folder will be created recursively in case that it does not exist.}
 
-\item{l}{Layout object. layout of print transcripts (affects only 'printtranscript' files).}
+\item{l}{Layout object. layout of print transcripts (affects only 'txt' and 'docx' files).}
 }
 \description{
 Exports all (or some) transcript objects in a corpus object to different annotation file formats.
@@ -41,27 +41,27 @@ In case that you want to select transcripts and/or tiers by using regular expres
 library(act)
 
 # Set destination folder
-outputFolder <- tempdir()
+folderOutput <- tempdir()
 
 # It makes more sense, however, to you define a folder
 # that is easier to access on your computer
 \dontrun{
-outputFolder <- "PATH_TO_AN_EMPTY_FOLDER_ON_YOUR_COMPUTER"
+folderOutput <- "PATH_TO_AN_EMPTY_FOLDER_ON_YOUR_COMPUTER"
 }
 
 # Exports all transcript objects in all supported formats
 act::corpus_export(x=examplecorpus,
-							   outputFolder=outputFolder)
+							   folderOutput=folderOutput)
 
 # Exports all transcript objects in 'Praat' .TextGrid format
 act::corpus_export(x=examplecorpus,
-                              outputFolder=outputFolder,
+                              folderOutput=folderOutput,
                               formats="textgrid")
 
 # Exports all transcript objects in 'ELAN' .eaf format.
 # By default WITH media links
 act::corpus_export(x=examplecorpus,
-						outputFolder=outputFolder,
+						folderOutput=folderOutput,
 						formats="eaf")
 
 
@@ -69,16 +69,16 @@ act::corpus_export(x=examplecorpus,
 # Only Media links are only exported that are in
 # the '@media.path' attribute in the transcript object(s))
 act::corpus_export(x=examplecorpus,
-						outputFolder=outputFolder,
+						folderOutput=folderOutput,
 						formats="eaf",
 						createMediaLinks=FALSE)
 
 # Exports in 'ELAN' .eaf and Praat' .TextGrid format
 act::corpus_export(x=examplecorpus,
-                                 outputFolder=outputFolder,
+                                 folderOutput=folderOutput,
                                  formats=c("eaf", "textgrid"))
 
 }
 \seealso{
-\link{export_eaf}, \link{export_textgrid}, \link{import_textgrid}
+\link{export_eaf}, \link{export_textgrid}, \link{export_exb}, \link{export_txt}, \link{export_docx}, \link{export_rpraat}, \link{export_srt}
 }

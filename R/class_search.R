@@ -27,7 +27,7 @@
 #' @slot concordance.width Integer; number of characters to include in the concordance.
 #' @slot cuts.span.beforesec Double; Seconds how much the cuts (media and print transcripts) should start before the start of the search hit.
 #' @slot cuts.span.aftersec Double; Seconds how much the cuts (media and print transcripts) should end after the end of the search hit.
-#' @slot cuts.column.srt Character string; name of  destination column in the search results data frame where the srt substitles will be inserted; column will be created if not present in data frame; set to "" for no insertion.
+#' @slot cuts.column.srt Character string; name of  destination column in the search results data frame where the .srt subtitles will be inserted; column will be created if not present in data frame; set to "" for no insertion.
 #' @slot cuts.column.printtranscript Character string; name of  destination column in the search results data frame where the print transcripts will be inserted; column will be created if not present in data frame; set to "" for no insertion.
 #' @slot cuts.printtranscripts Character string; \code{[READ ONLY]} All print transcripts for the search results (if generated previously)
 #' @slot cuts.cutlist.mac Character string; \code{[READ ONLY]} 'FFmpeg' cut list for use on a Mac, to cut the media files for the search results.
@@ -37,6 +37,8 @@
 #' @slot results.tiers.nr Integer; \code{[READ ONLY]} Number of tiers over which the search results are distrubuted.
 #' @slot results.transcripts.nr Integer; \code{[READ ONLY]} Number of transcripts over which the search results are distrubuted.
 #' @slot x.name Character string; \code{[READ ONLY]} name of the corpus object on which the search has been run.
+#'
+#' @seealso \link{act::export_docx}, \link{act::export_docx}, 
 #'
 #' @export
 #'
@@ -76,7 +78,7 @@ methods::setClass("search",
 				  	results.transcripts.nr="numeric",
 				  	x.name="character"
 				  	
-				  ), prototype = list (
+				  ), prototype = list(
 				  	name="mysearch",
 				  	pattern="",
 				  	search.mode="fulltext",
@@ -129,7 +131,7 @@ search_show <- function (object) {
 	cat("  filter.tier.names             : ", paste("'", object@filter.tier.names,"'",sep="", collapse=", "), fill=TRUE)
 	cat("  filter.tier.includeRegEx      : ", paste("'", object@filter.tier.includeRegEx,"'",sep="", collapse=""), fill=TRUE)
 	cat("  filter.tier.excludeRegEx      : ", paste("'", object@filter.tier.excludeRegEx,"'",sep="", collapse=""), fill=TRUE)
-	cat("  filter.section.startsec       : ", if (length(object@filter.section.startsec)==0) {"[not set]"} else {if (is.na(object@filter.section.startsec)){"[not set]"} else {object@ffilter.section.startsec}}, fill=TRUE)
+	cat("  filter.section.startsec       : ", if (length(object@filter.section.startsec)==0) {"[not set]"} else {if (is.na(object@filter.section.startsec)){"[not set]"} else {object@filter.section.startsec}}, fill=TRUE)
 	cat("  filter.section.endsec         : ", if (length(object@filter.section.endsec)==0) {"[not set]"} else {if (is.na(object@filter.section.endsec)){"[not set]"} else {object@filter.section.endsec}}, fill=TRUE)
 	cat("\n")
 	
@@ -148,8 +150,8 @@ search_show <- function (object) {
 	
 	cat("  results                       : ", if(!'hit' %in% colnames(object@results))        {"[search not run yet]"} else {"[check directly]"}, fill=TRUE)
 	cat("  results.nr                    : ", if(!'hit' %in% colnames(object@results))        {"[search not run yet]"} else {nrow(object@results)}                       , fill=TRUE)
-	cat("  results.tiers.nr              : ", if(!'tier.name' %in% colnames(object@results))       {"[search not run yet]"} else {length(unique(object@results$tier.name))}        , fill=TRUE)
-	cat("  results.transcripts.nr        : ", if(!'transcript.name' %in% colnames(object@results)) {"[search not run yet]"} else {length(unique(object@results$transcript.name))}  , fill=TRUE)
+	cat("  results.tiers.nr              : ", if(!'tierName' %in% colnames(object@results))       {"[search not run yet]"} else {length(unique(object@results$tierName))}        , fill=TRUE)
+	cat("  results.transcripts.nr        : ", if(!'transcriptName' %in% colnames(object@results)) {"[search not run yet]"} else {length(unique(object@results$transcriptName))}  , fill=TRUE)
 	cat("  x.name                        : ", paste("'", object@x.name,"'",sep="", collapse=""), fill=TRUE)
 	cat()
 }

@@ -20,36 +20,27 @@ If you want to modify the layout of the print transcripts, create a new layout o
 
 \item{\code{transcript.width}}{Integer; width of transcript, -1 for no line wrapping.}
 
-\item{\code{speaker.width}}{Integer; width of speaker abbreviation, -1 for full name without shortening.}
+\item{\code{speaker.regex}}{Character string; Regular expression to extract speaker abbreviation from tier name}
+
+\item{\code{speaker.width}}{Integer; maximum width of speaker abbreviation, -1 for full name without shortening.}
 
 \item{\code{speaker.ending}}{Character string; string that is added at the end of the speaker name.}
 
 \item{\code{spacesbefore}}{Integer; number of spaces inserted before line number.}
 
-\item{\code{additionalline1.insert}}{Logical; if \code{TRUE} an additional dummy line will be inserted after each annotation line, the text is defined in \code{.additionalline1.text}.}
-
-\item{\code{additionalline1.text}}{Character string; Content of additional dummy line 1.}
-
-\item{\code{additionalline1.indent}}{Logical; if \code{TRUE} the content of the dummy line 1 will be indented to begin where the content of the annotations start.}
-
-\item{\code{additionalline2.insert}}{Logical; if \code{TRUE} an additional dummy line will be inserted after each annotation line, the text is defined in \code{.additionalline2.text}.}
-
-\item{\code{additionalline2.text}}{Character string; Content of additional dummy line 2.}
-
-\item{\code{additionalline2.indent}}{Logical; if \code{TRUE} the content of the dummy line 2 will be indented to begin where the content of the annotations start.}
-
-\item{\code{brackets.tryToAlign}}{Logical; if \code{TRUE} act will try to align brackets [] for parallel speaking (Attention: experimental function; results may not satisfy).}
-
-\item{\code{pauseTierRegEx}}{Character string; regular expression to identify pause tier for auto formatting pauses.}
+\item{\code{brackets.align}}{Logical; if \code{TRUE} act will try to align brackets [] for parallel speaking (Attention: experimental function; results may not satisfy).}
 
 \item{\code{header.insert}}{Logical; if \code{TRUE} a transcript header is inserted.}
-
-\item{\code{header.heading.fromColumnName}}{Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the heading is taken (if \code{object@.header.insert==TRUE})}
-
-\item{\code{header.firstInfo.fromColumnName}}{Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the first info is taken (if \code{object@.header.insert==TRUE})}
 
 \item{\code{arrow.insert}}{Logical; is only used when transcripts are made based on a search results; if \code{TRUE} an arrow will be inserted, highlighting the transcript line containing the search hit.}
 
 \item{\code{arrow.shape}}{Character string; shape of the arrow.}
+
+\item{\code{docx.template.path}}{Character string;}
+
+\item{\code{docx.styles}}{Data.frame; Matrix with mappings of act variables and the format templates in the .docx template files. To change the styles matrix use \code{l@docx.styles <- act::export_docx_styles_load(path="...")}}
 }}
 
+\seealso{
+\link{act::matrix_load}
+}

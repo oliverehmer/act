@@ -2,7 +2,7 @@
 % Please edit documentation in R/export_rpraat.R
 \name{export_rpraat}
 \alias{export_rpraat}
-\title{Export a transcript object to a 'rPraat' TextGrid object}
+\title{Export 'rPraat' TextGrid object}
 \usage{
 export_rpraat(
   t,
@@ -45,5 +45,5 @@ rpraat.tg <- act::export_rpraat(t=examplecorpus@transcripts[[1]])
 }
 }
 \seealso{
-\code{import_rpraat}, \code{corpus_export}, \code{export_eaf}, \code{export_exb}, \code{export_printtranscript}, \code{export_srt}, \code{export_textgrid}
+\link{import_rpraat}, \link{corpus_export}, \link{export_eaf}, \link{export_exb}, \link{export_txt}, \link{export_docx}, \link{export_srt}, \link{export_textgrid}
 }

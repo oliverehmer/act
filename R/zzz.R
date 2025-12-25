@@ -13,7 +13,6 @@ act.environment$pb <- progress::progress_bar$new(
 	if (any(toset)) {
 		options(act.options.default[toset])
 	}
-	
 
 }
 .onAttach <- function(libname, pkgname) {

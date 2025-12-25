@@ -2,25 +2,25 @@
 % Please edit documentation in R/transcripts_filter.R
 \name{transcripts_filter}
 \alias{transcripts_filter}
-\title{Filter all transcripts in a corpus}
+\title{Filter a single transcript: Extract}
 \usage{
 transcripts_filter(
   x,
   filterTranscriptNames = NULL,
-  filterOnlyTheseTranscripts = NULL,
+  filterTranscriptsRestict = NULL,
   filterTierNames = NULL,
   filterSectionStartsec = NULL,
   filterSectionEndsec = NULL,
-  preserveTimes = TRUE,
-  sort = c("none", "tier>startSec", "startSec>tier")
+  timesPreserve = TRUE,
+  sort = c("none", "tier>startsec", "startsec>tier")
 )
 }
 \arguments{
 \item{x}{Corpus object;}
 
-\item{filterTranscriptNames}{Vector of character strings; names of transcripts to remain in the transcripts. If left unspecified, all transcripts will  remain in the transcripts.}
+\item{filterTranscriptNames}{Vector of character strings; names of transcripts to remain. If left unspecified, all transcripts will  remain in the transcripts.}
 
-\item{filterOnlyTheseTranscripts}{Vector of character strings; names of transcripts to which filters will be applied. If left unspecified, all transcripts will be filtered.}
+\item{filterTranscriptsRestict}{Vector of character strings; names of transcripts to which filters will be applied. If left unspecified, all transcripts will be filtered.}
 
 \item{filterTierNames}{Vector of character strings; names of tiers to remain in the transcripts. If left unspecified, all tiers will remain in the transcripts.}
 
@@ -28,9 +28,9 @@ transcripts_filter(
 
 \item{filterSectionEndsec}{Double, end of selection in seconds.}
 
-\item{preserveTimes}{Logical; Parameter is used if \code{filterSectionStartsec} it set. If \code{TRUE} start times will be preserved, if \code{FALSE} the selection will start from 0.}
+\item{timesPreserve}{Logical; Parameter is used if \code{filterSectionStartsec} it set. If \code{TRUE} start times will be preserved, if \code{FALSE} the selection will start from 0.}
 
-\item{sort}{Logical; Annotations will be sorted: 'none' (=no sorting), 'tier>startSec' (=sort first by tier, then by startSec), 'startSec>tier' (=sort first by startSec, then by tier)}
+\item{sort}{Logical; Annotations will be sorted: 'none' (=no sorting), 'tier>startsec' (=sort first by tier, then by startsec), 'startsec>tier' (=sort first by startsec, then by tier)}
 }
 \value{
 Corpus object;
@@ -44,8 +44,8 @@ In case that you want to select tiers by using regular expressions use the funct
 library(act)
 
 # Filter corpus to only contain some tiers
-all.tier.names <- unique(act::tiers_all(examplecorpus)$name)
-some.tier.names <- all.tier.names[1:10]
-x <- act::transcripts_filter(examplecorpus, filterTierNames=some.tier.names)
+all.tierNames <- unique(act::tiers_all(examplecorpus)$name)
+some.tierNames <- all.tierNames[1:10]
+x <- act::transcripts_filter(examplecorpus, filterTierNames=some.tierNames)
 x@history[[length(x@history)]]
 }

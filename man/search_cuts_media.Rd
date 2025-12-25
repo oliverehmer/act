@@ -7,14 +7,19 @@
 search_cuts_media(
   x,
   s,
+  exportMedia = TRUE,
+  exportStills = TRUE,
+  exportThumbnail = TRUE,
   cutSpanBeforesec = NULL,
   cutSpanAftersec = NULL,
-  outputFolder = NULL,
+  folderOutput = NULL,
   filterMediaInclude = "",
-  fastVideoPostioning = TRUE,
+  videoFastPositioning = TRUE,
   videoCodecCopy = FALSE,
-  audioCutsAsMP3 = FALSE,
-  Panning = NULL
+  audioAsMP3 = FALSE,
+  panning = NULL,
+  outputOS = c("mac", "win"),
+  outputFileName = "FFMPEG_cutlist"
 )
 }
 \arguments{
@@ -22,21 +27,31 @@ search_cuts_media(
 
 \item{s}{Search object.}
 
-\item{cutSpanBeforesec}{Double; Start the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.}
+\item{exportMedia}{Logical; If \code{TRUE} media cuts (audio/video)  will be included in the cut list.}
 
-\item{cutSpanAftersec}{Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.}
+\item{exportStills}{Logical; If \code{TRUE} stills (image) will be included in the cut list. For creating the list of stills to be exported see \link{search_cuts_media}.}
 
-\item{outputFolder}{Character string; path to folder where files will be written.}
+\item{exportThumbnail}{Logical; If \code{TRUE} a thumbnail image (.jpg) will be exported to the main folder. The name will be the same as the media cut. By default the time value is the start of the search hit. To change this set time values in seconds in a column called \code{thumbnails} in \code{s@results}.}
+
+\item{cutSpanBeforesec}{Double; Start the media cut some seconds before the hit to include some context; the default \code{NULL} will take the value as set in @cuts.span.beforesec of the search object.}
+
+\item{cutSpanAftersec}{Double; End the media cut some seconds before the hit to include some context; the default \code{NULL} will take the value as set in @cuts.span.beforesec of the search object.}
+
+\item{folderOutput}{Character string; path to folder where files will be written.}
 
 \item{filterMediaInclude}{Character string; regular expression to match only some of the media files in \code{corpus@transcripts[[ ]]@media.path}.}
 
-\item{fastVideoPostioning}{Logical; If \code{TRUE} the FFmpeg command will be using the parameter fast video positioning as specified in \code{options()$act.ffmpeg.command.fastVideoPostioning}.}
+\item{videoFastPositioning}{Logical; If \code{TRUE} the FFmpeg command will be using the parameter fast video positioning as specified in \code{options()$act.ffmpeg.command.main.fast}.}
 
-\item{videoCodecCopy}{Logical; if \code{TRUE} FFMPEG will use the option \emph{codec copy} for videos.}
+\item{videoCodecCopy}{Logical; If \code{TRUE} FFMPEG will use the option \emph{codec copy} for videos.}
 
-\item{audioCutsAsMP3}{Logical; If \code{TRUE} audio cuts will be exported as '.mp3' files, using  \code{options()$act.ffmpeg.command.audioCutsAsMP3}.}
+\item{audioAsMP3}{Logical; If \code{TRUE} audio cuts will be converted to .mp3 files, using  \code{options()$act.ffmpeg.command.audioAsMP3}(By default the file type of audio will be maintained. E.g. when the original media file is an .wav file, the output will be so, too.).}
 
-\item{Panning}{Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.exportchannels.fromColumnName' .}
+\item{panning}{Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.exportchannels.fromColumnName' .}
+
+\item{outputOS}{Vector of character Strings; Saves FFMpeg cut list in format for \code{"win"}=windows, \code{"mac"}=apple ox/linux.}
+
+\item{outputFileName}{Character String; Name of the cut list.}
 }
 \value{
 Search object; cut lists will be stored in \code{s@cuts.cutlist.mac} and \code{s@cuts.cutlist.win}.
@@ -60,37 +75,45 @@ The function will use all files in  \code{corpus@transcripts[[ ]]@media.path}.
 Therefore you will need to set the options \code{filterMediaInclude} filtering for which input media files you want to create the cuts.
 The filter is a regular expression, e.g.  \code{'\\.(wav|aif)'} for '.wav' and '.aif' audio files or \code{'\\.mp4'} for '.mp4' video files.
 
+\emph{Output file names}\cr
+The file names of the cuts are taken from the \code{resultID} column in the search results table. To change this, modify the contents of this column or define a different column using \code{options(act.export.filename.fromColumnName}.
+By default, the name of the original media will be appended to the file name. The name of the media file will be taken from the \code{names()} attribute of each media file listed in the \code{corpus@transcripts[]@media.path}. To change this, modify the \code{names()}attribute.
+
 \emph{Output format}\cr
 The output format is predefined by in the options:
 \itemize{
-\item \code{act.ffmpeg.command} defines the basic FFmpeg command
-\item \code{act.ffmpeg.command.fastVideoPostioning} defines the FFmpeg command to be used with large video files.
+\item \code{act.ffmpeg.command.main}: defines the basic FFmpeg command (used for audio & video)
+\item \code{act.ffmpeg.command.main.fast}: defines the FFmpeg command to be used with large video files.
+\item \code{act.ffmpeg.command.audioAsMP3}: defines the FFmpeg used for converting audio files to MP3
+\item \code{act.ffmpeg.command.images}. Defines the FFmpeg command used for extracting still images.
 }
 
-The default is to generate mp4 video cuts. You can also use the following commands to change the output format:\cr\cr
+For video, the default is to generate mp4  cuts. You can also use the following commands to change the output format:\cr\cr
 MP4 video cuts with original video quality:
 \itemize{
-\item \code{options(act.ffmpeg.command                     = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH.mp4" -hide_banner')}
-\item \code{options(act.ffmpeg.command.fastVideoPostioning = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -t TIMEDURATION OPTIONS -y "OUTFILEPATH.mp4" -hide_banner')}
+\item \code{options(act.ffmpeg.command.main      = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH.mp4" -hide_banner')}
+\item \code{options(act.ffmpeg.command.main.fast = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -t TIMEDURATION OPTIONS -y "OUTFILEPATH.mp4" -hide_banner')}
 }
 
 MP4 video cuts with reduced video quality:
 \itemize{
-\item \code{options(act.ffmpeg.command                     = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -vf scale=1920:-1 -b:v 1M -b:a 192k -y "OUTFILEPATH.mp4" -hide_banner')}
-\item \code{options(act.ffmpeg.command.fastVideoPostioning = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -t TIMEDURATION OPTIONS -vf scale=1920:-1 -b:v 6M -b:a 192k -y "OUTFILEPATH.mp4" -hide_banner')}
+\item \code{options(act.ffmpeg.command.main      = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -vf scale=1920:-1 -b:v 1M -b:a 192k -y "OUTFILEPATH.mp4" -hide_banner')}
+\item \code{options(act.ffmpeg.command.main.fast = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -t TIMEDURATION OPTIONS -vf scale=1920:-1 -b:v 6M -b:a 192k -y "OUTFILEPATH.mp4" -hide_banner')}
 }
 
-WAV audio cuts:
-\itemize{
-\item \code{options(act.ffmpeg.command                     = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH.wav" -hide_banner')}
-\item \code{options(act.ffmpeg.command                     = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH.mp3" -hide_banner')}
-}
+\emph{Extract stills}\cr
+To extract stills the time information and the file names need to be stored in the search object in the results data frame, e.g. in \code{s@results}.
+The information needs to be contained in a vector.
+The elements of the vector are the time values in seconds, the name attribute will be used as file name, e.g. \code{myStills <- c(still1=1.0, still2=2.0)}.
+The vector needs stored for each search result in the column called \code{stills.values} as a list, e.g code \code{s@results$stills.values[[1]] <- myStills}.
+Stills will be stored in a sub folder called \code{stills} by default, if not otherwise defined in the column \code{stills.folder}.
+Please see the section \code{options_show} to customize the behavior of the function.
 
 \emph{Advanced options}\cr
 You can adjust the FFmpeg commands according to your needs.
 The following options define the FFmpeg command that will be used by the package. The command needs to contain place holders which will be replaced by the actual values in the package. If you want to define your own ffmpeg command, please make sure to use the following placeholders:
 \itemize{
-\item \code{INFILEPATH} path to the input media file.
+\item \code{INfilePath} path to the input media file.
 \item \code{OUTFILEPATH} path where the output media file will be saved
 \item \code{OPTIONS} FFmpeg options that will be applied additionally, in particular fast video positioning.
 \item \code{TIMESTART} time in seconds where to begin the cutting
@@ -133,7 +156,10 @@ library(act)
 	mycutlist <- mysearch@results$cuts.cutlist.win[[1]]
 	cat(mycutlist)
 	
-	# It is, however, more convenient to specify the argument 'outputFolder' in order to get
+	# It is, however, more convenient to specify the argument 'folderOutput' in order to get
 	# the cut list as a (executable) file/batch list.
 }
+}
+\seealso{
+\link{search_cuts_media},
 }

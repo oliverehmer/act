@@ -8,7 +8,7 @@ tiers_add(
   x,
   tierName,
   tierType = c("IntervalTier", "TextTier"),
-  absolutePosition = NULL,
+  positionAbsolute = NULL,
   destinationTier = NULL,
   relativePositionToDestinationTier = 0,
   insertOnlyIfDestinationExists = FALSE,
@@ -23,7 +23,7 @@ tiers_add(
 
 \item{tierType}{Character string; type of the tier to be added.}
 
-\item{absolutePosition}{Integer; Absolute position where the tier will be inserted. Value 1 and values beloe 1 will insert the tier in the first position; To insert the tier at the end, leave 'absolutePosition' and 'destinationTier' open.}
+\item{positionAbsolute}{Integer; Absolute position where the tier will be inserted. Value 1 and values beloe 1 will insert the tier in the first position; To insert the tier at the end, leave 'positionAbsolute' and 'destinationTier' open.}
 
 \item{destinationTier}{Character string; insert the tier relative to this tier.}
 
@@ -44,8 +44,8 @@ If tiers should be added only in certain transcripts, set the parameter \code{fi
 In case that you want to select transcripts by using regular expressions use the function \code{act::search_makefilter} first.
 }
 \details{
-You can either insert the new tier at a specific position (e.g. 'absolutePosition=1') or in relation to a existing tier (e.g. destinationTier='speaker1').
-To insert a tier at the end, leave 'absolutePosition' and 'destinationTier' open.
+You can either insert the new tier at a specific position (e.g. 'positionAbsolute=1') or in relation to a existing tier (e.g. destinationTier='speaker1').
+To insert a tier at the end, leave 'positionAbsolute' and 'destinationTier' open.
 
 Results will be reported in \code{@history} of the transcript objects.
 }
@@ -65,7 +65,7 @@ x@transcripts[[1]]@tiers
 # --- Add new interval tier in position 2
 x <- act::tiers_add(examplecorpus,
 					tierName="TEST",
-					absolutePosition=2)
+					positionAbsolute=2)
 #check results
 x@history[length(x@history)]
 #have a look at the first transcript

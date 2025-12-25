@@ -37,7 +37,7 @@ on the object.
 
 \item{\code{annotations}}{Data.frame; Table with the annotations.}
 
-\item{\code{media.path}}{Character string; Path(s) to the media files that correspond to this transcript object.}
+\item{\code{media.path}}{Vector of character strings; Path(s) to the media files that correspond to this transcript object.}
 
 \item{\code{normalization.systime}}{POSIXct; Time of the last normalization.}
 

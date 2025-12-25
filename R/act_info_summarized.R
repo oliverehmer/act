@@ -36,18 +36,18 @@ info_summarized <- function(...) {
 
 	if (!is.null(x)) {
 		#--- transcripts names
-		transcript.names <- names(x@transcripts)
-		transcript.count <- length(transcript.names)
+		transcriptNames <- names(x@transcripts)
+		transcript.count <- length(transcriptNames)
 		
 		#--- length
 		length <- lapply(x@transcripts, "slot", name = "length.sec")
 		length.sec <- sum(unlist(length))
-		length.formatted <- helper_format_time(length.sec, addTimeInSeconds = TRUE)
+		length.formatted <- helper_format_time(length.sec, addSec = TRUE)
 		
 		#--- tiers
 		tiers       <- lapply(x@transcripts, "slot", name = "tiers")
 		temp        <- do.call("rbind", tiers)
-		tier.names  <- unique(temp$name)
+		tierNames  <- unique(temp$name)
 		tier.count  <- sum(unlist(lapply(tiers, nrow)))
 		
 		#---annotations 
@@ -70,14 +70,14 @@ info_summarized <- function(...) {
 					 words.norm.count  = words.norm.count,
 					 annotations.count = annotations.count,
 					 tier.count        = tier.count,
-					 tier.names        = tier.names,
+					 tierNames        = tierNames,
 					 transcript.count  = transcript.count,
-					 transcript.names  = transcript.names
+					 transcriptNames  = transcriptNames
 		)
 	}
 	if (!is.null(t)) {
 		#--- tiers
-		tier.names <- t@tiers$name
+		tierNames <- t@tiers$name
 		tier.count <- nrow(t@tiers)
 		
 		#--- annotations
@@ -91,13 +91,13 @@ info_summarized <- function(...) {
 		words.norm.count <- lapply(t@annotations$content.norm, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 		words.norm.count <- sum(unlist(words.norm.count))
 
-		info <- list(length.formatted  = helper_format_time(t@length.sec , addTimeInSeconds = TRUE),
+		info <- list(length.formatted  = helper_format_time(t@length.sec , addSec = TRUE),
 					 length.sec        = t@length.sec,
 					 words.org.count   = words.org.count,
 					 words.norm.count  = words.norm.count,					 
 					 annotations.count = annotations.count,
 					 tier.count        = tier.count,
-					 tier.names        = tier.names
+					 tierNames        = tierNames
 					 )
 	}
 	return(info)

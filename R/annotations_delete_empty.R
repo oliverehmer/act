@@ -5,7 +5,7 @@
 #' In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_makefilter} first.
 #' 
 #' @param x Corpus object.
-#' @param trimBeforeCheck Logical; if \code{TRUE} leading and trailing spaces will be deleted before checking (as a consequence record sets that contain only spaces will be deleted, too).
+#' @param trim Logical; if \code{TRUE} leading and trailing spaces will be deleted before checking (as a consequence record sets that contain only spaces will be deleted, too).
 #' @param filterTranscriptNames Vector of character strings; names of the transcripts to be included. 
 #' @param filterTierNames Character string; names of the tiers to be included.
 #'
@@ -16,7 +16,7 @@
 #' @example inst/examples/annotations_delete_empty.R
 #' 
 annotations_delete_empty <- function (x, 
-									  trimBeforeCheck=FALSE, 
+									  trim=FALSE, 
 									  filterTranscriptNames=NULL, 
 									  filterTierNames=NULL) {
 	
@@ -47,11 +47,11 @@ annotations_delete_empty <- function (x,
 				#check if this tier is to be included
 				processThisRecordset <- TRUE
 				if (!is.null(filterTierNames)) {
-					processThisRecordset <- x@transcripts[[i]]@annotations$tier.name[[j]] %in% filterTierNames
+					processThisRecordset <- x@transcripts[[i]]@annotations$tierName[[j]] %in% filterTierNames
 				}
 				
 				if (processThisRecordset) {
-					if (trimBeforeCheck) {
+					if (trim) {
 						if (stringr::str_trim(x@transcripts[[i]]@annotations$content[[j]])=="") {
 							annotations_deleted_ids <- c(annotations_deleted_ids,j)
 						}

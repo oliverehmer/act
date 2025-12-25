@@ -4,12 +4,12 @@
 \alias{corpus_import}
 \title{Import annotation files into corpus object}
 \usage{
-corpus_import(x, createFullText = TRUE, assignMedia = TRUE)
+corpus_import(x, createFulltext = TRUE, assignMedia = TRUE)
 }
 \arguments{
 \item{x}{Corpus object.}
 
-\item{createFullText}{Logical; if \code{TRUE} full text will be created.}
+\item{createFulltext}{Logical; if \code{TRUE} full text will be created.}
 
 \item{assignMedia}{Logical; if \code{TRUE} the folder(s) specified in \code{@paths.media.files} of your corpus object will be scanned for media.}
 }
@@ -48,7 +48,7 @@ examplecorpus <- act::corpus_import(x=examplecorpus)
 
 # Creating the full texts may take a long time.
 # If you do NOT want to create the full texts immediately use the following command:
-examplecorpus <- act::corpus_import(x=examplecorpus, createFullText=FALSE )
+examplecorpus <- act::corpus_import(x=examplecorpus, createFulltext=FALSE )
 }
 \seealso{
 \link{corpus_new}, \link{examplecorpus}

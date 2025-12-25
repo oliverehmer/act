@@ -14,7 +14,7 @@
 #' @param updateTranscriptNames Vector of character strings; names of transcripts that contain the updates.
 #' @param identifierTier Character string;  regular expression that identifies the tier in which the sections are marked, that will be inserted into transDestination.
 #' @param identifierPattern Character string; regular expression that identifies the sections that will be inserted into transDestination.
-#' @param eraseUpdateSectionsCompletely Logical; if \code{TRUE} update sections in destination transcript will be erased completely, if \code{FALSE} update sections in the destination tier will not be erased completely but only the tiers that are present in the transUpdates be erased.
+#' @param eraseCompletely Logical; if \code{TRUE} update sections in destination transcript will be erased completely, if \code{FALSE} update sections in the destination tier will not be erased completely but only if the tier is present in updateTranscriptNames.
 #' 
 #' @return Transcript object
 #'  
@@ -27,17 +27,29 @@
 transcripts_merge <- function (x,
 							   destinationTranscriptName, 
 							   updateTranscriptNames, 
-							   identifierTier="update",
-							   identifierPattern=".+",
-							   eraseUpdateSectionsCompletely=TRUE) {
+							   identifierTier                = "update",
+							   identifierPattern             = ".+",
+							   eraseCompletely = TRUE) {
 	
 	#x=examplecorpus
 	#act::info_summarized(x)
 	#destinationTranscriptName <- 'update_destination'
 	#updateTranscriptNames <- c('update_update1', 'update_update2')
 	#updateTranscriptNames <- c('update_update1', 'update_update2', 'SDAF', "xxx")
+
+#	x<-corpus
+#	destinationTranscriptName <- corpus@transcripts[[1]]@name
+#	updateTranscriptNames <- corpus@transcripts[[2]]@name
+
+#	x<-corpus
+#	destinationTranscriptName <- 'destination'
+#	updateTranscriptNames <- c('A')
+#	identifierTier='status-progress'
+#	identifierPattern=".+"
+#	eraseCompletely<-TRUE
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	
+	if (missing(x)) 	                            {stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (missing(destinationTranscriptName))			{stop("Name of destination transcript is missing (parameter: destinationTranscriptName")	}
 	if (missing(updateTranscriptNames))			    {stop("Name(s) of update transcript(s) are missing (parameter: updateTranscriptNames")	}
 	
@@ -65,17 +77,17 @@ transcripts_merge <- function (x,
 		stop("The transcript object(s) specified in 'updateTranscriptNames' were not found in transcript object in 'x'.")
 	}
 	if (length(ids)!=length(updateTranscriptNames)) {
-		missingTranscriptNames <- setdiff(updateTranscriptNames, names(x@transcripts)[ids] )
-		stop(paste("Not all transcript object(s) specified in 'updateTranscriptNames' were not found in transcript object in 'x'. Missing transcript names:", paste(missingTranscriptNames, sep=", ", collapse=", "), sep= " "))
+		missingtranscriptNames <- setdiff(updateTranscriptNames, names(x@transcripts)[ids] )
+		stop(paste("Not all transcript object(s) specified in 'updateTranscriptNames' were not found in transcript object in 'x'. Missing transcript names:", paste(missingtranscriptNames, sep=", ", collapse=", "), sep= " "))
 	}
 	updateTranscripts <- x@transcripts[ids]
 	
 	#=== get the merged trasncript
-	mergedT <- act::transcripts_merge2 (destinationTranscript=destinationTranscript, 
-										updateTranscripts=updateTranscripts, 
-										identifierTier=identifierTier,
-										identifierPattern=identifierPattern,
-										eraseUpdateSectionsCompletely=eraseUpdateSectionsCompletely) 
+	mergedT <- act::transcripts_merge2 (destinationTranscript         = destinationTranscript, 
+										updateTranscripts             = updateTranscripts, 
+										identifierTier                = identifierTier,
+										identifierPattern             = identifierPattern,
+										eraseCompletely = eraseCompletely) 
 	
 
 	#=== delete  transcripts

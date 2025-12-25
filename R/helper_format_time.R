@@ -3,7 +3,7 @@
 #' @param t Double; time in seconds.
 #' @param digits Integer; number of digits. 
 #' @param addHrsMinSec Logical; if \code{TRUE} 'hrs' 'min' 'sec' will be used instead of ':'.
-#' @param addTimeInSeconds Logical; if \code{TRUE} time value in seconds will be shown, too.
+#' @param addSec Logical; if \code{TRUE} time value in seconds will be shown, too.
 #'
 #' @return Character string.
 #' @export
@@ -32,21 +32,21 @@
 #' helper_format_time(34.2322345, addHrsMinSec=TRUE, digits=3)
 #' helper_format_time(0.2322345, addHrsMinSec=TRUE, digits=3)
 #' 
-#' helper_format_time(12734.2322345, addHrsMinSec=TRUE, addTimeInSeconds=TRUE)
-#' helper_format_time(2734.2322345, addHrsMinSec=TRUE, addTimeInSeconds=TRUE)
-#' helper_format_time(34.2322345, addHrsMinSec=TRUE, addTimeInSeconds=TRUE)
-#' helper_format_time(0.2322345, addHrsMinSec=TRUE, addTimeInSeconds=TRUE)
+#' helper_format_time(12734.2322345, addHrsMinSec=TRUE, addSec=TRUE)
+#' helper_format_time(2734.2322345, addHrsMinSec=TRUE, addSec=TRUE)
+#' helper_format_time(34.2322345, addHrsMinSec=TRUE, addSec=TRUE)
+#' helper_format_time(0.2322345, addHrsMinSec=TRUE, addSec=TRUE)
 #' 
-#' helper_format_time(12734.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=TRUE)
-#' helper_format_time(2734.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=TRUE)
-#' helper_format_time(34.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=TRUE)
-#' helper_format_time(0.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=TRUE)
+#' helper_format_time(12734.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
+#' helper_format_time(2734.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
+#' helper_format_time(34.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
+#' helper_format_time(0.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
 #' 
 #' 
 helper_format_time <- function (t,
 								digits=1,
 								addHrsMinSec=FALSE, 
-								addTimeInSeconds=FALSE) {
+								addSec=FALSE) {
 
 	digits <- max(0, as.integer(digits))
 	t<-round(t, digits)
@@ -64,26 +64,28 @@ helper_format_time <- function (t,
 	}
 	
 	if (addHrsMinSec) {
-        f <- sprintf("%0.fhrs %02.fmin %02.fsec", h, m, s)
-		
+        #f <- sprintf("%0.fhrs %02.fmin %02.fsec", h, m, s)
+        f <- sprintf("%.0fhrs %02.0fmin %02.0fsec", h, m, s)
+        
 		if (digitsSTR!="") {
 			f <- paste(f," ", digitsSTR, sep="")
 		}
 		
-		if (addTimeInSeconds) {
-			f <- paste(f, " (=",round(t,3)," sec)", sep="")
+		if (addSec) {
+			f <- paste(f, " (=",round(t, 3)," sec)", sep="")
 		}
 	} else {
-		f <- sprintf("%02.f:%02.f:%02.f", h, m, s)
+		#f <- sprintf("%02.f:%02.f:%02.f", h, m, s)
+		f <- sprintf("%.0f:%02.0f:%02.0f", h, m, s)
 
 		if (digitsSTR!="") {
 			f <- paste(f, digitsSTR ,sep=",")
 		}
 		
-		if (addTimeInSeconds) {
-			f <- paste(f, " (=",round(t,digits)," sec)", sep="")
+		if (addSec) {
+			f <- paste(f, " (=",round(t, digits)," sec)", sep="")
 		}
 	}
-
+	f <- stringr::str_replace_all(f, ",", ".")
 	return(f)
 }

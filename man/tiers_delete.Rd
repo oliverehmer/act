@@ -39,7 +39,7 @@ x <- act::tiers_delete(examplecorpus, tierNames=tierNames)
 x@history[length(x@history)]
 
 # tiers 'A' and 'B' do not occur anymore
-act::info(x)$tiers$tier.name
+act::info(x)$tiers$tierName
 }
 \seealso{
 \link{tiers_add}, \link{tiers_rename}, \link{tiers_convert}, \link{tiers_sort}, \link{helper_tiers_new_table}, \link{helper_tiers_sort_table}

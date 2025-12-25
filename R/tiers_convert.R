@@ -59,9 +59,9 @@ tiers_convert <- function(x,
 					x@transcripts[[i]]@tiers$type[j]<-'TextTier'
 					
 					#--modify times
-					ids <- which(x@transcripts[[i]]@annotations$tier.name==j)
+					ids <- which(x@transcripts[[i]]@annotations$tierName==j)
 					if (length(ids)>0) {
-						x@transcripts[[i]]@annotations$endSec[ids]<- x@transcripts[[i]]@annotations$startSec[ids]
+						x@transcripts[[i]]@annotations$endsec[ids]<- x@transcripts[[i]]@annotations$startsec[ids]
 					}
 					tiers_converted_transcript <- c(tiers_converted_transcript,j)
 					transcripts_modified_ids <- c(transcripts_modified_ids, i)
@@ -74,11 +74,11 @@ tiers_convert <- function(x,
 					
 					#--modify times
 					#get all end times
-					ids <- which(x@transcripts[[i]]@annotations$tier.name==j)
+					ids <- which(x@transcripts[[i]]@annotations$tierName==j)
 					if (length(ids)>0) {
-						newTimes <- c(x@transcripts[[i]]@annotations$endSec[ids], x@transcripts[[i]]@length.sec)
+						newTimes <- c(x@transcripts[[i]]@annotations$endsec[ids], x@transcripts[[i]]@length.sec)
 						newTimes <- newTimes[2:length(newTimes)]
-						x@transcripts[[i]]@annotations$endSec[ids]<- newTimes
+						x@transcripts[[i]]@annotations$endsec[ids]<- newTimes
 					}
 					tiers_converted_transcript <- c(tiers_converted_transcript,j)
 					transcripts_modified_ids <- c(transcripts_modified_ids, i)

@@ -4,12 +4,12 @@
 \alias{matrix_load}
 \title{Load replacement matrix}
 \usage{
-matrix_load(path = NULL, myFileEncoding = "UTF-8")
+matrix_load(path = NULL, encoding = "UTF-8")
 }
 \arguments{
-\item{path}{Character string; path to the replacement matrix (a CSV file). If argument is left open, the default replacement matrix of the package will be returned.}
+\item{path}{Character string; path to the replacement matrix (a .csv file). If argument is left open, the default replacement matrix of the package will be returned.}
 
-\item{myFileEncoding}{Character string; encoding of the file.}
+\item{encoding}{Character string; encoding of the file.}
 }
 \value{
 Data.frame

@@ -9,10 +9,10 @@ search_cuts_srt(
   s,
   cutSpanBeforesec = NULL,
   cutSpanAftersec = NULL,
-  outputFolder = NULL,
-  speaker.show = TRUE,
-  speaker.width = 3,
-  speaker.ending = ":"
+  folderOutput = NULL,
+  speakerShow = TRUE,
+  speakerWidth = 3,
+  speakerEnding = ":"
 )
 }
 \arguments{
@@ -24,13 +24,13 @@ search_cuts_srt(
 
 \item{cutSpanAftersec}{Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.}
 
-\item{outputFolder}{Character string; if parameter is not set, the srt subtitles will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.srt' format.}
+\item{folderOutput}{Character string; if parameter is not set, the srt subtitles will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.srt' format.}
 
-\item{speaker.show}{Logical; if \code{TRUE} name of speaker will be shown before the content of the annotation.}
+\item{speakerShow}{Logical; if \code{TRUE} name of speaker will be shown before the content of the annotation.}
 
-\item{speaker.width}{Integer; width of speaker abbreviation, -1 for full name without shortening.}
+\item{speakerWidth}{Integer; width of speaker abbreviation, -1 for full name without shortening.}
 
-\item{speaker.ending}{Character string; string that is added at the end of the speaker name.}
+\item{speakerEnding}{Character string; string that is added at the end of the speaker name.}
 }
 \value{
 Search object;

@@ -6,7 +6,7 @@
 #' @return Corpus object.
 #' @export
 #'
-#' @seealso \link{media_assign}, \link{media_getPathToExistingFile}
+#' @seealso \link{media_assign}, \link{media_path_to_existing_file}
 #'
 #' @examples
 #' library(act)

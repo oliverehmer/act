@@ -7,10 +7,10 @@
 search_results_export(
   s,
   path,
-  sheetNameXLSX = "data",
+  sheetName = "data",
   saveAsCSV = FALSE,
-  encodingCSV = "UTF-8",
-  separatorCSV = ";",
+  encoding = "UTF-8",
+  separator = ";",
   overwrite = TRUE
 )
 }
@@ -19,13 +19,13 @@ search_results_export(
 
 \item{path}{Character string; path where file will be saved. Please add the suffix '.csv' or '.xlsx' to the file name.}
 
-\item{sheetNameXLSX}{Character string, set the name of the excel sheet.}
+\item{sheetName}{Character string, set the name of the excel sheet.}
 
 \item{saveAsCSV}{Logical; if \code{TRUE} results will be saved as CSV file; Logical; if \code{FALSE} a XLS file will be saved.}
 
-\item{encodingCSV}{Character string; text encoding for CSV files.}
+\item{encoding}{Character string; text encoding for CSV files.}
 
-\item{separatorCSV}{Character; single character that is used to separate the columns.}
+\item{separator}{Character; single character that is used to separate the columns.}
 
 \item{overwrite}{Logical; if \code{TRUE} existing files will be overwritten}
 }

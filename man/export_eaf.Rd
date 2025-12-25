@@ -2,11 +2,11 @@
 % Please edit documentation in R/export_eaf.R
 \name{export_eaf}
 \alias{export_eaf}
-\title{Export a transcript object to a 'ELAN' .eaf file}
+\title{Export 'ELAN' .eaf file}
 \usage{
 export_eaf(
   t,
-  outputPath = NULL,
+  pathOutput = NULL,
   filterTierNames = NULL,
   filterSectionStartsec = NULL,
   filterSectionEndsec = NULL,
@@ -16,7 +16,7 @@ export_eaf(
 \arguments{
 \item{t}{Transcript object; transcript to be exported.}
 
-\item{outputPath}{Character string; path where .eaf file will be saved.}
+\item{pathOutput}{Character string; path where .eaf file will be saved.}
 
 \item{filterTierNames}{Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.}
 
@@ -27,14 +27,14 @@ export_eaf(
 \item{createMediaLinks}{Logical; if \code{TRUE} media links will be created.}
 }
 \value{
-Contents of the .eaf file (only if \code{outputPath} is left empty)
+Contents of the .eaf file (only if \code{pathOutput} is left empty)
 }
 \description{
 Advice: In most situations it is more convenient to use \code{act::corpus_export} for exporting annotation files.
 }
 \details{
-The .eaf file will be written to the file specified in \code{outputPath}.
-If \code{outputPath} is left empty, the function will return the contents of the .eaf itself.
+The .eaf file will be written to the file specified in \code{pathOutput}.
+If \code{pathOutput} is left empty, the function will return the contents of the .eaf itself.
 }
 \examples{
 library(act)
@@ -53,12 +53,12 @@ path <- file.path("PATH_TO_AN_EXISTING_FOLDER_ON_YOUR_COMPUTER",
 }
 
 # Export WITH media links
-act::export_eaf(t=t, outputPath=path)
+act::export_eaf(t=t, pathOutput=path)
 
 # Export WITHOUT media links
-act::export_eaf(t=t, outputPath=path, createMediaLinks = FALSE)
+act::export_eaf(t=t, pathOutput=path, createMediaLinks = FALSE)
 
 }
 \seealso{
-\code{corpus_export}, \code{export_exb}, \code{export_printtranscript}, \code{export_rpraat}, \code{export_srt}, \code{export_textgrid}
+\code{corpus_export}, \link{export_exb}, \link{export_txt}, \link{export_rpraat}, \link{export_srt}, \link{export_textgrid}, \link{export_docx}
 }

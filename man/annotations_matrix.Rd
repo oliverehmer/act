@@ -4,12 +4,12 @@
 \alias{annotations_matrix}
 \title{Search and replace contents of annotations using a matrix}
 \usage{
-annotations_matrix(x, path_replacementMatrixCSV, filterTranscriptNames = NULL)
+annotations_matrix(x, pathReplacementMatrix, filterTranscriptNames = NULL)
 }
 \arguments{
 \item{x}{Corpus object.}
 
-\item{path_replacementMatrixCSV}{Character string; path to replacement matrix (a CSV file).}
+\item{pathReplacementMatrix}{Character string; path to replacement matrix (a CSV file).}
 
 \item{filterTranscriptNames}{Vector of character strings; names of the transcripts to be included.}
 }
@@ -34,7 +34,7 @@ mymatrix <- act::matrix_load(path)
 mymatrix
 
 # Apply matrix to examplecorpus
-test <- act::annotations_matrix(x=examplecorpus, path_replacementMatrixCSV=path)
+test <- act::annotations_matrix(x=examplecorpus, pathReplacementMatrix=path)
 
 # Compare some annotations in the original examplecorpus object and
 # in the modified corpus object test
@@ -51,5 +51,5 @@ and \code{\link[=matrix_save]{matrix_save()}} for saving the matrix to a CSV fil
 If only certain transcripts or tiers should be affected set the parameter \code{filterTranscriptNames}.
 In case that you want to select transcripts  by using regular expressions use the function \code{act::search_makefilter} first.
 
-\link{media_delete}, \link{media_getPathToExistingFile}
+\link{media_delete}, \link{media_path_to_existing_file}
 }

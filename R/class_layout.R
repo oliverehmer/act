@@ -8,98 +8,98 @@
 #' @slot filter.tier.includeRegEx Character string; as regular expression, tiers matching the expression will be included in the print transcript.
 #' @slot filter.tier.excludeRegEx Character string; as regular expression, tiers matching the expression will be excluded from the print transcript.
 #' @slot transcript.width Integer; width of transcript, -1 for no line wrapping.
-#' @slot speaker.width Integer; width of speaker abbreviation, -1 for full name without shortening.
+#' @slot speaker.regex Character string; Regular expression to extract speaker abbreviation from tier name
+#' @slot speaker.width Integer; maximum width of speaker abbreviation, -1 for full name without shortening.
 #' @slot speaker.ending Character string; string that is added at the end of the speaker name.
 #' @slot spacesbefore Integer; number of spaces inserted before line number.
-#' @slot additionalline1.insert Logical; if \code{TRUE} an additional dummy line will be inserted after each annotation line, the text is defined in \code{.additionalline1.text}.
-#' @slot additionalline1.text Character string; Content of additional dummy line 1.
-#' @slot additionalline1.indent Logical; if \code{TRUE} the content of the dummy line 1 will be indented to begin where the content of the annotations start.
-#' @slot additionalline2.insert Logical; if \code{TRUE} an additional dummy line will be inserted after each annotation line, the text is defined in \code{.additionalline2.text}.
-#' @slot additionalline2.text Character string; Content of additional dummy line 2.
-#' @slot additionalline2.indent Logical; if \code{TRUE} the content of the dummy line 2 will be indented to begin where the content of the annotations start.
-#' @slot brackets.tryToAlign Logical; if \code{TRUE} act will try to align brackets [] for parallel speaking (Attention: experimental function; results may not satisfy).
-#' @slot pauseTierRegEx Character string; regular expression to identify pause tier for auto formatting pauses.
+#' @slot brackets.align Logical; if \code{TRUE} act will try to align brackets [] for parallel speaking (Attention: experimental function; results may not satisfy).
 #' @slot header.insert Logical; if \code{TRUE} a transcript header is inserted.
-#' @slot header.heading.fromColumnName Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the heading is taken (if \code{object@.header.insert==TRUE})
-#' @slot header.firstInfo.fromColumnName Character string; is only used when transcripts are made based on a search results; defines from which column of a search results table the first info is taken (if \code{object@.header.insert==TRUE})
 #' @slot arrow.insert Logical; is only used when transcripts are made based on a search results; if \code{TRUE} an arrow will be inserted, highlighting the transcript line containing the search hit.
 #' @slot arrow.shape Character string; shape of the arrow.
-#' 
+#' @slot docx.template.path Character string; 
+#' @slot docx.styles Data.frame; Matrix with mappings of act variables and the format templates in the .docx template files. To change the styles matrix use \code{l@docx.styles <- act::export_docx_styles_load(path="...")}
+#'
+#' @seealso \link{act::matrix_load}
+#'
+#' @export
+#'
+
 methods::setClass("layout", 
 				  representation(
 				  	name                            = "character",
 				  	filter.tier.includeRegEx        = "character",
 				  	filter.tier.excludeRegEx        = "character",
 				  	transcript.width 				= "numeric",
+				  	speaker.regex    				= "character",
 				  	speaker.width    				= "numeric",
 				  	speaker.ending 					= "character",
 				  	spacesbefore 					= "numeric",
-				  	additionalline1.insert          = "logical",
-				  	additionalline1.text            = "character",
-				  	additionalline1.indent          = "logical",
-				  	additionalline2.insert          = "logical",
-				  	additionalline2.text            = "character",
-				  	additionalline2.indent          = "logical",
-				  	brackets.tryToAlign 			= "logical",
-				  	pauseTierRegEx   				= "character",
+				  	brackets.align 		         	= "logical",
 				  	header.insert 					= "logical",
-				  	header.heading.fromColumnName 	= "character",
-				  	header.firstInfo.fromColumnName = "character",
 				  	arrow.insert 					= "logical",
-				  	arrow.shape  					= "character"
-				  ), prototype = list (
+				  	arrow.shape  					= "character",
+				  	docx.template.path              = "character",
+				  	docx.styles                     = "data.frame"
+				  ), prototype = list(
 				  	name                            = "StandardLayout",
-				  	filter.tier.includeRegEx        = character(),
-				  	filter.tier.excludeRegEx        = character(),
+				  	filter.tier.includeRegEx        = NA_character_,
+				  	filter.tier.excludeRegEx        = NA_character_,
 				  	transcript.width 				= 65,
+				  	speaker.regex                   = NA_character_,
 				  	speaker.width    				= 3,
 				  	speaker.ending 					= ":  ",
 				  	spacesbefore 					= 3,
-				  	additionalline1.insert          = FALSE,
-				  	additionalline1.text            = "",
-				  	additionalline1.indent          = TRUE,
-				  	additionalline2.insert          = FALSE,
-				  	additionalline2.text            = "",
-				  	additionalline2.indent          = FALSE,
-				  	brackets.tryToAlign 			= TRUE,
-				  	pauseTierRegEx   				= "",
+				  	brackets.align 		         	= TRUE,
 				  	header.insert 					= TRUE,
-				  	header.heading.fromColumnName 	= "resultID",
-				  	header.firstInfo.fromColumnName = "header.firstinfo",
 				  	arrow.insert 					= TRUE,
-				  	arrow.shape  					= "->"
-
+				  	arrow.shape  					= "->",
+				  	docx.template.path              = '',
+				  	docx.styles                     = data.frame(act.style.name=character(),	act.style.type=character(), docx.template.type=character(), docx.template.name=character(), stringsAsFactors		= FALSE)
 				  )
 )
 
 layout_show <- function (object) {
 	cat("layout object", fill=TRUE)
-	cat("  name                            : ", paste("'", object@name, "'",sep="", collapse=""),fill=TRUE)
+	cat("  name                    : ", paste("'", object@name, "'",sep="", collapse=""),fill=TRUE)
 	cat("\n")
-	cat("  filter.tier.includeRegEx        : ", paste("'", object@filter.tier.includeRegEx, "'",sep="", collapse=""),fill=TRUE)
-	cat("  filter.tier.excludeRegEx        : ", paste("'", object@filter.tier.excludeRegEx, "'",sep="", collapse=""),fill=TRUE)
+	cat("  filter.tier.includeRegEx: ", paste("'", object@filter.tier.includeRegEx, "'",sep="", collapse=""),fill=TRUE)
+	cat("  filter.tier.excludeRegEx: ", paste("'", object@filter.tier.excludeRegEx, "'",sep="", collapse=""),fill=TRUE)
 	cat("\n")
-	cat("  transcript.width                : ", object@transcript.width, fill=TRUE)
+	cat("  transcript.width        : ", object@transcript.width, fill=TRUE)
 	cat("\n")
-	cat("  speaker.width                   : ", object@speaker.width, fill=TRUE)
-	cat("  speaker.ending                  : ", paste("'", object@speaker.ending, "'",sep="", collapse=""),fill=TRUE)
-	cat("  spacesbefore                    : ", object@spacesbefore, fill=TRUE)
+	cat("  speaker.regex           : ", object@speaker.regex, fill=TRUE)
+	cat("  speaker.width           : ", object@speaker.width, fill=TRUE)
+	cat("  speaker.ending          : ", paste("'", object@speaker.ending, "'",sep="", collapse=""),fill=TRUE)
+	cat("  spacesbefore            : ", object@spacesbefore, fill=TRUE)
 	cat("\n")
-	cat("  additionalline1.insert          : ", paste("'", object@additionalline1.insert, "'",sep="", collapse=""),fill=TRUE)
-	cat("  additionalline1.text            : ", paste("'", object@additionalline1.text, "'",sep="", collapse=""),fill=TRUE)
-	cat("  additionalline1.indent          : ", object@additionalline1.indent, fill=TRUE)
-	cat("  additionalline2.insert          : ", object@additionalline2.insert, fill=TRUE)
-	cat("  additionalline2.text            : ", paste("'", object@additionalline2.text, "'",sep="", collapse=""),fill=TRUE)
-	cat("  additionalline2.indent          : ", object@additionalline2.indent, fill=TRUE)
+	cat("  brackets.align          : ", object@brackets.align, fill=TRUE)
 	cat("\n")
-	cat("  brackets.tryToAlign             : ", object@brackets.tryToAlign, fill=TRUE)
-	cat("  pauseTierRegEx                  : ", paste("'", object@pauseTierRegEx, "'",sep="", collapse=""),fill=TRUE)
+	cat("  header.insert           : ", object@header.insert, fill=TRUE)
+	cat("  arrow.insert            : ", object@arrow.insert, fill=TRUE)
+	cat("  arrow.shape             : ", paste("'", object@arrow.shape,"'",sep="", collapse=""), fill=TRUE)
 	cat("\n")
-	cat("  header.insert                   : ", object@header.insert, fill=TRUE)
-	cat("  header.heading.fromColumnName   : ", paste("'", object@header.heading.fromColumnName, "'",sep="", collapse=""),fill=TRUE)
-	cat("  header.firstInfo.fromColumnName : ", paste("'", object@header.firstInfo.fromColumnName,"'",sep="", collapse=""), fill=TRUE)
-	cat("  arrow.insert                    : ", object@arrow.insert, fill=TRUE)
-	cat("  arrow.shape                     : ", paste("'", object@arrow.shape,"'",sep="", collapse=""), fill=TRUE)
+	cat("  docx.template.path      : ", paste("'", object@docx.template.path,"'",sep="", collapse=""), fill=TRUE)
+	cat("  docx.styles             : ", '[check directly]', nrow(object@docx.styles), 'row(s)', fill=TRUE)
 }
-
 methods::setMethod("show", signature = "layout", definition = layout_show)
+
+
+
+
+methods::setMethod(
+	"initialize",
+	"layout",
+	function(.Object, ...) {
+		
+		# call the default initializer first
+		.Object <- callNextMethod()
+		
+		# custom behavior
+		#message("A new layout object has been created.")
+		#load the default styles matrix to new layout objects
+		.Object@docx.styles <- export_docx_styles_load()
+		
+		.Object
+	}
+)
+

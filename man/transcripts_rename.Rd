@@ -9,10 +9,10 @@ transcripts_rename(
   newTranscriptNames = NULL,
   searchPatterns = NULL,
   searchReplacements = NULL,
-  toUpperCase = FALSE,
-  toLowerCase = FALSE,
+  toUpper = FALSE,
+  toLower = FALSE,
   trim = FALSE,
-  stopIfNotUnique = TRUE
+  stopNonUnique = TRUE
 )
 }
 \arguments{
@@ -24,13 +24,13 @@ transcripts_rename(
 
 \item{searchReplacements}{Character string; String to replace the hits of the search.}
 
-\item{toUpperCase}{Logical; Convert transcript names all to upper case.}
+\item{toUpper}{Logical; Convert transcript names all to upper case.}
 
-\item{toLowerCase}{Logical; Convert transcript names all to lower case.}
+\item{toLower}{Logical; Convert transcript names all to lower case.}
 
 \item{trim}{Logical; Remove leading and trailing spaces in names.}
 
-\item{stopIfNotUnique}{Logical; If \code{TRUE} the function will stop if replacement would lead to non-unique names; If \code{FALSE} names will be automatically changed to be unique.}
+\item{stopNonUnique}{Logical; If \code{TRUE} the function will stop if replacement would lead to non-unique names; If \code{FALSE} names will be automatically changed to be unique.}
 }
 \value{
 Corpus object
@@ -58,7 +58,7 @@ test@transcripts[[1]]@name
 test@history[length(test@history)]
 
 # convert to lower case
-test <- act::transcripts_rename(examplecorpus, toLowerCase=TRUE)
+test <- act::transcripts_rename(examplecorpus, toLower=TRUE)
 test@history[length(test@history)]
 
 # search replace

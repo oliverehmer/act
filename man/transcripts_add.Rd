@@ -8,7 +8,7 @@ transcripts_add(
   x,
   ...,
   skipDuplicates = FALSE,
-  createFullText = TRUE,
+  createFulltext = TRUE,
   assignMedia = TRUE
 )
 }
@@ -19,7 +19,7 @@ transcripts_add(
 
 \item{skipDuplicates}{Logical; If \code{FALSE} double transcripts will be renamed to make the names unique, if \code{TRUE} double transcripts will not be added.}
 
-\item{createFullText}{Logical; if \code{TRUE} full text will be created.}
+\item{createFulltext}{Logical; if \code{TRUE} full text will be created.}
 
 \item{assignMedia}{Logical; if \code{TRUE} the folder(s) specified in \code{@paths.media.files} of your corpus object will be scanned for media.}
 }
@@ -33,7 +33,7 @@ Add a single or multiple transcript objects to a corpus object.
 The name of the transcript objects have to be unique in the act package.
 The \code{@name} attribute of each transcript object will be set as identifier in the list of transcripts in the corpus object.
 By default, transcripts with non unique names will be renamed.
-If you prefer to import.skip.double.files, set the parameter \code{skipDuplicates=TRUE}.
+If you prefer to import.skipDoubleFiles, set the parameter \code{skipDuplicates=TRUE}.
 Skipped/renamed transcripts will be reported in
 }
 \examples{

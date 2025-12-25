@@ -2,23 +2,23 @@
 % Please edit documentation in R/export_srt.R
 \name{export_srt}
 \alias{export_srt}
-\title{Export a transcript object to a .srt subtitle file}
+\title{Export .srt subtitle file}
 \usage{
 export_srt(
   t,
-  outputPath = NULL,
+  pathOutput = NULL,
   filterTierNames = NULL,
   filterSectionStartsec = NULL,
   filterSectionEndsec = NULL,
-  speaker.show = TRUE,
-  speaker.width = 3,
-  speaker.ending = ":"
+  speakerShow = TRUE,
+  speakerWidth = 3,
+  speakerEnding = ":"
 )
 }
 \arguments{
 \item{t}{Transcript object; transcript to be saved.}
 
-\item{outputPath}{Character string; path where .srt will be saved.}
+\item{pathOutput}{Character string; path where .srt will be saved.}
 
 \item{filterTierNames}{Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.}
 
@@ -26,22 +26,22 @@ export_srt(
 
 \item{filterSectionEndsec}{Double; end of selection in seconds.}
 
-\item{speaker.show}{Logical; if \code{TRUE} name of speaker will be shown before the content of the annotation.}
+\item{speakerShow}{Logical; if \code{TRUE} name of speaker will be shown before the content of the annotation.}
 
-\item{speaker.width}{Integer; width of speaker abbreviation, -1 for full name without shortening.}
+\item{speakerWidth}{Integer; width of speaker abbreviation, -1 for full name without shortening.}
 
-\item{speaker.ending}{Character string; string that is added at the end of the speaker name.}
+\item{speakerEnding}{Character string; string that is added at the end of the speaker name.}
 }
 \value{
-Contents of the .srt file (only if \code{outputPath} is left empty)
+Contents of the .srt file (only if \code{pathOutput} is left empty)
 }
 \description{
 Advice: In most situations it is more convenient to use \code{act::corpus_export} for exporting annotation files.
 }
 \details{
 Creates a 'Subrip title' .srt subtitle file.
-It will be written to the file specified in \code{outputPath}.
-If \code{outputPath} is left empty, the function will return the contents of the .srt itself.
+It will be written to the file specified in \code{pathOutput}.
+If \code{pathOutput} is left empty, the function will return the contents of the .srt itself.
 }
 \examples{
 library(act)
@@ -61,9 +61,9 @@ path <- file.path("PATH_TO_AN_EXISTING_FOLDER_ON_YOUR_COMPUTER",
 }
 
 # Export
-act::export_srt(t=t, outputPath=path)
+act::export_srt(t=t, pathOutput=path)
 
 }
 \seealso{
-\code{corpus_export}, \code{export_eaf}, \code{export_exb}, \code{export_printtranscript}, \code{export_rpraat}, \code{export_textgrid}
+\code{corpus_export}, \link{export_eaf}, \link{export_exb}, \link{export_txt}, \link{export_docx}, \link{export_rpraat}, \link{export_textgrid}
 }

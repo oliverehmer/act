@@ -9,5 +9,5 @@ library(act)
 examplecorpus@transcripts[["SYNC_rotar_y_flexionar"]]@media.path
 
 # Get only media files of a certain type, e.g. a wav file, and return only the first match:
-act::media_getPathToExistingFile(examplecorpus@transcripts[["SYNC_rotar_y_flexionar"]],
+act::media_path_to_existing_file(examplecorpus@transcripts[["SYNC_rotar_y_flexionar"]],
  filterMediaFile=".*\\.wav")

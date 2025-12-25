@@ -10,7 +10,7 @@ annotations_all(x)
 \item{x}{Corpus object.}
 }
 \value{
-Data.frame.
+data frame
 }
 \description{
 Merges annotations from all transcripts in a corpus and returns a data frame.

@@ -1,3 +1,5 @@
+# Detect current operating system
+#
 helper_detect_os <- function(){
 	sysinf <- Sys.info()
 	if (!is.null(sysinf)){
@@ -18,9 +20,9 @@ helper_detect_os <- function(){
 
 # Make names for search results
 #
-# @param mySearchResults Data frame; data frame containing search results.
-# @param resultid.prefix Character string; prefix for the name of the consecutively numbered search results.
-# @param resultid.start Integer; start number of results 
+# @param search.results Data frame; data frame containing search results.
+# @param resultidPrefix Character string; prefix for the name of the consecutively numbered search results.
+# @param resultidStart Integer; start number of results 
 # @return Vector of character strings; names created for the search results.
 # @export
 #
@@ -32,17 +34,17 @@ helper_detect_os <- function(){
 # searchresults <- act::search_corpus(examplecorpus, pattern=myRegEx, concordanceMake=FALSE)
 # 
 # # Make custom names
-# mynames <- act::search_names(searchresults, resultid.prefix="yo")
+# mynames <- act::search_names(searchresults, resultidPrefix="yo")
 # 
 # # Replace old names in search by new names
 # searchresults$resultID <- mynames
 # @keywords internal
-helper_makeNamesForSearch <- function(mySearchResults, 
-									  resultid.prefix = "result",
-									  resultid.start  = 1) {
+helper_makeNamesForSearch <- function(search.results, 
+									  resultidPrefix = "result",
+									  resultidStart  = 1) {
 	
-	myFormat <- paste(resultid.prefix, "%0", nchar(toString(nrow(mySearchResults)-1+resultid.start)), "d", sep="")
-	myNames <- sprintf(myFormat, resultid.start:(nrow(mySearchResults)+resultid.start-1))
+	myFormat <- paste(resultidPrefix, "%0", nchar(toString(nrow(search.results)-1+resultidStart)), "d", sep="")
+	myNames <- sprintf(myFormat, resultidStart:(nrow(search.results)+resultidStart-1))
 	return (myNames)
 }
 
@@ -92,6 +94,48 @@ helper_test_read <- function(input_path,
 			myCon <- file(input_path, encoding = testencoding)
 			myLines <- readLines(myCon, n = testlinenrs)
 			close(myCon)
+			
+			if(	sum(stringr::str_length(myLines))==0) {
+				return("error")
+			}
+			return (myLines)
+		},
+		
+		error = function(c)
+		{
+			close(myCon)
+			return("error")
+		},
+		
+		warning = function(c)
+		{
+			close(myCon)
+			return("error")
+			#paste("warning:", warnings())
+		},
+		message = function(c)
+		{
+			return("error")
+			close(myCon)
+			#"message"
+		}
+	)
+}
+helper_test_read_OLDBACKUP <- function(input_path, 
+							 testencoding, 
+							 testlinenrs) {
+	
+	#assign("last.warning", NULL, envir = baseenv())
+	input_path <- toString(input_path)
+	
+	if(!file.exists(input_path)) {
+		return("error")
+	}
+	tryCatch(
+		{
+			myCon <- file(input_path, encoding = testencoding)
+			myLines <- readLines(myCon, n = testlinenrs)
+			close(myCon)
 			return (myLines)
 		},
 
@@ -116,35 +160,6 @@ helper_test_read <- function(input_path,
 	)
 }
 
-helper_progress_set <- function(title, total) {
-	#set progress bar	
-	if(getOption("act.showprogress", TRUE)) {
-		
-		if (exists("act.environment", mode="environment")) {
-			if(exists("pb", envir=act.environment)) {
-				title <- stringr::str_pad(title, width=24, side="right", pad=" ")
-				act.environment$pb <- progress::progress_bar$new(
-					format = paste("  ", title, "[:bar] :percent (:eta left)", sep=""),
-					total = total, 
-					clear = FALSE, 
-					show_after = 0,
-					width= 70)
-			}
-		}			
-	}
-}
 
-helper_progress_tick <- function() {
-	#update progress
-	if (getOption("act.showprogress", TRUE)) {
-		if (exists("act.environment", mode="environment")) {
-			if(exists("pb", envir=act.environment)) {
-				if (!act.environment$pb$finished) {			
-					act.environment$pb$tick()
-				}
-			}
-		}
-	}
-}
 
 

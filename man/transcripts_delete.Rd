@@ -34,9 +34,9 @@ setdiff(names(examplecorpus@transcripts), names(test@transcripts))
 test@history[length(test@history)]
 
 # delete transcripts that match a filter, e.g. all transcripts from Bolivia "BOL_"
-myfilter <- act::search_makefilter(examplecorpus, filterTranscriptIncludeRegEx = "BOL_")
+myfilter <- act::search_makefilter(examplecorpus, filterTranscriptIncludeRegex = "BOL_")
 test <- act::transcripts_delete(examplecorpus, 
-myfilter$transcript.names)
+myfilter$transcriptNames)
 
 # compare the the original and modified corpus object
 length(examplecorpus@transcripts)

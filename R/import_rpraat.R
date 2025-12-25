@@ -9,27 +9,25 @@
 #' 
 #' Credits: Thanks to Tomáš Bořil, the author of the rPraat package, for commenting on the exchange functions.
 #' 
-#' @param rPraatTextGrid List; rPraat TextGrid object.
+#' @param rpraatTextgrid List; rPraat TextGrid object.
 #' @param transcriptName Character string; name of the transcript.
 #' 
 #' @return Transcript object.
 #' 
-#' @seealso \code{corpus_import}, \code{corpus_new}, \code{import}, \code{import_eaf}, \code{import_exb}, \code{import_textgrid}  
+#' @seealso \link{corpus_import}, \link{corpus_new}, \link{import}, \link{import_eaf}, \link{import_exb}, \link{import_textgrid}, \link{export_rpraat}  
 #' 
 #' @export
 #' 
-#' @seealso \link{export_rpraat}, \link{import}, \link{import_textgrid}, \link{import_eaf}
-#'
 #' @example inst/examples/import_rpraat.R
 #' 
-import_rpraat <- function(rPraatTextGrid, 
+import_rpraat <- function(rpraatTextgrid, 
 						  transcriptName=NULL) {
 	
-	#rPraatTextGrid <- tg
+	#rpraatTextgrid <- tg
 	#transcriptName<-"test"
 	
-	if (length(setdiff(c("tmin", "tmax", "type", "name"), names(attr(rPraatTextGrid, "class"))))!=0) {
-		stop("The object that you have passed as 'rPraatTextGrid' does not seem to be a valid rPraat TextGrid.")
+	if (length(setdiff(c("tmin", "tmax", "type", "name"), names(attr(rpraatTextgrid, "class"))))!=0) {
+		stop("The object that you have passed as 'rpraatTextgrid' does not seem to be a valid rPraat TextGrid.")
 	}
 	
 	t 					<- methods::new("transcript")
@@ -39,18 +37,18 @@ import_rpraat <- function(rPraatTextGrid,
 	if (!is.null(transcriptName)) {
 		t@name <- transcriptName
 	} else {
-		t@name				<- stringr::str_replace(attr(rPraatTextGrid, "class")["name"], ".TextGrid","")
+		t@name				<- stringr::str_replace(attr(rpraatTextgrid, "class")["name"], ".TextGrid","")
 	}
 	t@file.type 			 <- "rpraat"
 	t@import.result 		 <- "ok"
 	t@load.message    	     <- ""
 	t@modification.systime   <- character()
-	t@length.sec        	 <- as.double(attr(rPraatTextGrid, "class")["tmax"])
-	if(getOption("act.import.storeFileContentInTranscript", default=TRUE)) {
-		t@file.content <- rPraatTextGrid
+	t@length.sec        	 <- as.double(attr(rpraatTextgrid, "class")["tmax"])
+	if(getOption("act.import.storefileContentInTranscript", default=TRUE)) {
+		t@file.content <- rpraatTextgrid
 	}
 	
-	tierNames					<- 	attr(rPraatTextGrid, "names")
+	tierNames					<- 	attr(rpraatTextgrid, "names")
 	
 	#---create unique tierNames
 	if (length(tierNames[duplicated(tierNames)])>0) {
@@ -63,80 +61,80 @@ import_rpraat <- function(rPraatTextGrid,
 	names(myTiers) <- tierNames
 	
 	#--- convert annotations 
-	myAnnotations <- data.frame()
-	if (length(rPraatTextGrid)>0) {
-		for (i in 1:length(rPraatTextGrid)) {
-			if (rPraatTextGrid[[i]]$type=="interval") {
-				myAnnotations <- rbind(myAnnotations, 
+	ann <- data.frame()
+	if (length(rpraatTextgrid)>0) {
+		for (i in 1:length(rpraatTextgrid)) {
+			if (rpraatTextgrid[[i]]$type=="interval") {
+				ann <- rbind(ann, 
 									  cbind(
-									  	tier.name = tierNames[[i]], 
-									  	startSec  = as.double(rPraatTextGrid[[i]]$t1), 
-									  	endSec    = as.double(rPraatTextGrid[[i]]$t2), 
-									  	content   = rPraatTextGrid[[i]]$label
+									  	tierName = tierNames[[i]], 
+									  	startsec  = as.double(rpraatTextgrid[[i]]$t1), 
+									  	endsec    = as.double(rpraatTextgrid[[i]]$t2), 
+									  	content   = rpraatTextgrid[[i]]$label
 									  	)
 									  )
 			} else {
-				myAnnotations <- rbind(myAnnotations, 
+				ann <- rbind(ann, 
 									  cbind(
-									  	tier.name = tierNames[[i]], 
-									  	startSec  = as.double(rPraatTextGrid[[i]]$t), 
-									  	endSec    = as.double(rPraatTextGrid[[i]]$t), 
-									  	content   = rPraatTextGrid[[i]]$label
+									  	tierName = tierNames[[i]], 
+									  	startsec  = as.double(rpraatTextgrid[[i]]$t), 
+									  	endsec    = as.double(rpraatTextgrid[[i]]$t), 
+									  	content   = rpraatTextgrid[[i]]$label
 									  	)
 									  )
 			}
-			myTiers[i] <- if (rPraatTextGrid[[i]]$type=="interval") {"IntervalTier"} else {"TextTier"}
+			myTiers[i] <- if (rpraatTextgrid[[i]]$type=="interval") {"IntervalTier"} else {"TextTier"}
 		}
 	}
 	
-	if (nrow(myAnnotations)==0) {
+	if (nrow(ann)==0) {
 		t@annotations 				<- .emptyAnnotations
 	} else {
-		annotationID <- c(1:nrow(myAnnotations))
-		myAnnotations <- cbind(
+		annotationID <- c(1:nrow(ann))
+		ann <- cbind(
 			annotationID 			= as.integer(annotationID),
 			
-			myAnnotations,	
+			ann,	
 			
 			content.norm 			= as.character(""),
-			char.orig.bytime.start	= rep(as.integer(NA), nrow(myAnnotations)),
-			char.orig.bytime.end	= rep(as.integer(NA), nrow(myAnnotations)),
-			char.norm.bytime.start	= rep(as.integer(NA), nrow(myAnnotations)),
-			char.norm.bytime.end	= rep(as.integer(NA), nrow(myAnnotations)),
-			char.orig.bytier.start	= rep(as.integer(NA), nrow(myAnnotations)),
-			char.orig.bytier.end	= rep(as.integer(NA), nrow(myAnnotations)),
-			char.norm.bytier.start	= rep(as.integer(NA), nrow(myAnnotations)),
-			char.norm.bytier.end	= rep(as.integer(NA), nrow(myAnnotations)),
+			char.orig.bytime.start	= rep(as.integer(NA), nrow(ann)),
+			char.orig.bytime.end	= rep(as.integer(NA), nrow(ann)),
+			char.norm.bytime.start	= rep(as.integer(NA), nrow(ann)),
+			char.norm.bytime.end	= rep(as.integer(NA), nrow(ann)),
+			char.orig.bytier.start	= rep(as.integer(NA), nrow(ann)),
+			char.orig.bytier.end	= rep(as.integer(NA), nrow(ann)),
+			char.norm.bytier.start	= rep(as.integer(NA), nrow(ann)),
+			char.norm.bytier.end	= rep(as.integer(NA), nrow(ann)),
 			row.names				= annotationID, 
 			stringsAsFactors		= FALSE) 
-		rownames(myAnnotations) 	<-  myAnnotations$annotationID
+		rownames(ann) 	<-  ann$annotationID
 		
 		#===set correct column format
-		myAnnotations$annotationID	<- as.integer(myAnnotations$annotationID)
-		myAnnotations$startSec		<- as.double(myAnnotations$startSec)
-		myAnnotations$endSec  		<- as.double(myAnnotations$endSec)
-		myAnnotations$content  		<- as.character(myAnnotations$content)
+		ann$annotationID	<- as.integer(ann$annotationID)
+		ann$startsec		<- as.double(ann$startsec)
+		ann$endsec  		<- as.double(ann$endsec)
+		ann$content  		<- as.character(ann$content)
 		
 		#=== get rid of empty intervals
 		if (options()$act.import.readEmptyIntervals==FALSE) 		{
-			myAnnotations <- myAnnotations[myAnnotations$content!="",]
+			ann <- ann[ann$content!="",]
 		}
-		myAnnotations <- myAnnotations[is.na(myAnnotations["content"])==FALSE,]
+		ann <- ann[is.na(ann["content"])==FALSE,]
 		
-		if (nrow(myAnnotations)>0) 		{
+		if (nrow(ann)>0) 		{
 			#=== sort transcript by start times
-			myAnnotations <- myAnnotations[order(myAnnotations$startSec, myAnnotations$tier.name), ]
+			ann <- ann[order(ann$startsec, ann$tierName), ]
 			
-			#=== set endSec of points to startSec
-			myAnnotations$endSec[is.na(myAnnotations$endSec)] <- myAnnotations$startSec[is.na(myAnnotations$endSec)]
+			#=== set endsec of points to startsec
+			ann$endsec[is.na(ann$endsec)] <- ann$startsec[is.na(ann$endsec)]
 			
 			#=== set annotations.id again
-			myAnnotations$annotationID <- c(1:nrow(myAnnotations))
+			ann$annotationID <- c(1:nrow(ann))
 			
 			#=== set the new row names
-			rownames(myAnnotations) <- myAnnotations$annotationID
+			rownames(ann) <- ann$annotationID
 		}	
-		t@annotations 	<- myAnnotations
+		t@annotations 	<- ann
 	}
 	
 	

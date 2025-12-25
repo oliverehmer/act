@@ -14,8 +14,8 @@ path <- file.path("PATH_TO_AN_EXISTING_FOLDER_ON_YOUR_COMPUTER",
 }
 
 # Export WITH media links
-act::export_exb(t=t, outputPath=path)
+act::export_exb(t=t, pathOutput=path)
 
 # Export WITHOUT media links
-act::export_exb(t=t, outputPath=path, createMediaLinks = FALSE)
+act::export_exb(t=t, pathOutput=path, createMediaLinks = FALSE)
 

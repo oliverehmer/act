@@ -8,20 +8,20 @@ tiers_sort(
   x,
   sortVector,
   filterTranscriptNames = NULL,
-  addMissingTiers = FALSE,
-  deleteTiersThatAreNotInTheSortVector = FALSE
+  tiersAddMissing = FALSE,
+  tiersDelete = FALSE
 )
 }
 \arguments{
 \item{x}{Corpus object.}
 
-\item{sortVector}{Vector of character strings; regular expressions to match the tier names. The order within the vector presents the new order of the tiers. Use "\\*" (=two backslashes and a star) to indicate where tiers that are not present in the sort vector but in the transcript should be inserted.}
+\item{sortVector}{Vector of character strings; regular expressions to match the tier names. The order within the vector presents the new order of the tiers. Use "\\\\*" (=two backslashes and a star) to indicate where tiers that are not present in the sort vector but in the transcript should be inserted.}
 
 \item{filterTranscriptNames}{Vector of character strings; names of the transcripts to be included.}
 
-\item{addMissingTiers}{Logical; if \code{TRUE} all tiers that are given in 'the 'sortVector' but are missing in the transcripts will be added.}
+\item{tiersAddMissing}{Logical; if \code{TRUE} all tiers that are given in 'the 'sortVector' but are missing in the transcripts will be added.}
 
-\item{deleteTiersThatAreNotInTheSortVector}{Logical; if \code{TRUE} tiers that are not matched by the regular expressions in 'sortVector' will be deleted. Otherwise the will be inserted at the end of the table or at the position defined by '"\\*' in  'sortVector.}
+\item{tiersDelete}{Logical; if \code{TRUE} tiers that are not matched by the regular expressions in 'sortVector' will be deleted. Otherwise the will be inserted at the end of the table or at the position defined by '"\\*' in  'sortVector.}
 }
 \value{
 Corpus object.
@@ -58,7 +58,7 @@ examplecorpus@transcripts[[2]]@tiers$name[order(examplecorpus@transcripts[[2]]@t
 # in the sort vector but not present in the transcript.
 examplecorpus <- act::tiers_sort(x=examplecorpus,
 sortVector=sortVector,
-addMissingTiers=TRUE)
+tiersAddMissing=TRUE)
 # Check again the order of the tiers
 examplecorpus@transcripts[[1]]@tiers$name[order(examplecorpus@transcripts[[1]]@tiers$position)]
 examplecorpus@transcripts[[2]]@tiers$name[order(examplecorpus@transcripts[[2]]@tiers$position)]
@@ -69,7 +69,7 @@ for (t in examplecorpus@transcripts) {
  examplecorpus <- act::tiers_sort(x=examplecorpus,
 sortVector=sortVector,
 filterTranscriptNames=t@name,
-addMissingTiers=TRUE)
+tiersAddMissing=TRUE)
 }
 # Check for example the first transcript: it now contains a tier called "newTier"
 examplecorpus@transcripts[[1]]@tiers

@@ -55,5 +55,5 @@ t
 
 }
 \seealso{
-\code{corpus_import}, \code{corpus_new}, \code{import}, \code{import_eaf}, \code{import_exb}, \code{import_rpraat}
+\link{corpus_import}, \link{corpus_new}, \link{import}, \link{import_eaf}, \link{import_exb}, \link{import_rpraat}
 }

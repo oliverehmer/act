@@ -4,7 +4,7 @@
 #' 
 #' @param x Corpus object.
 #'
-#' @return Data.frame.
+#' @return data frame
 #' @export
 #'
 #' @examples
@@ -24,11 +24,11 @@ annotations_all <- function(x) {
 	for (t in x@transcripts) {
 		if (is.null(temp)) {
 			if (nrow(t@annotations)>0) {
-				temp <- cbind(transcript.name=rep(t@name, nrow(t@annotations)),  t@annotations)	
+				temp <- cbind(transcriptName=rep(t@name, nrow(t@annotations)),  t@annotations)	
 			}
 		} else {
 			if (nrow(t@annotations)>0) {
-				temp <- rbind(temp, cbind(transcript.name=rep(t@name, nrow(t@annotations)),  t@annotations))	
+				temp <- rbind(temp, cbind(transcriptName=rep(t@name, nrow(t@annotations)),  t@annotations))	
 			}
 		}
 	}

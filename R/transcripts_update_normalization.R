@@ -4,7 +4,7 @@
 #' Function returns a corpus object with normalized transcription and updates the original corpus object passed as argument to x.
 #'
 #' @param x Corpus object.
-#' @param path_replacementMatrixCSV Character string; path to replacement matrix in CSV format. If empty, the default replacement matrix that comes with the package will be used.
+#' @param pathReplacementMatrix Character string; path to replacement matrix in CSV format. If empty, the default replacement matrix that comes with the package will be used.
 #' @param transcriptNames Vector of character strings; Names of the transcripts for which you want to search media files; leave empty if you want to search media for all transcripts in the corpus object.
 #' @param forceUpdate Logical; If \code{TRUE} transcripts will be normalized in any case, if \code{FALSE} transcripts will be only normalized if there was a modification to the transcript since the last normalization.
 #'
@@ -16,7 +16,7 @@
 #' examplecorpus <- act::transcripts_update_normalization(x=examplecorpus)
 #' 
 transcripts_update_normalization <- function(x, 
-											 path_replacementMatrixCSV = "", 
+											 pathReplacementMatrix = "", 
 											 transcriptNames           = NULL, 
 											 forceUpdate               = FALSE){
 	#=== check data

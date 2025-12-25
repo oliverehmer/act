@@ -8,9 +8,9 @@
 #' 
 #' @seealso \link{media_assign}, \link{media_delete}
 #'
-#' @example inst/examples/media_getPathToExistingFile.R
+#' @example inst/examples/media_path_to_existing_file.R
 #' 
-media_getPathToExistingFile <- function(t, 
+media_path_to_existing_file <- function(t, 
 										filterMediaFile=c('.*\\.(mp4|mov)', '.*\\.(aiff|aif|wav)', '.*\\.mp3')) {
 	
 	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }

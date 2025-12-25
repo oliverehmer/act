@@ -11,10 +11,10 @@
 #' @param s Search object.
 #' @param cutSpanBeforesec Double; Start the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param cutSpanAftersec Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
-#' @param outputFolder Character string; if parameter is not set, the srt subtitles will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.srt' format.
-#' @param speaker.show Logical; if \code{TRUE} name of speaker will be shown before the content of the annotation.
-#' @param speaker.width Integer; width of speaker abbreviation, -1 for full name without shortening.
-#' @param speaker.ending Character string; string that is added at the end of the speaker name.
+#' @param folderOutput Character string; if parameter is not set, the srt subtitles will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.srt' format.
+#' @param speakerShow Logical; if \code{TRUE} name of speaker will be shown before the content of the annotation.
+#' @param speakerWidth Integer; width of speaker abbreviation, -1 for full name without shortening.
+#' @param speakerEnding Character string; string that is added at the end of the speaker name.
 #'
 #'
 #' @return Search object; 
@@ -27,14 +27,14 @@ search_cuts_srt <- function(x,
 							s, 
 							cutSpanBeforesec = NULL,
 							cutSpanAftersec = NULL,
-							outputFolder=NULL, 
-							speaker.show=TRUE, 
-							speaker.width=3, 
-							speaker.ending=":" ) {
+							folderOutput=NULL, 
+							speakerShow=TRUE, 
+							speakerWidth=3, 
+							speakerEnding=":" ) {
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
-	if (is.null(s@results$transcript.name)) 		{ stop("Data frame s@results does not contain column 'transcript.name'") 	}
+	if (is.null(s@results$transcriptName)) 		{ stop("Data frame s@results does not contain column 'transcriptName'") 	}
 	
 	if (!options()$act.export.filename.fromColumnName %in% colnames(s@results)) {
 		stop("The column defined in the option 'options()$act.export.filename.fromColumnName' does not exist in the data.frame with the search results.")
@@ -60,8 +60,8 @@ search_cuts_srt <- function(x,
 	}
 	#--- check if output folder is given
 	destination_folder <- NULL
-	if (!is.null(outputFolder)) {
-		destination_folder <- normalizePath(outputFolder, winslash = "/")
+	if (!is.null(folderOutput)) {
+		destination_folder <- normalizePath(folderOutput, winslash = "/")
 		if (destination_folder!="") {
 			if (dir.exists(destination_folder)==FALSE) 	{
 				stop("Output folder does not exist.")
@@ -98,16 +98,16 @@ search_cuts_srt <- function(x,
 			#=== get transcript
 			t <- NULL
 			
-			if (is.null(s@results$transcript.name[i])) {
+			if (is.null(s@results$transcriptName[i])) {
 				#transcript not found
-				myWarnings <- paste(myWarnings, sprintf("- result %s '%s': transcript '%s' not found in corpus. ", i, as.character(s@results[i, options()$act.export.filename.fromColumnName]),  as.character(s@results$transcript.name[i]) ), collapse="\n", sep="\n")
+				myWarnings <- paste(myWarnings, sprintf("- result %s '%s': transcript '%s' not found in corpus. ", i, as.character(s@results[i, options()$act.export.filename.fromColumnName]),  as.character(s@results$transcriptName[i]) ), collapse="\n", sep="\n")
 				
 			} else {
-				t <- x@transcripts[[ s@results$transcript.name[i] ]]
+				t <- x@transcripts[[ s@results$transcriptName[i] ]]
 				
 				if (is.null(t)) {
 					#transcript not found
-					myWarnings <- paste(myWarnings, sprintf("- result %s '%s': transcript '%s' not found in corpus. ", i, as.character(s@results[i, options()$act.export.filename.fromColumnName]),  as.character(s@results$transcript.name[i]) ), collapse="\n", sep="\n")
+					myWarnings <- paste(myWarnings, sprintf("- result %s '%s': transcript '%s' not found in corpus. ", i, as.character(s@results[i, options()$act.export.filename.fromColumnName]),  as.character(s@results$transcriptName[i]) ), collapse="\n", sep="\n")
 				}
 			}
 			
@@ -125,23 +125,23 @@ search_cuts_srt <- function(x,
 				}
 				
 				#=== get start & end
-				startSec 	<- max(0, s@results$startSec[i] - s@cuts.span.beforesec)
-				endSec 		<- min(s@results$endSec[i] + s@cuts.span.beforesec, t@length.sec)
+				startsec 	<- max(0, s@results$startsec[i] - s@cuts.span.beforesec)
+				endsec 		<- min(s@results$endsec[i] + s@cuts.span.beforesec, t@length.sec)
 				
 				#assemble file PATH
-				myFilepath <- NULL
+				myfilePath <- NULL
 				if (!is.null(destination_folder)) {
-					myFilepath <- file.path(destination_folder, "srt", paste(filename, ".srt", sep=""))
+					myfilePath <- file.path(destination_folder, "srt", paste(filename, ".srt", sep=""))
 				} 
 				
-				srt <- act::export_srt(   t                     = x@transcripts[[ s@results$transcript.name[i] ]],
-										  outputPath            = myFilepath,
+				srt <- act::export_srt(   t                     = x@transcripts[[ s@results$transcriptName[i] ]],
+										  pathOutput            = myfilePath,
 										  filterTierNames       = s@filter.tier.names,
-										  filterSectionStartsec = startSec,
-										  filterSectionEndsec   = endSec,
-										  speaker.show          = TRUE, 
-										  speaker.width         = 3, 
-										  speaker.ending        = ":"
+										  filterSectionStartsec = startsec,
+										  filterSectionEndsec   = endsec,
+										  speakerShow          = TRUE, 
+										  speakerWidth         = 3, 
+										  speakerEnding        = ":"
 				)   
 				
 				
@@ -181,7 +181,7 @@ search_cuts_srt <- function(x,
 	}
 	#=== print warnings
 	if (!myWarnings=="") {
-		warning(myWarnings)		
+		warning(unique(myWarnings))		
 	}
 	
 	#=== give modified results back

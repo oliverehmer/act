@@ -4,12 +4,7 @@
 \alias{helper_format_time}
 \title{Formats time as HH:MM:SS,mmm}
 \usage{
-helper_format_time(
-  t,
-  digits = 1,
-  addHrsMinSec = FALSE,
-  addTimeInSeconds = FALSE
-)
+helper_format_time(t, digits = 1, addHrsMinSec = FALSE, addSec = FALSE)
 }
 \arguments{
 \item{t}{Double; time in seconds.}
@@ -18,7 +13,7 @@ helper_format_time(
 
 \item{addHrsMinSec}{Logical; if \code{TRUE} 'hrs' 'min' 'sec' will be used instead of ':'.}
 
-\item{addTimeInSeconds}{Logical; if \code{TRUE} time value in seconds will be shown, too.}
+\item{addSec}{Logical; if \code{TRUE} time value in seconds will be shown, too.}
 }
 \value{
 Character string.
@@ -50,15 +45,15 @@ helper_format_time(2734.2322345, addHrsMinSec=TRUE, digits=3)
 helper_format_time(34.2322345, addHrsMinSec=TRUE, digits=3)
 helper_format_time(0.2322345, addHrsMinSec=TRUE, digits=3)
 
-helper_format_time(12734.2322345, addHrsMinSec=TRUE, addTimeInSeconds=TRUE)
-helper_format_time(2734.2322345, addHrsMinSec=TRUE, addTimeInSeconds=TRUE)
-helper_format_time(34.2322345, addHrsMinSec=TRUE, addTimeInSeconds=TRUE)
-helper_format_time(0.2322345, addHrsMinSec=TRUE, addTimeInSeconds=TRUE)
+helper_format_time(12734.2322345, addHrsMinSec=TRUE, addSec=TRUE)
+helper_format_time(2734.2322345, addHrsMinSec=TRUE, addSec=TRUE)
+helper_format_time(34.2322345, addHrsMinSec=TRUE, addSec=TRUE)
+helper_format_time(0.2322345, addHrsMinSec=TRUE, addSec=TRUE)
 
-helper_format_time(12734.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=TRUE)
-helper_format_time(2734.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=TRUE)
-helper_format_time(34.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=TRUE)
-helper_format_time(0.2322345, addHrsMinSec=TRUE, digits=3, addTimeInSeconds=TRUE)
+helper_format_time(12734.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
+helper_format_time(2734.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
+helper_format_time(34.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
+helper_format_time(0.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
 
 
 }

@@ -4,14 +4,14 @@
 \alias{search_playresults_inquicktime}
 \title{Open all search results in 'Quicktime' and play them}
 \usage{
-search_playresults_inquicktime(x, s, bringQuicktimeToFront = FALSE)
+search_playresults_inquicktime(x, s, bringToFront = FALSE)
 }
 \arguments{
 \item{x}{Corpus object.}
 
 \item{s}{Search object.}
 
-\item{bringQuicktimeToFront}{Logical; if \code{TRUE} the Quicktime player will be activated and placed before all other windows.}
+\item{bringToFront}{Logical; if \code{TRUE} the Quicktime player will be activated and placed before all other windows.}
 }
 \value{
 No return value.

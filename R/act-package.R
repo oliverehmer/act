@@ -7,9 +7,8 @@
 #' 
 #' @section Package options:
 #' The package has numerous options that change the internal workings of the package.
-#' Please see \code{act::options_show} and the information given there. 
+#' Please see \code{act::options_show()} and the information given there. 
 #'  
-#' @docType package
 #' @name act
 #' 
 #' @example inst/examples/act-package.R

@@ -2,15 +2,15 @@
 % Please edit documentation in R/transcripts_filter_single.R
 \name{transcripts_filter_single}
 \alias{transcripts_filter_single}
-\title{Filter a single transcript}
+\title{Filter a single transcript: Extract}
 \usage{
 transcripts_filter_single(
   t,
   filterTierNames = NULL,
   filterSectionStartsec = NULL,
   filterSectionEndsec = NULL,
-  preserveTimes = TRUE,
-  sort = c("none", "tier>startSec", "startSec>tier")
+  timesPreserve = TRUE,
+  sort = c("none", "tier>startsec", "startsec>tier")
 )
 }
 \arguments{
@@ -22,16 +22,16 @@ transcripts_filter_single(
 
 \item{filterSectionEndsec}{Double, end of selection in seconds.}
 
-\item{preserveTimes}{Logical; Parameter is used if \code{filterSectionStartsec} it set. If \code{TRUE} start times will be preserved, if \code{FALSE} the selection will start from 0.}
+\item{timesPreserve}{Logical; Parameter is used if \code{filterSectionStartsec} it set. If \code{TRUE} start times will be preserved, if \code{FALSE} the selection will start from 0.}
 
-\item{sort}{Logical; Annotations will be sorted: 'none' (=no sorting), 'tier>startSec' (=sort first by tier, then by startSec), 'startSec>tier' (=sort first by startSec, then by tier)}
+\item{sort}{Logical; Annotations will be sorted: 'none' (=no sorting), 'tier>startsec' (=sort first by tier, then by startsec), 'startsec>tier' (=sort first by startsec, then by tier)}
 }
 \value{
 Transcript object;
 }
 \description{
 Filter a transcript object and return the filtered transcript object.
-It is possible to filter out temporal sections and tiers.
+It is possible to EXTRACT temporal sections and tiers.
 In case that you want to select tiers by using regular expressions use the function \code{act::search_makefilter} first.
 }
 \examples{
@@ -43,42 +43,42 @@ t1 <- examplecorpus@transcripts[[1]]
 # --- Filter by tiers
 # The example transcript contains two tiers that contain four annotations each.
 t1@tiers
-table(t1@annotations$tier.name)
+table(t1@annotations$tierName)
 
 # Filter transcript to only contain annotations of the FIRST tier
 t2 <- act::transcripts_filter_single(t1, filterTierNames=t1@tiers$name[1])
 t2@tiers
-table(t2@annotations$tier.name)
+table(t2@annotations$tierName)
 
 # Use act::search_makefilter() first to get the tier names, 
 # in this case search for tiers with a capital 'I',
 # which is the second tier, called 'ISanti'
 myfilter <- act::search_makefilter(examplecorpus, 
 				filterTranscriptNames=t2@name,
-				filterTierIncludeRegEx="I"
+				filterTierIncludeRegex="I"
 				)
-t2 <- act::transcripts_filter_single(t1, filterTierNames=myfilter$tier.names)
+t2 <- act::transcripts_filter_single(t1, filterTierNames=myfilter$tierNames)
 t2@tiers
-table(t2@annotations$tier.name)
+table(t2@annotations$tierName)
 
 # --- Filter by time section
 # only set start of section (until the end of the transcript)
 t2 <- act::transcripts_filter_single(t1, filterSectionStartsec=6)
-cbind(t2@annotations$startSec,t2@annotations$endSec) 
+cbind(t2@annotations$startsec,t2@annotations$endsec) 
 	  
 # only set end of section (from the beginning of the transcript)
 t2 <- act::transcripts_filter_single(t1, filterSectionEndsec=8)
-cbind(t2@annotations$startSec,t2@annotations$endSec) 
+cbind(t2@annotations$startsec,t2@annotations$endsec) 
 
 # set start and end of section
 t2 <- act::transcripts_filter_single(t1, filterSectionStartsec=6, filterSectionEndsec=8)
-cbind(t2@annotations$startSec,t2@annotations$endSec) 
+cbind(t2@annotations$startsec,t2@annotations$endsec) 
 
 # set start and end of section, start new times from 0
 t2 <- act::transcripts_filter_single(t1, 
  filterSectionStartsec=6, 
  filterSectionEndsec=8,
  preserveTime=FALSE)
-cbind(t2@annotations$startSec,t2@annotations$endSec) 
+cbind(t2@annotations$startsec,t2@annotations$endsec) 
 
 }

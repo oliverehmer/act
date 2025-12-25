@@ -13,18 +13,18 @@
 #'
 #'
 #' @param x Corpus object.
-#' @param path_replacementMatrixCSV Character string; path to replacement matrix (a CSV file).
+#' @param pathReplacementMatrix Character string; path to replacement matrix (a CSV file).
 #' @param filterTranscriptNames Vector of character strings; names of the transcripts to be included. 
 #'
 #' @return Corpus object.
 #' @export
 #'
-#'@seealso \link{media_delete}, \link{media_getPathToExistingFile}
+#'@seealso \link{media_delete}, \link{media_path_to_existing_file}
 #'
 #' @example inst/examples/annotations_matrix.R
 #'  
 annotations_matrix <- function(x, 
-							   path_replacementMatrixCSV, 
+							   pathReplacementMatrix, 
 							   filterTranscriptNames=NULL) {
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
@@ -41,13 +41,9 @@ annotations_matrix <- function(x,
 	if (is.null(filterTranscriptNames)) {	filterTranscriptNames <- names(x@transcripts)	}
 	
 	#=== load the matrix
-	act_replacementMatrix <- matrix_load(path_replacementMatrixCSV)
-	
-	#=== check matrix
+	act_replacementMatrix <- matrix_load(pathReplacementMatrix)
 	if (is.null(act_replacementMatrix)) 						{	stop("Normalization matrix not read.")		}
-	if ("search" %in% colnames(act_replacementMatrix)==FALSE)   {	stop("Column 'search' is missing in normalization matrix CSV file. File needs to contain colums 'search' and 'replace'")}
-	if ("replace" %in% colnames(act_replacementMatrix)==FALSE)  {	stop("Column 'replace' is missing in normalization matrix CSV file. File needs to contain colums 'search' and 'replace'")	}
-	
+
 	#=== check 
 	if (is.null(x@transcripts)) 	{	stop("No transcripts found in corpus object x.")	}
 	

@@ -1,33 +1,36 @@
 act.options.default <- list (
 	#--- do not reset
-	act.excamplecorpusURL                      = " http://www.romanistik.uni-freiburg.de/ehmer/files/digitalhumanities/act_examplecorpus.zip",
-	act.updateX                                = TRUE,
-	act.showprogress				    	   = TRUE,
+	act.excamplecorpusURL                    = "https://github.com/oliverehmer/act_examplecorpus/archive/refs/heads/main.zip",
+	act.updateX                              = TRUE,
+	act.showprogress				    	 = TRUE,
 	
-	act.path.praat					       	   = "",
-	act.path.sendpraat					       = "",
-	act.path.elan                              = "",
+	act.path.praat					        	= "",
+	act.path.sendpraat					     = "",
+	act.path.elan                            = "",
 
-	act.fileformats.video                      = c("mp4", "mov"),
-	act.fileformats.audio                      = c("wav", "aif", "aiff", "mp3"),
+	act.fileformats.video                    = c("mp4", "mov"),
+	act.fileformats.audio                    = c("wav", "aif", "aiff", "mp3"),
 	
-	act.ffmpeg.command.main	 	 	           = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
-	act.ffmpeg.command.fastVideoPostioning     = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
-	act.ffmpeg.command.audioCutsAsMP3          = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPAT" -hide_banner',
-	act.ffmpeg.exportchannels.fromColumnName       = "channels", 
+	act.ffmpeg.command.main	 	 	         = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
+	act.ffmpeg.command.main.fast             = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
+	act.ffmpeg.command.audioAsMP3            = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
+	act.ffmpeg.command.images                = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -frames:v 1 -q:v 2 -update 1 -y "OUTFILEPATH"',
+	act.ffmpeg.command.images.fast           = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -frames:v 1 -q:v 2 -update 1 -y "OUTFILEPATH"',
+	act.ffmpeg.exportchannels.fromColumnName = "channels", 
+
+	act.import.readEmptyIntervals 			  = FALSE,
+	act.import.scanSubfolders                 = TRUE,
+	act.import.storefileContentInTranscript   = TRUE,
 	
-	act.import.readEmptyIntervals 			   = FALSE,
-	act.import.scanSubfolders                  = TRUE,
-	act.import.storeFileContentInTranscript    = TRUE,
-	
-	act.export.foldergrouping1.fromColumnName  = "resultID",
-	act.export.foldergrouping2.fromColumnName  = "",
-	act.export.filename.fromColumnName 		   = "resultID",
-	
-	act.separator_between_intervals 		   = "&",
-	act.separator_between_tiers				   = "#",
-	act.separator_between_words				   = "^\\s|\\|\\'|\\#|\\/|\\\\\\\\",
-	act.wordCountRegEx 					       = '(?<=[^|\\b])[A-z\\u00C0-\\u00FA\\-\\:]+(?=\\b|\\s|_|$)'
+	act.export.filename.fromColumnName 		  = "resultID",
+	act.export.folder.grouping1.fromColumnName= "resultID",
+	act.export.folder.grouping2.fromColumnName= "",
+
+	act.separator_between_intervals 		  = "&",
+	act.separator_between_tiers				  = "#",
+	act.separator_between_words				  = "^\\s|\\|\\'|\\#|\\/|\\\\\\\\",
+	act.wordCountRegEx 					      = '(?<=[^|\\b])[A-z\\u00C0-\\u00FA\\-\\:]+(?=\\b|\\s|_|$)',
+	act.pauseIdentifierGATRegEx               = '^\\s*\\([\\d\\.-]*\\)\\s*$'
 )
 
 
@@ -35,9 +38,6 @@ act.options.default <- list (
 
 
 
-#' 
-#' 
-#' 
 #' Options of the package
 #'
 #' The package has numerous options that change the internal workings of the package.
@@ -65,26 +65,30 @@ act.options.default <- list (
 #' * \code{act.fileformats.audio} Vector of character strings; Suffixes of audio files that will be identified; default is 'c("wav", "aif", "mp3")'.
 #'
 #' \emph{FFMPEG commands and options}
-#' * \code{act.ffmpeg.command} Character string; 'FFmpeg' command that is used for cutting video files.
-#' * \code{act.ffmpeg.command.fastVideoPostioning} Character string; 'FFmpeg' command that is used for cutting video files using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
-#' * \code{act.ffmpeg.command.audio} Character string; 'FFmpeg' command that is used for cutting/generating uncompressed audio files.
+#' * \code{act.ffmpeg.command.main} Character string; 'FFmpeg' command that is used for cutting media files (audio & video).
+#' * \code{act.ffmpeg.command.main.fast} Character string; 'FFmpeg' command that is used for cutting video files using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
+#' * \code{act.ffmpeg.command.audioAsMP3} Character string; 'FFmpeg' command that is used for cutting/generating compressed audio files as mp3 (for other audio, the main command is used).
+#' * \code{act.ffmpeg.command.images} Character string; 'FFmpeg' command that is used for extracting still images.
+#' * \code{act.ffmpeg.command.images.fast} Character string; 'FFmpeg' command that is used for extracting still images using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
 #' * \code{act.ffmpeg.exportchannels.fromColumnName} Character string; Name of the column in the data frame \code{s@results} from information, which audio channel to export, will be taken.
-#' 
+#'
 #' \emph{Import annotation files}
 #' * \code{act.import.readEmptyIntervals} Logical; if \code{TRUE} empty intervals in you annotation files will be read, if \code{FALSE} empty intervals will be skipped.
-#' * \code{act.import.scanSubfolders} Logical; if \code{TRUE} sub folders will also be scanned for annotation files; if \code{FALSE} only the main level of the folders specified in \code{paths.annotation.files} of your corpus object will be scanned. 
-#' * \code{act.import.storeFileContentInTranscript} if \code{TRUE} the contents of the original annotation file will be stored in \code{transcript@file.content}. Set to \code{FALSE} if you want to keep your corpus object small.
+#' * \code{act.import.scanSubfolders} Logical; if \code{TRUE} sub folders will also be scanned for annotation files; if \code{FALSE} only the main level of the folders specified in \code{pathsAnnotationFiles} of your corpus object will be scanned. 
+#' * \code{act.import.storefileContentInTranscript} if \code{TRUE} the contents of the original annotation file will be stored in \code{transcript@file.content}. Set to \code{FALSE} if you want to keep your corpus object small.
 #' 
 #' \emph{Export}
-#' * \code{act.export.foldergrouping1.fromColumnName} Character string; Name of sub folders that will be created in the folder of the search result, level 1.
-#' * \code{act.export.foldergrouping2.fromColumnName}  Character string; Name of sub folders that will be created in the folder of the search result, level 2.
-#' * \code{act.export.filename.fromColumnName}  Character string; Name of the column from which the file names for exported files will be taken.
+#' * \code{act.export.filename.fromColumnName} Character string; Name of the column from which the file names for exported files will be taken.
+#' * \code{act.export.folder.grouping1.fromColumnName} Character string; Name of sub folders that will be created in the folder of the search result, level 1.
+#' * \code{act.export.folder.grouping2.fromColumnName} Character string; Name of sub folders that will be created in the folder of the search result, level 2.
 #'  
 #' \emph{Miscellaneous}
 #' * \code{act.separator_between_intervals} Character; Single character that is used for separating intervals when creating the full text.
 #' * \code{act.separator_between_tiers} Character; Single character that is used for separating tiers when creating the full text.
 #' * \code{act.separator_between_words} Character string; regular expression with alternatives that count as separators between words. Used for preparing the concordance.
 #' * \code{act.wordCountRegEx} Character string; regular expression that is used to count words.
+#' * \code{act.pauseIdentifierGATRegEx} Character string; regular expression that is used to identify pauses in GAT transcription
+#' * 
 #'
 #' @return Nothing.
 #' @export
@@ -100,39 +104,43 @@ act.options.default <- list (
 options_show <- function () {
 	cat("options", fill=TRUE)
 	cat("  Program", fill=TRUE)
-	cat("    act.excamplecorpusURL                          : ",paste("'", options()$act.excamplecorpusURL,"'",sep="", collapse=""), fill=TRUE)
-	cat("    act.showprogress                               : ",paste("'", options()$act.showprogress,"'",sep="", collapse=""), fill=TRUE)
-	cat("    act.updateX                                    : ",paste("'", options()$act.updateX,"'",sep="", collapse=""), fill=TRUE)
+	cat("    act.excamplecorpusURL                     : ",paste("'", options()$act.excamplecorpusURL,"'",sep="", collapse=""), fill=TRUE)
+	cat("    act.showprogress                          : ",paste("'", options()$act.showprogress,"'",sep="", collapse=""), fill=TRUE)
+	cat("    act.updateX                               : ",paste("'", options()$act.updateX,"'",sep="", collapse=""), fill=TRUE)
 	cat("  Paths", fill=TRUE)
-	cat("    act.path.praat                                 : ",paste("'", options()$act.path.praat,"'",sep="", collapse=""), fill=TRUE)
-	cat("    act.path.sendpraat                             : ",paste("'", options()$act.path.sendpraat, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.path.elan                                  : ",paste("'", options()$act.path.elan, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.path.praat                            : ",paste("'", options()$act.path.praat,"'",sep="", collapse=""), fill=TRUE)
+	cat("    act.path.sendpraat                        : ",paste("'", options()$act.path.sendpraat, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.path.elan                             : ",paste("'", options()$act.path.elan, "'",sep="", collapse=""),fill=TRUE)
 	cat("", fill=TRUE)
 	cat("  File formats", fill=TRUE)
-	cat("    act.fileformats.video                          : ",paste("'", options()$act.fileformats.video, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.fileformats.audio                          : ",paste("'", options()$act.fileformats.audio, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.fileformats.video                     : ",paste("'", options()$act.fileformats.video, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.fileformats.audio                     : ",paste("'", options()$act.fileformats.audio, "'",sep="", collapse=""),fill=TRUE)
 	cat("", fill=TRUE)	
 	cat("  FFMPEG commands and options", fill=TRUE)
-	cat("    act.ffmpeg.command                             : ",paste("'", options()$act.ffmpeg.command,"'",sep="", collapse=""), fill=TRUE)
-	cat("    act.ffmpeg.command.fastVideoPostioning         : ",paste("'", options()$act.ffmpeg.command.fastVideoPostioning, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.ffmpeg.command.audio                       : ",paste("'", options()$act.ffmpeg.command.audio, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.ffmpeg.exportchannels.fromColumnName       : ",paste("'", options()$act.ffmpeg.exportchannels.fromColumnName, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.ffmpeg.command.main                   : ",paste("'", options()$act.ffmpeg.command.main,"'",sep="", collapse=""), fill=TRUE)
+	cat("    act.ffmpeg.command.main.fast              : ",paste("'", options()$act.ffmpeg.command.main.fast, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.ffmpeg.command.audioAsMP3             : ",paste("'", options()$act.ffmpeg.command.audioAsMP3, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.ffmpeg.command.images                 : ",paste("'", options()$act.ffmpeg.command.images, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.ffmpeg.command.images.fast            : ",paste("'", options()$act.ffmpeg.command.images.fast, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.ffmpeg.exportchannels.fromColumnName  : ",paste("'", options()$act.ffmpeg.exportchannels.fromColumnName, "'",sep="", collapse=""),fill=TRUE)
 	cat("", fill=TRUE)
 	cat("  Import annotation files", fill=TRUE)
-	cat("    act.import.readEmptyIntervals                  : ", options()$act.import.readEmptyIntervals, fill=TRUE)
-	cat("    act.import.scanSubfolders                      : ", options()$act.import.scanSubfolders, fill=TRUE)
-	cat("    act.import.storeFileContentInTranscript        : ", options()$act.import.scanSubfolders, fill=TRUE)
+	cat("    act.import.readEmptyIntervals             : ", options()$act.import.readEmptyIntervals, fill=TRUE)
+	cat("    act.import.scanSubfolders                 : ", options()$act.import.scanSubfolders, fill=TRUE)
+	cat("    act.import.storefileContentInTranscript   : ", options()$act.import.scanSubfolders, fill=TRUE)
 	cat("", fill=TRUE)
 	cat("  Export", fill=TRUE)
-	cat("    act.export.foldergrouping1.fromColumnName      : ",paste("'", options()$act.export.foldergrouping1.fromColumnName,"'",sep="", collapse=""), fill=TRUE)
-	cat("    act.export.foldergrouping2.fromColumnName      : ",paste("'", options()$act.export.foldergrouping2.fromColumnName,"'",sep="", collapse=""), fill=TRUE)
-	cat("    act.export.filename.fromColumnName             : ",paste("'", options()$act.export.filename.fromColumnName, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.export.filename.fromColumnName        : ",paste("'", options()$act.export.filename.fromColumnName, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.export.folder.grouping1.fromColumnName: ",paste("'", options()$act.export.folder.grouping1.fromColumnName,"'",sep="", collapse=""), fill=TRUE)
+	cat("    act.export.folder.grouping2.fromColumnName: ",paste("'", options()$act.export.folder.grouping2.fromColumnName,"'",sep="", collapse=""), fill=TRUE)
+
 	cat("", fill=TRUE)
 	cat("  Miscellaneous", fill=TRUE)
-	cat("    act.separator_between_intervals                : ",paste("'", options()$act.separator_between_intervals, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.separator_between_tiers                    : ",paste("'", options()$act.separator_between_tiers, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.separator_between_words                    : ",paste("'", options()$act.separator_between_words, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.wordCountRegEx                            : ",paste("'", options()$act.wordCountRegEx, "'",sep="", collapse=""), fill=TRUE)
+	cat("    act.separator_between_intervals           : ",paste("'", options()$act.separator_between_intervals, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.separator_between_tiers               : ",paste("'", options()$act.separator_between_tiers, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.separator_between_words               : ",paste("'", options()$act.separator_between_words, "'",sep="", collapse=""),fill=TRUE)
+	cat("    act.wordCountRegEx                        : ",paste("'", options()$act.wordCountRegEx, "'",sep="", collapse=""), fill=TRUE)
+	cat("    act.pauseIdentifierGATRegEx               : ",paste("'", options()$act.pauseIdentifierGATRegEx, "'",sep="", collapse=""), fill=TRUE)
 }
 
 	
@@ -157,22 +165,25 @@ options_delete <- function() {
 	options(act.fileformats.audio                   = NULL)
 	
 	options(act.ffmpeg.command.main	 	 	 	    = NULL)
-	options(act.ffmpeg.command.fastVideoPostioning  = NULL)
-	options(act.ffmpeg.command.audioCutsAsMP3       = NULL)
+	options(act.ffmpeg.command.main.fast            = NULL)
+	options(act.ffmpeg.command.audioAsMP3       = NULL)
+	options(act.ffmpeg.command.images               = NULL)
+	options(act.ffmpeg.command.images.fast          = NULL)
 	options(act.ffmpeg.exportchannels.fromColumnName= NULL)
-			
+	
 	options(act.import.readEmptyIntervals 		    = NULL)
 	options(act.import.scanSubfolders               = NULL)
-	options(act.import.storeFileContentInTranscript = NULL)
+	options(act.import.storefileContentInTranscript = NULL)
 	
-	options(act.export.foldergrouping1.fromColumnName= NULL)
-	options(act.export.foldergrouping2.fromColumnName= NULL)
-	options(act.export.filename.fromColumnName       = NULL)
-	
+	options(act.export.filename.fromColumnName        = NULL)
+	options(act.export.folder.grouping1.fromColumnName= NULL)
+	options(act.export.folder.grouping2.fromColumnName= NULL)
+
 	options(act.separator_between_intervals          = NULL)
 	options(act.separator_between_tiers              = NULL)
 	options(act.separator_between_words              = NULL)
-	options(act.wordCountRegEx                      = NULL)
+	options(act.wordCountRegEx                       = NULL)
+	options(act.pauseIdentifierGATRegEx              = NULL)
 }
 
 

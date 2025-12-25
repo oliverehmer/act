@@ -46,5 +46,5 @@ library(act)
 
 }
 \seealso{
-\code{corpus_import}, \code{corpus_new}, \code{import}, \code{import_eaf}, \code{import_rpraat}, \code{import_textgrid}
+\link{corpus_import}, \link{corpus_new}, \link{import}, \link{import_eaf}, \link{import_rpraat}, \link{import_textgrid}
 }

@@ -10,14 +10,14 @@ search_new(
   searchMode = c("content", "fulltext", "fulltext.byTime", "fulltext.byTier"),
   searchNormalized = TRUE,
   name = "mysearch",
-  resultid.prefix = "result",
-  resultid.start = 1,
+  resultidPrefix = "result",
+  resultidStart = 1,
   filterTranscriptNames = NULL,
-  filterTranscriptIncludeRegEx = NULL,
-  filterTranscriptExcludeRegEx = NULL,
+  filterTranscriptIncludeRegex = NULL,
+  filterTranscriptExcludeRegex = NULL,
   filterTierNames = NULL,
-  filterTierIncludeRegEx = NULL,
-  filterTierExcludeRegEx = NULL,
+  filterTierIncludeRegex = NULL,
+  filterTierExcludeRegex = NULL,
   filterSectionStartsec = NULL,
   filterSectionEndsec = NULL,
   concordanceMake = TRUE,
@@ -38,21 +38,21 @@ search_new(
 
 \item{name}{Character string; name of the search. Will be used, for example, as name of the sub folder when creating media cuts.}
 
-\item{resultid.prefix}{Character string; search results will be numbered consecutively; This character string will be placed before the consecutive numbers.}
+\item{resultidPrefix}{Character string; search results will be numbered consecutively; This character string will be placed before the consecutive numbers.}
 
-\item{resultid.start}{Integer; search results will be numbered consecutively; This is the start number of the identifiers.}
+\item{resultidStart}{Integer; search results will be numbered consecutively; This is the start number of the identifiers.}
 
 \item{filterTranscriptNames}{Vector of character strings; names of transcripts to be included.}
 
-\item{filterTranscriptIncludeRegEx}{Character string; as regular expression, limit search to certain transcripts matching the expression.}
+\item{filterTranscriptIncludeRegex}{Character string; as regular expression, limit search to certain transcripts matching the expression.}
 
-\item{filterTranscriptExcludeRegEx}{Character string; as regular expression, exclude certain transcripts matching the expression.}
+\item{filterTranscriptExcludeRegex}{Character string; as regular expression, exclude certain transcripts matching the expression.}
 
-\item{filterTierNames}{Vector of character strings; names of tiers to be included.}
+\item{filterTierNames}{Vector of character strings; names of tiers to be included in the search.}
 
-\item{filterTierIncludeRegEx}{Character string; as regular expression, limit search to certain tiers matching the expression.}
+\item{filterTierIncludeRegex}{Character string; as regular expression, limit search to certain tiers matching the expression.}
 
-\item{filterTierExcludeRegEx}{Character string; as regular expression, exclude certain tiers matching the expression.}
+\item{filterTierExcludeRegex}{Character string; as regular expression, exclude certain tiers matching the expression.}
 
 \item{filterSectionStartsec}{Double; start time of region for search.}
 

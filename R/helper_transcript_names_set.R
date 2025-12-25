@@ -8,15 +8,16 @@
 #' @return List
 #' @export
 #'
-#' @example inst/examples/helper_transcriptNames_set.R
+#' @example inst/examples/helper_transcript_names_set.R
 #' 
-helper_transcriptNames_set <- function(x, transcriptNames) {
+helper_transcript_names_set <- function(x, transcriptNames) {
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	
 	#--- get names from objects in list
 	names.original.ids <- c(unlist(lapply(x@transcripts, "slot", name = "name")), use.names=FALSE)
-
+	
+	transcriptNames[is.na(transcriptNames)] <- ""
 	transcriptNames <- stringr::str_trim(transcriptNames)
 	
 	#--- check equal length
@@ -26,7 +27,7 @@ helper_transcriptNames_set <- function(x, transcriptNames) {
 	
 	#--- check empty names
 	if (any(transcriptNames=="")) {
-		stop("Parameter 'transcriptNames' contains empty names.")
+		stop("Parameter 'transcriptNames' contains empty names. Possibly you ill-defined your regular expressions for 'namesExtractPatterns', 'namesSearchPatterns' and/or 'namesSearchReplacements'.")
 	}
 	
 	#--- check duplicates

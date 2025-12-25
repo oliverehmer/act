@@ -5,22 +5,23 @@
 \title{Create a new corpus object}
 \usage{
 corpus_new(
-  pathsAnnotationFiles,
+  pathsAnnotationFiles = NULL,
   pathsMediaFiles = NULL,
   name = "New Corpus",
   importFiles = TRUE,
   skipDoubleFiles = TRUE,
-  createFullText = TRUE,
+  createFulltext = TRUE,
   assignMedia = TRUE,
   pathNormalizationMatrix = NULL,
   namesInclude = character(),
   namesExclude = character(),
+  namesExtractPatterns = character(),
   namesSearchPatterns = character(),
   namesSearchReplacements = character(),
-  namesToUpperCase = FALSE,
-  namesToLowerCase = FALSE,
+  namesToUpper = FALSE,
+  namesToLower = FALSE,
   namesTrim = TRUE,
-  namesDefaultForEmptyNames = "no_name"
+  namesDefault = "no_name"
 )
 }
 \arguments{
@@ -34,27 +35,29 @@ corpus_new(
 
 \item{skipDoubleFiles}{Logical; if \code{TRUE} transcripts with the same names will be skipped (only one of them will be added), if \code{FALSE} transcripts will be renamed to make the names unique.}
 
-\item{createFullText}{Logical; if \code{TRUE} full text will be created.}
+\item{createFulltext}{Logical; if \code{TRUE} full text will be created.}
 
 \item{assignMedia}{Logical; if \code{TRUE} the folder(s) specified in \code{@paths.media.files} of your corpus object will be scanned for media.}
 
 \item{pathNormalizationMatrix}{Character string; path to the replacement matrix used for normalizing the annotations; if argument left open, the default normalization matrix of the package will be used.}
 
-\item{namesInclude}{Vector of character strings; Only files matching this regular expression will be imported into the corpus.}
+\item{namesInclude}{Character strings; Only files matching this regular expression will be imported into the corpus.}
 
-\item{namesExclude}{Vector of character strings; Files matching this regular expression will be skipped and not imported into the corpus.}
+\item{namesExclude}{Character strings; Files matching this regular expression will be skipped and not imported into the corpus.}
+
+\item{namesExtractPatterns}{Vector of character strings; Only the part of the file name matching these expressions will be taken as trasncript name.}
 
 \item{namesSearchPatterns}{Vector of character strings; Search pattern as regular expression. Leave empty for no search-replace in the names.}
 
 \item{namesSearchReplacements}{Vector of character strings; Replacements for search. Leave empty for no search-replace in the names.}
 
-\item{namesToUpperCase}{Logical; Convert transcript names all to upper case.}
+\item{namesToUpper}{Logical; Convert transcript names all to upper case.}
 
-\item{namesToLowerCase}{Logical; Convert transcript names all to lower case.}
+\item{namesToLower}{Logical; Convert transcript names all to lower case.}
 
 \item{namesTrim}{Logical; Remove leading and trailing spaces in names.}
 
-\item{namesDefaultForEmptyNames}{Character string; Default value for empty transcript names (e.g., resulting from search-replace operations)}
+\item{namesDefault}{Character string; Default value for empty transcript names (e.g., resulting from search-replace operations)}
 }
 \value{
 Corpus object.

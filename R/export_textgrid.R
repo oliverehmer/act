@@ -1,67 +1,67 @@
-#' Export a transcript object to a 'Praat' .TextGrid file
+#' Export 'Praat' .TextGrid file
 #' 
 #' Advice: In most situations it is more convenient to use \code{act::corpus_export} for exporting annotation files.
 #'
-#' The .TextGrid file will be written to the file specified in \code{outputPath}.
-#' If \code{outputPath} is left empty, the function will return the contents of the .TextGrid itself.
+#' The .TextGrid file will be written to the file specified in \code{pathOutput}.
+#' If \code{pathOutput} is left empty, the function will return the contents of the .TextGrid itself.
 #' 
 #' @param t Transcript object; transcript to be saved.
-#' @param outputPath Character string; path where .TextGrid will be saved.
+#' @param pathOutput Character string; path where .TextGrid will be saved.
 #' @param filterTierNames Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.
 #' @param filterSectionStartsec Double; start of selection in seconds.
 #' @param filterSectionEndsec Double; end of selection in seconds.
 #' 
-#' @return Contents of the .TextGrid file (only if \code{outputPath} is left empty)
+#' @return Contents of the .TextGrid file (only if \code{pathOutput} is left empty)
 #' @export
 #' 
-#' @seealso \code{corpus_export}, \code{export_eaf}, \code{export_exb}, \code{export_printtranscript}, \code{export_rpraat}, \code{export_srt}  
+#' @seealso \link{corpus_export}, \link{export_eaf}, \link{export_exb}, \link{export_txt}, \link{export_docx}, \link{export_rpraat}, \link{export_srt}  
 #' 
 #' @example inst/examples/export_textgrid.R
 #' 
 #' 
 export_textgrid <- function(t, 
-							outputPath=NULL, 
-							filterTierNames=NULL, 
+							pathOutput = NULL, 
+							filterTierNames = NULL, 
 							filterSectionStartsec = NULL, 
 							filterSectionEndsec = NULL) {
 	
 	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
 	
 	#--- check if output folder exists
-	if (!is.null(outputPath)) {
-		if (!dir.exists(dirname(outputPath))) {
-			stop("Output folder does not exist. Modify parameter 'outputPath'.")
+	if (!is.null(pathOutput)) {
+		if (!dir.exists(dirname(pathOutput))) {
+			stop("Output folder does not exist. Modify parameter 'pathOutput'.")
 		}
 	}
 	
 	#=== Get data
 	#--- Filter and cure transcript
 	t <- act::transcripts_filter_single(t, filterTierNames=filterTierNames, filterSectionStartsec = filterSectionStartsec, filterSectionEndsec = filterSectionEndsec)
-	t <- act::transcripts_cure_single(t, annotationsWithReversedTimes=TRUE, overlappingAnnotations=TRUE, annotationsWithTimesBelowZero=FALSE, missingTiers=TRUE, showWarning=TRUE)
+	t <- act::transcripts_cure_single(t, annotationsTimesReversed=TRUE, annotationsOverlap=TRUE, annotationsTimesBelowZero=FALSE, tiersMissing=TRUE, warning=TRUE)
 	
 	if (nrow(t@tiers)==0) {
-		warning(sprintf('Textgrid for transcript "%s" not exported. Transcript did not contain any tiers (after filtering).', t@name))
+		warning(unique(sprintf('Textgrid for transcript "%s" not exported. Transcript did not contain any tiers (after filtering).', t@name)))
 	} else {
 		#--- get only relevant columns
-		myCols <- c("tier.name", "startSec","endSec","content")
+		myCols <- c("tierName", "startsec","endsec","content")
 		if (!all(myCols %in% colnames(t@annotations))) {
 			stop(paste("Missing colums. Annotations need to contain: ", paste(myCols, collapse = " ", sep="")))
 		}
-		myAnnotations <- t@annotations[,myCols]
+		ann <- t@annotations[,myCols]
 		
 		#sort annotations by start time
-		myAnnotations <- myAnnotations[order(myAnnotations$startSec), ]
+		ann <- ann[order(ann$startsec), ]
 		
 		#--- get min and max times of textgrid
-		textgrid.startSec <- min(0, myAnnotations$startSec, myAnnotations$endSec)
-		textgrid.endSec   <- max(c(t@length.sec, myAnnotations$startSec, myAnnotations$endSec))
+		textgrid.startsec <- min(0, ann$startsec, ann$endsec)
+		textgrid.endsec   <- max(c(t@length.sec, ann$startsec, ann$endsec))
 		
 		#--- create TextGrid header
 		myTG <- 			"File type = \"ooTextFile\""
 		myTG <- append(myTG, "Object class = \"TextGrid\"" )
 		myTG <- append(myTG, "" )
-		myTG <- append(myTG, sprintf("xmin = %s ", as.character(textgrid.startSec)))
-		myTG <- append(myTG, sprintf("xmax = %s ", as.character(textgrid.endSec)))
+		myTG <- append(myTG, sprintf("xmin = %s ", as.character(textgrid.startsec)))
+		myTG <- append(myTG, sprintf("xmax = %s ", as.character(textgrid.endsec)))
 		myTG <- append(myTG, "tiers? <exists> ")
 		myTG <- append(myTG, sprintf("size = %s ", nrow(t@tiers) ))
 		myTG <- append(myTG, "item []: ")
@@ -73,7 +73,7 @@ export_textgrid <- function(t,
 			# tierNr <- 2
 			
 			#get annotations within tier
-			annotations.tier <- myAnnotations[myAnnotations$tier.name==t@tiers$name[tierNr],]
+			annotations.tier <- ann[ann$tierName==t@tiers$name[tierNr],]
 			
 			if (t@tiers$type[tierNr] == "IntervalTier") {
 				#get number of intervals in tier
@@ -87,28 +87,28 @@ export_textgrid <- function(t,
 						}
 						return(x)
 					}
-					annotations.tier$tier.name  <- addLevel(annotations.tier$tier.name, t@tiers$name[tierNr])
+					annotations.tier$tierName  <- addLevel(annotations.tier$tierName, t@tiers$name[tierNr])
 					
 					#add an empty interval
-					annotations.tier[1, ]		<- c(tier.name=t@tiers$name[tierNr], startSec=as.double(textgrid.startSec), endSec=as.double(textgrid.endSec), content="")
-					annotations.tier$startSec   <- as.double(annotations.tier$startSec)
-					annotations.tier$endSec     <- as.double(annotations.tier$endSec)
+					annotations.tier[1, ]		<- c(tierName=t@tiers$name[tierNr], startsec=as.double(textgrid.startsec), endsec=as.double(textgrid.endsec), content="")
+					annotations.tier$startsec   <- as.double(annotations.tier$startsec)
+					annotations.tier$endsec     <- as.double(annotations.tier$endsec)
 				} else {
 					#get all times from tier, and add 0 and TextGrid-Length
-					allTimes <- sort(unique(c(textgrid.startSec, textgrid.endSec, annotations.tier$startSec, annotations.tier$endSec )))
+					allTimes <- sort(unique(c(textgrid.startsec, textgrid.endsec, annotations.tier$startsec, annotations.tier$endsec )))
 					
 					#create empty intervals for all times
 					newAnnotations			<- data.frame(
-						tier.name=t@tiers$name[tierNr], 
-						startSec=as.double(allTimes[1:length(allTimes)-1]), 
-						endSec=as.double(allTimes[2:length(allTimes)]), 
+						tierName=t@tiers$name[tierNr], 
+						startsec=as.double(allTimes[1:length(allTimes)-1]), 
+						endsec=as.double(allTimes[2:length(allTimes)]), 
 						content="", 
 						stringsAsFactors=FALSE		)
 					
 					
 					
 					#merge new and actual annotations
-					merged <- merge(x=annotations.tier, y=newAnnotations, all.y =TRUE, by= c("tier.name","startSec", "endSec"))
+					merged <- merge(x=annotations.tier, y=newAnnotations, all.y =TRUE, by= c("tierName","startsec", "endsec"))
 					
 					#set empty content to ""
 					merged$content.x[is.na(merged$content.x)]<-""
@@ -123,10 +123,10 @@ export_textgrid <- function(t,
 				annotations.tier <- cbind(as.character(1:nrow(annotations.tier)), annotations.tier)
 				
 				#sort annotations by start time
-				annotations.tier <- annotations.tier[order(annotations.tier$startSec), ]
+				annotations.tier <- annotations.tier[order(annotations.tier$startsec), ]
 				
 				#rename columns
-				colnames(annotations.tier) <- c("intervalNr", "tier.name", "startSec","endSec", "content")
+				colnames(annotations.tier) <- c("intervalNr", "tierName", "startsec","endsec", "content")
 				
 				#get number of intervals
 				intervalNr <- nrow(annotations.tier)
@@ -134,8 +134,8 @@ export_textgrid <- function(t,
 				myTG <- append(myTG, sprintf("    item [%s]:", tierNr))
 				myTG <- append(myTG,         "        class = \"IntervalTier\" ")
 				myTG <- append(myTG, sprintf("        name = \"%s\" " , t@tiers$name[tierNr]))
-				myTG <- append(myTG, sprintf("        xmin = %s ", as.character(textgrid.startSec)))
-				myTG <- append(myTG, sprintf("        xmax = %s ", as.character(textgrid.endSec)))
+				myTG <- append(myTG, sprintf("        xmin = %s ", as.character(textgrid.startsec)))
+				myTG <- append(myTG, sprintf("        xmax = %s ", as.character(textgrid.endsec)))
 				myTG <- append(myTG, sprintf("        intervals: size = %s " , intervalNr))
 				
 				
@@ -160,8 +160,8 @@ export_textgrid <- function(t,
 				myTG <- append(myTG, sprintf("    item [%s]:", tierNr))
 				myTG <- append(myTG,         "        class = \"TextTier\" ")
 				myTG <- append(myTG, sprintf("        name = \"%s\" " , t@tiers$name[tierNr]))
-				myTG <- append(myTG, sprintf("        xmin = %s ", as.character(textgrid.startSec)))
-				myTG <- append(myTG, sprintf("        xmax = %s ", as.character(textgrid.endSec)))
+				myTG <- append(myTG, sprintf("        xmin = %s ", as.character(textgrid.startsec)))
+				myTG <- append(myTG, sprintf("        xmax = %s ", as.character(textgrid.endsec)))
 				myTG <- append(myTG, sprintf("        points: size = %s " , pointNr))
 				
 				if (pointNr>0) {
@@ -193,11 +193,11 @@ export_textgrid <- function(t,
 		}
 		
 		
-		if (is.null(outputPath)) {
+		if (is.null(pathOutput)) {
 			return(myTG)
 		} else {
 			#---write to file
-			fileConn <- file(outputPath)
+			fileConn <- file(pathOutput)
 			writeLines(myTG, fileConn)
 			close(fileConn)		
 		}

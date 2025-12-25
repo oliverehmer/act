@@ -101,12 +101,12 @@ transcripts_update_fulltexts <- function(x,
 			#do not get all columns but only the original ones
 			#add the other later as empty cols
 			mycols <- c("annotationID" ,
-					   "tier.name",
-					   "startSec" ,
-					   "endSec",
+					   "tierName",
+					   "startsec" ,
+					   "endsec",
 					   "content",
 					   "content.norm"   )
-			myAnnotations <- x@transcripts[[i]]@annotations[, mycols]
+			ann <- x@transcripts[[i]]@annotations[, mycols]
 			
 			#=== get filter by tiers
 			tierNames.forthistranscript <- x@transcripts[[i]]@tiers$name
@@ -114,11 +114,11 @@ transcripts_update_fulltexts <- function(x,
 				tierNames.forthistranscript <- tierNames.forthistranscript[tierNames.forthistranscript %in% tierNames]
 			}
 			
-			if (!is.null(myAnnotations))  	{
-				if (nrow(myAnnotations)>0) 	{
+			if (!is.null(ann))  	{
+				if (nrow(ann)>0) 	{
 
 					#===add new cols
-					myAnnotations <- cbind.data.frame(myAnnotations, 
+					ann <- cbind.data.frame(ann, 
 													  separator=as.character(""), 
 													  char.separator=0, 
 													  char.content.orig=0, 
@@ -133,47 +133,47 @@ transcripts_update_fulltexts <- function(x,
 					if (searchMode=="fulltext" | searchMode=="fulltext.bytime") {
 						
 						#=== sort annotations: start sec - tier name
-						myAnnotations <- 	myAnnotations[order(myAnnotations$startSec, myAnnotations$tier.name), ]
+						ann <- 	ann[order(ann$startsec, ann$tierName), ]
 						
 						#=== filter by tiers
-						include <- which(myAnnotations$tier.name %in% tierNames.forthistranscript)
+						include <- which(ann$tierName %in% tierNames.forthistranscript)
 						
 						#=== make vector with separator character
 						#check if tier of preceeding interval is the same
-						included.sametier 				<- c(FALSE, myAnnotations$tier.name[include[2:length(include)]] == myAnnotations$tier.name[include[1:length(include)-1]])
+						included.sametier 				<- c(FALSE, ann$tierName[include[2:length(include)]] == ann$tierName[include[1:length(include)-1]])
 						
 						#make vector containing corresponding separators
 						included.separator				<- unlist(lapply(included.sametier, function(x) if(x==TRUE) {options()$act.separator_between_intervals} else {options()$act.separator_between_tiers}))
 						
 						#set the separators in annotations
-						#myAnnotations$separator 				<- ""  	# rep("", nrow(myAnnotations))
-						myAnnotations$separator[include] 		<- included.separator
+						#ann$separator 				<- ""  	# rep("", nrow(ann))
+						ann$separator[include] 		<- included.separator
 						
 						#=== calculate the lengths only of included recordsets
 						#separator
-						myAnnotations$char.separator[include]				<- nchar(myAnnotations$separator[include])
+						ann$char.separator[include]				<- nchar(ann$separator[include])
 						
 						#content
-						myAnnotations$char.content.orig[include]			<- nchar(myAnnotations$content[include] )
-						myAnnotations$char.content.norm[include]			<- nchar(myAnnotations$content.norm[include] )
+						ann$char.content.orig[include]			<- nchar(ann$content[include] )
+						ann$char.content.norm[include]			<- nchar(ann$content.norm[include] )
 						
 						#separator + content
-						myAnnotations$char.content.orig.plussep[include]	<- myAnnotations$char.separator[include] + myAnnotations$char.content.orig[include]
-						myAnnotations$char.content.norm.plussep[include]	<- myAnnotations$char.separator[include] + myAnnotations$char.content.norm[include]
+						ann$char.content.orig.plussep[include]	<- ann$char.separator[include] + ann$char.content.orig[include]
+						ann$char.content.norm.plussep[include]	<- ann$char.separator[include] + ann$char.content.norm[include]
 						
 						#end position within full text
 						#-- original leads to error in recognizing the first hit
-						myAnnotations$char.orig.bytime.end   	<- cumsum(myAnnotations$char.content.orig.plussep)
-						myAnnotations$char.norm.bytime.end    	<- cumsum(myAnnotations$char.content.norm.plussep)
+						ann$char.orig.bytime.end   	<- cumsum(ann$char.content.orig.plussep)
+						ann$char.norm.bytime.end    	<- cumsum(ann$char.content.norm.plussep)
 						
 						#start position within full text
 						#-- original leads to error in recognizing the first hit
-						myAnnotations$char.orig.bytime.start  	<- myAnnotations$char.orig.bytime.end - myAnnotations$char.content.orig.plussep + 1
-						myAnnotations$char.norm.bytime.start 	<- myAnnotations$char.norm.bytime.end - myAnnotations$char.content.norm.plussep+ 1
+						ann$char.orig.bytime.start  	<- ann$char.orig.bytime.end - ann$char.content.orig.plussep + 1
+						ann$char.norm.bytime.start 	<- ann$char.norm.bytime.end - ann$char.content.norm.plussep+ 1
 						
 						#=== create full text
-						myFulltext.bytime.orig 						<- paste(myAnnotations$separator[include], myAnnotations$content[include], sep="", collapse="")
-						myFulltext.bytime.norm 						<- paste(myAnnotations$separator[include], myAnnotations$content.norm[include], sep="", collapse="")
+						myFulltext.bytime.orig 						<- paste(ann$separator[include], ann$content[include], sep="", collapse="")
+						myFulltext.bytime.norm 						<- paste(ann$separator[include], ann$content.norm[include], sep="", collapse="")
 						
 						#end full text with separator for tiers
 						myFulltext.bytime.orig 						<- paste(myFulltext.bytime.orig, options()$act.separator_between_tiers, sep="", collapse="")
@@ -184,45 +184,45 @@ transcripts_update_fulltexts <- function(x,
 					if (searchMode=="fulltext" | searchMode=="fulltext.bytier") {
 						
 						#=== sort annotations: tier name - start sec
-						myAnnotations <- 	myAnnotations[order(myAnnotations$tier.name, myAnnotations$startSec), ]
+						ann <- 	ann[order(ann$tierName, ann$startsec), ]
 						
 						#=== filter by tiers
-						include <- which(myAnnotations$tier.name %in% tierNames.forthistranscript)
+						include <- which(ann$tierName %in% tierNames.forthistranscript)
 						
 						#=== make vector with separator character
 						#check if tier of preceeding interval is the same
-						included.sametier 					<- c(FALSE, myAnnotations$tier.name[include[2:length(include)]] == myAnnotations$tier.name[include[1:length(include)-1]])
+						included.sametier 					<- c(FALSE, ann$tierName[include[2:length(include)]] == ann$tierName[include[1:length(include)-1]])
 						
 						#make vector containing corresponding separators
 						included.separator					<- unlist(lapply(included.sametier, function(x) if(x==TRUE) {options()$act.separator_between_intervals} else {options()$act.separator_between_tiers}))
 						
 						#set the separators in annotations
-						myAnnotations$separator 					<- rep("", nrow(myAnnotations))
-						myAnnotations$separator[include] 			<- included.separator
+						ann$separator 					<- rep("", nrow(ann))
+						ann$separator[include] 			<- included.separator
 						
 						#=== calculate the lengths only of included recordsets
 						#separator
-						myAnnotations$char.separator[include]				<- nchar(myAnnotations$separator[include])
+						ann$char.separator[include]				<- nchar(ann$separator[include])
 						
 						#content
-						myAnnotations$char.content.orig[include]			<- nchar(myAnnotations$content[include] )
-						myAnnotations$char.content.norm[include]			<- nchar(myAnnotations$content.norm[include] )
+						ann$char.content.orig[include]			<- nchar(ann$content[include] )
+						ann$char.content.norm[include]			<- nchar(ann$content.norm[include] )
 						
 						#separator + content
-						myAnnotations$char.content.orig.plussep[include]	<- myAnnotations$char.separator[include] + myAnnotations$char.content.orig[include]
-						myAnnotations$char.content.norm.plussep[include]	<- myAnnotations$char.separator[include] + myAnnotations$char.content.norm[include]
+						ann$char.content.orig.plussep[include]	<- ann$char.separator[include] + ann$char.content.orig[include]
+						ann$char.content.norm.plussep[include]	<- ann$char.separator[include] + ann$char.content.norm[include]
 						
 						#end position within full text
-						myAnnotations$char.orig.bytier.end  		<- cumsum(myAnnotations$char.content.orig.plussep)
-						myAnnotations$char.norm.bytier.end    		<- cumsum(myAnnotations$char.content.norm.plussep)
+						ann$char.orig.bytier.end  		<- cumsum(ann$char.content.orig.plussep)
+						ann$char.norm.bytier.end    		<- cumsum(ann$char.content.norm.plussep)
 						
 						#star position within full text
-						myAnnotations$char.orig.bytier.start  	<- myAnnotations$char.orig.bytier.end  - myAnnotations$char.content.orig.plussep + 1
-						myAnnotations$char.norm.bytier.start  	<- myAnnotations$char.norm.bytier.end - myAnnotations$char.content.norm.plussep + 1
+						ann$char.orig.bytier.start  	<- ann$char.orig.bytier.end  - ann$char.content.orig.plussep + 1
+						ann$char.norm.bytier.start  	<- ann$char.norm.bytier.end - ann$char.content.norm.plussep + 1
 						
 						#=== create full text
-						myFulltext.bytier.orig 						<- paste(myAnnotations$separator[include], myAnnotations$content[include], sep="", collapse="")
-						myFulltext.bytier.norm 						<- paste(myAnnotations$separator[include], myAnnotations$content.norm[include], sep="", collapse="")
+						myFulltext.bytier.orig 						<- paste(ann$separator[include], ann$content[include], sep="", collapse="")
+						myFulltext.bytier.norm 						<- paste(ann$separator[include], ann$content.norm[include], sep="", collapse="")
 						
 						#end full text with separator for tiers
 						myFulltext.bytier.orig 						<- paste(myFulltext.bytier.orig, options()$act.separator_between_tiers, sep="", collapse="")
@@ -230,10 +230,10 @@ transcripts_update_fulltexts <- function(x,
 					}
 					
 					#=== get rid of superfluous columns
-					myAnnotations <- myAnnotations[,setdiff(colnames(myAnnotations), c("separator", "char.separator","char.content.orig","char.content.norm", "char.content.orig.plussep","char.content.norm.plussep"))]
+					ann <- ann[,setdiff(colnames(ann), c("separator", "char.separator","char.content.orig","char.content.norm", "char.content.orig.plussep","char.content.norm.plussep"))]
 					
 					#=== save modified annotations back to corpus object
-					x@transcripts[[i]]@annotations <- myAnnotations 
+					x@transcripts[[i]]@annotations <- ann 
 				}
 			}
 			

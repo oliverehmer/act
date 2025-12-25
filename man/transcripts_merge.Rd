@@ -10,7 +10,7 @@ transcripts_merge(
   updateTranscriptNames,
   identifierTier = "update",
   identifierPattern = ".+",
-  eraseUpdateSectionsCompletely = TRUE
+  eraseCompletely = TRUE
 )
 }
 \arguments{
@@ -24,7 +24,7 @@ transcripts_merge(
 
 \item{identifierPattern}{Character string; regular expression that identifies the sections that will be inserted into transDestination.}
 
-\item{eraseUpdateSectionsCompletely}{Logical; if \code{TRUE} update sections in destination transcript will be erased completely, if \code{FALSE} update sections in the destination tier will not be erased completely but only the tiers that are present in the transUpdates be erased.}
+\item{eraseCompletely}{Logical; if \code{TRUE} update sections in destination transcript will be erased completely, if \code{FALSE} update sections in the destination tier will not be erased completely but only if the tier is present in updateTranscriptNames.}
 }
 \value{
 Transcript object
@@ -77,8 +77,8 @@ test@transcripts[["update_destination"]]@annotations
 
 # Compare the transcript in the original and in the modified corpus object. 
 # The update transcript objects are gone:
-act::info_summarized(examplecorpus)$transcript.names
-act::info_summarized(test)$transcript.names
+act::info_summarized(examplecorpus)$transcriptNames
+act::info_summarized(test)$transcriptNames
 	
 #Have a look at the history of the corpus object
 test@history

@@ -2,8 +2,10 @@
 #' 
 #' Example corpus with data loaded from the example annotations files that come with the package
 #'
-#' You can download the corresponding media files from www.oliverehmer.de in the section "Digital Humanities".
-#' Alternatively you can use the download commands in the example section.
+#' You can download the corresponding media files from 
+#' - www.oliverehmer.de in the section "Digital Humanities or
+#' - from Github: https://github.com/oliverehmer/act_examplecorpus/.
+#' Alternatively you can use the download commands in the example section below.
 #' @docType data
 #'
 #' @usage data(examplecorpus)

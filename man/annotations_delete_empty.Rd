@@ -6,7 +6,7 @@
 \usage{
 annotations_delete_empty(
   x,
-  trimBeforeCheck = FALSE,
+  trim = FALSE,
   filterTranscriptNames = NULL,
   filterTierNames = NULL
 )
@@ -14,7 +14,7 @@ annotations_delete_empty(
 \arguments{
 \item{x}{Corpus object.}
 
-\item{trimBeforeCheck}{Logical; if \code{TRUE} leading and trailing spaces will be deleted before checking (as a consequence record sets that contain only spaces will be deleted, too).}
+\item{trim}{Logical; if \code{TRUE} leading and trailing spaces will be deleted before checking (as a consequence record sets that contain only spaces will be deleted, too).}
 
 \item{filterTranscriptNames}{Vector of character strings; names of the transcripts to be included.}
 

@@ -11,8 +11,8 @@
 #' 
 #' @param x Corpus object.
 #' @param s Search object. 
-#' @param resultNr Integer; Number of the search result (row in the data frame \code{s@results}) to be opened.
-#' @param openOriginalEafFileIfAvailable Logical; if \code{TRUE} the function will check if the original annotation file was an .eaf file and if it still exists in the original location. If so, the function will not create a temporary .eaf file but open the original file. Warning: The original .pfsx file (if it exists) will be overwritten.
+#' @param resultid Integer; Number of the search result (row in the data frame \code{s@results}) to be opened.
+#' @param openOriginal Logical; if \code{TRUE} the function will check if the original annotation file was an .eaf file and if it still exists in the original location. If so, the function will not create a temporary .eaf file but open the original file. Warning: The original .pfsx file (if it exists) will be overwritten.
 #' 
 #' @export
 #'
@@ -24,21 +24,21 @@
 #' # You can only use this function if you have installed ELAN on our computer.
 #' \dontrun{
 #' options(act.path.elan='PATHTOYOURELANEXECUTABLE')
-#' act::search_openresult_inelan(x=examplecorpus, s=mysearch, resultNr=1, TRUE)
+#' act::search_openresult_inelan(x=examplecorpus, s=mysearch, resultid=1, TRUE)
 #' }
 #' 
 
 search_openresult_inelan  <- function(x, 
 									  s, 
-									  resultNr, 
-									  openOriginalEafFileIfAvailable=FALSE) {
+									  resultid, 
+									  openOriginal=FALSE) {
 	
 	#NOT IMPLEMENTED YET  @param filterMediaFile Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first matches with existing media files will set as linked media in the eaf file. If the aprameter is left open, media files assigned to the transcript object will be set as links in the .eaf file.
 	
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
-	if (missing(resultNr)) {stop("Number of the search result 'resultNr' is missing.") 	}
+	if (missing(resultid)) {stop("Number of the search result 'resultid' is missing.") 	}
 	
 	
 	#--- check if ELAN exists
@@ -52,40 +52,40 @@ search_openresult_inelan  <- function(x,
 	}
 	
 	#--- get corresponding transcript
-	t <- x@transcripts[[s@results$transcript.name[resultNr]]]
+	t <- x@transcripts[[s@results$transcriptName[resultid]]]
 	if (is.null(t))	{
 		stop("Transcript not found in corpus object'.")
 	}
 	
 	#--- set paths to ""
-	file.path.eaf <- ""
-	file.path.pfsx <- ""
+	filePath.eaf <- ""
+	filePath.pfsx <- ""
 	
 	#--- check for original elan file
-	if(openOriginalEafFileIfAvailable) {
+	if(openOriginal) {
 		if(t@file.type=="eaf") {
 			if(file.exists(t@file.path)) {
-				file.path.eaf <- t@file.path
+				filePath.eaf <- t@file.path
 			}		
 		}
 	}
 	
 	#--- create temporary eaf if original not found
-	if (file.path.eaf == ""	) {
-		file.path.eaf <- file.path(tempdir(), stringr::str_c(t@name, ".eaf", collapse=""))
-		act::export_eaf(t, file.path.eaf)
-		if(openOriginalEafFileIfAvailable) {
+	if (filePath.eaf == ""	) {
+		filePath.eaf <- file.path(tempdir(), stringr::str_c(t@name, ".eaf", collapse=""))
+		act::export_eaf(t, filePath.eaf)
+		if(openOriginal) {
 			warning("Original .eaf file has not been found. A temporary .eaf file has been created")
 		}
 	}
 	
 	#--- create pfsx file
 	#check if pfsx file already exists - make a backup
-	#	file.path.eaf<-'/Users/oliverehmer/Desktop/Quiz.eaf'
-	#	pattern<- stringr::str_replace(basename(file.path.eaf), pattern='eaf',replacement="*pfsx$") 
-	#	filenames <- list.files(dirname(file.path.eaf), pattern=pattern)
+	#	filePath.eaf<-'/Users/oliverehmer/Desktop/Quiz.eaf'
+	#	pattern<- stringr::str_replace(basename(filePath.eaf), pattern='eaf',replacement="*pfsx$") 
+	#	filenames <- list.files(dirname(filePath.eaf), pattern=pattern)
 	#	filenames <- tools::file_path_sans_ext(filenames)
-	#	destination.name <- tools::file_path_sans_ext(basename(file.path.eaf))
+	#	destination.name <- tools::file_path_sans_ext(basename(filePath.eaf))
 	#   check if destinatino name already exists
 	#	if(destination.name %in% filenames) {
 	#		uniquename<- make.unique(filenames, destination.name)
@@ -107,31 +107,31 @@ search_openresult_inelan  <- function(x,
 				            <Long>%s</Long>
 				    </pref>
 				</preferences>'
-	startMiliSec <- round(s@results$startSec[resultNr]*1000, 0) 
-	endMiliSec <- round(s@results$endSec[resultNr]*1000, 0) 
+	startMiliSec <- round(s@results$startsec[resultid]*1000, 0) 
+	endMiliSec <- round(s@results$endsec[resultid]*1000, 0) 
 	pfsx.1 <- sprintf(pfsx, startMiliSec, endMiliSec, max(0, startMiliSec-1000),  startMiliSec)
 	#cat(pfsx.1)
 	
 	#write to file
-	file.path.pfsx<- stringr::str_replace(file.path.eaf, pattern='\\.eaf', replacement=".pfsx")
-	fileConn <- file(file.path.pfsx, open="wb")
+	filePath.pfsx<- stringr::str_replace(filePath.eaf, pattern='\\.eaf', replacement=".pfsx")
+	fileConn <- file(filePath.pfsx, open="wb")
 	writeBin(charToRaw(pfsx.1), fileConn, endian="little")
 	close(fileConn)
 	
 	#wait until pfsx exists
 	for (i in 1:10) {
-		if(file.exists(file.path.pfsx)) {
+		if(file.exists(filePath.pfsx)) {
 			break	
 		}
 		Sys.sleep(0.02)
 	}
 	
-	if(file.exists(file.path.pfsx)) {
+	if(file.exists(filePath.pfsx)) {
 		#--- open eaf file
 		if (helper_detect_os()=="windows" ){
-			cmd <- sprintf("%s %s",   shQuote(path.elan), shQuote(file.path.eaf))
+			cmd <- sprintf("%s %s",   shQuote(path.elan), shQuote(filePath.eaf))
 		} else {
-			cmd <- sprintf("open %s -a %s",  shQuote(file.path.eaf), shQuote(path.elan))
+			cmd <- sprintf("open %s -a %s",  shQuote(filePath.eaf), shQuote(path.elan))
 		}
 		#--- open file
 		rslt <- system(cmd, wait=FALSE)

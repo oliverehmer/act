@@ -16,7 +16,7 @@
 #' 
 #' @return Transcript object.
 #' 
-#' @seealso \code{corpus_import}, \code{corpus_new}, \code{import}, \code{import_exb}, \code{import_rpraat}, \code{import_textgrid}  
+#' @seealso \link{corpus_import}, \link{corpus_new}, \link{import}, \link{import_exb}, \link{import_rpraat}, \link{import_textgrid}  
 #' 
 #' @export
 #'
@@ -74,8 +74,8 @@ import_eaf <- function(filePath=NULL,
 		myeaf <- readLines(myCon, warn=FALSE)
 		close(myCon)
 		t@file.encoding <- "UTF-8"
-		if (!length(options()$act.import.storeFileContentInTranscript)==0) {
-			if (options()$act.import.storeFileContentInTranscript==TRUE) {
+		if (!length(options()$act.import.storefileContentInTranscript)==0) {
+			if (options()$act.import.storefileContentInTranscript==TRUE) {
 				t@file.content <- myeaf
 			}
 		}
@@ -158,10 +158,10 @@ import_eaf <- function(filePath=NULL,
 	#View(tier.ling_type_ref)
 	
 	regex_name <- '(?s)(<TIER)(.*TIER_ID="(.*?)")?'
-	tier.name <- stringr::str_match_all(annotations.block, regex_name)
-	tier.name <- do.call(rbind, lapply(tier.name, data.frame, stringsAsFactors=FALSE))
-	tier.name <- tier.name[,4]
-	#View(tier.name)
+	tierName <- stringr::str_match_all(annotations.block, regex_name)
+	tierName <- do.call(rbind, lapply(tierName, data.frame, stringsAsFactors=FALSE))
+	tierName <- tierName[,4]
+	#View(tierName)
 	
 	regex_tierparent_ref <- '(?s)(<TIER)(.*PARENT_REF="(.*?)")?'
 	tier.parent_ref <- stringr::str_match_all(annotations.block, regex_tierparent_ref)
@@ -169,18 +169,18 @@ import_eaf <- function(filePath=NULL,
 	tier.parent_ref <- tier.parent_ref[,4]
 	#View(tier.parent_ref)
 	
-	if (is.null (tier.name)) {
+	if (is.null (tierName)) {
 		#if there are no tiers in the file
-		tiers <- data.frame(tier.name=as.character(), 
-							tier.type.ref=as.character(), 
+		tiers <- data.frame(tierName=as.character(), 
+							tierType.ref=as.character(), 
 							tier.parent.ref=as.character(), 
 							tier.hierarchy=as.character(),
 							stringsAsFactors = FALSE)
 		
 	} else {
 		
-		tiers <- data.frame(cbind(tier.name=tier.name, 
-									 tier.type.ref=tier.ling_type_ref, 
+		tiers <- data.frame(cbind(tierName=tierName, 
+									 tierType.ref=tier.ling_type_ref, 
 									 tier.parent.ref=tier.parent_ref, 
 									 tier.hierarchy=NA),
 							stringsAsFactors = FALSE)
@@ -196,11 +196,11 @@ import_eaf <- function(filePath=NULL,
 				break
 			}
 			hierarchy <- hierarchy+1
-			tiernames.currentlevel <- tiers$tier.name[which(tiers$tier.hierarchy==hierarchy)]
-			if (length(tiernames.currentlevel)!=0) {
-				for (j in 1:length(tiernames.currentlevel)) {
-					tiernames.currentlevel
-					tiers$tier.hierarchy[which(tiers$tier.parent.ref==tiernames.currentlevel[j])] <- hierarchy+1
+			tierNames.currentlevel <- tiers$tierName[which(tiers$tier.hierarchy==hierarchy)]
+			if (length(tierNames.currentlevel)!=0) {
+				for (j in 1:length(tierNames.currentlevel)) {
+					tierNames.currentlevel
+					tiers$tier.hierarchy[which(tiers$tier.parent.ref==tierNames.currentlevel[j])] <- hierarchy+1
 				}
 			}
 		}
@@ -210,7 +210,7 @@ import_eaf <- function(filePath=NULL,
 		#remember the order
 		tiers$order <- 1:nrow(tiers)
 		#merge with constraints
-		tiers <- merge(x = tiers, y = constraints, by.x = "tier.type.ref", by.y="type.id", all.x = TRUE)
+		tiers <- merge(x = tiers, y = constraints, by.x = "tierType.ref", by.y="type.id", all.x = TRUE)
 		#restore initial order
 		tiers <- tiers[order(tiers$order),]
 		tiers$constraint[is.na(tiers$constraint)]<- "No_Constraint"
@@ -218,19 +218,19 @@ import_eaf <- function(filePath=NULL,
 		#View(tiers.m)
 		
 		#---create unique tierNames
-		#	while (length(tiers$tier.name[duplicated(tiers$tier.name)])>0)  	{
+		#	while (length(tiers$tierName[duplicated(tiers$tierName)])>0)  	{
 		#		#get multiple tierNames
-		#		multiple <- tiers$tier.name[duplicated(tiers$tier.name)]
+		#		multiple <- tiers$tierName[duplicated(tiers$tierName)]
 		#		for (myName in multiple) {
-		#			tiers$tier.name[tiers$tier.name==myName]<- paste(tiers$tier.name[tiers$tier.name==myName],1:length(tiers$tier.name[tiers$tier.name==myName]),sep="-")
+		#			tiers$tierName[tiers$tierName==myName]<- paste(tiers$tierName[tiers$tierName==myName],1:length(tiers$tierName[tiers$tierName==myName]),sep="-")
 		#		}
 		#		t@import.result 		<- "ok"
 		#		t@load.message   <- "Some tiers have been renamed since their names were not unique."
 		#}
 	
 		#---create unique tierNames
-		if (length(tiers$tier.name[duplicated(tiers$tier.name)])>0) {
-			tiers$tier.name <- make.unique(tiers$tier.name)
+		if (length(tiers$tierName[duplicated(tiers$tierName)])>0) {
+			tiers$tierName <- make.unique(tiers$tierName)
 			t@import.result 		<- "ok"
 			t@load.message   <- "Some tiers have been renamed since their names were not unique."
 		}
@@ -262,8 +262,8 @@ import_eaf <- function(filePath=NULL,
 					annotations.tier <- do.call(rbind, lapply(annotations.tier, data.frame, stringsAsFactors=FALSE))
 					#View(annotations.tier)
 					if (nrow(annotations.tier)>0) {
-						annotations.tier <- data.frame(cbind(         tier=tiers$tier.name[i], 
-														   type=tiers$tier.type[i],
+						annotations.tier <- data.frame(cbind(         tier=tiers$tierName[i], 
+														   type=tiers$tierType[i],
 														   hierarchy=tiers$tier.hierarchy[i],
 														   id=annotations.tier[, 4], 
 														   content=annotations.tier[, 10], 
@@ -279,8 +279,8 @@ import_eaf <- function(filePath=NULL,
 					annotations.tier <- do.call(rbind, lapply(annotations.tier, data.frame, stringsAsFactors=FALSE))
 					#View(annotations.tier)
 					if (nrow(annotations.tier)>0) {
-						annotations.tier <- data.frame(cbind(         tier=tiers$tier.name[i], 
-														   type=tiers$tier.type[i],
+						annotations.tier <- data.frame(cbind(         tier=tiers$tierName[i], 
+														   type=tiers$tierType[i],
 														   hierarchy=tiers$tier.hierarchy[i],
 														   id=annotations.tier[, 4], 
 														   content=annotations.tier[, 10], 
@@ -314,13 +314,13 @@ import_eaf <- function(filePath=NULL,
 				#ts1
 				annotations <- merge(x = annotations, y = timeslots, by.x = "ts1", by.y="timeSlotID", all.x = TRUE)
 				mycolnames <- colnames(annotations)
-				mycolnames[length(mycolnames)] <- "startSec"
+				mycolnames[length(mycolnames)] <- "startsec"
 				colnames(annotations) <- mycolnames
 				
 				#ts2
 				annotations <- merge(x = annotations, y = timeslots, by.x = "ts2", by.y="timeSlotID", all.x = TRUE)
 				mycolnames <- colnames(annotations)
-				mycolnames[length(mycolnames)] <- "endSec"
+				mycolnames[length(mycolnames)] <- "endsec"
 				colnames(annotations) <- mycolnames
 				
 				#restore order!
@@ -332,7 +332,7 @@ import_eaf <- function(filePath=NULL,
 				allrefids <- unique(annotations$annotation.ref)
 				allrefids <- allrefids[!is.na(allrefids)]
 				tiers.copy <- tiers[order(tiers$tier.hierarchy), ]
-				all_tiers <- tiers.copy$tier.name
+				all_tiers <- tiers.copy$tierName
 				#all_tiers <- unique(annotations$tier[which(annotations$annotation.ref!="")]) 
 				
 				#=mark which are the first and the last annotations in a group
@@ -395,8 +395,8 @@ import_eaf <- function(filePath=NULL,
 							#if there is only one referring annotation
 							#--> simply take the time values of the annotation referred to
 							ann.referred.to <- annotations[which(annotations$id==allrefids[j])[1], ]
-							annotations[ids, ]$startSec <- ann.referred.to$startSec
-							annotations[ids, ]$endSec <-   ann.referred.to$endSec
+							annotations[ids, ]$startsec <- ann.referred.to$startsec
+							annotations[ids, ]$endsec <-   ann.referred.to$endsec
 							annotations[ids, ]$ts1 <- "fromsuperordinated"
 						} 
 						if (length(ids)>1) {
@@ -404,15 +404,15 @@ import_eaf <- function(filePath=NULL,
 							#-- first annotation in group
 							#--> split up the time values 
 							ann.referred.to <- annotations[which(annotations$id==allrefids[j])[1], ]
-							minSec <- ann.referred.to$startSec
-							maxSec <- ann.referred.to$endSec
+							minSec <- ann.referred.to$startsec
+							maxSec <- ann.referred.to$endsec
 							
 							newTimes		<- seq(from=minSec, to=maxSec, length.out=length(ids)+1)
 							newTimes.start	<- newTimes[1:length(newTimes)-1]
 							newTimes.end	<- newTimes[2:length(newTimes)]
 							
-							annotations[ids, ]$startSec <- newTimes.start
-							annotations[ids, ]$endSec <- newTimes.end
+							annotations[ids, ]$startsec <- newTimes.start
+							annotations[ids, ]$endsec <- newTimes.end
 							annotations[ids, ]$ts1 <- "interpolated"
 						}
 					}
@@ -432,24 +432,24 @@ import_eaf <- function(filePath=NULL,
 						for (i in 1:(nrow(annotations)-1)) {
 							#print(i)
 							#check if the end value is empty
-							if (is.na(annotations$endSec[i])) {
+							if (is.na(annotations$endsec[i])) {
 								#if we are lucky, the following annotation has a start value and we are done
-								if (!is.na(annotations$startSec[i+1])) {
-									annotations$endSec[i] <- annotations$startSec[i+1]
+								if (!is.na(annotations$startsec[i+1])) {
+									annotations$endsec[i] <- annotations$startsec[i+1]
 								}
 								
 								#otherwise search for the next end value
 								counter <- 0
 								for (j in i:nrow(annotations)) {
-									if (!is.na(annotations$endSec[j])) {
+									if (!is.na(annotations$endsec[j])) {
 										break
 									}
 								}
 								#the span that we need to calculate is this from: i startsec to j endsec
 								#how many annotations are spanned:  j-i+1
 								# we this need even one more timevalue for the sequence: j-i+2
-								if (!is.na(annotations$startSec[i]) & !is.na(annotations$endSec[j])) {
-									newTimes		<- seq(from=annotations$startSec[i], to=annotations$endSec[j], length.out=j-i+2)
+								if (!is.na(annotations$startsec[i]) & !is.na(annotations$endsec[j])) {
+									newTimes		<- seq(from=annotations$startsec[i], to=annotations$endsec[j], length.out=j-i+2)
 									newTimes.start	<- newTimes[1:length(newTimes)-1]
 									newTimes.end	<- newTimes[2:length(newTimes)]
 									
@@ -457,8 +457,8 @@ import_eaf <- function(filePath=NULL,
 									l <- 0
 									for (k in i:j) {
 										l <- l+1
-										annotations$startSec[k] <- newTimes.start[l]
-										annotations$endSec[k] <- newTimes.end[l]
+										annotations$startsec[k] <- newTimes.start[l]
+										annotations$endsec[k] <- newTimes.end[l]
 										annotations[k, ]$ts1 <- "interpolated"
 										annotations[k, ]$ts2 <- "interpolated"				
 									}					
@@ -467,7 +467,7 @@ import_eaf <- function(filePath=NULL,
 						}					
 
 					}
-					if (!any(is.na(c(annotations$startSec, annotations$endSec)))) {
+					if (!any(is.na(c(annotations$startsec, annotations$endsec)))) {
 						break
 					}
 				}
@@ -476,16 +476,16 @@ import_eaf <- function(filePath=NULL,
 		#View(annotations)
 		
 		if (nrow(annotations)==0) {
-			#empty myAnnotations is already set at the beginning
-			myAnnotations <- data.frame()
+			#empty ann is already set at the beginning
+			ann <- data.frame()
 		} else {
 			annotationID <- c(1:nrow(annotations))
-			myAnnotations <- data.frame(
+			ann <- data.frame(
 				annotationID  			= as.integer(annotationID),
 				
-				tier.name  				= annotations$tier,
-				startSec  				= as.double(annotations$startSec),
-				endSec  				= as.double(annotations$endSec),
+				tierName  				= annotations$tier,
+				startsec  				= as.double(annotations$startsec),
+				endsec  				= as.double(annotations$endsec),
 				content  				= as.character(annotations$content),
 				
 				content.norm  			= as.character(""),
@@ -499,12 +499,12 @@ import_eaf <- function(filePath=NULL,
 				char.norm.bytier.end  	= rep(as.integer(NA),nrow(annotations)),
 				row.names 				= annotationID, 
 				stringsAsFactors		= FALSE)
-			rownames(myAnnotations) 	<- myAnnotations$annotationID
+			rownames(ann) 	<- ann$annotationID
 			
 			#===set correct column format
 			t@annotations$annotationID	<- as.integer(t@annotations$annotationID)
-			t@annotations$startSec		<- as.double(t@annotations$startSec)
-			t@annotations$endSec  		<- as.double(t@annotations$endSec)
+			t@annotations$startsec		<- as.double(t@annotations$startsec)
+			t@annotations$endsec  		<- as.double(t@annotations$endsec)
 			t@annotations$content  		<- as.character(t@annotations$content)
 			
 		}
@@ -513,48 +513,48 @@ import_eaf <- function(filePath=NULL,
 		t@length.sec <- 0
 		
 		#=== if it is not a completely empty transcript
-		if (!nrow(myAnnotations)==0)  	{
+		if (!nrow(ann)==0)  	{
 			#=== get rid of empty intervals
 			if (options()$act.import.readEmptyIntervals==FALSE) 		{
-				myAnnotations <- myAnnotations[myAnnotations$content!="",]
+				ann <- ann[ann$content!="",]
 			}
-			myAnnotations <- myAnnotations[is.na(myAnnotations["content"])==FALSE,]
+			ann <- ann[is.na(ann["content"])==FALSE,]
 			
-			if (nrow(myAnnotations)>0) 		{
+			if (nrow(ann)>0) 		{
 				#=== sort transcript by start times
-				myAnnotations <- myAnnotations[order(myAnnotations$startSec, myAnnotations$tier.name), ]
+				ann <- ann[order(ann$startsec, ann$tierName), ]
 				
-				#=== set endSec of points to startSec
-				myAnnotations$endSec[is.na(myAnnotations$endSec)] <- myAnnotations$startSec[is.na(myAnnotations$endSec)]
+				#=== set endsec of points to startsec
+				ann$endsec[is.na(ann$endsec)] <- ann$startsec[is.na(ann$endsec)]
 				
 				#=== set annotations.id again
-				myAnnotations$annotationID <- c(1:nrow(myAnnotations))
+				ann$annotationID <- c(1:nrow(ann))
 				
 				#=== set the new row names
-				rownames(myAnnotations) <- myAnnotations$annotationID
-				#View(myAnnotations)
+				rownames(ann) <- ann$annotationID
+				#View(ann)
 			}
 			#make transcript 1 sec longer than last annotation
-			t@length.sec <- max( t@length.sec, as.double(annotations$startSec)+1, as.double(annotations$endSec)+1)
+			t@length.sec <- max( t@length.sec, as.double(annotations$startsec)+1, as.double(annotations$endsec)+1)
 			
 			#=== html conversion
-			myAnnotations$content      <- textutils::HTMLdecode(myAnnotations$content)
-			myAnnotations$tier.name    <- textutils::HTMLdecode(myAnnotations$tier.name)
+			ann$content      <- textutils::HTMLdecode(ann$content)
+			ann$tierName    <- textutils::HTMLdecode(ann$tierName)
 			
 		}
 		#=== html conversion
-		tiers$tier.name     	   <- textutils::HTMLdecode(tiers$tier.name)
+		tiers$tierName     	   <- textutils::HTMLdecode(tiers$tierName)
 	}
 	
 	#=== assign other values to object
 	#annotations
-	t@annotations 	<- myAnnotations
+	t@annotations 	<- ann
 	
 	#media
 	t@media.path <- medialinks
 	
 	#tiers: all are interval tiers 
-	t@tiers <- act::helper_tiers_new_table(tierNames=tiers$tier.name)
+	t@tiers <- act::helper_tiers_new_table(tierNames=tiers$tierName)
 	
 	t@history <- list( 
 				   list(modification                               = "import_eaf",

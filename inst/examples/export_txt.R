@@ -4,7 +4,7 @@ library(act)
 t <- examplecorpus@transcripts[[1]]
 
 # Create print transcript
-printtranscript <- act::export_printtranscript (t=t)
+printtranscript <- act::export_txt (t=t)
 
 # Display on screen
 cat(printtranscript)

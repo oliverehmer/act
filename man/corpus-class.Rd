@@ -11,8 +11,7 @@ It collects the annotations and meta data from loaded annotation files.
 \details{
 Some of the slots are defined by the user.
 Some slots report results, such as \code{@import.results} and \code{@history} and .
-Other slots are settings and are used when performing functions on the corpus oibject.
-To change the normalization matrix use \code{x@normalization.matrix <- act::matrix_load(path="...")}
+Other slots are settings and are used when performing functions on the corpus object.
 }
 \section{Slots}{
 
@@ -25,7 +24,7 @@ To change the normalization matrix use \code{x@normalization.matrix <- act::matr
 
 \item{\code{paths.media.files}}{Vector of character strings; Path(s) to one or several folders where your media files are located.}
 
-\item{\code{normalization.matrix}}{Data.frame; Replacement matrix used for normalizing the annotations.}
+\item{\code{normalization.matrix}}{Data.frame; Replacement matrix used for normalizing the annotations. To change the normalization matrix use \code{x@normalization.matrix <- act::matrix_load(path="...")}}
 
 \item{\code{import.skip.double.files}}{Logical; if \code{TRUE} files with the same names will be skipped (only one of them will be loaded), if \code{FALSE} transcripts will be renamed to make the names unique.}
 

@@ -30,11 +30,11 @@ tierTable.2 <- act::helper_tiers_sort_table(tierTable=tierTable, sortVector=sort
 tierTable.2
 
 # Sort the table, but delete tiers that are missing in the sort vector
-# Note: If 'deleteTiersThatAreNotInTheSortVector=TRUE' tiers that are missing in the
+# Note: If 'tiersDelete=TRUE' tiers that are missing in the
 # will be deleted, even if the 'sortVector' contains a "\\*".
 tierTable.3 <- act::helper_tiers_sort_table(tierTable=tierTable, 
 sortVector=sortVector, 
-deleteTiersThatAreNotInTheSortVector=TRUE)
+tiersDelete=TRUE)
 tierTable.3
 
 # --- Create a vector, which contains tier names that are not present in 'tierTable'.

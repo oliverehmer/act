@@ -4,9 +4,9 @@
 #'
 #' @param path Character string; path to file from where data will be loaded.
 #' @param revertReplacements Logical, when exporting search results from act, '=' at the beginning of lines are replaced by '.=", and in numbers the decimal separator '.' is replaced by a ",". If \code{TRUE}, this replacement will be reverted when importing search results.
-#' @param sheetNameXLSX Character string, set the name of the excel sheet containing the data.
-#' @param encodingCSV Character string; text encoding in the case of CVS files.
-#' @param separatorCSV Character; single character that is used to separate the columns in CSV files.
+#' @param sheetName Character string, set the name of the excel sheet containing the data.
+#' @param encoding Character string; text encoding in the case of CVS files.
+#' @param separator Character; single character that is used to separate the columns in CSV files.
 #'
 #' @return Search object.
 #' 
@@ -16,19 +16,19 @@
 #' 
 search_results_import <- function(path, 
 								  revertReplacements=TRUE,
-								  sheetNameXLSX="data", 
-								  encodingCSV="UTF-8", 
-								  separatorCSV=";") {
+								  sheetName="data", 
+								  encoding="UTF-8", 
+								  separator=";") {
 	
 	filetype <- tools::file_ext(path)
 	if (filetype=="csv") {
-		#temp <- utils::read.table(path, header = TRUE, sep = separatorCSV, fileEncoding = encodingCSV, encoding=encodingCSV )
+		#temp <- utils::read.table(path, header = TRUE, sep = separator, fileEncoding = encoding, encoding=encoding )
 
 		temp <- suppressWarnings(utils::read.csv( path,
 												  header = TRUE, 
-												  sep = separatorCSV, 
-												  fileEncoding = encodingCSV, 
-												  encoding=encodingCSV ))
+												  sep = separator, 
+												  fileEncoding = encoding, 
+												  encoding=encoding ))
 		
 
 			
@@ -36,11 +36,11 @@ search_results_import <- function(path,
 			rownames(temp)<- temp$resultID
 		}
 	} else {
-		temp <- openxlsx::read.xlsx(xlsxFile=path, sheet=sheetNameXLSX)
+		temp <- openxlsx::read.xlsx(xlsxFile=path, sheet=sheetName)
 	}
 	
 	#check colnames
-	necessarycolnames <- c("resultID", "transcript.name", "annotationID",  "tier.name", "startSec", "endSec", "content", "content.norm", "hit", "hit.nr", "hit.length", "hit.pos.content", "hit.pos.fulltext", "search.mode", "hit.span")
+	necessarycolnames <- c("resultID", "transcriptName", "annotationID",  "tierName", "startsec", "endsec", "content", "content.norm", "hit", "hit.nr", "hit.length", "hit.pos.content", "hit.pos.fulltext", "searchMode", "hit.span")
 	mycolnames <- colnames(temp)
 	missingcolnames <- necessarycolnames[!necessarycolnames %in% mycolnames]
 	if (length(missingcolnames>0)) {
@@ -49,8 +49,8 @@ search_results_import <- function(path,
 	
 	if(revertReplacements) {
 		#replace .  by , in numbers
-		temp$startSec	<-	gsub(",", "\\.", temp$startSec)
-		temp$endSec		<-	gsub(",", "\\.", temp$endSec) 
+		temp$startsec	<-	gsub(",", "\\.", temp$startsec)
+		temp$endsec		<-	gsub(",", "\\.", temp$endsec) 
 		
 		#replace = at he beginning of cells
 		searchString <-"^\\'="
@@ -71,8 +71,8 @@ search_results_import <- function(path,
 	temp[, fctr.cols] 			<- sapply(temp[, fctr.cols], as.character)
 	temp[is.na(temp)]			<- " "
 	
-	temp$startSec				<- as.double(temp$startSec)
-	temp$endSec					<- as.double(temp$endSec)
+	temp$startsec				<- as.double(temp$startsec)
+	temp$endsec					<- as.double(temp$endsec)
 	
 	temp$annotationID					<- as.integer(temp$annotationID)
 	temp$hit.length				<- as.integer(temp$hit.length)
@@ -89,12 +89,12 @@ search_results_import <- function(path,
 	#s@pattern                   <- pattern
 	#s@search.mode                <- searchMode
 	#s@search.normalized          <- searchNormalized
-	#s@filter.section.startsec                  <- if(!is.na(startSec)) {if(!is.null(startSec)) {startSec}} else {s@filter.section.startsec}
-	#s@filter.section.endsec                    <- if(!is.na(endSec))   {if(!is.null(endSec))   {endSec}}   else {s@filter.section.endsec}
+	#s@filter.section.startsec                  <- if(!is.na(startsec)) {if(!is.null(startsec)) {startsec}} else {s@filter.section.startsec}
+	#s@filter.section.endsec                    <- if(!is.na(endsec))   {if(!is.null(endsec))   {endsec}}   else {s@filter.section.endsec}
 	#s@filter.tier.includeRegEx      <- ""
 	#s@filter.tier.excludeRegEx      <- ""
-	#s@filter.transcript.includeRegEx  <- if(!is.na(filterTranscriptIncludeRegEx))   {if(!is.null(filterTranscriptIncludeRegEx))   {filterTranscriptIncludeRegEx}}   else {s@filter.transcript.includeRegEx }
-	#s@filter.transcript.excludeRegEx  <- if(!is.na(filterTranscriptExcludeRegEx))   {if(!is.null(filterTranscriptExcludeRegEx))   {filterTranscriptExcludeRegEx}}   else {s@filter.transcript.excludeRegEx }
+	#s@filter.transcript.includeRegEx  <- if(!is.na(filterTranscriptIncludeRegex))   {if(!is.null(filterTranscriptIncludeRegex))   {filterTranscriptIncludeRegex}}   else {s@filter.transcript.includeRegEx }
+	#s@filter.transcript.excludeRegEx  <- if(!is.na(filterTranscriptExcludeRegex))   {if(!is.null(filterTranscriptExcludeRegex))   {filterTranscriptExcludeRegex}}   else {s@filter.transcript.excludeRegEx }
 	s@results <- temp
 	
 	return(s)

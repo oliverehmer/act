@@ -15,7 +15,7 @@ test@transcripts[[1]]@name
 test@history[length(test@history)]
 
 # convert to lower case
-test <- act::transcripts_rename(examplecorpus, toLowerCase=TRUE)
+test <- act::transcripts_rename(examplecorpus, toLower=TRUE)
 test@history[length(test@history)]
 
 # search replace

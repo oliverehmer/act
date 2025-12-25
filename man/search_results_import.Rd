@@ -7,9 +7,9 @@
 search_results_import(
   path,
   revertReplacements = TRUE,
-  sheetNameXLSX = "data",
-  encodingCSV = "UTF-8",
-  separatorCSV = ";"
+  sheetName = "data",
+  encoding = "UTF-8",
+  separator = ";"
 )
 }
 \arguments{
@@ -17,11 +17,11 @@ search_results_import(
 
 \item{revertReplacements}{Logical, when exporting search results from act, '=' at the beginning of lines are replaced by '.=", and in numbers the decimal separator '.' is replaced by a ",". If \code{TRUE}, this replacement will be reverted when importing search results.}
 
-\item{sheetNameXLSX}{Character string, set the name of the excel sheet containing the data.}
+\item{sheetName}{Character string, set the name of the excel sheet containing the data.}
 
-\item{encodingCSV}{Character string; text encoding in the case of CVS files.}
+\item{encoding}{Character string; text encoding in the case of CVS files.}
 
-\item{separatorCSV}{Character; single character that is used to separate the columns in CSV files.}
+\item{separator}{Character; single character that is used to separate the columns in CSV files.}
 }
 \value{
 Search object.

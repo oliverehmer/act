@@ -6,7 +6,6 @@
 "(?<!\))\((\.{1}|[\-]*|\d*(\.|\,)*\d*)\)(?!\))";" ";"pauses -> single blank space ! but does not delete unsure transcriptions (...)"
 "[\.\;\,\-\?]\W*$";" ";"intonation signs at the end of an utterance -> single space"
 "[\n\r]+";" ";"line break, carriage return -> single space"
-"\b((ja|je|ji) *)+";" ((laughs))";"line break, carriage return -> single space"
 "\({2,}.+?\){2,}";" ";"comments -> blank"
 "(^\s*|\s*$)";"";"space at the beginning and end of line -> nothing"
 "\bh*m+\b";"hm";"hm & mm -> hm"

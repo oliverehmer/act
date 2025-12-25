@@ -117,7 +117,7 @@ tiers_rename <- function(x,
 				rownames(x@transcripts[[i]]@tiers) <- x@transcripts[[i]]@tiers$name
 				
 				#set new names in annotations
-				x@transcripts[[i]]@annotations$tier.name <- stringr::str_replace_all(x@transcripts[[i]]@annotations$tier.name, searchPattern, searchReplacement)
+				x@transcripts[[i]]@annotations$tierName <- stringr::str_replace_all(x@transcripts[[i]]@annotations$tierName, searchPattern, searchReplacement)
 			}
 		}
 	}

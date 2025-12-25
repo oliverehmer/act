@@ -10,10 +10,10 @@
 #' 
 #' @param x Corpus object.
 #' @param s Search object.
-#' @param resultNr Integer; Number of the search result (row in the data frame \code{s@results}) to be played. 
+#' @param resultid Integer; Number of the search result (row in the data frame \code{s@results}) to be played. 
 #' @param play Logical; If \code{TRUE} selection will be played.
-#' @param closeAfterPlaying Logical; if \code{TRUE} the Quicktime player will be closed after playing the cuts. 
-#' @param bringQuicktimeToFront Logical; if \code{TRUE} the Quicktime player will be activated and placed before all other windows. 
+#' @param close Logical; if \code{TRUE} the Quicktime player will be closed after playing the cuts. 
+#' @param bringToFront Logical; if \code{TRUE} the Quicktime player will be activated and placed before all other windows. 
 #' @param filterFile Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is video > uncompressed audio > compressed audio.
 #'
 #' @return Logical; \code{TRUE} if media file has been played, or \code{FALSE} if not.
@@ -23,32 +23,32 @@
 #' 
 search_openresult_inquicktime  <- function(x, 
 										   s, 
-										   resultNr,
+										   resultid,
 										   play=TRUE, 
-										   closeAfterPlaying=FALSE, 
-										   bringQuicktimeToFront=TRUE, 
+										   close=FALSE, 
+										   bringToFront=TRUE, 
 										   filterFile=c('.*\\.(mp4|mov)', '.*\\.(aiff|aif|wav)', '.*\\.mp3') ) {
 	
 	# result <- mysearch@results[1,]
 	# x <- examplecorpus
 	# search_openresult_inquicktime(x, searchresults[1,])
-	# closeAfterPlaying <- TRUE
+	# close <- TRUE
 
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
-	if (missing(resultNr))                   {stop("Number of the search result 'resultNr' is missing.") 	}
+	if (missing(resultid))                   {stop("Number of the search result 'resultid' is missing.") 	}
 	if (Sys.info()["sysname"]!="Darwin")     {stop("You need to be on a Mac to use this function") 	}
 	
-	if (resultNr>nrow(s@results)) {stop("Number of the search result exceeds rows in 's@results'.") 	}
-	result <- s@results[resultNr,]
+	if (resultid>nrow(s@results)) {stop("Number of the search result exceeds rows in 's@results'.") 	}
+	result <- s@results[resultid,]
 	
 	#--- get  corresponding transcript
-	t <- x@transcripts[[result$transcript.name]]
+	t <- x@transcripts[[result$transcriptName]]
 	if (is.null(t))	{ 	stop("Transcript not found in corpus object x.") 	}
 	
 	#---get path of media file
-	pathMediaFile <- act::media_getPathToExistingFile(t) 
+	pathMediaFile <- act::media_path_to_existing_file(t) 
 	if (is.null(pathMediaFile))	{
 		warning("No media file(s) found.")
 		return (FALSE)
@@ -59,12 +59,12 @@ search_openresult_inquicktime  <- function(x,
 	#appleScriptPath <- "/Users/oliverehmer/Desktop/PlayCutInQuicktime.scpt"
 	if (file.exists(appleScriptPath)) {
 		appleScriptPath <- normalizePath(appleScriptPath, winslash = "/")
-		startSec <- result$startSec - s@cuts.span.beforesec
-		endSec <- result$endSec + s@cuts.span.aftersec
-		durationSec <- endSec-startSec+0.3
+		startsec <- result$startsec - s@cuts.span.beforesec
+		endsec <- result$endsec + s@cuts.span.aftersec
+		durationSec <- endsec-startsec+0.3
 		
 		#execute script
-		cmd <- sprintf('osascript "%s" "%s" %s %s %s %s %s', appleScriptPath, pathMediaFile,  as.character(startSec), as.character(durationSec), if(play) {1} else {0}, if(closeAfterPlaying) {1} else {0}, if (bringQuicktimeToFront){1} else {0})
+		cmd <- sprintf('osascript "%s" "%s" %s %s %s %s %s', appleScriptPath, pathMediaFile,  as.character(startsec), as.character(durationSec), if(play) {1} else {0}, if(close) {1} else {0}, if (bringToFront){1} else {0})
 		rslt <- system(cmd, intern=TRUE, ignore.stderr = TRUE, ignore.stdout=TRUE)
 	}
 	return(TRUE)

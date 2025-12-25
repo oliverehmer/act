@@ -7,9 +7,9 @@
 #' @return List
 #' @export
 #'
-#' @example inst/examples/helper_transcriptNames_get.R
+#' @example inst/examples/helper_transcript_names_get.R
 #' 
-helper_transcriptNames_get <- function(x) {
+helper_transcript_names_get <- function(x) {
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	

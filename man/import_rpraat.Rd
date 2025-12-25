@@ -4,10 +4,10 @@
 \alias{import_rpraat}
 \title{Import a single 'rPraat' TextGrid object}
 \usage{
-import_rpraat(rPraatTextGrid, transcriptName = NULL)
+import_rpraat(rpraatTextgrid, transcriptName = NULL)
 }
 \arguments{
-\item{rPraatTextGrid}{List; rPraat TextGrid object.}
+\item{rpraatTextgrid}{List; rPraat TextGrid object.}
 
 \item{transcriptName}{Character string; name of the transcript.}
 }
@@ -59,7 +59,5 @@ path <- system.file("extdata", "examplecorpus", "GAT",
 }
 }
 \seealso{
-\code{corpus_import}, \code{corpus_new}, \code{import}, \code{import_eaf}, \code{import_exb}, \code{import_textgrid}
-
-\link{export_rpraat}, \link{import}, \link{import_textgrid}, \link{import_eaf}
+\link{corpus_import}, \link{corpus_new}, \link{import}, \link{import_eaf}, \link{import_exb}, \link{import_textgrid}, \link{export_rpraat}
 }

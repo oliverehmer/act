@@ -17,7 +17,7 @@
 #' 
 #' @return Transcript object.
 #' 
-#' @seealso \code{corpus_import}, \code{corpus_new}, \code{import}, \code{import_eaf}, \code{import_rpraat}, \code{import_textgrid}  
+#' @seealso \link{corpus_import}, \link{corpus_new}, \link{import}, \link{import_eaf}, \link{import_rpraat}, \link{import_textgrid}  
 #' 
 #' @export
 #'
@@ -51,11 +51,11 @@ import_exb <- function(filePath=NULL,
 			t@name <- "imported transcript"
 		}
 	}
-	t@file.type 			 <- "exb"
-	t@import.result 		 <- "ok"
-	t@load.message 	     <- ""
-	t@file.encoding		 <- "UTF8"
-	t@modification.systime <- character()
+	t@file.type 			<- "exb"
+	t@import.result 		<- "ok"
+	t@load.message 	    	<- ""
+	t@file.encoding			<- "UTF8"
+	t@modification.systime	<- character()
 	
 	#=== take file content
 	if (!is.null(fileContent)) {
@@ -83,7 +83,7 @@ import_exb <- function(filePath=NULL,
 		}
 		myexb <- out
 	}
-	if(getOption("act.import.storeFileContentInTranscript", default=TRUE)) {
+	if(getOption("act.import.storefileContentInTranscript", default=TRUE)) {
 		myCon <- file(filePath, encoding = "UTF-8")
 		mytxt <- readLines(myCon, warn=FALSE)
 		close(myCon)
@@ -172,15 +172,15 @@ import_exb <- function(filePath=NULL,
 		
 		#=== extract tier info
 		tiers <- xml2::xml_find_all(myexb, "basic-body/tier")
-		tier.name <- xml2::xml_attr(tiers, "id")
+		tierName <- xml2::xml_attr(tiers, "id")
 		tier.speaker <- xml2::xml_attr(tiers, "speaker")
 		tier.category <- xml2::xml_attr(tiers, "category")
-		tier.type <- xml2::xml_attr(tiers, "type")
+		tierType <- xml2::xml_attr(tiers, "type")
 		tier.displayName <- xml2::xml_attr(tiers, "display-name")
-		mytiers <- data.frame(cbind(tier.name, 
+		mytiers <- data.frame(cbind(tierName, 
 									tier.speaker, 
 									tier.category, 
-									tier.type, 
+									tierType, 
 									tier.displayName), 
 							  stringsAsFactors		= FALSE)
 		
@@ -221,15 +221,15 @@ import_exb <- function(filePath=NULL,
 			annotations <- merge(annotations, timeslots, by.x = "ts1", by.y = "id")
 			annotations <- merge(annotations, timeslots, by.x = "ts2", by.y = "id")
 			annotations <- annotations[,c(3,5,7,4)]
-			names(annotations) <- c("tier.name","startSec","endSec", "content")
+			names(annotations) <- c("tierName","startsec","endsec", "content")
 			
 			annotationID <- c(1:nrow(annotations))
 			t@annotations <- data.frame(
 				annotationID = as.integer(annotationID),
 				
-				tier.name  				= annotations$tier.name,
-				startSec  				= as.double(annotations$startSec),
-				endSec  				= as.double(annotations$endSec),
+				tierName  				= annotations$tierName,
+				startsec  				= as.double(annotations$startsec),
+				endsec  				= as.double(annotations$endsec),
 				content  				= as.character(annotations$content),
 				
 				content.norm            = as.character(""),
@@ -247,8 +247,8 @@ import_exb <- function(filePath=NULL,
 			
 			#===set correct column format
 			t@annotations$annotationID	<- as.integer(t@annotations$annotationID)
-			t@annotations$startSec		<- as.double(t@annotations$startSec)
-			t@annotations$endSec  		<- as.double(t@annotations$endSec)
+			t@annotations$startsec		<- as.double(t@annotations$startsec)
+			t@annotations$endsec  		<- as.double(t@annotations$endsec)
 			t@annotations$content  		<- as.character(t@annotations$content)
 			
 			
@@ -261,7 +261,7 @@ import_exb <- function(filePath=NULL,
 			
 			if (nrow(t@annotations)>0) 		{
 				#=== sort transcript by start times
-				t@annotations <- t@annotations[order(t@annotations$startSec, t@annotations$tier.name), ]
+				t@annotations <- t@annotations[order(t@annotations$startsec, t@annotations$tierName), ]
 				
 				#=== set annotations.id again
 				t@annotations$annotationID <- c(1:nrow(t@annotations))
@@ -273,11 +273,11 @@ import_exb <- function(filePath=NULL,
 		
 		#=== html conversion
 		t@annotations$content      <- textutils::HTMLdecode(t@annotations$content)
-		t@annotations$tier.name    <- textutils::HTMLdecode(t@annotations$tier.name)
-		mytiers$tier.name                <- textutils::HTMLdecode(mytiers$tier.name)
+		t@annotations$tierName    <- textutils::HTMLdecode(t@annotations$tierName)
+		mytiers$tierName                <- textutils::HTMLdecode(mytiers$tierName)
 		
 		#--- tiers to object
-		t@tiers <- act::helper_tiers_new_table(tierNames=mytiers$tier.name)
+		t@tiers <- act::helper_tiers_new_table(tierNames=mytiers$tierName)
 	}
 	
 	t@history <- list(

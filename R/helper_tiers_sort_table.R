@@ -9,8 +9,8 @@
 #' 
 #' @param tierTable Data frame; tiers as specified and necessary in \code{@tiers} of a transcript object.
 #' @param sortVector Vector of character strings; regular expressions to match the tier names. The order within the vector presents the new order of the tiers. Use "\\*" (=two backslashes and a star) to indicate where tiers that are not present in the sort vector but in the transcript should be inserted.
-#' @param addMissingTiers Logical; if \code{TRUE} all tiers that are given in 'the 'sortVector' but are missing in 'tierTable' will be added.
-#' @param deleteTiersThatAreNotInTheSortVector Logical; if \code{TRUE} tiers that are not matched by the regular expressions in 'sortVector' will be deleted. Otherwise the will be inserted at the end of the table or at the position defined by '"\\*' in  'sortVector.
+#' @param tiersAddMissing Logical; if \code{TRUE} all tiers that are given in 'the 'sortVector' but are missing in 'tierTable' will be added.
+#' @param tiersDelete Logical; if \code{TRUE} tiers that are not matched by the regular expressions in 'sortVector' will be deleted. Otherwise the will be inserted at the end of the table or at the position defined by '"\\*' in  'sortVector.
 #'
 #' @return Data.frame
 #' 
@@ -22,8 +22,14 @@
 #' 
 helper_tiers_sort_table <- function (tierTable, 
 									 sortVector, 
-									 addMissingTiers=TRUE, 
-									 deleteTiersThatAreNotInTheSortVector=FALSE) {
+									 tiersAddMissing=TRUE, 
+									 tiersDelete=FALSE) {
+	
+
+	#tierTable <- tierTable
+	#sortVector <-sortVector
+	#tiersAddMissing<-TRUE
+	#tiersDelete<-FALSE
 	
 	#set old and new data frame
 	oldTable <- tierTable[order(tierTable$position),]
@@ -43,7 +49,11 @@ helper_tiers_sort_table <- function (tierTable,
 	insertPosition <- -1
 	counter <- 0
 	sortVector <- as.character(sortVector) #needs to be a as.character and not a factor
+	
+	
 	for (myPattern in sortVector) {
+		#myPattern <-  stringr::str_escape(myPattern)	# old version with RegEx comparison: results in arror if tier name "xxx" is part of another tier name e.g. "xxx-sub"
+		
 		#increase the counter
 		counter <- counter+1
 		
@@ -52,9 +62,10 @@ helper_tiers_sort_table <- function (tierTable,
 			insertPosition <- counter+1
 			counter <- counter+100000
 		} else {
-			#are there hits for this pattern?
-			hits <- stringr::str_which(oldTable$name, myPattern)
-			
+			#are there hits for this pattern?	
+			#hits <- stringr::str_which(oldTable$name, myPattern)	# old version with RegEx comparison: results in arror if tier name "xxx" is part of another tier name e.g. "xxx-sub"
+			hits <- which(oldTable$name==myPattern)
+		
 			#if there are
 			if (length(hits) >0) {
 				#set new position of tier in counter 
@@ -67,7 +78,7 @@ helper_tiers_sort_table <- function (tierTable,
 				oldTable <- oldTable[-hits, ]
 			} else {
 				#if missing tiers should be added
-				if (addMissingTiers) {
+				if (tiersAddMissing) {
 					newRow$name <- as.character(myPattern)
 					newRow$type <- as.character("IntervalTier")
 					newRow$counter <- as.integer(counter)
@@ -77,8 +88,11 @@ helper_tiers_sort_table <- function (tierTable,
 		}
 	}
 	
+	
+	
+
 	#if there are still elements in the old list, insert those too
-	if (deleteTiersThatAreNotInTheSortVector==FALSE) {
+	if (tiersDelete==FALSE) {
 		if (nrow(oldTable)>0) {
 			#--- set new positions in counter
 			

@@ -7,11 +7,11 @@
 transcripts_cure(
   x,
   filterTranscriptNames = NULL,
-  annotationsWithReversedTimes = TRUE,
-  overlappingAnnotations = TRUE,
-  annotationsWithTimesBelowZero = TRUE,
-  missingTiers = TRUE,
-  showWarning = FALSE
+  annotationsTimesReversed = TRUE,
+  annotationsOverlap = TRUE,
+  annotationsTimesBelowZero = TRUE,
+  tiersMissing = TRUE,
+  warning = FALSE
 )
 }
 \arguments{
@@ -19,15 +19,15 @@ transcripts_cure(
 
 \item{filterTranscriptNames}{Vector of character strings; names of the transcripts to be included.}
 
-\item{annotationsWithReversedTimes}{Logical; If \code{TRUE} annotations with reversed times will be deleted}
+\item{annotationsTimesReversed}{Logical; If \code{TRUE} annotations with reversed times will be deleted}
 
-\item{overlappingAnnotations}{Logical; If \code{TRUE} overlapping annotations will be corrected.}
+\item{annotationsOverlap}{Logical; If \code{TRUE} overlapping annotations will be corrected.}
 
-\item{annotationsWithTimesBelowZero}{Logical; If \code{TRUE} annotations before 0 sec will be corrected.}
+\item{annotationsTimesBelowZero}{Logical; If \code{TRUE} annotations before 0 sec will be corrected.}
 
-\item{missingTiers}{Logical; If \code{TRUE} tiers missing in \code{@tiers} slot of the transcript object will be added.}
+\item{tiersMissing}{Logical; If \code{TRUE} tiers missing in \code{@tiers} slot of the transcript object will be added.}
 
-\item{showWarning}{Logical; If \code{TRUE} a warning notice will be shown upon correction.}
+\item{warning}{Logical; If \code{TRUE} a warning notice will be shown upon correction.}
 }
 \value{
 Corpus object;
@@ -36,7 +36,7 @@ Corpus object;
 Transcript object may contain errors, e.g. because of defect annotation input files or user modifications.
 This function may cure some of these errors in all transcript objects of a corpus.
 \itemize{
-\item Annotations with reversed times: annotations with \code{endSec} lower than \code{startSec} will be deleted.
+\item Annotations with reversed times: annotations with \code{endsec} lower than \code{startsec} will be deleted.
 \item Overlapping annotations: earlier annotations will end where the next annotation starts.
 \item Annotations below 0 sec: Annotations that are starting and ending before 0 sec will be deleted; Annotations starting before but ending after 0 sec will be truncated.
 \item Missing tiers: Tiers that are present in the annotations but missing in the list of tiers in \code{@tiers} of the transcript object will be added.

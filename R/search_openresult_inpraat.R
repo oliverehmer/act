@@ -9,11 +9,11 @@
 #' 
 #' @param x Corpus object.
 #' @param s Search object. 
-#' @param resultNr Integer; Number of the search result (row in the data frame \code{s@results}) to be played. 
+#' @param resultid Integer; Number of the search result (row in the data frame \code{s@results}) to be played. 
 #' @param play Logical; If \code{TRUE} selection will be played.
-#' @param closeAfterPlaying Logical; If \code{TRUE} TextGrid editor will be closed after playing (Currently non functional!)
+#' @param close Logical; If \code{TRUE} TextGrid editor will be closed after playing (Currently non functional!)
 #' @param filterMediaFile Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is uncompressed audio > compressed audio.
-#' @param delayBeforeOpen Double; Time in seconds before the section will be opened in Praat. This is useful if Praat opens but the section does not. In that case increase the delay. 
+#' @param delay Double; Time in seconds before the section will be opened in Praat. This is useful if Praat opens but the section does not. In that case increase the delay. 
 #' @export
 #'
 #' @examples
@@ -24,15 +24,15 @@
 #' # You can only use this functions if you have installed and 
 #' # located the 'sendpraat' executable properly in the package options.
 #' \dontrun{
-#' act::search_openresult_inpraat(x=examplecorpus, s=mysearch, resultNr=1, TRUE, TRUE)
+#' act::search_openresult_inpraat(x=examplecorpus, s=mysearch, resultid=1, TRUE, TRUE)
 #' }
 search_openresult_inpraat  <- function(x, 
 									   s, 
-									   resultNr, 
+									   resultid, 
 									   play=TRUE, 
-									   closeAfterPlaying=FALSE, 
+									   close=FALSE, 
 									   filterMediaFile=c('.*\\.(aiff|aif|wav)', '.*\\.mp3'), 
-									   delayBeforeOpen=0.5) {
+									   delay=0.5) {
 	
 	# result <- mysearch@results[1,]
 	# x <- examplecorpus
@@ -42,7 +42,7 @@ search_openresult_inpraat  <- function(x,
 	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
 	
 	
-	if (missing(resultNr)) {stop("Number of the search result 'resultNr' is missing.") 	}
+	if (missing(resultid)) {stop("Number of the search result 'resultid' is missing.") 	}
 	
 	
 	#--- check for sendpraat
@@ -55,7 +55,7 @@ search_openresult_inpraat  <- function(x,
 	}
 	
 	#--- get  corresponding transcript
-	t <- x@transcripts[[s@results[resultNr, ]$transcript.name]]
+	t <- x@transcripts[[s@results[resultid, ]$transcriptName]]
 	if (is.null(t))	{
 		stop("Transcript not found in corpus object'.")
 	}
@@ -67,7 +67,7 @@ search_openresult_inpraat  <- function(x,
 	name_textgrid	<- stringr::str_replace_all(string = t@name, pattern=" ", replacement="_")
 	
 	#---get path of sound
-	path_longsound <- media_getPathToExistingFile(t, filterMediaFile=".*\\.(wav|mp3|aif|aiff)") 
+	path_longsound <- media_path_to_existing_file(t, filterMediaFile=".*\\.(wav|mp3|aif|aiff)") 
 	if (is.null(path_longsound))	{
 		name_longsound <-""
 		path_longsound <-""
@@ -90,10 +90,10 @@ search_openresult_inpraat  <- function(x,
 	#set values of variables
 	tx  <- stringr::str_replace_all(string = tx, pattern = "PATHTEXTGRID",  replacement = path_textgrid)
 	tx  <- stringr::str_replace_all(string = tx, pattern = "PATHLONGSOUND", replacement = path_longsound)
-	tx  <- stringr::str_replace_all(string = tx, pattern = "SELSTARTSEC",   replacement = as.character(s@results[resultNr, ]$startSec))
-	tx  <- stringr::str_replace_all(string = tx, pattern = "SELENDSEC",     replacement = as.character(s@results[resultNr, ]$endSec))
+	tx  <- stringr::str_replace_all(string = tx, pattern = "SELSTARTSEC",   replacement = as.character(s@results[resultid, ]$startsec))
+	tx  <- stringr::str_replace_all(string = tx, pattern = "SELENDSEC",     replacement = as.character(s@results[resultid, ]$endsec))
 	tx  <- stringr::str_replace_all(string = tx, pattern = "PLAYSELECTION",     replacement = if(play) {as.character(1)} else {as.character(0)})
-	tx  <- stringr::str_replace_all(string = tx, pattern = "CLOSEAFTERPLAYING",     replacement = if (closeAfterPlaying) {as.character(1)} else {as.character(0)})
+	tx  <- stringr::str_replace_all(string = tx, pattern = "close",     replacement = if (close) {as.character(1)} else {as.character(0)})
 	
 	#write temporary script
 	#tempScriptPath <- file.path(tempdir(), "temp.praat")
@@ -111,7 +111,7 @@ search_openresult_inpraat  <- function(x,
 	if(file.exists(tempScriptPath)) {
 		
 		#but produce a delay
-		Sys.sleep(delayBeforeOpen)
+		Sys.sleep(delay)
 		
 		#run script via sendpraat 
 		cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", shQuote(options()$act.path.sendpraat), tempScriptPath)
@@ -143,7 +143,7 @@ search_openresult_inpraat  <- function(x,
 			}
 			
 			#but produce a delay
-			Sys.sleep(delayBeforeOpen)
+			Sys.sleep(delay)
 			
 			#run script via sendpraat 
 			cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", shQuote(options()$act.path.sendpraat), tempScriptPath)

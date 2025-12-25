@@ -21,7 +21,7 @@ Advice: In most situations it is more convenient to use \code{act::corpus_new}, 
 Imports the contents of an annotation file and returns a transcript object.
 
 The input to this function in the parameter '...' may either be
-(1) the path to an annotation file (Currently 'ELAN' .eaf, 'EXMARaLDA .exb and 'Praat' .TextGrid files),
+(1) the path to an annotation file (Currently 'ELAN' .eaf, 'EXMARaLDA .exb, 'Praat' .TextGrid and 'Subrib title' .srt files),
 (2) the contents of an annotation file obtained from the \code{@file.content} or by reading the contents of the files directly with \code{read.lines()} or
 (3) a \code{rPraat} TextGrid object.
 
@@ -61,5 +61,5 @@ t
 
 }
 \seealso{
-\code{corpus_import}, \code{corpus_new}, \code{import_eaf}, \code{import_exb}, \code{import_rpraat}, \code{import_textgrid}
+\link{corpus_import}, \link{corpus_new}, \link{import_eaf}, \link{import_exb}, \link{import_rpraat}, \link{import_srt}, \link{import_textgrid}
 }

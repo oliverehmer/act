@@ -1,5 +1,5 @@
 pathTextGrid$ ="PATHTEXTGRID"
-tiername$ = "DESTINATIONTIERNAME"
+tierName$ = "destinationTierName"
 selStartSec = SELSTARTSEC
 selEndSec = SELENDSEC
 appendText$ = "TEXTTOINSERT"
@@ -28,7 +28,7 @@ gridID = selected ("TextGrid", 1)
 
 
 #--- try to get tier number from tier name
-@tier_number_by_name (gridID, tiername$)
+@tier_number_by_name (gridID, tierName$)
 tierNr=result
 #appendInfoLine: tierNr
 

@@ -4,15 +4,15 @@
 #' If tiers should be added only in certain transcripts, set the parameter \code{filterTranscriptNames}. 
 #' In case that you want to select transcripts by using regular expressions use the function \code{act::search_makefilter} first.
 #' 
-#' You can either insert the new tier at a specific position (e.g. 'absolutePosition=1') or in relation to a existing tier (e.g. destinationTier='speaker1').
-#' To insert a tier at the end, leave 'absolutePosition' and 'destinationTier' open.
+#' You can either insert the new tier at a specific position (e.g. 'positionAbsolute=1') or in relation to a existing tier (e.g. destinationTier='speaker1').
+#' To insert a tier at the end, leave 'positionAbsolute' and 'destinationTier' open.
 #' 
 #' Results will be reported in \code{@history} of the transcript objects.
 #'
 #' @param x Corpus object.
 #' @param tierName Character string; names of the tier to be added.
 #' @param tierType Character string; type of the tier to be added.
-#' @param absolutePosition Integer; Absolute position where the tier will be inserted. Value 1 and values beloe 1 will insert the tier in the first position; To insert the tier at the end, leave 'absolutePosition' and 'destinationTier' open.
+#' @param positionAbsolute Integer; Absolute position where the tier will be inserted. Value 1 and values beloe 1 will insert the tier in the first position; To insert the tier at the end, leave 'positionAbsolute' and 'destinationTier' open.
 #' @param destinationTier Character string; insert the tier relative to this tier.
 #' @param relativePositionToDestinationTier Integer; position relative to the destination tier; 1=immediately after; 0 and -1=immediately before;  bigger numbers are also allowed.
 #' @param insertOnlyIfDestinationExists Logical; if \code{TRUE} the new tier will only be added if the destination tier 'destinationTier' exists in the transcript object. If \code{FALSE} the new tier will only be added in any case. If the destination tier 'destinationTier' does not exist in the transcript object, the tier will be inserted at the end. 
@@ -30,7 +30,7 @@
 tiers_add <- function( x,  
 					   tierName,
 					   tierType=c("IntervalTier", "TextTier"),
-					   absolutePosition=NULL,
+					   positionAbsolute=NULL,
 					   destinationTier=NULL,
 					   relativePositionToDestinationTier=0,
 					   insertOnlyIfDestinationExists=FALSE,
@@ -39,7 +39,7 @@ tiers_add <- function( x,
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
 	if (missing(tierName))  									{stop("Parameter 'tierName' is missing.") 		}
-	if (!is.null(absolutePosition) & !is.null(destinationTier)) {stop("You mey define either 'absolutePosition' or 'destinationTier', not both.") 			}
+	if (!is.null(positionAbsolute) & !is.null(destinationTier)) {stop("You mey define either 'positionAbsolute' or 'destinationTier', not both.") 			}
 	
 	
 	#=== get the transcript names
@@ -56,9 +56,9 @@ tiers_add <- function( x,
 	#---correct values
 	tierName<- tierName[1]
 	tierType<- tierType[1]
-	if(!is.null(absolutePosition)) {
-		absolutePosition<- as.integer(absolutePosition)
-		if (absolutePosition<1) {absolutePosition<- 1}
+	if(!is.null(positionAbsolute)) {
+		positionAbsolute<- as.integer(positionAbsolute)
+		if (positionAbsolute<1) {positionAbsolute<- 1}
 	}
 	if(!is.null(destinationTier)) {
 		destinationTier<- as.character(destinationTier)
@@ -107,20 +107,24 @@ tiers_add <- function( x,
 			#--- set position
 			addThisTier <- FALSE
 			#- insert at the very end
-			if (is.null(absolutePosition) & is.null(destinationTier)) {
-				newRow$position<- max(newTable$position)+1
+			if (is.null(positionAbsolute) & is.null(destinationTier)) {
+				if (nrow(newTable)==0) {
+					newRow$position <- 1	
+				} else {
+					newRow$position <- max(newTable$position)+1
+				}
 				addThisTier <- TRUE
 			}
 			
 			#- insert in absolute position
-			if(!is.null(absolutePosition)) {
+			if(!is.null(positionAbsolute)) {
 				#get all tiers that are in this position or later
-				ids<- which(newTable$position>=absolutePosition)
+				ids<- which(newTable$position>=positionAbsolute)
 				#increase their position
 				newTable$position[ids] <- newTable$position[ids] +1 
 				
 				#set  position of new row
-				newRow$position <- absolutePosition
+				newRow$position <- positionAbsolute
 				
 				addThisTier <- TRUE
 			}
@@ -128,7 +132,7 @@ tiers_add <- function( x,
 			#- insert after a certain tier
 			if(!is.null(destinationTier)) {
 				
-				#check if transcript contains some of the tiers
+				#check if transcript contains the destination tiers
 				id.destination <- which(newTable$name==destinationTier)
 				
 				#if destination tier not found
@@ -183,7 +187,7 @@ tiers_add <- function( x,
 				x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
 					modification        = "tiers_add",
 					systime             = Sys.time(),
-					tier.name           = newRow$name,
+					tierName           = newRow$name,
 					tier.position       = newRow$position
 				)
 				#increase counters for corpus object
@@ -212,7 +216,7 @@ tiers_add <- function( x,
 		transcripts.modified.count   = length(transcripts_modified_ids),
 		transcripts.modified.names   = transcripts_modified_ids,
 		tier.already.existed.in.transcript.count = length(alreadyExistsInTranscripts),
-		tier.already.existed.in.transcript.names = alreadyExistsInTranscripts
+		tier.already.existed.in.transcriptNames = alreadyExistsInTranscripts
 	)
 	
 	return (x)

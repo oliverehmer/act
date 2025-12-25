@@ -1,27 +1,27 @@
-#' Export a transcript object to a 'EXMARaLDA' .exb file
+#' Export 'EXMARaLDA' .exb file
 #'
 #' Advice: In most situations it is more convenient to use \code{act::corpus_export} for exporting annotation files.
 #' 
-#' The .exb file will be written to the file specified in \code{outputPath}.
-#' If \code{outputPath} is left empty, the function will return the contents of the .exb itself.
+#' The .exb file will be written to the file specified in \code{pathOutput}.
+#' If \code{pathOutput} is left empty, the function will return the contents of the .exb itself.
 #'
 #' @param t Transcript object; transcript to be exported.
-#' @param outputPath Character string; path where .exb file will be saved.
+#' @param pathOutput Character string; path where .exb file will be saved.
 #' @param filterTierNames Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.
 #' @param filterSectionStartsec Double; start of selection in seconds.
 #' @param filterSectionEndsec Double; end of selection in seconds.
 #' @param createMediaLinks Logical; if \code{TRUE} media links will be created.
 #'
-#' @return Contents of the .exb file (only if \code{outputPath} is left empty)
+#' @return Contents of the .exb file (only if \code{pathOutput} is left empty)
 #' @export
 #' 
-#' @seealso \code{corpus_export}, \code{export_eaf}, \code{export_printtranscript}, \code{export_rpraat}, \code{export_srt}, \code{export_textgrid}  
+#' @seealso \link{corpus_export}, \link{export_eaf}, \link{export_txt}, \link{export_docx}, \link{export_rpraat}, \link{export_srt}, \link{export_textgrid}  
 #' 
 #' @example inst/examples/export_exb.R
 #' 
 #' 
 export_exb <- function(t, 
-					   outputPath=NULL, 
+					   pathOutput=NULL, 
 					   filterTierNames=NULL, 
 					   filterSectionStartsec = NULL, 
 					   filterSectionEndsec = NULL, 
@@ -30,16 +30,16 @@ export_exb <- function(t,
 	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
 	
 	#--- check if output folder exists
-	if (!is.null(outputPath)) {
-		if (!dir.exists(dirname(outputPath))) {
-			stop("Output folder does not exist. Modify parameter 'outputPath'.")
+	if (!is.null(pathOutput)) {
+		if (!dir.exists(dirname(pathOutput))) {
+			stop("Output folder does not exist. Modify parameter 'pathOutput'.")
 		}
 	}
 	
 	#=== Get data
 	#--- Filter and cure transcript
 	t <- act::transcripts_filter_single(t, filterTierNames=filterTierNames, filterSectionStartsec = filterSectionStartsec, filterSectionEndsec = filterSectionEndsec)
-	t <- act::transcripts_cure_single(t, annotationsWithReversedTimes=TRUE, overlappingAnnotations=TRUE, annotationsWithTimesBelowZero=TRUE, missingTiers=TRUE, showWarning=TRUE)
+	t <- act::transcripts_cure_single(t, annotationsTimesReversed=TRUE, annotationsOverlap=TRUE, annotationsTimesBelowZero=TRUE, tiersMissing=TRUE, warning=TRUE)
 
 	# --- Convert Point tiers to interval tiers
 	if ('TextTier' %in% t@tiers$type) {
@@ -51,23 +51,23 @@ export_exb <- function(t,
 	}
 	
 	#--- get annotations from transcript
-	myAnnotations <- t@annotations
+	ann <- t@annotations
 	
 	#convert annotations to html safe characters
-	myAnnotations$content   <-	XML::xmlValue(XML::xmlTextNode(as.vector(myAnnotations$content)))
-	myAnnotations$tier.name <-	XML::xmlValue(XML::xmlTextNode(as.vector(myAnnotations$tier.name)))
+	ann$content   <-	XML::xmlValue(XML::xmlTextNode(as.vector(ann$content)))
+	ann$tierName <-	XML::xmlValue(XML::xmlTextNode(as.vector(ann$tierName)))
 	
 	
 	#--- get only relevant columns
-	myCols <- c("tier.name", "startSec","endSec","content")
-	if (!all(myCols %in% colnames(myAnnotations))) {
+	myCols <- c("tierName", "startsec","endsec","content")
+	if (!all(myCols %in% colnames(ann))) {
 		stop(paste("Missing colums. Annotations need to contain: ", paste(myCols, collapse = " ", sep="")))
 	}
-	myAnnotations <- myAnnotations[,myCols]
+	ann <- ann[,myCols]
 	
 	#convert annotations to html save characters
-	myAnnotations$content <-	XML::xmlValue(XML::xmlTextNode(as.vector(myAnnotations$content)))
-	myAnnotations$tier.name <-	XML::xmlValue(XML::xmlTextNode(as.vector(myAnnotations$tier.name)))
+	ann$content <-	XML::xmlValue(XML::xmlTextNode(as.vector(ann$content)))
+	ann$tierName <-	XML::xmlValue(XML::xmlTextNode(as.vector(ann$tierName)))
 	
 	#--- generate EAF-XML-document
 	myEXB <- paste(
@@ -186,9 +186,9 @@ export_exb <- function(t,
 
 	#--- timeline 
 	#generate times 
-	if (nrow(myAnnotations)>0) {
+	if (nrow(ann)>0) {
 		#--- get all times
-		alltimes <- c(	myAnnotations$startSec, myAnnotations$endSec)
+		alltimes <- c(	ann$startsec, ann$endsec)
 		if (min (alltimes>0)) {
 			alltimes <- c(0,alltimes)
 		}
@@ -200,15 +200,15 @@ export_exb <- function(t,
 		alltimes <- as.data.frame(cbind(ts=paste("T", 1:length(alltimes),sep=""), value=as.character(alltimes)), stringsAsFactors=FALSE)
 		
 		#--- merge with annotations
-		myAnnotations <- merge(myAnnotations, alltimes, by.x = "startSec", by.y = "value")
-		myColnames <- colnames(myAnnotations)
+		ann <- merge(ann, alltimes, by.x = "startsec", by.y = "value")
+		myColnames <- colnames(ann)
 		myColnames[myColnames=="ts"] <-"tsStart" 
-		colnames(myAnnotations) <- myColnames
+		colnames(ann) <- myColnames
 		
-		myAnnotations <- merge(myAnnotations, alltimes, by.x = "endSec", by.y = "value")
-		myColnames <- colnames(myAnnotations)
+		ann <- merge(ann, alltimes, by.x = "endsec", by.y = "value")
+		myColnames <- colnames(ann)
 		myColnames[myColnames=="ts"] <-"tsEnd" 
-		colnames(myAnnotations) <- myColnames
+		colnames(ann) <- myColnames
 		#generate timeline
 		tli   <- sprintf(tli, alltimes$ts, alltimes$value)
     } else {
@@ -225,7 +225,7 @@ export_exb <- function(t,
 		tiers <- '      <tier id="TIE0" speaker="SPK0" category="v" type="t" display-name="X [v]">\n</tier>'
 	} else {
 		#sort annotations by tier names and start time
-		myAnnotations <- myAnnotations[order(ordered(myAnnotations$tier.name, levels = t@tiers$name), myAnnotations$startSec),]
+		ann <- ann[order(ordered(ann$tierName, levels = t@tiers$name), ann$startsec),]
 		
 		#for each tier
 		tierNr <- 1
@@ -233,9 +233,9 @@ export_exb <- function(t,
 		for (tierNr in 1:nrow(t@tiers)) 	{
 			speaker_name <- speakernames[tierNr]
 			
-			event_block <- sprintf(events, myAnnotations$tsStart[myAnnotations$tier.name==t@tiers$name[tierNr]], 
-								   myAnnotations$tsEnd[myAnnotations$tier.name==t@tiers$name[tierNr]], 
-								   myAnnotations$content[myAnnotations$tier.name==t@tiers$name[tierNr]] 
+			event_block <- sprintf(events, ann$tsStart[ann$tierName==t@tiers$name[tierNr]], 
+								   ann$tsEnd[ann$tierName==t@tiers$name[tierNr]], 
+								   ann$content[ann$tierName==t@tiers$name[tierNr]] 
 								   )
 			
 			event_block <- paste(event_block, collapse="\n")
@@ -253,11 +253,11 @@ export_exb <- function(t,
 	myEXB <- sprintf(myEXB, head, basic_body)
 	#cat(myEXB)
 			
-	if (is.null(outputPath)) 	{
+	if (is.null(pathOutput)) 	{
 		return(myEXB)
 	} else {
 		#---write to file
-		fileConn <- file(outputPath, open="wb")
+		fileConn <- file(pathOutput, open="wb")
 		writeBin(charToRaw(myEXB), fileConn, endian="little")
 		close(fileConn)			
 	}

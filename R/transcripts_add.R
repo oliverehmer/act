@@ -5,13 +5,13 @@
 #' The name of the transcript objects have to be unique in the act package. 
 #' The \code{@name} attribute of each transcript object will be set as identifier in the list of transcripts in the corpus object.
 #' By default, transcripts with non unique names will be renamed. 
-#' If you prefer to import.skip.double.files, set the parameter \code{skipDuplicates=TRUE}.
+#' If you prefer to import.skipDoubleFiles, set the parameter \code{skipDuplicates=TRUE}.
 #' Skipped/renamed transcripts will be reported in 
 #' 
 #' @param x Corpus object
 #' @param ... transcript object, list of transcript objects, corpus object.
 #' @param skipDuplicates Logical; If \code{FALSE} double transcripts will be renamed to make the names unique, if \code{TRUE} double transcripts will not be added.
-#' @param createFullText Logical; if \code{TRUE} full text will be created.
+#' @param createFulltext Logical; if \code{TRUE} full text will be created.
 #' @param assignMedia Logical; if \code{TRUE} the folder(s) specified in \code{@paths.media.files} of your corpus object will be scanned for media. 
 #'
 #' @return Corpus object
@@ -23,7 +23,7 @@
 transcripts_add <- function(x, 
 							..., 
 							skipDuplicates=FALSE, 
-							createFullText=TRUE, 
+							createFulltext=TRUE, 
 							assignMedia=TRUE) {
 	
 	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
@@ -62,31 +62,32 @@ transcripts_add <- function(x,
 	x@transcripts <- c(x@transcripts, transcripts.new)
 	
 	#--- correct the names
-	transcript.names      <- act::helper_transcriptNames_get(x)
-	transcript.names.info <- helper_transcriptNames_make (transcriptNames           = transcript.names,
+	transcriptNames      <- act::helper_transcript_names_get(x)
+	transcriptNames.info <- helper_transcript_names_make (transcriptNames           = transcriptNames,
+														  extractPatterns           = x@import.names.modify$extractPatterns,
 														  searchPatterns            = x@import.names.modify$searchPatterns,
 														  searchReplacements        = x@import.names.modify$searchReplacements,
-														  toUpperCase               = x@import.names.modify$toUpperCase,
-														  toLowerCase               = x@import.names.modify$toLowerCase,
+														  toUpper               = x@import.names.modify$toUpper,
+														  toLower               = x@import.names.modify$toLower,
 														  trim                      = x@import.names.modify$trim,
-														  defaultForEmptyNames      = x@import.names.modify$defaultForEmptyNames)
-	
+														  defaultEmpty      = x@import.names.modify$defaultEmpty)
+
 	#--- set the new names
-	x<- act::helper_transcriptNames_set(x, transcript.names.info$names.ok.ids)
+	x<- act::helper_transcript_names_set(x, transcriptNames.info$names.ok.ids)
 	
 	#--- skip
 	transcripts_skipped_nr <- 0
 	transcripts_skipped_ids <- c()
 	if (skipDuplicates) {
 		#get the numbers of the transcripts to skip
-		skip <- transcript.names.info$duplicated.ids[ which(transcript.names.info$duplicated.ids > length(transcripts_previous_ids))]
+		skip <- transcriptNames.info$duplicated.ids[ which(transcriptNames.info$duplicated.ids > length(transcripts_previous_ids))]
 		
 		#skip those
 		x@transcripts           <- x@transcripts[-skip]
 		
 		#remeber numer and ids
 		transcripts_skipped_nr  <- length(skip)
-		transcripts_skipped_ids <- transcript.names.info$names.original.ids[skip]
+		transcripts_skipped_ids <- transcriptNames.info$names.original.ids[skip]
 	} 
 	
 	#get names/ids of added transcripts
@@ -99,7 +100,7 @@ transcripts_add <- function(x,
 		x <- act::transcripts_update_normalization(x, transcriptNames=transcripts_added_ids)
 		
 		#=== create full text for searches
-		if (createFullText) {	x <- act::transcripts_update_fulltexts(x,transcriptNames=transcripts_added_ids) }
+		if (createFulltext) {	x <- act::transcripts_update_fulltexts(x,transcriptNames=transcripts_added_ids) }
 		
 		#=== scan for media
 		if (assignMedia)	{	x <- act::media_assign(x, transcriptNames=transcripts_added_ids)	}
@@ -113,8 +114,8 @@ transcripts_add <- function(x,
 		transcripts.added.ids      = transcripts_added_ids,
 		transcripts.skipped.count  = transcripts_skipped_nr,
 		transcripts.skipped.ids    = transcripts_skipped_ids,
-		transcripts.renamed.count  = length(transcript.names.info$names.modified.ids),
-		transcripts.renamed.ids    = transcript.names.info$names.modified.ids
+		transcripts.renamed.count  = length(transcriptNames.info$names.modified.ids),
+		transcripts.renamed.ids    = transcriptNames.info$names.modified.ids
 	)
 	
 	return(x)

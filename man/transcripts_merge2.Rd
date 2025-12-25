@@ -9,7 +9,8 @@ transcripts_merge2(
   updateTranscripts,
   identifierTier = "update",
   identifierPattern = ".+",
-  eraseUpdateSectionsCompletely = TRUE
+  eraseCompletely = TRUE,
+  pathOverview = NA
 )
 }
 \arguments{
@@ -21,7 +22,9 @@ transcripts_merge2(
 
 \item{identifierPattern}{Character string; regular expression that identifies the sections that will be inserted into destinationTranscript.}
 
-\item{eraseUpdateSectionsCompletely}{Logical; if \code{TRUE} update sections in destination transcript will be erased completely, if \code{FALSE} update sections in the destination tier will not be erased completely but only the tiers that are present in the updateTranscripts be erased.}
+\item{eraseCompletely}{Logical; if \code{TRUE} update sections in destination transcript will be erased completely, if \code{FALSE} update sections in the destination tier will not be erased completely but only the tiers that are present in the updateTranscripts be erased.}
+
+\item{pathOverview}{Character string; path where comparison of tiers is saved as .xlsx file; if \code{NA} no .xlsx file will be exported.}
 }
 \value{
 Transcript object
@@ -64,7 +67,7 @@ path <- file.path("PATH_TO_AN_EXISTING_FOLDER_ON_YOUR_COMPUTER",
 }
 
 # Export
-act::export_textgrid( t=test, outputPath=path)
+act::export_textgrid( t=test, pathOutput=path)
 
 }
 \seealso{

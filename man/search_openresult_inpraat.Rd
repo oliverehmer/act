@@ -7,11 +7,11 @@
 search_openresult_inpraat(
   x,
   s,
-  resultNr,
+  resultid,
   play = TRUE,
-  closeAfterPlaying = FALSE,
+  close = FALSE,
   filterMediaFile = c(".*\\\\.(aiff|aif|wav)", ".*\\\\.mp3"),
-  delayBeforeOpen = 0.5
+  delay = 0.5
 )
 }
 \arguments{
@@ -19,15 +19,15 @@ search_openresult_inpraat(
 
 \item{s}{Search object.}
 
-\item{resultNr}{Integer; Number of the search result (row in the data frame \code{s@results}) to be played.}
+\item{resultid}{Integer; Number of the search result (row in the data frame \code{s@results}) to be played.}
 
 \item{play}{Logical; If \code{TRUE} selection will be played.}
 
-\item{closeAfterPlaying}{Logical; If \code{TRUE} TextGrid editor will be closed after playing (Currently non functional!)}
+\item{close}{Logical; If \code{TRUE} TextGrid editor will be closed after playing (Currently non functional!)}
 
 \item{filterMediaFile}{Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is uncompressed audio > compressed audio.}
 
-\item{delayBeforeOpen}{Double; Time in seconds before the section will be opened in Praat. This is useful if Praat opens but the section does not. In that case increase the delay.}
+\item{delay}{Double; Time in seconds before the section will be opened in Praat. This is useful if Praat opens but the section does not. In that case increase the delay.}
 }
 \description{
 The function remote controls 'Praat' by using 'sendpraat' and a 'Praat' script.
@@ -48,6 +48,6 @@ mysearch <- act::search_new(x=examplecorpus, pattern = "pero")
 # You can only use this functions if you have installed and 
 # located the 'sendpraat' executable properly in the package options.
 \dontrun{
-act::search_openresult_inpraat(x=examplecorpus, s=mysearch, resultNr=1, TRUE, TRUE)
+act::search_openresult_inpraat(x=examplecorpus, s=mysearch, resultid=1, TRUE, TRUE)
 }
 }

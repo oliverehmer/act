@@ -7,11 +7,13 @@
 media_assign(
   x,
   searchPaths = NULL,
-  searchInSubfolders = TRUE,
+  searchSubfolders = TRUE,
   filterFile = "",
+  namesExtractPattern = "",
   transcriptNames = NULL,
   deleteExistingMedia = TRUE,
-  onlyUniqueFiles = TRUE
+  onlyUniqueFiles = TRUE,
+  audioAsFallback = TRUE
 )
 }
 \arguments{
@@ -19,15 +21,19 @@ media_assign(
 
 \item{searchPaths}{Vector of character strings; paths where media files should be searched; if path is not defined, the paths given in \code{x@paths.media.files} will be used).}
 
-\item{searchInSubfolders}{Logical; if \code{FALSE} only the main level of the directory will be scanned for media, if \code{TRUE} sub folders will be scanned for media, too.}
+\item{searchSubfolders}{Logical; if \code{FALSE} only the main level of the directory will be scanned for media, if \code{TRUE} sub folders will be scanned for media, too.}
 
 \item{filterFile}{Character string; Regular expression of files to look for.}
+
+\item{namesExtractPattern}{Character string; Regular Expression to match a part of the transcript name to seach for media files.}
 
 \item{transcriptNames}{Vector of character strings; Names of the transcripts for which you want to search media files; leave empty if you want to search media for all transcripts in the corpus object.}
 
 \item{deleteExistingMedia}{Logical; if \code{TRUE} existing media links will be deleted, if \code{FALSE} existing media links will be preserved and new links will be added.}
 
 \item{onlyUniqueFiles}{Logical; if \code{TRUE} media files with the same name (in different locations) will only be added once; if \code{FALSE} all media files found will be added, irrespective of possible doublets.}
+
+\item{audioAsFallback}{Logical; if \code{TRUE} audio media files will only be assigned if no video files were found; if \code{FALSE} all media files found will be added, irrespective of type.}
 }
 \value{
 Corpus object.
@@ -54,5 +60,5 @@ examplecorpus <- act::media_assign(examplecorpus)
 
 }
 \seealso{
-\link{media_delete}, \link{media_getPathToExistingFile}
+\link{media_delete}, \link{media_path_to_existing_file}
 }

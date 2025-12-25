@@ -59,7 +59,7 @@ tiers_delete <- function(x,
 			x@transcripts[[i]]@tiers <- x@transcripts[[i]]@tiers[-tiers.ids, ]
 				
 			#delete annotations
-			annotations.ids<- which(x@transcripts[[i]]@annotations$tier.name %in% tierNames)
+			annotations.ids<- which(x@transcripts[[i]]@annotations$tierName %in% tierNames)
 			x@transcripts[[i]]@annotations <- x@transcripts[[i]]@annotations[-annotations.ids, ]
 			annotations_deleted_count <- length(annotations.ids)
 			annotations_deleted_count_all <- annotations_deleted_count_all + annotations_deleted_count
@@ -69,8 +69,8 @@ tiers_delete <- function(x,
 			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
 				modification        = "tiers_delete",
 				systime             = Sys.time(),
-				tiers.deleted.count = length(tiers_deleted_names),
-				tiers.deleted.names = tiers_deleted_names,
+				tiersDeleted.count = length(tiers_deleted_names),
+				tiersDeleted.names = tiers_deleted_names,
 				annotations.deleted = annotations_deleted_count
 			)
 		}
@@ -90,8 +90,8 @@ tiers_delete <- function(x,
 	x@history[[length(x@history)+1]] <- list(  
 		modification                 ="tiers_delete",
 		systime                      = Sys.time(),
-		tiers.deleted.count          = length(tiers_deleted_names_all),
-		tiers.deleted.names          = tiers_deleted_names_all,
+		tiersDeleted.count          = length(tiers_deleted_names_all),
+		tiersDeleted.names          = tiers_deleted_names_all,
 		annotations.deleted          = annotations_deleted_count_all,
 		transcripts.modified.count   = length(transcripts_modified_ids),
 		transcripts.modified.names   = transcripts_modified_ids

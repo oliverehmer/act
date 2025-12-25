@@ -1,8 +1,8 @@
 .emptyAnnotations <- data.frame(
 	annotationID 			= as.integer(),
-	tier.name 				= as.character(),
-	startSec 				= as.double(),
-	endSec 					= as.double(),
+	tierName 				= as.character(),
+	startsec 				= as.double(),
+	endsec 					= as.double(),
 	content 				= as.character(),
 	content.norm 			= as.character(),
 	char.orig.bytime.start 	= as.integer(),
@@ -17,8 +17,8 @@
 	stringsAsFactors        = FALSE)
 
 .emptyAnnotations$annotationID	<- as.integer(.emptyAnnotations$annotationID)
-.emptyAnnotations$startSec		<- as.double(.emptyAnnotations$startSec)
-.emptyAnnotations$endSec  		<- as.double(.emptyAnnotations$endSec)
+.emptyAnnotations$startsec		<- as.double(.emptyAnnotations$startsec)
+.emptyAnnotations$endsec  		<- as.double(.emptyAnnotations$endsec)
 .emptyAnnotations$content  		<- as.character(.emptyAnnotations$content)
 
 .emptyTiers <- data.frame( 
@@ -47,7 +47,7 @@
 #' @slot length.sec Double; \code{[READ ONLY]} Duration of the transcript in seconds.
 #' @slot tiers Data.frame; \code{[READ ONLY]} Table with the tiers. To modify the tiers it is highly recommended to use functions of the package to ensure for consistency of the data.
 #' @slot annotations Data.frame; Table with the annotations.
-#' @slot media.path Character string; Path(s) to the media files that correspond to this transcript object.
+#' @slot media.path Vector of character strings; Path(s) to the media files that correspond to this transcript object.
 #' @slot normalization.systime POSIXct; Time of the last normalization. 
 #' @slot fulltext.systime POSIXct; \code{[READ ONLY]} Time of the last creation of the full texts. 
 #' @slot fulltext.filter.tier.names Vector of character strings; names of tiers that were included in the full text..
@@ -143,7 +143,7 @@ transcript_show <- function (object) {
 	cat("  Aggregated info from act::info_summarized():", fill=TRUE)
 	info <- act::info_summarized(object)
 	cat("    tier.count                 : ", info$tier.count, fill=TRUE)
-   #cat("    tier.names                 : ", paste("'", info$tier.names,"'",sep="", collapse=", "), fill=TRUE)
+   #cat("    tierNames                 : ", paste("'", info$tierNames,"'",sep="", collapse=", "), fill=TRUE)
 	cat("    annotations.count          : ", info$annotations.count, fill=TRUE)
 	cat("    words.org.count            : ", info$words.org.count, fill=TRUE)
 	cat("    words.norm.count           : ", info$words.norm.count, fill=TRUE)

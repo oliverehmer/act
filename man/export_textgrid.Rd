@@ -2,11 +2,11 @@
 % Please edit documentation in R/export_textgrid.R
 \name{export_textgrid}
 \alias{export_textgrid}
-\title{Export a transcript object to a 'Praat' .TextGrid file}
+\title{Export 'Praat' .TextGrid file}
 \usage{
 export_textgrid(
   t,
-  outputPath = NULL,
+  pathOutput = NULL,
   filterTierNames = NULL,
   filterSectionStartsec = NULL,
   filterSectionEndsec = NULL
@@ -15,7 +15,7 @@ export_textgrid(
 \arguments{
 \item{t}{Transcript object; transcript to be saved.}
 
-\item{outputPath}{Character string; path where .TextGrid will be saved.}
+\item{pathOutput}{Character string; path where .TextGrid will be saved.}
 
 \item{filterTierNames}{Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.}
 
@@ -24,14 +24,14 @@ export_textgrid(
 \item{filterSectionEndsec}{Double; end of selection in seconds.}
 }
 \value{
-Contents of the .TextGrid file (only if \code{outputPath} is left empty)
+Contents of the .TextGrid file (only if \code{pathOutput} is left empty)
 }
 \description{
 Advice: In most situations it is more convenient to use \code{act::corpus_export} for exporting annotation files.
 }
 \details{
-The .TextGrid file will be written to the file specified in \code{outputPath}.
-If \code{outputPath} is left empty, the function will return the contents of the .TextGrid itself.
+The .TextGrid file will be written to the file specified in \code{pathOutput}.
+If \code{pathOutput} is left empty, the function will return the contents of the .TextGrid itself.
 }
 \examples{
 library(act)
@@ -51,9 +51,9 @@ path <- file.path("PATH_TO_AN_EXISTING_FOLDER_ON_YOUR_COMPUTER",
 }
 
 # Export
-act::export_textgrid(t=t, outputPath=path)
+act::export_textgrid(t=t, pathOutput=path)
 
 }
 \seealso{
-\code{corpus_export}, \code{export_eaf}, \code{export_exb}, \code{export_printtranscript}, \code{export_rpraat}, \code{export_srt}
+\link{corpus_export}, \link{export_eaf}, \link{export_exb}, \link{export_txt}, \link{export_docx}, \link{export_rpraat}, \link{export_srt}
 }

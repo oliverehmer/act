@@ -10,7 +10,7 @@ search_cuts(
   cutSpanBeforesec = NULL,
   cutSpanAftersec = NULL,
   l = NULL,
-  outputFolder = NULL
+  folderOutput = NULL
 )
 }
 \arguments{
@@ -24,7 +24,7 @@ search_cuts(
 
 \item{l}{Layout object.}
 
-\item{outputFolder}{Character string; if parameter is not set, the print transcripts will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.txt' format.}
+\item{folderOutput}{Character string; if parameter is not set, the print transcripts will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.txt' format.}
 }
 \value{
 Search object;

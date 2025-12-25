@@ -24,5 +24,5 @@ examplecorpus <- act::media_delete(examplecorpus)
 
 }
 \seealso{
-\link{media_assign}, \link{media_getPathToExistingFile}
+\link{media_assign}, \link{media_path_to_existing_file}
 }
