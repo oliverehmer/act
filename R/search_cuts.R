@@ -31,10 +31,10 @@ search_cuts <- function(x,
 	#x <- corpus
 	#s <- mysearch
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
 	
-	if (is.null(s@results$transcriptName)) 		{ stop("Data frame s@results does not contain column 'transcriptName'") 	}
+	if (is.null(s@results$transcriptName)) 		{ cli::cli_abort("Data frame s@results does not contain column {.arg transcriptName}") 	}
 
 	s <- act::search_cuts_printtranscript(x=x,
 										  s=s,

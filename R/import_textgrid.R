@@ -29,13 +29,13 @@ import_textgrid <- function(filePath=NULL,
 	#filePath<-	'/Users/oliverehmer/Desktop/Mary_John_bell.TextGrid'
 	
 	if (is.null(filePath) & is.null(fileContent)) {
-		stop("You need to pass as parameter eiter a file path to a TextGrid file (filePath) or the contents of a TextGrid file (fileContent) as parameter.")
+		cli::cli_abort("You need to pass as parameter eiter a file path to a TextGrid file (filePath) or the contents of a TextGrid file (fileContent) as parameter.")
 	}
 	if (!is.null(filePath) & !is.null(fileContent)) {
-		stop("Please pass only filePath or fileContent as parameter, not both.")
+		cli::cli_abort("Please pass only filePath or fileContent as parameter, not both.")
 	}
 	if (!is.null(fileContent) & is.null(transcriptName)) {
-		stop("If you pass 'fileContent' you need to pass 'transcriptName' as parameter, too.")
+		cli::cli_abort("If you pass {.arg fileContent} you need to pass {.arg transcriptName} as parameter, too.")
 	}
 	
 	#--- new transcript
@@ -79,12 +79,12 @@ import_textgrid <- function(filePath=NULL,
 		#result <- readLines(con=filePath, encoding=myEncoding)
 		for (myEncoding in myEncodings)	{
 			#try to read first 2 lines
-			result	<- helper_test_read(filePath, myEncoding, 2)
+			result	<- .test_read(filePath, myEncoding, 2)
 			
 			#if that worked
 			if (result[1]!="error")		{
 				# try to read all lines
-				result	<- helper_test_read(filePath, myEncoding, -1)
+				result	<- .test_read(filePath, myEncoding, -1)
 				
 				#if that worked
 				if (result[1]!="error") 			{
@@ -164,6 +164,7 @@ import_textgrid <- function(filePath=NULL,
 		
 		#replace double "" from praat TextGrids
 		tiercontent$content <- stringr::str_replace_all(tiercontent$content, "\"\"", "\"")
+		tiercontent$content <- .strip_invalid_xml_chars(tiercontent$content)
 		
 		#check if actual and calculated values are the same
 		if(	length(alltierNames)!=nrow(tiercontent) ) 	{

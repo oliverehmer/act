@@ -13,7 +13,7 @@ matrix_save <- function(replacementMatrix,
 						path, 
 						encoding="UTF-8") {
 	
-	if (exists("replacementMatrix")==FALSE)	{	stop("Object 'replacementMatrix' does not exist")	}
+	if (exists("replacementMatrix")==FALSE)	{	cli::cli_abort("Object {.arg replacementMatrix} does not exist")	}
 	utils::write.table(replacementMatrix, file = path, sep = ";",  row.names=FALSE, qmethod = "double", fileEncoding= encoding)
 }
 

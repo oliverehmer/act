@@ -26,7 +26,7 @@ To make this function work you need to do two things first:
 \examples{
 library(act)
 
-# You can only use this functions if you have installed 
+# You can only use this functions if you have installed
 # and located the 'sendpraat' executable properly in the package options.
 \dontrun{
 act::search_searchandopen_inpraat(x=examplecorpus, "pero")
@@ -34,4 +34,7 @@ act::search_searchandopen_inpraat(x=examplecorpus, "pero")
 
 
 
+}
+\seealso{
+\code{vignette("install_sendpraat", package = "act")}
 }

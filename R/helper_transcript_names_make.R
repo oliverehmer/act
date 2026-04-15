@@ -69,13 +69,13 @@ helper_transcript_names_make <- function(transcriptNames,
 	#---search replace: names.ok.ids
 	if (!is.null(searchPatterns)) {
 		if (is.null(searchReplacements)) {
-			stop("Replacement pattern is missing.")
+			cli::cli_abort("Replacement pattern is missing.")
 		}
 		
 		if (length(searchPatterns)>0) {
 			
 			if(length(searchPatterns)!=length(searchReplacements)) {
-				warning("The patterns 'searchPatterns' and 'searchReplacements' are not of the same length. No replacements made.")
+				cli::cli_warn("The patterns {.arg searchPatterns} and {.arg searchReplacements} are not of the same length. No replacements made.")
 			} else {
 				names(searchReplacements) <- searchPatterns
 				for (i in 1:length(searchReplacements)) {
@@ -111,16 +111,18 @@ helper_transcript_names_make <- function(transcriptNames,
 	}
 	
 	#--- duplicates
-	duplicated.ids <- which(duplicated(names.ok.ids))
-	names.ok.ids   <- make.unique(names.ok.ids)
+	duplicated.ids      <- which(duplicated(names.ok.ids))
+	names.before.unique <- names.ok.ids
+	names.ok.ids        <- make.unique(names.ok.ids)
 	#---results
 	result <- list(
-		names.ok.ids       = names.ok.ids,
-		names.original.ids = names.original.ids,
-		names.modified.ids = setdiff(names.ok.ids, names.original.ids),
-		modified           = !identical(names.ok.ids, names.original.ids),
-		empty.ids          = empty.ids,
-		duplicated.ids     = duplicated.ids)
+		names.ok.ids        = names.ok.ids,
+		names.before.unique = names.before.unique,
+		names.original.ids  = names.original.ids,
+		names.modified.ids  = setdiff(names.ok.ids, names.original.ids),
+		modified            = !identical(names.ok.ids, names.original.ids),
+		empty.ids           = empty.ids,
+		duplicated.ids      = duplicated.ids)
 
 	return(result)
 }

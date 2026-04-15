@@ -1,6 +1,6 @@
 # Detect current operating system
 #
-helper_detect_os <- function(){
+.detect_os <- function(){
 	sysinf <- Sys.info()
 	if (!is.null(sysinf)){
 		os <- sysinf['sysname']
@@ -39,7 +39,7 @@ helper_detect_os <- function(){
 # # Replace old names in search by new names
 # searchresults$resultID <- mynames
 # @keywords internal
-helper_makeNamesForSearch <- function(search.results, 
+.make_names_for_search <- function(search.results, 
 									  resultidPrefix = "result",
 									  resultidStart  = 1) {
 	
@@ -63,9 +63,9 @@ helper_makeNamesForSearch <- function(search.results,
 # @examples
 # print("")
 
-helper_getTextGridForTranscript <- function(t) {
+.get_textgrid_for_transcript <- function(t) {
 	
-	if (missing(t)) 	{stop("Transcript object t is missing.") }	
+	if (missing(t)) 	{cli::cli_abort("Transcript object t is missing.") }	
 	
 	#=== check in corpus object if textgrid is given and exits
 	if (!is.na(t@file.path)) {
@@ -79,11 +79,70 @@ helper_getTextGridForTranscript <- function(t) {
 	#=== create temporary textgrid
 	path <- file.path(tempdir(), stringr::str_c(t@name, ".TextGrid", collapse=""))
 	act::export_textgrid(t, path)
-	warning("Original TextGrid has not been found. A temporary TextGrid has been created")
+	cli::cli_warn("Original TextGrid has not been found. A temporary TextGrid has been created")
 	return(path)
 }
 
-helper_test_read <- function(input_path, 
+.validate_resource <- function(loaded_path, package_path) {
+	if (!file.exists(package_path)) return(TRUE)
+	if (!file.exists(loaded_path)) return(TRUE)
+
+	helper_read_cols <- function(path) {
+		ext <- tolower(tools::file_ext(path))
+		if (ext == "xlsx") {
+			wb <- openxlsx2::wb_load(path)
+			sheets <- wb$sheet_names
+			result <- list()
+			for (s in sheets) {
+				result[[s]] <- colnames(openxlsx2::read_xlsx(path, sheet = s))
+			}
+			return(result)
+		} else if (ext == "csv") {
+			cols <- colnames(utils::read.table(path, header = TRUE, sep = ";", nrows = 1))
+			return(list("Sheet1" = cols))
+		}
+		return(NULL)
+	}
+
+	tryCatch({
+		pkg_cols <- helper_read_cols(package_path)
+		loaded_cols <- helper_read_cols(loaded_path)
+
+		if (is.null(pkg_cols) || is.null(loaded_cols)) return(TRUE)
+
+		issues <- character()
+		for (s in names(pkg_cols)) {
+			matching_sheet <- if (s %in% names(loaded_cols)) s else if (length(loaded_cols) == 1) names(loaded_cols)[1] else NULL
+			if (is.null(matching_sheet)) {
+				issues <- c(issues, paste0('Sheet "', s, '": missing entirely'))
+				next
+			}
+			missing <- setdiff(pkg_cols[[s]], loaded_cols[[matching_sheet]])
+			if (length(missing) > 0) {
+				issues <- c(issues, paste0('Sheet "', s, '": missing column(s): ', paste(missing, collapse = ", ")))
+			}
+		}
+
+		if (length(issues) > 0) {
+			cli::cli_alert_warning("Resource validation failed: {.path {loaded_path}}")
+			for (issue in issues) {
+				cli::cli_text("  {issue}")
+			}
+			cli::cli_alert_info("  Falling back to package version.")
+			return(FALSE)
+		}
+		return(TRUE)
+	}, error = function(e) {
+		cli::cli_alert_warning("Resource validation error: {e$message}")
+		return(TRUE)
+	})
+}
+
+.strip_invalid_xml_chars <- function(x) {
+	gsub("[\x01-\x08\x0b\x0c\x0e-\x1f\x7f]", "", x)
+}
+
+.test_read <- function(input_path,
 							 testencoding, 
 							 testlinenrs) {
 	
@@ -121,45 +180,6 @@ helper_test_read <- function(input_path,
 		}
 	)
 }
-helper_test_read_OLDBACKUP <- function(input_path, 
-							 testencoding, 
-							 testlinenrs) {
-	
-	#assign("last.warning", NULL, envir = baseenv())
-	input_path <- toString(input_path)
-	
-	if(!file.exists(input_path)) {
-		return("error")
-	}
-	tryCatch(
-		{
-			myCon <- file(input_path, encoding = testencoding)
-			myLines <- readLines(myCon, n = testlinenrs)
-			close(myCon)
-			return (myLines)
-		},
-
-		error = function(c)
-		{
-			close(myCon)
-			"error"
-		},
-
-		warning = function(c)
-		{
-			close(myCon)
-			"error"
-			#paste("warning:", warnings())
-		},
-		message = function(c)
-		{
-			"error"
-			close(myCon)
-			#"message"
-		}
-	)
-}
-
 
 
 

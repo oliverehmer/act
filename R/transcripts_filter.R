@@ -28,20 +28,20 @@ transcripts_filter <- function (x,
 						   timesPreserve=TRUE, 
 						   sort=c("none", "tier>startsec", "startsec>tier")) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
 	
 	
 	#--- check parameter 'filterTierNames'
 	if (!is.null(filterTierNames)) {
 		if (length(filterTierNames)>0) {
 			if (!is.vector(filterTierNames)) {
-				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+				{cli::cli_abort("Parameter {.arg filterTierNames} needs to be a vector containing names of tiers.") 	}
 			}
 			if (!is.atomic(filterTierNames)) {
-				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+				{cli::cli_abort("Parameter {.arg filterTierNames} needs to be a vector containing names of tiers.") 	}
 			}
 			if (!is.character(filterTierNames)) {
-				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+				{cli::cli_abort("Parameter {.arg filterTierNames} needs to be a vector containing names of tiers.") 	}
 			}
 		}
 	}
@@ -49,13 +49,13 @@ transcripts_filter <- function (x,
 	if (!is.null(filterTranscriptNames)) {
 		if (length(filterTranscriptNames)>0) {
 			if (!is.vector(filterTranscriptNames)) {
-				{stop("Parameter 'filterTranscriptNames' needs to be a vector containing names of tiers.") 	}
+				{cli::cli_abort("Parameter {.arg filterTranscriptNames} needs to be a vector containing names of tiers.") 	}
 			}
 			if (!is.atomic(filterTranscriptNames)) {
-				{stop("Parameter 'filterTranscriptNames' needs to be a vector containing names of tiers.") 	}
+				{cli::cli_abort("Parameter {.arg filterTranscriptNames} needs to be a vector containing names of tiers.") 	}
 			}
 			if (!is.character(filterTranscriptNames)) {
-				{stop("Parameter 'filterTranscriptNames' needs to be a vector containing names of tiers.") 	}
+				{cli::cli_abort("Parameter {.arg filterTranscriptNames} needs to be a vector containing names of tiers.") 	}
 			}
 		}
 	}	

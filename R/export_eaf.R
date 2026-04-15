@@ -26,12 +26,12 @@ export_eaf <- function(t,
 					   filterSectionEndsec = NULL, 
 					   createMediaLinks=TRUE) {
 	
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
 	
 	#--- check if output folder exists
 	if (!is.null(pathOutput)) {
 		if (!dir.exists(dirname(pathOutput))) {
-			stop("Output folder does not exist. Modify parameter 'pathOutput'.")
+			cli::cli_abort("Output folder does not exist. Modify parameter {.arg pathOutput}.")
 		}
 	}
 	
@@ -46,7 +46,8 @@ export_eaf <- function(t,
 	#=== Get data
 	#--- Filter and cure transcript
 	t <- act::transcripts_filter_single(t, filterTierNames=filterTierNames, filterSectionStartsec = filterSectionStartsec, filterSectionEndsec = filterSectionEndsec)
-	t <- act::transcripts_cure_single(t, annotationsTimesReversed=TRUE, annotationsOverlap=TRUE, annotationsTimesBelowZero=TRUE, tiersMissing=TRUE, warning=TRUE)
+	t <- act::transcripts_cure_single(t, annotationsTimesReversed=TRUE, annotationsOverlap=TRUE, annotationsTimesBelowZero=TRUE, transcriptLengthZero=TRUE, annotationsZeroDuration=TRUE, tiersMissing=TRUE, warning=TRUE)
+	
 	# --- Convert Point tiers to interval tiers
 	if ('TextTier' %in% t@tiers$type) {
 		tempcorpus <- methods::new("corpus")
@@ -61,13 +62,18 @@ export_eaf <- function(t,
 	#--- get only relevant columns
 	myCols <- c("tierName", "startsec","endsec","content")
 	if (!all(myCols %in% colnames(ann))) {
-		stop(paste("Missing columns. Annotations needs to contain: ", paste(myCols, collapse = " ", sep="")))
+		cli::cli_abort("Missing columns. Annotations need to contain: {.val {myCols}}")
 	}
 	ann <- ann[,myCols]
 	
-	#convert annotations to html safe characters
-	ann$content <-	XML::xmlValue(XML::xmlTextNode(as.vector(ann$content)))
-	ann$tierName <-	XML::xmlValue(XML::xmlTextNode(as.vector(ann$tierName)))
+	# XML escape helper: escape special characters for XML output
+	xml_escape <- function(x) {
+		x <- gsub("&",  "&amp;",  x, fixed = TRUE)
+		x <- gsub("<",  "&lt;",   x, fixed = TRUE)
+		x <- gsub(">",  "&gt;",   x, fixed = TRUE)
+		x <- gsub("\"", "&quot;", x, fixed = TRUE)
+		x
+	}
 	
 	#--- generate EAF-XML-document
 	myEAF <-               "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -123,11 +129,11 @@ export_eaf <- function(t,
 
 			if (nrow(annotations.tier)==0) {
 				#--- generate tier AND close
-				myEAF <- append(myEAF, sprintf("    <TIER LINGUISTIC_TYPE_REF=\"praat\" TIER_ID=\"%s\"/>", t@tiers$name[tierNr]))
+				myEAF <- append(myEAF, sprintf("    <TIER LINGUISTIC_TYPE_REF=\"praat\" TIER_ID=\"%s\"/>", xml_escape(t@tiers$name[tierNr])))
 				
 			} else {
 				#--- generate tier
-				myEAF <- append(myEAF, sprintf("    <TIER LINGUISTIC_TYPE_REF=\"praat\" TIER_ID=\"%s\">", t@tiers$name[tierNr]))
+				myEAF <- append(myEAF, sprintf("    <TIER LINGUISTIC_TYPE_REF=\"praat\" TIER_ID=\"%s\">", xml_escape(t@tiers$name[tierNr])))
 				
 				if (t@tiers$type[tierNr] == "IntervalTier")
 				{
@@ -154,7 +160,7 @@ export_eaf <- function(t,
 				
 				annotations <- paste(        "        <ANNOTATION>",
 									 sprintf("            <ALIGNABLE_ANNOTATION ANNOTATION_ID=\"%s\" TIME_SLOT_REF1=\"%s\" TIME_SLOT_REF2=\"%s\">", annotations.tier$annotationID, annotations.tier$TIME_SLOT_REF1, annotations.tier$TIME_SLOT_REF2),
-									 sprintf("                <ANNOTATION_VALUE>%s</ANNOTATION_VALUE>", annotations.tier$content ),
+									 sprintf("                <ANNOTATION_VALUE>%s</ANNOTATION_VALUE>", xml_escape(annotations.tier$content) ),
 									         "            </ALIGNABLE_ANNOTATION>",
 									         "        </ANNOTATION>", sep="\n")
 				
@@ -173,6 +179,7 @@ export_eaf <- function(t,
 	
 	myEAF <- append(myEAF, "</ANNOTATION_DOCUMENT>")
 	
+
 	if (is.null(pathOutput)) 	{
 		return(myEAF)
 	} else {

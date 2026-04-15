@@ -30,13 +30,13 @@ import_eaf <- function(filePath=NULL,
 	# fileContent<-NULL
 	# transcriptName<-NULL
 	if (is.null(filePath) & is.null(fileContent)) {
-		stop("You need to pass as parameter eiter a file path to a TextGrid file (filePath) or the contents of a TextGrid file (fileContent) as parameter.")
+		cli::cli_abort("You need to pass as parameter eiter a file path to a TextGrid file (filePath) or the contents of a TextGrid file (fileContent) as parameter.")
 	}
 	if (!is.null(filePath) & !is.null(fileContent)) {
-		stop("Please pass only filePath or fileContent as parameter, not both.")
+		cli::cli_abort("Please pass only filePath or fileContent as parameter, not both.")
 	}
 	if (!is.null(fileContent) & is.null(transcriptName)) {
-		stop("If you pass 'fileContent' you need to pass 'transcriptName' as parameter, too.")
+		cli::cli_abort("If you pass {.arg fileContent} you need to pass {.arg transcriptName} as parameter, too.")
 	}
 
 	#--- get transcript name
@@ -538,7 +538,7 @@ import_eaf <- function(filePath=NULL,
 			t@length.sec <- max( t@length.sec, as.double(annotations$startsec)+1, as.double(annotations$endsec)+1)
 			
 			#=== html conversion
-			ann$content      <- textutils::HTMLdecode(ann$content)
+			ann$content      <- .strip_invalid_xml_chars(textutils::HTMLdecode(ann$content))
 			ann$tierName    <- textutils::HTMLdecode(ann$tierName)
 			
 		}

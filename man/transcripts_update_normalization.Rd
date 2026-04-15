@@ -6,15 +6,12 @@
 \usage{
 transcripts_update_normalization(
   x,
-  pathReplacementMatrix = "",
   transcriptNames = NULL,
   forceUpdate = FALSE
 )
 }
 \arguments{
 \item{x}{Corpus object.}
-
-\item{pathReplacementMatrix}{Character string; path to replacement matrix in CSV format. If empty, the default replacement matrix that comes with the package will be used.}
 
 \item{transcriptNames}{Vector of character strings; Names of the transcripts for which you want to search media files; leave empty if you want to search media for all transcripts in the corpus object.}
 

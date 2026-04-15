@@ -44,7 +44,7 @@ search_results_import <- function(path,
 	mycolnames <- colnames(temp)
 	missingcolnames <- necessarycolnames[!necessarycolnames %in% mycolnames]
 	if (length(missingcolnames>0)) {
-		stop(	stringr::str_c(c("Some necessary columns are missing in your input file'. Missing columns: ", missingcolnames), sep="", collapse=" "))
+		cli::cli_abort("Some necessary columns are missing in your input file. Missing columns: {.val {missingcolnames}}")
 	}
 	
 	if(revertReplacements) {

@@ -37,14 +37,14 @@ search_results_export <- function(s,
 		overwrite<-TRUE 
 	}
 	
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
+	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
 	
 	#check colnames
 	mycolnames <- colnames(s@results)
 	necessarycolnames <- c("resultID", "transcriptName", "annotationID",  "tierName", "startsec", "endsec", "content", "content.norm", "hit", "hit.nr", "hit.length", "hit.pos.content", "hit.pos.fulltext", "searchMode", "hit.span")
 	missingcolnames <- necessarycolnames[!necessarycolnames %in% mycolnames]
 	if (length(missingcolnames>0)) {
-		stop(	stringr::str_c(c("Some necessary columns are missing in the data frame '@results' in your search object. Missing columns: ", missingcolnames), sep="", collapse=" "))
+		cli::cli_abort("Some necessary columns are missing in {.code s@results}. Missing columns: {.val {missingcolnames}}")
 	}
 	
 	#replace .  by , in numbers
@@ -94,7 +94,7 @@ search_results_export <- function(s,
 				Sys.sleep(0.02)
 			}
 			if (file.exists(path)) {
-				warning("Unable to overwrite existing file. No .csv file written")
+				cli::cli_warn("Unable to overwrite existing file. No .csv file written")
 			} else {
 				utils::write.table(s@results, 
 								   file = path, 
@@ -105,7 +105,7 @@ search_results_export <- function(s,
 								   fileEncoding= encoding)
 			}
 		} else {
-			warning("Destination file already exists. No .csv file written")
+			cli::cli_warn("Destination file already exists. No .csv file written")
 		}
 	} else {
 		if (!file.exists(path)) {
@@ -121,12 +121,12 @@ search_results_export <- function(s,
 			}
 			
 			if (file.exists(path)) {
-				warning("Unable to overwrite existing file. No .xlsx file written")
+				cli::cli_warn("Unable to overwrite existing file. No .xlsx file written")
 			} else {
 				openxlsx::write.xlsx(s@results, file=path, sheetName="data", overwrite=TRUE)
 			}
 		} else {
-			warning("Destination file already exists. No .xlsx file written")
+			cli::cli_warn("Destination file already exists. No .xlsx file written")
 		}
 	}
 }

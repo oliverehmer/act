@@ -27,7 +27,7 @@ import <- function(..., transcriptName=NULL) {
 	arguments <- list(...)
 	
 	if (length(arguments)==0) {
-		warning("The parameter '...' may not be empty.")
+		cli::cli_warn("The parameter '...' may not be empty.")
 	}
 	argument <- arguments[[1]]
 	
@@ -37,7 +37,7 @@ import <- function(..., transcriptName=NULL) {
 			if (length(setdiff(c("tmin", "tmax", "type", "name"), names(class(argument))))==0) {
 				test <- act::import_rpraat(fileContent=argument)
 			} else {
-				warning("Unable to identify the input format.")
+				cli::cli_warn("Unable to identify the input format.")
 				return(NULL)
 			}	
 	
@@ -82,7 +82,7 @@ import <- function(..., transcriptName=NULL) {
 				test <- act::import_textgrid(fileContent=argument, transcriptName=transcriptName)
 				
 			} else {
-				warning("Unable to identify the input format.")
+				cli::cli_warn("Unable to identify the input format.")
 				return(NULL)
 			}
 		}

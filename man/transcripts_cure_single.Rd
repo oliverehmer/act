@@ -9,6 +9,8 @@ transcripts_cure_single(
   annotationsTimesReversed = TRUE,
   annotationsOverlap = TRUE,
   annotationsTimesBelowZero = TRUE,
+  transcriptLengthZero = TRUE,
+  annotationsZeroDuration = TRUE,
   tiersMissing = TRUE,
   warning = FALSE
 )
@@ -21,6 +23,10 @@ transcripts_cure_single(
 \item{annotationsOverlap}{Logical; If \code{TRUE} overlapping annotations will be corrected.}
 
 \item{annotationsTimesBelowZero}{Logical; If \code{TRUE} annotations before 0 sec will be corrected.}
+
+\item{transcriptLengthZero}{Logical; If \code{TRUE} a transcript with \code{@length.sec <= 0} will be corrected to the largest annotation endsec.}
+
+\item{annotationsZeroDuration}{Logical; If \code{TRUE} zero-duration annotations in IntervalTiers will be merged/extended/deleted.}
 
 \item{tiersMissing}{Logical; If \code{TRUE} tiers missing in \code{@tiers} slot of the transcript object will be added.}
 
@@ -36,6 +42,8 @@ This function may cure some of these errors.
 \item Annotations with reversed times: annotations with \code{endsec} lower than \code{startsec} will be deleted.
 \item Overlapping annotations: earlier annotations will end where the next annotation starts.
 \item Annotations below 0 sec: Annotations that are starting and ending before 0 sec will be deleted; Annotations starting before but ending after 0 sec will be truncated.
+\item Transcript length zero: If \code{@length.sec} is missing or \code{<= 0} it will be set to the largest \code{endsec} of any annotation (or a small default).
+\item Zero-duration annotations: In IntervalTiers, annotations with \code{startsec == endsec} will be cured. Multiple zero-duration annotations at the same time point are merged by concatenating their content with a single space. The resulting annotation is then extended to the start of the next annotation (or to \code{@length.sec} if it is the last one). If no room is available (next annotation starts at the same time), the annotation is deleted.
 \item Missing tiers: Tiers that are present in the annotations but missing in the list of tiers in \code{@tiers} of the transcript object will be added.
 }
 }

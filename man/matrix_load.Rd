@@ -7,21 +7,31 @@
 matrix_load(path = NULL, encoding = "UTF-8")
 }
 \arguments{
-\item{path}{Character string; path to the replacement matrix (a .csv file). If argument is left open, the default replacement matrix of the package will be returned.}
+\item{path}{Character string; path to the replacement matrix (.csv or .xlsx file). If argument is left open, the default replacement matrix of the package will be returned.}
 
-\item{encoding}{Character string; encoding of the file.}
+\item{encoding}{Character string; encoding of the file (only used for .csv files).}
 }
 \value{
 Data.frame
 }
 \description{
-This function is only for checking how the normalization matrix will be loaded internally.
+Loads a normalization/replacement matrix from a .csv or .xlsx file.
+}
+\details{
+The following placeholders are supported in the \code{replace} column:
+\itemize{
+\item \verb{\\\{SPACE\\\}} is replaced by a single space character \code{" "}
+\item \verb{\\\{NOTHING\\\}} is replaced by an empty string \code{""}
+}
+
+Placeholders can be part of a longer string, e.g. \verb{abc\\\{SPACE\\\}def}
+becomes \verb{abc def}.
 }
 \examples{
 library(act)
 
 # An example replacement matrix comes with the package.
-path <- system.file("extdata", "normalization", "normalizationMatrix.csv", package="act")
+path <- system.file("extdata", "normalization", "normalization_matrix.csv", package="act")
 
 # Load the matrix
 mymatrix <- act::matrix_load(path)

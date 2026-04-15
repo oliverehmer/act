@@ -1,0 +1,155 @@
+---
+title: "DOCX Export Styles"
+author: "Oliver Ehmer"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_float: false
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{DOCX Export Styles}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+The DOCX export in `act` uses two style matrices to control how transcripts
+are rendered. Both matrices are stored in a single `.xlsx` file (sheets
+`base` and `user`) or in separate `.csv` files.
+
+# Base matrix (sheet `base`)
+
+The base matrix maps act-internal style names to paragraph styles defined in
+the `.docx` template file. Every layout object needs at least these five
+styles:
+
+| `act.style.name` | Purpose |
+|---|---|
+| `header.preface` | Preface line above the title |
+| `header.title` | Transcript title |
+| `header.subtitle` | Subtitle |
+| `header.info` | Description / source information |
+| `transcript.default` | Default paragraph style for annotations |
+
+Additional styles can be added and referenced from the user matrix.
+
+Use `act::export_styles_base_load()` to load the base matrix.
+
+# User matrix (sheet `user`)
+
+The user matrix defines per-tier formatting rules. Each row is a rule that
+matches tiers by regex or layers by column name. The first matching rule
+wins.
+
+Use `act::export_styles_user_load()` to load the user matrix.
+
+## Columns
+
+### Identification
+
+Each row must have at least one of the following:
+
+| Column | Type | Description |
+|---|---|---|
+| `name` | Character | Human-readable label (informational only). |
+| `tier.regex` | Character | Regex matched against tier names. First match wins. |
+| `layer.name` | Character | Column name in the `annotations` data.frame to match as a layer. |
+
+### Visibility
+
+| Column | Type | Default | Description |
+|---|---|---|---|
+| `show` | Logical | `TRUE` | Render the tier/layer (`TRUE`) or hide it (`FALSE`). |
+
+### Paragraph style
+
+| Column | Type | Default | Description |
+|---|---|---|---|
+| `docx.template.name` | Character | (transcript default) | Paragraph style name from the `.docx` template. |
+
+### Line numbers
+
+| Column | Type | Default | Description |
+|---|---|---|---|
+| `line.nr.show` | Logical | `TRUE` | Show line numbers (`TRUE`) or replace with spaces (`FALSE`). |
+
+### Speaker acronym
+
+| Column | Type | Default | Description |
+|---|---|---|---|
+| `acronym.show` | Logical | `TRUE` | Show (`TRUE`) or hide (`FALSE`) the speaker acronym. |
+| `acronym.case` | Character | (no change) | Case transformation. Allowed: `toupper`, `tolower`, `capitalize`. |
+| `acronym.search` | Character | -- | Regex search pattern applied to the acronym. |
+| `acronym.replace` | Character | -- | Replacement string for `acronym.search` matches. |
+| `acronym.width` | Numeric | `0` | Fixed character width (padded/truncated). `0` = global layout default. |
+| `acronym.ending` | Character | (layout default) | String appended after the acronym (e.g., `:`). |
+
+### Indentation (layers)
+
+| Column | Type | Default | Description |
+|---|---|---|---|
+| `content.indent` | Character | `none` | Indentation mode for layer lines. See below. |
+| `content.indent.skip` | Character | -- | Regex for characters at the start of content to skip when calculating indent (only for `content.indent = "content"`). |
+| `content.align.char` | Character | -- | Characters used as alignment target for `content.indent = "align"`. |
+
+**Indentation modes** (`content.indent`):
+
+| Value | Layer indented to ... |
+|---|---|
+| `none` | No indentation (column 0). |
+| `linenumber` | Start of the line number. |
+| `speaker` | Start of the speaker acronym. |
+| `textblock` | Start of the text (after speaker + ending). |
+| `content` | First non-whitespace character in the text. Use `content.indent.skip` to skip leading symbols. |
+| `align` | Position of the first occurrence of any character in `content.align.char` within the main text. Falls back to `textblock` if not found. |
+
+### Spacing
+
+| Column | Type | Default | Description |
+|---|---|---|---|
+| `space.after` | Character | `NA` | Controls spacing after this tier's annotations. |
+
+**`space.after` values:**
+
+| Value | Behavior |
+|---|---|
+| `block` | Insert an empty paragraph after the end of the block (after the last visible line that belongs to the same main annotation). This is the typical setting for transcript tiers. |
+| `always` | Insert an empty paragraph after every line of this tier, even if more lines in the same block follow. |
+| `no` | No spacing after this tier. |
+
+The empty paragraphs use a dedicated spacer paragraph style. A "block" is
+defined as a main tier annotation together with all layer tier annotations
+that follow it before the next main tier annotation.
+
+### Other
+
+| Column | Type | Description |
+|---|---|---|
+| `comment` | Character | Free-text comment (ignored by the code). |
+
+# Example
+
+A minimal user matrix with three rules:
+
+| name | show | tier.regex | layer.name | docx.template.name | line.nr.show | acronym.show | content.indent | space.after |
+|---|---|---|---|---|---|---|---|---|
+| Main | TRUE | `^(?!.*=)` | | | TRUE | TRUE | | block |
+| Translation | TRUE | | translation | transcript_translation | FALSE | FALSE | content | block |
+| Cut | TRUE | `^cut` | | transcript_transition | FALSE | FALSE | | always |
+
+This configuration:
+
+- Shows all tiers not containing `=` as main tiers with line numbers and speaker acronyms.
+- Shows the `translation` layer without line numbers or acronyms, indented to the content position.
+- Shows cut markers with a different paragraph style, with spacing before and after.
+
+```r
+# Load the styles
+styles_base <- act::export_styles_base_load("my_styles.xlsx")
+styles_user <- act::export_styles_user_load("my_styles.xlsx")
+
+# Assign to layout
+l <- methods::new("layout")
+l@docx.styles.base <- styles_base
+l@docx.styles.user <- styles_user
+```

@@ -51,3 +51,6 @@ mysearch <- act::search_new(x=examplecorpus, pattern = "pero")
 act::search_openresult_inpraat(x=examplecorpus, s=mysearch, resultid=1, TRUE, TRUE)
 }
 }
+\seealso{
+\code{vignette("install_sendpraat", package = "act")}
+}

@@ -25,9 +25,9 @@ transcripts_update_fulltexts <- function(x,
 										 tierNames       = NULL, 
 										 forceUpdate     = FALSE) {
 	#=== check x object
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
 	if (is.null(x@transcripts)) 	{
-		warning("No transcripts found in corpus object x.")	
+		cli::cli_warn("No transcripts found in corpus object x.")
 		return(x)
 	}
 	
@@ -98,15 +98,7 @@ transcripts_update_fulltexts <- function(x,
 			myFulltext.bytier.orig <-""
 			myFulltext.bytier.norm <-""
 			
-			#do not get all columns but only the original ones
-			#add the other later as empty cols
-			mycols <- c("annotationID" ,
-					   "tierName",
-					   "startsec" ,
-					   "endsec",
-					   "content",
-					   "content.norm"   )
-			ann <- x@transcripts[[i]]@annotations[, mycols]
+			ann <- x@transcripts[[i]]@annotations
 			
 			#=== get filter by tiers
 			tierNames.forthistranscript <- x@transcripts[[i]]@tiers$name

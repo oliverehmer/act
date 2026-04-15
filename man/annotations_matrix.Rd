@@ -27,7 +27,7 @@ library(act)
 
 # An example replacement matrix comes with the package.
 # It replaces most of the GAT conventions.
-path <- system.file("extdata", "normalization", "normalizationMatrix.csv", package="act")
+path <- system.file("extdata", "normalization", "normalization_matrix.csv", package="act")
 
 # Have a look at the matrix
 mymatrix <- act::matrix_load(path)

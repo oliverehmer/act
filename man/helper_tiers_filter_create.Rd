@@ -13,7 +13,7 @@ helper_tiers_filter_create(
 \arguments{
 \item{tierNames}{Vector of character strings; names of the tiers.}
 
-\item{filterTierIncludeRegEx}{Character string; as regular expression, tiers matching the expression will be included in the print transcript.}
+\item{filterTierIncludeRegEx}{Character string; as regular expression, tiers matching the expression will always be included, even if they match the exclude expression.}
 
 \item{filterTierExcludeRegEx}{Character string; as regular expression, tiers matching the expression will be excluded from the print transcript.}
 }
@@ -21,7 +21,7 @@ helper_tiers_filter_create(
 Vector of character strings; names of tiers
 }
 \description{
-Creates a tier name filter based on a vector of character strings and the values 'filterTierIncludeRegEx' and 'filterTierExcludeRegEx' in a layout object.
+Creates a tier name filter based on a vector of character strings and the values 'filterTierIncludeRegEx' and 'filterTierExcludeRegEx' in a layout object. First, tiers matching 'filterTierExcludeRegEx' are removed. Then, tiers matching 'filterTierIncludeRegEx' are added back from the original tier list, ensuring they are always included regardless of the exclude filter. The original tier order is preserved.
 }
 \examples{
 library(act)

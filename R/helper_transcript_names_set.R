@@ -12,7 +12,7 @@
 #' 
 helper_transcript_names_set <- function(x, transcriptNames) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
 	
 	#--- get names from objects in list
 	names.original.ids <- c(unlist(lapply(x@transcripts, "slot", name = "name")), use.names=FALSE)
@@ -22,17 +22,17 @@ helper_transcript_names_set <- function(x, transcriptNames) {
 	
 	#--- check equal length
 	if (length(x@transcripts)!=length(transcriptNames)) {
-		stop("Length of 'transcriptNames' does not match the number of transcripts in 'x'.")
+		cli::cli_abort("Length of {.arg transcriptNames} does not match the number of transcripts in {.arg x}.")
 	}
 	
 	#--- check empty names
 	if (any(transcriptNames=="")) {
-		stop("Parameter 'transcriptNames' contains empty names. Possibly you ill-defined your regular expressions for 'namesExtractPatterns', 'namesSearchPatterns' and/or 'namesSearchReplacements'.")
+		cli::cli_abort("Parameter {.arg transcriptNames} contains empty names. Possibly you ill-defined your regular expressions for {.arg namesExtractPatterns}, {.arg namesSearchPatterns} and/or {.arg namesSearchReplacements}.")
 	}
 	
 	#--- check duplicates
 	if (any(duplicated(transcriptNames))) {
-		stop("Parameter 'transcriptNames' contains duplicates.")
+		cli::cli_abort("Parameter {.arg transcriptNames} contains duplicates.")
 	}
 	
 	#--- set names

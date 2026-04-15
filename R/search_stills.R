@@ -47,8 +47,8 @@ search_stills <- function (	x,
 		resultids              <- 1
 	}
 	
-	if ( missing(x) )	{stop("Corpus object in parameter 'x' is missing.") }
-	if ( missing(s) )	{stop("Search object in parameter 's' is missing.") }
+	if ( missing(x) )	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") }
+	if ( missing(s) )	{cli::cli_abort("Search object in parameter {.arg s} is missing.") }
 			
 	if(is.null(s)) {
 		if (nrow(s@results)==0) {

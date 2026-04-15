@@ -14,7 +14,7 @@ export_docx_styles_save <- function(exportStyles,
 						path, 
 						encoding="UTF-8") {
 	
-	if (exists("exportStyles")==FALSE)	{	stop("Object 'exportStyles' does not exist")	}
+	if (exists("exportStyles")==FALSE)	{	cli::cli_abort("Object {.arg exportStyles} does not exist")	}
 	utils::write.table(exportStyles, file = path, sep = ";",  row.names=FALSE, qmethod = "double", fileEncoding= encoding)
 }
 

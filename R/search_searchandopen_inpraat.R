@@ -12,12 +12,14 @@
 #' @param x Corpus object.
 #' @param pattern Character string; search pattern as regular expression.
 #' 
+#' @seealso \code{vignette("install_sendpraat", package = "act")}
+#'
 #' @export
 #'
 #' @examples
 #' library(act)
-#' 
-#' # You can only use this functions if you have installed 
+#'
+#' # You can only use this functions if you have installed
 #' # and located the 'sendpraat' executable properly in the package options.
 #' \dontrun{
 #' act::search_searchandopen_inpraat(x=examplecorpus, "pero")
@@ -28,9 +30,9 @@
 search_searchandopen_inpraat <- function(x,
 										 pattern) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
 	
-	if (missing(pattern)) 	{stop("Pattern is missing.") }	
+	if (missing(pattern)) 	{cli::cli_abort("Pattern is missing.") }	
 	
 	s <- act::search_new(x=x, pattern=pattern, concordanceMake=FALSE)
 	if (is.null(s@results)) {

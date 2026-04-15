@@ -14,11 +14,13 @@
 #' @param close Logical; If \code{TRUE} TextGrid editor will be closed after playing (Currently non functional!)
 #' @param filterMediaFile Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is uncompressed audio > compressed audio.
 #' @param delay Double; Time in seconds before the section will be opened in Praat. This is useful if Praat opens but the section does not. In that case increase the delay. 
+#' @seealso \code{vignette("install_sendpraat", package = "act")}
+#'
 #' @export
 #'
 #' @examples
 #' library(act)
-#' 
+#'
 #' mysearch <- act::search_new(x=examplecorpus, pattern = "pero")
 #' 
 #' # You can only use this functions if you have installed and 
@@ -29,39 +31,39 @@
 search_openresult_inpraat  <- function(x, 
 									   s, 
 									   resultid, 
-									   play=TRUE, 
-									   close=FALSE, 
+									   play           =TRUE, 
+									   close          =FALSE, 
 									   filterMediaFile=c('.*\\.(aiff|aif|wav)', '.*\\.mp3'), 
-									   delay=0.5) {
+									   delay          =0.5) {
 	
 	# result <- mysearch@results[1,]
 	# x <- examplecorpus
 	# search_openresult_inpraat(x, searchresults[1,])
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
 	
 	
-	if (missing(resultid)) {stop("Number of the search result 'resultid' is missing.") 	}
+	if (missing(resultid)) {cli::cli_abort("Number of the search result {.arg resultid} is missing.") 	}
 	
 	
 	#--- check for sendpraat
 	if (is.null(options()$act.path.praat)) {
-		stop("Path to sendpraat is not set found. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
+		cli::cli_abort("Path to sendpraat is not set found. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
 	} else {
 		if (file.exists(options()$act.path.sendpraat)==FALSE)	{
-			stop("Sendpraat not found. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
+			cli::cli_abort("Sendpraat not found. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
 		}
 	}
 	
 	#--- get  corresponding transcript
 	t <- x@transcripts[[s@results[resultid, ]$transcriptName]]
 	if (is.null(t))	{
-		stop("Transcript not found in corpus object'.")
+		cli::cli_abort("Transcript not found in corpus object'.")
 	}
 	
 	#--- get path of textgrid
-	path_textgrid <- helper_getTextGridForTranscript(t)
+	path_textgrid <- .get_textgrid_for_transcript(t)
 	name_textgrid <- tools::file_path_sans_ext(basename(path_textgrid))
 	#replace blanks by underscores, as praat does
 	name_textgrid	<- stringr::str_replace_all(string = t@name, pattern=" ", replacement="_")
@@ -71,7 +73,7 @@ search_openresult_inpraat  <- function(x,
 	if (is.null(path_longsound))	{
 		name_longsound <-""
 		path_longsound <-""
-		warning("No media file(s) found.")
+		cli::cli_warn("No media file(s) found.")
 	} else {
 		name_longsound <- path_longsound
 		if (nchar(path_longsound)>=0) {
@@ -114,7 +116,7 @@ search_openresult_inpraat  <- function(x,
 		Sys.sleep(delay)
 		
 		#run script via sendpraat 
-		cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", shQuote(options()$act.path.sendpraat), tempScriptPath)
+		cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\"\"", shQuote(options()$act.path.sendpraat), tempScriptPath)
 		rslt <- system(cmd, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
 		
 		# if execution of sendpraat resulted in an error, try to start praat
@@ -123,15 +125,15 @@ search_openresult_inpraat  <- function(x,
 		#fail    rslt=1
 		if (rslt==1){
 			if (is.null(options()$act.path.praat)) {
-				stop("Praat is not running. And the path to the your Praat executable is not set. Please start Praat first or indicate its location with 'options(act.path.praat = ...)'.")
+				cli::cli_abort("Praat is not running. And the path to the your Praat executable is not set. Please start Praat first or indicate its location with 'options(act.path.praat = ...)'.")
 			} else {
 				if (file.exists(options()$act.path.praat)==FALSE)	{
-					stop("Praat is not running. Please start Praat first. To start Praat automatically indicate its location 'options(act.path.praat = ...)'.")
+					cli::cli_abort("Praat is not running. Please start Praat first. To start Praat automatically indicate its location 'options(act.path.praat = ...)'.")
 				}
 			}
 		
 			#start praat 
-			if (helper_detect_os()=="windows") {
+			if (.detect_os()=="windows") {
 				#start praat WITHOUT waiting for it to finish
 				cmd2 <- sprintf("%s", shQuote(options()$act.path.praat))
 				rslt <- system(cmd2, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=FALSE)
@@ -146,7 +148,7 @@ search_openresult_inpraat  <- function(x,
 			Sys.sleep(delay)
 			
 			#run script via sendpraat 
-			cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\" \"", shQuote(options()$act.path.sendpraat), tempScriptPath)
+			cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\"\"", shQuote(options()$act.path.sendpraat), tempScriptPath)
 			rslt <- system(cmd, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
 			
 		}

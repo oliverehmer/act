@@ -8,7 +8,7 @@
 #' @param pathOutput Character string; Optional. Output path were to save result. If parameter is not set, the print transcripts will only be returned.
 #' @param recursive Logical;  if \code{TRUE} folder input will be searched recursively.
 #' 
-#' @return merged .docx in \link{officeR} format,  
+#' @return merged .docx in officer format,
 #' 
 #' @export
 #' 
@@ -21,6 +21,11 @@ merge_docx <- function(folderInput,
 					   pathOutput=NULL, 
 					   recursive=TRUE) {
 	if (1==2) {
+		folderInput        <- '/Users/oliverehmer/Library/CloudStorage/OneDrive-Persoenlich/Corpus/corpus_work/temporary/oliverehmer/sequences__2026-01-13__20-00-15'
+		pathOutput <- "/Users/oliverehmer/Downloads/test.docx"
+		pathTemplateInput  <- '/Users/oliverehmer/Library/CloudStorage/OneDrive-Persoenlich/Corpus/corpus_work/word/_templates/word/template_sequences_NO_colors_v15.dotx'
+		recursive          <- TRUE
+		
 		folderInput        <- mergefolder
 		pathTemplateInput  <- template_path
 		pathOutput         <- file.path(mergefolder, "merged_transcripts.docx")
@@ -30,10 +35,10 @@ merge_docx <- function(folderInput,
 	
 	#==== CHECKS ====
 	if (!dir.exists(folderInput)) {
-		stop("Input folder  does not exist. Modify parameter 'folderInput'.")
+		cli::cli_abort("Input folder does not exist. Modify parameter {.arg folderInput}.")
 	}
 	if (!file.exists(pathTemplateInput)){
-		stop("Input template does not exist. Modify parameter 'pathTemplateInput'.")
+		cli::cli_abort("Input template does not exist. Modify parameter {.arg pathTemplateInput}.")
 	}	
 	
 	# Find all .docx files in folder and sub folders
@@ -49,11 +54,13 @@ merge_docx <- function(folderInput,
 	
 	# Loop through all found Word files
 	act::helper_progress_set("Merging transcripts", length(word_files))
+	i<-1
 	for (i in seq_along(word_files)) {
 		act::helper_progress_tick()
 		
 		# load for testing
 		#temp_doc <- officer::read_docx(word_files[i])
+		#View(temp_doc)
 		
 		# Append file content to the combined document
 		destination_docx <- officer::body_add_docx(destination_docx, src = word_files[i])

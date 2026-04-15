@@ -18,19 +18,20 @@
 #' nrow(allannotations)
 #' 
 annotations_all <- function(x) {
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	temp <- data.frame()
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
 	temp <- NULL
 	for (t in x@transcripts) {
-		if (is.null(temp)) {
-			if (nrow(t@annotations)>0) {
-				temp <- cbind(transcriptName=rep(t@name, nrow(t@annotations)),  t@annotations)	
-			}
-		} else {
-			if (nrow(t@annotations)>0) {
-				temp <- rbind(temp, cbind(transcriptName=rep(t@name, nrow(t@annotations)),  t@annotations))	
+		if (nrow(t@annotations)>0) {
+			ann <- cbind(transcriptName=rep(t@name, nrow(t@annotations)),  t@annotations)
+			if (is.null(temp)) {
+				temp <- ann
+			} else {
+				temp <- dplyr::bind_rows(temp, ann)
 			}
 		}
+	}
+	if (!is.null(temp)) {
+		temp <- helper_order_annotations_columns(temp)
 	}
 	return(temp)
 }

@@ -27,7 +27,7 @@ import_rpraat <- function(rpraatTextgrid,
 	#transcriptName<-"test"
 	
 	if (length(setdiff(c("tmin", "tmax", "type", "name"), names(attr(rpraatTextgrid, "class"))))!=0) {
-		stop("The object that you have passed as 'rpraatTextgrid' does not seem to be a valid rPraat TextGrid.")
+		cli::cli_abort("The object that you have passed as {.arg rpraatTextgrid} does not seem to be a valid rPraat TextGrid.")
 	}
 	
 	t 					<- methods::new("transcript")
@@ -120,7 +120,8 @@ import_rpraat <- function(rpraatTextgrid,
 			ann <- ann[ann$content!="",]
 		}
 		ann <- ann[is.na(ann["content"])==FALSE,]
-		
+		ann$content <- .strip_invalid_xml_chars(ann$content)
+
 		if (nrow(ann)>0) 		{
 			#=== sort transcript by start times
 			ann <- ann[order(ann$startsec, ann$tierName), ]

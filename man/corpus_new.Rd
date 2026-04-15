@@ -21,7 +21,9 @@ corpus_new(
   namesToUpper = FALSE,
   namesToLower = FALSE,
   namesTrim = TRUE,
-  namesDefault = "no_name"
+  namesDefault = "no_name",
+  cureTranscripts = TRUE,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -58,6 +60,10 @@ corpus_new(
 \item{namesTrim}{Logical; Remove leading and trailing spaces in names.}
 
 \item{namesDefault}{Character string; Default value for empty transcript names (e.g., resulting from search-replace operations)}
+
+\item{cureTranscripts}{Logical; if \code{TRUE} (default) imported transcripts are automatically cured via \link{transcripts_cure_single}. Set to \code{FALSE} to skip the cure step.}
+
+\item{verbose}{Logical; if \code{TRUE} informational messages (e.g., cure summary) are shown. Set to \code{FALSE} to suppress them.}
 }
 \value{
 Corpus object.

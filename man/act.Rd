@@ -11,6 +11,15 @@ The Aligned Corpus Toolkit (act) is designed for linguists that work with time a
 ...
 }
 
+\section{Vignettes}{
+
+\itemize{
+\item \code{vignette("export_docx_styles", package = "act")} -- DOCX export style matrix reference
+\item \code{vignette("install_ffmpeg", package = "act")} -- Install FFmpeg
+\item \code{vignette("install_sendpraat", package = "act")} -- Install sendpraat
+}
+}
+
 \section{Package options}{
 
 The package has numerous options that change the internal workings of the package.

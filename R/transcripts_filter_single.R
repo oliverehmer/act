@@ -39,19 +39,19 @@ transcripts_filter_single <- function (t,
 	#	View(t@annotations)
 	}
 	#=== settings
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
 
 	#--- check parameter 'filterTierNames'
 	if (!is.null(filterTierNames)) {
 		if (length(filterTierNames)>0) {
 			if (!is.vector(filterTierNames)) {
-				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+				{cli::cli_abort("Parameter {.arg filterTierNames} needs to be a vector containing names of tiers.") 	}
 			}
 			if (!is.atomic(filterTierNames)) {
-				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+				{cli::cli_abort("Parameter {.arg filterTierNames} needs to be a vector containing names of tiers.") 	}
 			}
 			if (!is.character(filterTierNames)) {
-				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+				{cli::cli_abort("Parameter {.arg filterTierNames} needs to be a vector containing names of tiers.") 	}
 			}
 		}
 	}	

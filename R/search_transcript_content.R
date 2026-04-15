@@ -12,8 +12,8 @@
 search_transcript_content <- function(t, s) {
 	helper_progress_tick()
 	
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
+	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
+	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
 	
 	temp <- NULL
 	
@@ -34,24 +34,9 @@ search_transcript_content <- function(t, s) {
 		}	
 	}
 	#filter by regex in search
-	if (!is.null(s@filter.tier.includeRegEx)){
-		if (length(s@filter.tier.includeRegEx)!=0) {
-			if (s@filter.tier.includeRegEx!="") {
-				filterTierNames <- grep(pattern=s@filter.tier.includeRegEx, filterTierNames, value=TRUE)
-			}
-		}	
-	}
-	if (!is.null(s@filter.tier.excludeRegEx)){
-		if (length(s@filter.tier.excludeRegEx)!=0) {
-			if (s@filter.tier.excludeRegEx!="") {
-				#search for tier to exclude
-				i <- grep(pattern=s@filter.tier.excludeRegEx, filterTierNames)
-				if (length(i)>0) {
-					filterTierNames <- filterTierNames[-i]
-				}
-			}
-		}
-	}
+	filterTierNames <- helper_tiers_filter_create(tierNames              = filterTierNames,
+												  filterTierIncludeRegEx = s@filter.tier.includeRegEx,
+												  filterTierExcludeRegEx = s@filter.tier.excludeRegEx)
 	ann <- t@annotations[t@annotations$tierName %in% filterTierNames,]
 	#View(ann)
 	
@@ -68,23 +53,6 @@ search_transcript_content <- function(t, s) {
 			ann <- ann[(ann$startsec<s@filter.section.endsec), ]
 		}
 	}
-	#---- only main columns from annotations ----
-	names.col <- c("annotationID",
-				   "tierName",
-				   "startsec",
-				   "endsec",
-				   "content",
-				   "content.norm",
-				   "char.orig.bytime.start",
-				   "char.orig.bytime.end",
-				   "char.norm.bytime.start",
-				   "char.norm.bytime.end",
-				   "char.orig.bytier.start",
-				   "char.orig.bytier.end",
-				   "char.norm.bytier.start",
-				   "char.norm.bytier.end")
-	ann <- ann[,names.col]
-	
 	if (!is.null(ann)) {
 		if (s@search.normalized==TRUE) {
 			if (is.na(ann$content.norm[1]))				{
@@ -147,7 +115,7 @@ search_transcript_content <- function(t, s) {
 				sResults$annotationID       <-   as.numeric(sResults$annotationID)       # as.numeric(levels(sResults$annotationID))[sResults$annotationID]
 				sResults$hit       		   	<-   as.character(sResults$hit)              #as.character(levels(sResults$hit))[sResults$hit]
 				sResults$hit.pos.content	<-   as.numeric(sResults$hit.pos.content)    #as.numeric(levels(sResults$hit.pos.content))[sResults$hit.pos.content]
-				sResults$end				<-   as.numeric(sResults$end)                #as.numeric(levels(sResults$hit.pos.content))[sResults$hit.pos.content]
+				sResults$end				<-   NULL
 				sResults$hit.nr				<-   as.numeric(sResults$hit.nr)             #as.numeric(levels(sResults$hit.pos.content))[sResults$hit.pos.content]
 				sResults$hit.length			<-   as.numeric(sResults$hit.length)         #as.numeric(levels(sResults$hit.pos.content))[sResults$hit.pos.content]
 				sResults$hit.pos.fulltext	<-   as.numeric(sResults$hit.pos.fulltext)   #as.numeric(levels(sResults$hit.pos.content))[sResults$hit.pos.content]

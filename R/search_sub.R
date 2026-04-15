@@ -49,11 +49,11 @@ search_sub <- function(x,
 #	deleteEmptyLines <- FALSE
 #	excludeHitsInSameTier <- TRUE
 
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
 	
 	if (destinationColumn=="") {
-		stop("Destination column name may not be empty.")
+		cli::cli_abort("Destination column name may not be empty.")
 	}
 	if (destinationColumn %in% colnames(s@results)) {
 		#add column

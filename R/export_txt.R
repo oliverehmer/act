@@ -58,7 +58,7 @@ export_txt <- function (t,
 	}
 	
 	#==== SETTINGS ====
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
 	if (missing(l)) 	{
 		l <- methods::new("layout")
 		l@docx.template.path <- "" 
@@ -73,24 +73,24 @@ export_txt <- function (t,
 	#if output folder exists
 	if (!is.null(pathOutput)) {
 		if (!dir.exists(dirname(pathOutput))) {
-			stop("Output folder does not exist. Modify parameter 'pathOutput'.")
+			cli::cli_abort("Output folder does not exist. Modify parameter {.arg pathOutput}.")
 		}
 	}
 	
 	#---- exit if transcript width is too short or too long
 	if (l@transcript.width == -1) {
 	} else if (l@transcript.width < 40) {
-		return( "ERROR: The width of the transcript is to low. Minimum is 40. Check option 'l@transcript.width'")
+		cli::cli_abort("The width of the transcript is to low. Minimum is 40. Check option {.code l@transcript.width}")
 	}
 	
 	#---- exit if tier length is too short or too long
 	if (l@speaker.width == -1) {
 	} else if (l@speaker.width==0) {
-		return( "ERROR: Length of tier names is to short. Minimum is 1. Check option 'l@speaker.width'.")
+		cli::cli_abort("Length of tier names is to short. Minimum is 1. Check option {.code l@speaker.width}.")
 	} else if (l@speaker.width < -1) {
-		return("ERROR: Length of tier names is to short. Minimum is 1. Check option 'l@speaker.width'.")
+		cli::cli_abort("Length of tier names is to short. Minimum is 1. Check option {.code l@speaker.width}.")
 	} else if (l@speaker.width > 25) {
-		return("ERROR: Length of tier names is to long. Maximum is 25. Check option 'l@speaker.width'.")
+		cli::cli_abort("Length of tier names is to long. Maximum is 25. Check option {.code l@speaker.width}.")
 	}
 	
 	#---- increase ----
@@ -103,28 +103,9 @@ export_txt <- function (t,
 	}
 	
 	#filter the filterTierNames by regular expressions
-	if (!is.null(l@filter.tier.includeRegEx)) {
-		if (length(l@filter.tier.includeRegEx)>0) {
-			if (!is.na(l@filter.tier.includeRegEx)) {
-				if (l@filter.tier.includeRegEx!="") {
-					#	filterTierNames <- grep(pattern=l@filter.tier.includeRegEx, filterTierNames, value=TRUE)
-					filterTierNames <- filterTierNames[grep(pattern=l@filter.tier.includeRegEx, filterTierNames)]
-				}
-			}
-		}
-	}
-	if (!is.null(l@filter.tier.excludeRegEx)) {
-		if (length(l@filter.tier.excludeRegEx)>0) {
-			if (!is.na(l@filter.tier.excludeRegEx)) {
-				if (l@filter.tier.excludeRegEx!="") {
-					IDs<-grep(pattern=l@filter.tier.excludeRegEx, filterTierNames)
-					if (length(IDs)>0) {
-						filterTierNames <- filterTierNames[-IDs]
-					}
-				}
-			}
-		}
-	}
+	filterTierNames <- helper_tiers_filter_create(tierNames              = filterTierNames,
+												  filterTierIncludeRegEx = l@filter.tier.includeRegEx,
+												  filterTierExcludeRegEx = l@filter.tier.excludeRegEx)
 	
 	#---- filter data ----
 	t <- act::transcripts_filter_single(t, 
@@ -133,22 +114,28 @@ export_txt <- function (t,
 										filterSectionEndsec   = filterSectionEndsec)
 	
 	#---- cure data ----
-	t <- act::transcripts_cure_single(t, 
-									  annotationsTimesReversed=TRUE, 
-									  annotationsOverlap=TRUE, 
-									  annotationsTimesBelowZero=FALSE, 
-									  tiersMissing=FALSE, 
+	t <- act::transcripts_cure_single(t,
+									  annotationsTimesReversed=TRUE,
+									  annotationsOverlap=TRUE,
+									  annotationsTimesBelowZero=FALSE,
+									  transcriptLengthZero=TRUE,
+									  annotationsZeroDuration=TRUE,
+									  tiersMissing=FALSE,
 									  warning=TRUE)
 
 	#---- get annotations ----
 	ann <- t@annotations
 
-	if (nrow(ann)==0) { 	return("No annotations found") }
+	if (nrow(ann)==0) {
+		label <- export_docx_make_label(t@name, headerTitle, filterSectionStartsec, filterSectionEndsec)
+		cli::cli_warn("No annotations found for {.val {label}}.")
+		return("")
+	}
 	
 	#only relevant columns
 	myCols <- c("tierName", "startsec","endsec","content")
 	if (!all(myCols %in% colnames(ann))) {
-		return(paste("ERROR: Missing columns. Annotations needs to contain: ", paste(myCols, collapse = " ", sep="")))
+		cli::cli_abort("Missing columns. Annotations need to contain: {.val {myCols}}")
 	}
 	
 	#if annotationID column is provided too

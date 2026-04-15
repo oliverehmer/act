@@ -42,9 +42,9 @@ search_cuts_printtranscript <- function(x,
 		folderOutput<-'/Users/oliverehmer/Downloads'
 	}
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
-	if (is.null(s@results$transcriptName)) 		{ stop("Data frame s@results does not contain column 'transcriptName'") 	}
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
+	if (is.null(s@results$transcriptName)) 		{ cli::cli_abort("Data frame s@results does not contain column {.arg transcriptName}") 	}
 	
 	if (is.null(l)) 	{
 		l <- methods::new("layout")
@@ -54,10 +54,10 @@ search_cuts_printtranscript <- function(x,
 		cutSpanBeforesec <- 0
 	} else {
 		if (length(cutSpanBeforesec)!=1) {
-			stop("Parameter 'cutSpanBeforesec' needs to contain only one element as a numeric value.") 
+			cli::cli_abort("Parameter {.arg cutSpanBeforesec} needs to contain only one element as a numeric value.")
 		}
 		if (!is.numeric(cutSpanBeforesec)) {
-			stop("Parameter 'cutSpanBeforesec' needs to be a numeric value.") 
+			cli::cli_abort("Parameter {.arg cutSpanBeforesec} needs to be a numeric value.")
 		}
 		s@cuts.span.beforesec       <- cutSpanBeforesec
 	}
@@ -66,16 +66,16 @@ search_cuts_printtranscript <- function(x,
 		cutSpanAftersec <- 0
 	} else {
 		if (length(cutSpanAftersec)!=1) {
-			stop("Parameter 'cutSpanAftersec' needs to contain only one element as a numeric value.") 
+			cli::cli_abort("Parameter {.arg cutSpanAftersec} needs to contain only one element as a numeric value.")
 		}
 		if (!is.numeric(cutSpanAftersec)) {
-			stop("Parameter 'cutSpanAftersec' needs to be a numeric value.") 
+			cli::cli_abort("Parameter {.arg cutSpanAftersec} needs to be a numeric value.")
 		}
 		s@cuts.span.aftersec       <- cutSpanAftersec
 	}
 	
 	if (!options()$act.export.filename.fromColumnName %in% colnames(s@results)) {
-		stop("The column defined in the option 'options()$act.export.filename.fromColumnName' does not exist in the data.frame with the search results.")
+		cli::cli_abort("The column defined in the option 'options()$act.export.filename.fromColumnName' does not exist in the data.frame with the search results.")
 	}
 	
 	#--- check if output folder is given
@@ -83,7 +83,7 @@ search_cuts_printtranscript <- function(x,
 	if (!is.null(folderOutput)) {
 		folder.destination <- normalizePath(folderOutput, winslash = "/", mustWork = FALSE)
 		if (dir.exists(folder.destination)==FALSE) 	{
-			stop("Output folder does not exist.")
+			cli::cli_abort("Output folder does not exist.")
 		}
 		
 		#create a sub folder for the search
@@ -91,7 +91,7 @@ search_cuts_printtranscript <- function(x,
 			folder.destination <- file.path(folder.destination, s@name)
 			dir.create(folder.destination, showWarnings = FALSE)
 			if (file.exists(folder.destination)==FALSE) 		{
-				stop("Unable to create output directory")
+				cli::cli_abort("Unable to create output directory")
 			}
 		}
 	}	
@@ -283,7 +283,7 @@ search_cuts_printtranscript <- function(x,
 	}
 	#=== print warnings
 	if (!myWarnings=="") {
-		warning(unique(myWarnings))	
+		cli::cli_warn(unique(myWarnings))	
 	}
 	
 	#=== give modified results back

@@ -13,8 +13,8 @@
 #' @example inst/examples/transcripts_delete.R
 transcripts_delete <- function(x, transcriptNames) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	if (missing(transcriptNames)) 	{stop("Parameter 'transcriptNames' is missing.") 	}
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	if (missing(transcriptNames)) 	{cli::cli_abort("Parameter {.arg transcriptNames} is missing.") 	}
 	
 	transcripts.deleted.ids <- which(names(x@transcripts) %in% transcriptNames)
 	transcripts.deleted.names <- names(x@transcripts)[which(names(x@transcripts) %in% transcriptNames)]

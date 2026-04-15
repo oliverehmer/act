@@ -104,5 +104,5 @@ mysearch@results$hit
 
 }
 \seealso{
-\link{act::export_docx}, \link{act::export_docx},
+\link{export_docx}
 }

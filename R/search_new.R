@@ -86,9 +86,9 @@ search_new <- function(x,
 	start.time <- Sys.time()
 
 	#=== check x object
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	if (missing(pattern))			{stop("Pattern is missing.") 	}
-	if (is.null(x@transcripts)) 	{stop("No transcripts found in corpus object x.")	}
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	if (missing(pattern))			{cli::cli_abort("Pattern is missing.") 	}
+	if (is.null(x@transcripts)) 	{cli::cli_abort("No transcripts found in corpus object x.")	}
 
 	#=== check arguments
 	searchMode <- match.arg(searchMode)
@@ -122,7 +122,8 @@ search_new <- function(x,
 
 	#=== run the search
 	if (runSearch) {
-		s <- act::search_run(x=x, s=s)
+		s <- act::search_run(x=x, 
+							 s=s)
 	}
 
 	#View(s@results)

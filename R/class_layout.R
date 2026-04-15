@@ -16,15 +16,16 @@
 #' @slot header.insert Logical; if \code{TRUE} a transcript header is inserted.
 #' @slot arrow.insert Logical; is only used when transcripts are made based on a search results; if \code{TRUE} an arrow will be inserted, highlighting the transcript line containing the search hit.
 #' @slot arrow.shape Character string; shape of the arrow.
-#' @slot docx.template.path Character string; 
-#' @slot docx.styles Data.frame; Matrix with mappings of act variables and the format templates in the .docx template files. To change the styles matrix use \code{l@docx.styles <- act::export_docx_styles_load(path="...")}
+#' @slot docx.template.path Character string;
+#' @slot docx.styles.base Data.frame; Matrix with mappings of act style names to DOCX template paragraph styles. To change the styles matrix use \code{l@docx.styles.base <- act::export_styles_base_load(path="...")}
+#' @slot docx.styles.user Data.frame; Matrix with user-defined tier-specific formatting rules (regex-based). Empty data.frame means all tiers use layout defaults.
 #'
-#' @seealso \link{act::matrix_load}
+#' @seealso \link{matrix_load}
 #'
 #' @export
 #'
 
-methods::setClass("layout", 
+methods::setClass("layout",
 				  representation(
 				  	name                            = "character",
 				  	filter.tier.includeRegEx        = "character",
@@ -39,7 +40,8 @@ methods::setClass("layout",
 				  	arrow.insert 					= "logical",
 				  	arrow.shape  					= "character",
 				  	docx.template.path              = "character",
-				  	docx.styles                     = "data.frame"
+				  	docx.styles.base                = "data.frame",
+				  	docx.styles.user                = "data.frame"
 				  ), prototype = list(
 				  	name                            = "StandardLayout",
 				  	filter.tier.includeRegEx        = NA_character_,
@@ -54,32 +56,57 @@ methods::setClass("layout",
 				  	arrow.insert 					= TRUE,
 				  	arrow.shape  					= "->",
 				  	docx.template.path              = '',
-				  	docx.styles                     = data.frame(act.style.name=character(),	act.style.type=character(), docx.template.type=character(), docx.template.name=character(), stringsAsFactors		= FALSE)
+				  	docx.styles.base                = data.frame(act.style.name=character(), docx.template.name=character(), stringsAsFactors = FALSE),
+				  	docx.styles.user                = data.frame(stringsAsFactors = FALSE)
 				  )
 )
 
 layout_show <- function (object) {
-	cat("layout object", fill=TRUE)
-	cat("  name                    : ", paste("'", object@name, "'",sep="", collapse=""),fill=TRUE)
-	cat("\n")
-	cat("  filter.tier.includeRegEx: ", paste("'", object@filter.tier.includeRegEx, "'",sep="", collapse=""),fill=TRUE)
-	cat("  filter.tier.excludeRegEx: ", paste("'", object@filter.tier.excludeRegEx, "'",sep="", collapse=""),fill=TRUE)
-	cat("\n")
-	cat("  transcript.width        : ", object@transcript.width, fill=TRUE)
-	cat("\n")
-	cat("  speaker.regex           : ", object@speaker.regex, fill=TRUE)
-	cat("  speaker.width           : ", object@speaker.width, fill=TRUE)
-	cat("  speaker.ending          : ", paste("'", object@speaker.ending, "'",sep="", collapse=""),fill=TRUE)
-	cat("  spacesbefore            : ", object@spacesbefore, fill=TRUE)
-	cat("\n")
-	cat("  brackets.align          : ", object@brackets.align, fill=TRUE)
-	cat("\n")
-	cat("  header.insert           : ", object@header.insert, fill=TRUE)
-	cat("  arrow.insert            : ", object@arrow.insert, fill=TRUE)
-	cat("  arrow.shape             : ", paste("'", object@arrow.shape,"'",sep="", collapse=""), fill=TRUE)
-	cat("\n")
-	cat("  docx.template.path      : ", paste("'", object@docx.template.path,"'",sep="", collapse=""), fill=TRUE)
-	cat("  docx.styles             : ", '[check directly]', nrow(object@docx.styles), 'row(s)', fill=TRUE)
+	w <- 24
+	cli::cli_rule("layout object: {.val {object@name}}")
+
+	cli::cli_text("{.strong Filters}")
+	.show_dl(c(
+		"filter.tier.includeRegEx" = object@filter.tier.includeRegEx,
+		"filter.tier.excludeRegEx" = object@filter.tier.excludeRegEx
+	), width = w)
+
+	cli::cli_text("")
+	cli::cli_text("{.strong Transcript}")
+	.show_dl(c(
+		"transcript.width" = as.character(object@transcript.width),
+		"speaker.regex"    = object@speaker.regex,
+		"speaker.width"    = as.character(object@speaker.width),
+		"speaker.ending"   = object@speaker.ending,
+		"spacesbefore"     = as.character(object@spacesbefore),
+		"brackets.align"   = as.character(object@brackets.align)
+	), width = w)
+
+	cli::cli_text("")
+	cli::cli_text("{.strong Header & Arrow}")
+	.show_dl(c(
+		"header.insert" = as.character(object@header.insert),
+		"arrow.insert"  = as.character(object@arrow.insert),
+		"arrow.shape"   = object@arrow.shape
+	), width = w)
+
+	cli::cli_text("")
+	cli::cli_text("{.strong DOCX}")
+	if (length(object@docx.template.path) <= 1) {
+		template_display <- object@docx.template.path
+	} else {
+		tpl_names <- names(object@docx.template.path)
+		if (!is.null(tpl_names)) {
+			template_display <- paste0(length(object@docx.template.path), " template(s): ", paste(tpl_names, collapse = ", "))
+		} else {
+			template_display <- paste0(length(object@docx.template.path), " template(s)")
+		}
+	}
+	.show_dl(c(
+		"docx.template.path" = template_display,
+		"docx.styles.base"   = paste(nrow(object@docx.styles.base), "row(s)"),
+		"docx.styles.user"   = paste(nrow(object@docx.styles.user), "row(s)")
+	), width = w)
 }
 methods::setMethod("show", signature = "layout", definition = layout_show)
 
@@ -87,16 +114,16 @@ methods::setMethod(
 	"initialize",
 	"layout",
 	function(.Object, ...) {
-		
+
 		# call the default initializer first
-		.Object <- callNextMethod()
-		
+		.Object <- methods::callNextMethod()
+
 		# custom behavior
 		#message("A new layout object has been created.")
 		#load the default styles matrix to new layout objects
-		.Object@docx.styles <- export_docx_styles_load()
-		
+		.Object@docx.styles.base <- export_styles_base_load()
+		.Object@docx.styles.user <- export_styles_user_load()
+
 		.Object
 	}
 )
-

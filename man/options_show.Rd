@@ -4,7 +4,7 @@
 \alias{options_show}
 \title{Options of the package}
 \usage{
-options_show()
+options_show(group = NULL)
 }
 \value{
 Nothing.
@@ -17,71 +17,29 @@ There are several options that change the way the package works. They are set gl
 \itemize{
 \item Use \code{options(name.of.option = value)} to set an option.
 \item Use \code{options()$name.of.option} to get the current value of an option.
-\item Use \code{act::options_reset} to set all options to the default value.
-\item Use \code{act::options_delete} to clean up and delete all option settings.
+\item Use \code{act::options_reset()} to set all options to the default value.
+\item Use \code{act::options_delete()} to clean up and delete all option settings.
 }
 
-The package uses the following options.
+Options are organized in groups:
 
-\emph{Program}
-\itemize{
-\item \code{act.excamplecorpusURL} character strings; where to download example media files.
-\item \code{act.updateX} Logical; If \code{TRUE} the original corpus object 'x' passed passed to the search functions \code{search_new} and \code{search_run} will also be updated, in case that during the search fulltexts are created or the normalization is performed.
-\item \code{act.showprogress} logical; if \code{TRUE} a progress bar will be shown during (possibly) time consuming operations.
-}
+\strong{Program:} General behavior settings (progress bars, corpus updates).
 
-\emph{Paths}
-\itemize{
-\item \code{act.path.praat} Character string; path to the 'Praat' executable on your computer. Only necessary if you use the functions to remote control Praat using Praat scripts.
-\item \code{act.path.sendpraat} Character string; path to the 'sendpraat' executable on your computer. Only necessary if you use the functions to remote control Praat using Praat scripts.
-\item \code{act.path.elan} Character string; path to the 'ELAN' executable on your computer. Only necessary if you want to open search results in ELAN.
-}
+\strong{Paths:} Paths to external programs (Praat, ELAN).
 
-\emph{File formats}
-\itemize{
-\item \code{act.fileformats.video} Vector of character strings; Suffixes of video files that will be identified; default is 'c("mp4", "mov")'.
-\item \code{act.fileformats.audio} Vector of character strings; Suffixes of audio files that will be identified; default is 'c("wav", "aif", "mp3")'.
-}
+\strong{File formats:} Recognized audio and video file extensions.
 
-\emph{FFMPEG commands and options}
-\itemize{
-\item \code{act.ffmpeg.command.main} Character string; 'FFmpeg' command that is used for cutting media files (audio & video).
-\item \code{act.ffmpeg.command.main.fast} Character string; 'FFmpeg' command that is used for cutting video files using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
-\item \code{act.ffmpeg.command.audioAsMP3} Character string; 'FFmpeg' command that is used for cutting/generating compressed audio files as mp3 (for other audio, the main command is used).
-\item \code{act.ffmpeg.command.images} Character string; 'FFmpeg' command that is used for extracting still images.
-\item \code{act.ffmpeg.command.images.fast} Character string; 'FFmpeg' command that is used for extracting still images using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
-\item \code{act.ffmpeg.exportchannels.fromColumnName} Character string; Name of the column in the data frame \code{s@results} from information, which audio channel to export, will be taken.
-}
+\strong{FFmpeg:} Commands and options for media cutting and still extraction.
 
-\emph{Import annotation files}
-\itemize{
-\item \code{act.import.readEmptyIntervals} Logical; if \code{TRUE} empty intervals in you annotation files will be read, if \code{FALSE} empty intervals will be skipped.
-\item \code{act.import.scanSubfolders} Logical; if \code{TRUE} sub folders will also be scanned for annotation files; if \code{FALSE} only the main level of the folders specified in \code{pathsAnnotationFiles} of your corpus object will be scanned.
-\item \code{act.import.storefileContentInTranscript} if \code{TRUE} the contents of the original annotation file will be stored in \code{transcript@file.content}. Set to \code{FALSE} if you want to keep your corpus object small.
-}
+\strong{Import:} Settings for reading annotation files.
 
-\emph{Export}
-\itemize{
-\item \code{act.export.filename.fromColumnName} Character string; Name of the column from which the file names for exported files will be taken.
-\item \code{act.export.folder.grouping1.fromColumnName} Character string; Name of sub folders that will be created in the folder of the search result, level 1.
-\item \code{act.export.folder.grouping2.fromColumnName} Character string; Name of sub folders that will be created in the folder of the search result, level 2.
-}
+\strong{Export:} Settings for file naming and folder structure.
 
-\emph{Miscellaneous}
-\itemize{
-\item \code{act.separator_between_intervals} Character; Single character that is used for separating intervals when creating the full text.
-\item \code{act.separator_between_tiers} Character; Single character that is used for separating tiers when creating the full text.
-\item \code{act.separator_between_words} Character string; regular expression with alternatives that count as separators between words. Used for preparing the concordance.
-\item \code{act.wordCountRegEx} Character string; regular expression that is used to count words.
-\item \code{act.pauseIdentifierGATRegEx} Character string; regular expression that is used to identify pauses in GAT transcription
-\item 
-}
+\strong{Parsing:} Separators, word counting, and pause identification patterns.
 }
 \examples{
 library(act)
 \dontrun{
 act::options_show()
 }
-
-
 }

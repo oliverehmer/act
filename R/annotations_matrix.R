@@ -27,7 +27,7 @@ annotations_matrix <- function(x,
 							   pathReplacementMatrix, 
 							   filterTranscriptNames=NULL) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a corpus object.") } }
 	
 	#=== get the transcript names
 	#if none are given, take all names
@@ -42,10 +42,10 @@ annotations_matrix <- function(x,
 	
 	#=== load the matrix
 	act_replacementMatrix <- matrix_load(pathReplacementMatrix)
-	if (is.null(act_replacementMatrix)) 						{	stop("Normalization matrix not read.")		}
+	if (is.null(act_replacementMatrix)) 						{	cli::cli_abort("Normalization matrix not read.")		}
 
 	#=== check 
-	if (is.null(x@transcripts)) 	{	stop("No transcripts found in corpus object x.")	}
+	if (is.null(x@transcripts)) 	{	cli::cli_abort("No transcripts found in corpus object {.arg x}.")	}
 	
 	#replace NA by empty string
 	act_replacementMatrix$replace[is.na(act_replacementMatrix$replace)] <- ""
@@ -65,15 +65,14 @@ annotations_matrix <- function(x,
 			NULL
 		}
 	)
-	if (is.null(out)) 						{	stop("Replacement matrix seems to be containing invalid regular expressions.")		}
+	if (is.null(out)) 						{	cli::cli_abort("Replacement matrix seems to be containing invalid regular expressions.")		}
 	
 	#=== do the replacement
 	annotations_modified_nr  <- 0
 	transcripts_modified_ids <- c()
 	
 	if (length(mymatrix)<1) {
-		warning("Replacement matrix is empty.")
-		
+		cli::cli_warn("Replacement matrix is empty.")
 	} else {
 		
 		#set progress bar

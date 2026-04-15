@@ -45,18 +45,18 @@ corpus_export <-  function(x,
 	}
 	
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a corpus object.") } }
 	
-	if (missing(folderOutput)) { stop("No output folder specified in parameter 'folderOutput'") }
+	if (missing(folderOutput)) { cli::cli_abort("No output folder specified in parameter {.arg folderOutput}.") }
 	
 	if (!dir.exists(folderOutput)) {
 		if (createFolderOutput) {
 			dir.create(folderOutput, recursive=TRUE)
 			if (!dir.exists(folderOutput)) {
-				stop("Error while crating the output. Modify the parameter 'folderOutput'.")
+				cli::cli_abort("Error while creating the output folder. Modify the parameter {.arg folderOutput}.")
 			} 
 		} else {
-			stop("Output folder does not exist. Modify parameter 'folderOutput'.")
+			cli::cli_abort("Output folder does not exist. Modify parameter {.arg folderOutput}.")
 		}
 	}
 	
@@ -65,7 +65,7 @@ corpus_export <-  function(x,
 	} else {
 		filterTranscriptNames <- intersect(filterTranscriptNames, names(x@transcripts))
 		if (length(filterTranscriptNames)==0) {
-			stop("No transcripts to export. Possibly modify parameter 'filterTranscriptNames'.")
+			cli::cli_abort("No transcripts to export. Possibly modify parameter {.arg filterTranscriptNames}.")
 		}
 	}
 	

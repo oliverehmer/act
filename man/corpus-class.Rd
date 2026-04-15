@@ -26,7 +26,7 @@ Other slots are settings and are used when performing functions on the corpus ob
 
 \item{\code{normalization.matrix}}{Data.frame; Replacement matrix used for normalizing the annotations. To change the normalization matrix use \code{x@normalization.matrix <- act::matrix_load(path="...")}}
 
-\item{\code{import.skip.double.files}}{Logical; if \code{TRUE} files with the same names will be skipped (only one of them will be loaded), if \code{FALSE} transcripts will be renamed to make the names unique.}
+\item{\code{import.skip.double.files}}{Character string; controls handling of duplicate transcript names. \code{"warn_keep_newest"} keeps the newest file and warns. \code{"warn_keep_first"} keeps the first file and warns. \code{"error"} aborts on duplicates. \code{"allow"} allows duplicates without warning. For backward compatibility, logical values are accepted: \code{TRUE} is treated as \code{"warn_keep_first"}, \code{FALSE} as \code{"allow"}.}
 
 \item{\code{import.names.include}}{Vector of character strings; Only files matching this regular expression will be imported into the corpus.}
 
@@ -35,6 +35,8 @@ Other slots are settings and are used when performing functions on the corpus ob
 \item{\code{import.names.modify}}{List; Options how to modify the names of the transcript objects when they are added to the corpus. These options are useful, for instacne, if your annotation files contain character sequences that you do not want to include into the transcript name in the corpus (e.g. if you regularly add a date to the file name of your annotations files  as 'myFile_2020-09-21.TextGrid').}
 
 \item{\code{import.results}}{Data.frame; information about the import of the annotation files.}
+
+\item{\code{media.assign.results}}{Data.frame; information about the media assignment.}
 
 \item{\code{history}}{List; History of modifications made by any of the package functions to the corpus.}
 }}

@@ -31,6 +31,8 @@
 #' @param namesToLower Logical; Convert transcript names all to lower case.
 #' @param namesTrim Logical; Remove leading and trailing spaces in names.
 #' @param namesDefault Character string; Default value for empty transcript names (e.g., resulting from search-replace operations)
+#' @param cureTranscripts Logical; if \code{TRUE} (default) imported transcripts are automatically cured via \link{transcripts_cure_single}. Set to \code{FALSE} to skip the cure step.
+#' @param verbose Logical; if \code{TRUE} informational messages (e.g., cure summary) are shown. Set to \code{FALSE} to suppress them.
 #'
 #' @return Corpus object.
 #' 
@@ -41,12 +43,12 @@
 #' @example inst/examples/corpus_new.R
 #' 
 #' 
-corpus_new <- function(pathsAnnotationFiles      = NULL, 
-					   pathsMediaFiles           = NULL, 
-					   name                      = "New Corpus", 
-					   importFiles               = TRUE, 
-					   skipDoubleFiles           = TRUE, 
-					   createFulltext            = TRUE, 
+corpus_new <- function(pathsAnnotationFiles      = NULL,
+					   pathsMediaFiles           = NULL,
+					   name                      = "New Corpus",
+					   importFiles               = TRUE,
+					   skipDoubleFiles           = TRUE,
+					   createFulltext            = TRUE,
 					   assignMedia               = TRUE,
 					   pathNormalizationMatrix   = NULL,
 					   namesInclude              = character(),
@@ -57,7 +59,9 @@ corpus_new <- function(pathsAnnotationFiles      = NULL,
 					   namesToUpper              = FALSE,
 					   namesToLower              = FALSE,
 					   namesTrim                 = TRUE,
-					   namesDefault              = "no_name"
+					   namesDefault              = "no_name",
+					   cureTranscripts           = TRUE,
+					   verbose                   = TRUE
 ) {
 	
 	
@@ -96,6 +100,9 @@ corpus_new <- function(pathsAnnotationFiles      = NULL,
 	
 	#--- assign the parameters
 	x@name                       <- name
+	if (is.logical(skipDoubleFiles)) {
+		skipDoubleFiles <- if (isTRUE(skipDoubleFiles)) "warn_keep_first" else "allow"
+	}
 	x@import.skip.double.files   <- skipDoubleFiles
 	x@import.names.include       <- namesInclude
 	x@import.names.exclude       <- namesExclude
@@ -114,7 +121,7 @@ corpus_new <- function(pathsAnnotationFiles      = NULL,
 	
 	#normalization matrix
 	act_replacementMatrix <- act::matrix_load(pathNormalizationMatrix, "UTF-8")
-	if (is.null(act_replacementMatrix))  {	stop("Normalization matrix not read.")		}
+	if (is.null(act_replacementMatrix))  {	cli::cli_abort("Normalization matrix not read.")		}
 	x@normalization.matrix <- act_replacementMatrix
 	
 	#--- update history
@@ -133,7 +140,7 @@ corpus_new <- function(pathsAnnotationFiles      = NULL,
 				message <- sprintf("%s of %s path(s) in 'x@paths.annotation.files' do not exist.", length(paths.dont.exist), length(x@paths.annotation.files))
 				m       <- stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
 				message <- stringr::str_c(message,"\n", m, collapse="\n")
-				warning(unique(message))
+				cli::cli_warn(unique(message))
 			}
 		}
 	}
@@ -144,10 +151,12 @@ corpus_new <- function(pathsAnnotationFiles      = NULL,
 	}
 	
 	if (importFiles) {
-		return(act::corpus_import(x=x, 
-								  createFulltext=createFulltext, 
-								  assignMedia=assignMedia))
-		
+		return(act::corpus_import(x=x,
+								  createFulltext=createFulltext,
+								  assignMedia=assignMedia,
+								  cureTranscripts=cureTranscripts,
+								  verbose=verbose))
+
 	} else {
 		return(x)
 	}

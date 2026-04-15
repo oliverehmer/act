@@ -16,6 +16,10 @@
 #' @param deleteExistingMedia Logical; if \code{TRUE} existing media links will be deleted, if \code{FALSE} existing media links will be preserved and new links will be added.
 #' @param onlyUniqueFiles Logical; if \code{TRUE} media files with the same name (in different locations) will only be added once; if \code{FALSE} all media files found will be added, irrespective of possible doublets.
 #' @param audioAsFallback Logical; if \code{TRUE} audio media files will only be assigned if no video files were found; if \code{FALSE} all media files found will be added, irrespective of type.
+#' @param videoMaxFiles Integer or NULL; maximum number of video files to assign per transcript. NULL means no limit.
+#' @param audioMaxFiles Integer or NULL; maximum number of audio files to assign per transcript. NULL means no limit.
+#' @param videoPriority Character vector or NULL; regex patterns matched against video filenames for prioritization. First matching pattern wins. E.g. \code{c("hand.*_al", "_al", "hand.*_ac", "_ac")}.
+#' @param audioPriority Character vector or NULL; file extensions for audio prioritization. First matching extension wins. E.g. \code{c("aif", "wav", "mp3")}.
 #'
 #'
 #' @return Corpus object.
@@ -26,25 +30,34 @@
 #'
 #' @example inst/examples/media_assign.R
 #' 
-media_assign <- function(x, 
-						 searchPaths                 = NULL, 
-						 searchSubfolders            = TRUE, 
+media_assign <- function(x,
+						 searchPaths                 = NULL,
+						 searchSubfolders            = TRUE,
 						 filterFile                  = "",
-						 namesExtractPattern         = '',      	 
-						 transcriptNames             = NULL, 
-						 deleteExistingMedia         = TRUE, 
+						 namesExtractPattern         = '',
+						 transcriptNames             = NULL,
+						 deleteExistingMedia         = TRUE,
 						 onlyUniqueFiles             = TRUE,
-						 audioAsFallback = TRUE) {
-	#x <-corpus
-	#searchPaths        <- NULL 
-	#searchSubfolders <- TRUE 
-	#filterFile         <- ""
-	#filterFile         <- "mp4"
-	#transcriptNames    <- NULL 
-	#deleteExistingMedia<- TRUE 
-	#onlyUniqueFiles    <- TRUE
+						 audioAsFallback             = TRUE,
+						 videoMaxFiles               = NULL,
+						 audioMaxFiles               = NULL,
+						 videoPriority               = NULL,
+						 audioPriority               = NULL) {
+	# x <- corpus
+	# searchPaths        <- NULL
+	# searchSubfolders <- TRUE
+	# filterFile         <- ""
+	# filterFile         <- "mp4"
+	# transcriptNames    <- NULL
+	# deleteExistingMedia<- TRUE
+	# onlyUniqueFiles    <- TRUE
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+
+	#					   filterFile          <- ""
+	#					   namesExtractPattern <- '[a-zA-Z]+_[a-zA-Z]*[0-9]+'
+	#					   audioAsFallback    <- TRUE
+
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
 	
 	message <- c()
 
@@ -90,7 +103,11 @@ media_assign <- function(x,
 		#if it is a directory
 		if(dir.exists(path)) {
 			#get all files in folders
-			paths.sub <- list.files(path, recursive=searchSubfolders, pattern=filterFile, ignore.case=TRUE,  full.names=TRUE)
+			paths.sub <- list.files(path, 
+									recursive=searchSubfolders, 
+									pattern=filterFile, 
+									ignore.case=TRUE,  
+									full.names=TRUE)
 			paths.new <- c(paths.new, paths.sub)
 		} else {
 			#it must be a file
@@ -101,7 +118,7 @@ media_assign <- function(x,
 	#--- if there are no files at all in the folders
 	if (length(paths.new)==0) { 
 		if (length(message)>0){
-			warning(paste(unique(message),sep="\n", collapse="\n"))
+			cli::cli_warn(unique(message))
 		}
 		return (x)
 	}
@@ -113,7 +130,7 @@ media_assign <- function(x,
 	paths.new <- unlist(paths.new[stringr::str_which(string=paths.new, pattern=filterFile.media, )		])
 	if (length(paths.new)==0) {
 		message<- c(message, "No media files found. Please check 'x@paths.media.files'.")
-		warning(paste(unique(message),sep="\n", collapse="\n"))
+		cli::cli_warn(unique(message))
 		return (x)
 	}
 
@@ -134,6 +151,8 @@ media_assign <- function(x,
 	
 	#--- run through transcripts in the corpus file
 	for (nameTranscript in transcriptNames) {
+		#print(nameTranscript)
+		
 		#update progress bar
 		#if (exists('helper_progress_tick')) {
 			helper_progress_tick()
@@ -159,17 +178,31 @@ media_assign <- function(x,
 		#get all media files
 		myMediaFiles <-	unlist(paths.new[grep(pattern=search, file.names)])
 
-		#check if video is prioritized / audio only as fallback
-		if (audioAsFallback) {
-			
-			myMediaFiles.video <- myMediaFiles[tools::file_ext(myMediaFiles) %in% options()$act.fileformats.video]
-			myMediaFiles.audio <- myMediaFiles[tools::file_ext(myMediaFiles) %in% options()$act.fileformats.audio]
+		myMediaFiles.video <- myMediaFiles[tolower(tools::file_ext(myMediaFiles)) %in% tolower(options()$act.fileformats.video)]
+		myMediaFiles.audio <- myMediaFiles[tolower(tools::file_ext(myMediaFiles)) %in% tolower(options()$act.fileformats.audio)]
 
-			#check if there are video files
-			if(length(myMediaFiles.video)>0){
+		if (!is.null(videoPriority) && length(myMediaFiles.video) > 0) {
+			myMediaFiles.video <- .media_prioritize(myMediaFiles.video, videoPriority, "name")
+		}
+		if (!is.null(videoMaxFiles) && length(myMediaFiles.video) > videoMaxFiles) {
+			myMediaFiles.video <- myMediaFiles.video[seq_len(videoMaxFiles)]
+		}
+
+		if (!is.null(audioPriority) && length(myMediaFiles.audio) > 0) {
+			myMediaFiles.audio <- .media_prioritize(myMediaFiles.audio, audioPriority, "ext")
+		}
+		if (!is.null(audioMaxFiles) && length(myMediaFiles.audio) > audioMaxFiles) {
+			myMediaFiles.audio <- myMediaFiles.audio[seq_len(audioMaxFiles)]
+		}
+
+		if (audioAsFallback) {
+			if (length(myMediaFiles.video) > 0) {
 				myMediaFiles <- myMediaFiles.video
-				#otherwise it is already ok
+			} else {
+				myMediaFiles <- myMediaFiles.audio
 			}
+		} else {
+			myMediaFiles <- c(myMediaFiles.video, myMediaFiles.audio)
 		}
 		
 		names(myMediaFiles) <- stringr::str_to_lower(
@@ -190,9 +223,21 @@ media_assign <- function(x,
 	
 	#--- show warnings
 	if (length(message)>0){
-		warning(paste(unique(message),sep="\n", collapse="\n"))
+		cli::cli_warn(unique(message))
 	}
 	
 	#--- return corpus object
 	return (x)
+}
+
+.media_prioritize <- function(files, priority, match_by = "name") {
+	for (p in priority) {
+		if (match_by == "name") {
+			matched <- files[stringr::str_detect(basename(files), p)]
+		} else {
+			matched <- files[tolower(tools::file_ext(files)) == tolower(p)]
+		}
+		if (length(matched) > 0) return(matched)
+	}
+	return(files)
 }

@@ -28,13 +28,13 @@ import_exb <- function(filePath=NULL,
 					   transcriptName=NULL) {
 	
 	if (is.null(filePath) & is.null(fileContent)) {
-		stop("You need to pass as parameter eiter a file path to a EXMARaLDA file (filePath) or the contents of a EXMARaLDA file (fileContent) as parameter.")
+		cli::cli_abort("You need to pass as parameter eiter a file path to a EXMARaLDA file (filePath) or the contents of a EXMARaLDA file (fileContent) as parameter.")
 	}
 	if (!is.null(filePath) & !is.null(fileContent)) {
-		stop("Please pass only filePath or fileContent as parameter, not both.")
+		cli::cli_abort("Please pass only filePath or fileContent as parameter, not both.")
 	}
 	if (!is.null(fileContent) & is.null(transcriptName)) {
-		stop("If you pass 'fileContent' you need to pass 'transcriptName' as parameter, too.")
+		cli::cli_abort("If you pass {.arg fileContent} you need to pass {.arg transcriptName} as parameter, too.")
 	}
 	
 	#--- new transcript
@@ -205,8 +205,7 @@ import_exb <- function(filePath=NULL,
 			
 			test <- c( length(tierID), length(content), length(ts1),  length(ts2))
 			if (length(unique(test))!=1) {
-				print(i)
-				print(t@file.path)
+				cli::cli_warn("Tier data length mismatch in tier {i} of {.file {t@file.path}}.")
 			}
 			
 			annotations <- rbind( annotations, cbind(tierID, content, ts1, ts2))
@@ -258,6 +257,7 @@ import_exb <- function(filePath=NULL,
 				t@annotations <- t@annotations[t@annotations$content!="",]
 			}
 			t@annotations <- t@annotations[is.na(t@annotations["content"])==FALSE,]
+			t@annotations$content <- .strip_invalid_xml_chars(t@annotations$content)
 			
 			if (nrow(t@annotations)>0) 		{
 				#=== sort transcript by start times

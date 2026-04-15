@@ -4,7 +4,13 @@
 \alias{corpus_import}
 \title{Import annotation files into corpus object}
 \usage{
-corpus_import(x, createFulltext = TRUE, assignMedia = TRUE)
+corpus_import(
+  x,
+  createFulltext = TRUE,
+  assignMedia = TRUE,
+  cureTranscripts = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{x}{Corpus object.}

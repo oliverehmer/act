@@ -24,15 +24,17 @@
 #' 
 #' @example inst/examples/corpus_import.R
 #' 
-corpus_import <- function(x, 
-						  createFulltext     = TRUE, 
-						  assignMedia        = TRUE) {
+corpus_import <- function(x,
+						  createFulltext     = TRUE,
+						  assignMedia        = TRUE,
+						  cureTranscripts    = TRUE,
+						  verbose            = TRUE) {
 	
 	 
 	#createFulltext     <- TRUE 
 	#assignMedia        <- TRUE
 	#x<-corpus
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a corpus object.") } }
 	
 	#--- check if files and folders exist
 	paths <- x@paths.annotation.files
@@ -48,7 +50,7 @@ corpus_import <- function(x,
 	if (length(paths)==0) {
 		message <- c(message, "  No existing input paths.")
 		message <- paste(message, sep='\n', collapse='\n')
-		warning(paste(unique(message),sep="\n", collapse="\n"))
+		cli::cli_warn(unique(message))
 		return(x)
 	} 
 	
@@ -84,7 +86,7 @@ corpus_import <- function(x,
 	supportedFileFormats <- "(?i)\\.(eaf|exb|srt|textgrid)"
 	paths.new <- unlist(paths.new[stringr::str_which(string=paths.new, pattern=supportedFileFormats, )		])
 	if (length(paths.new)==0) {
-		stop("No annotation files found. Please check 'x@paths.annotation.files'.")
+		cli::cli_abort("No annotation files found. Please check {.code x@paths.annotation.files}.")
 	}
 	
 	#--- make the names
@@ -101,24 +103,47 @@ corpus_import <- function(x,
 	)
 	
 	results <- data.frame( file.name         = basename(paths.new),
-						   transcriptName   = transcriptNames.info$names.ok.ids,
+						   transcriptName   = transcriptNames.info$names.before.unique,
 						   status            = "load",
 						   message           = "",
-						   duplicated        = duplicated(transcriptNames),
-						   filePath         = paths.new, 
+						   duplicated        = duplicated(transcriptNames.info$names.before.unique),
+						   filePath         = paths.new,
 						   stringsAsFactors  = FALSE)
 #View(results)
 
-	#--- how to deal with double transcripts 
-	if (any(results$duplicated)) {
-		if (x@import.skip.double.files) {
-			#skip duplicates
-			results$status[results$duplicated]            <- "skipped"
-			results$message[results$duplicated]           <- "Non-unique transcript names"
-		} else {
-			transcriptName.old <- results$transcriptName
-			results$transcriptName <- make.unique(results$transcriptName)
-			results$message[results$transcriptName!=transcriptName.old]           <- "Renamed because of non-unique transcript names"
+	#--- backward compatibility: convert logical to character
+	duplicate_handling <- x@import.skip.double.files
+	if (is.logical(duplicate_handling)) {
+		duplicate_handling <- if (isTRUE(duplicate_handling)) "warn_keep_first" else "allow"
+	}
+
+	#--- how to deal with double transcripts
+	has_duplicates <- any(duplicated(transcriptNames.info$names.before.unique))
+	if (has_duplicates) {
+		if (duplicate_handling == "error") {
+			dup_names <- unique(transcriptNames.info$names.before.unique[duplicated(transcriptNames.info$names.before.unique)])
+			cli::cli_abort("Duplicate transcript name(s): {.val {dup_names}}")
+		} else if (duplicate_handling == "allow") {
+			results$transcriptName <- transcriptNames.info$names.ok.ids
+			renamed_idx <- which(transcriptNames.info$names.ok.ids != transcriptNames.info$names.before.unique)
+			results$message[renamed_idx] <- "Renamed because of non-unique transcript names"
+		} else if (duplicate_handling %in% c("warn_keep_first", "warn_keep_newest")) {
+			dup_names <- unique(transcriptNames.info$names.before.unique[duplicated(transcriptNames.info$names.before.unique)])
+			if (duplicate_handling == "warn_keep_newest") {
+				for (dn in dup_names) {
+					dup_idx <- which(transcriptNames.info$names.before.unique == dn)
+					file_dates <- file.info(results$filePath[dup_idx])$mtime
+					keep_idx <- dup_idx[which.max(file_dates)]
+					skip_idx <- setdiff(dup_idx, keep_idx)
+					results$status[skip_idx] <- "skipped"
+					results$message[skip_idx] <- paste0("Duplicate: newer file kept (", basename(results$filePath[keep_idx]), ")")
+					results$message[keep_idx] <- paste0("Kept (duplicate of: ", paste(basename(results$filePath[skip_idx]), collapse = ", "), ")")
+				}
+			} else {
+				skip_idx <- which(duplicated(transcriptNames.info$names.before.unique))
+				results$status[skip_idx] <- "skipped"
+				results$message[skip_idx] <- "Non-unique transcript names"
+			}
 		}
 	}
 
@@ -171,6 +196,46 @@ corpus_import <- function(x,
 		}
 	}
 
+	#--- cure imported transcripts
+	if (isTRUE(cureTranscripts) && length(test) > 0) {
+		helper_progress_set("Curing transcripts", length(test))
+		n_cured <- 0L
+		for (j in seq_along(test)) {
+			helper_progress_tick()
+			test[[j]] <- act::transcripts_cure_single(
+				t                         = test[[j]],
+				annotationsTimesReversed  = TRUE,
+				annotationsOverlap        = TRUE,
+				annotationsTimesBelowZero = TRUE,
+				transcriptLengthZero      = TRUE,
+				annotationsZeroDuration   = TRUE,
+				tiersMissing              = TRUE,
+				warning                   = isTRUE(verbose)
+			)
+			h <- test[[j]]@history[[length(test[[j]]@history)]]
+			if (identical(h$modification, "transcripts_cure_single")) {
+				if (h$annotationsTimesReversed.deleted.count > 0
+					|| h$annotationsTimesBelowZero.deleted.count > 0
+					|| h$annotationsTimesBelowZero.corrected.count > 0
+					|| h$annotationsOverlap.corrected.count > 0
+					|| isTRUE(h$transcriptLengthZero.corrected)
+					|| h$annotationsZeroDuration.merged.count > 0
+					|| h$annotationsZeroDuration.extended.count > 0
+					|| h$annotationsZeroDuration.deleted.count > 0
+					|| h$tiersMissing.added.count > 0) {
+					n_cured <- n_cured + 1L
+				}
+			}
+		}
+		if (verbose && n_cured > 0L) {
+			cli::cli_inform(c(
+				"!" = "{n_cured} of {length(test)} transcript(s) were cured during import.",
+				"i" = "Details per transcript in {.code x@transcripts[[i]]@history}.",
+				"i" = "To export cured transcripts, use {.code act::helper_corpus_export_cured()}."
+			))
+		}
+	}
+
 	#--- add results to corpus
 	#View(results)
 	#test
@@ -185,7 +250,7 @@ corpus_import <- function(x,
 
 	#--- add transcripts to corpus
 	if (length(test)==0) {
-		stop("No annotation files found in input path(s).")	
+		cli::cli_abort("No annotation files found in input path(s).")
 	} else {
 		x <- act::transcripts_add(x=x, 
 								 test, 
@@ -195,7 +260,7 @@ corpus_import <- function(x,
 
 	#--- show warnings
 	if (length(message)>0){
-		warning(paste(unique(message),sep="\n", collapse="\n"))
+		cli::cli_warn(unique(message))
 	}
 
 	

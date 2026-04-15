@@ -14,8 +14,8 @@ search_transcript_fulltext <- function(t, s) {
 	#progress
 	helper_progress_tick()
 	
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
+	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
+	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
 	
 	search.results 	 	    <- NULL
 	search.results.byTime	<- NULL
@@ -24,22 +24,6 @@ search_transcript_fulltext <- function(t, s) {
 	
 	#==== get  annotations ====
 	ann <- t@annotations
-	#---- only main columns from annotations ----
-	names.col <- c("annotationID",
-				   "tierName",
-				   "startsec",
-				   "endsec",
-				   "content",
-				   "content.norm",
-				   "char.orig.bytime.start",
-				   "char.orig.bytime.end",
-				   "char.norm.bytime.start",
-				   "char.norm.bytime.end",
-				   "char.orig.bytier.start",
-				   "char.orig.bytier.end",
-				   "char.norm.bytier.start",
-				   "char.norm.bytier.end")
-	ann <- ann[,names.col]
 	
 	#==== helper functions ====
 	#---- get the numbers of the record set where the hit starts
@@ -273,20 +257,12 @@ search_transcript_fulltext <- function(t, s) {
 	}
 	
 	if(	is.null(search.results)) {
-		myColNames <- c("annotationID", "tierName", "startsec","endsec", "content", "content.norm", "char.orig.bytime.start", "char.orig.bytime.end", "char.norm.bytime.start", "char.norm.bytime.end", "char.orig.bytier.start", "char.orig.bytier.end", "char.norm.bytier.start", "char.norm.bytier.end", "hit", "hit.nr" ,"hit.length", "hit.pos.fulltext", "hit.pos.content", "searchMode", "hit.span")
-		search.results <- data.frame(matrix(ncol = length(myColNames), nrow = 0), 
-									  stringsAsFactors		= FALSE)
-		colnames(search.results) <- myColNames	
+		return(NULL)
 	}
-	
+
 	#add column transcript name
-	if(!is.null(search.results)){
-		if (nrow(search.results)==0) {
-			search.results <- cbind(transcriptName=character(0), search.results)
-		} else {
-			search.results <- cbind(transcriptName=rep(t@name, times=nrow(search.results)), search.results)
-		}
-	}
+	search.results <- cbind(transcriptName=rep(t@name, times=nrow(search.results)), search.results)
+
 	#=== return results
 	return(search.results)
 }

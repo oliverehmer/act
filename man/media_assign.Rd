@@ -13,7 +13,11 @@ media_assign(
   transcriptNames = NULL,
   deleteExistingMedia = TRUE,
   onlyUniqueFiles = TRUE,
-  audioAsFallback = TRUE
+  audioAsFallback = TRUE,
+  videoMaxFiles = NULL,
+  audioMaxFiles = NULL,
+  videoPriority = NULL,
+  audioPriority = NULL
 )
 }
 \arguments{
@@ -34,6 +38,14 @@ media_assign(
 \item{onlyUniqueFiles}{Logical; if \code{TRUE} media files with the same name (in different locations) will only be added once; if \code{FALSE} all media files found will be added, irrespective of possible doublets.}
 
 \item{audioAsFallback}{Logical; if \code{TRUE} audio media files will only be assigned if no video files were found; if \code{FALSE} all media files found will be added, irrespective of type.}
+
+\item{videoMaxFiles}{Integer or NULL; maximum number of video files to assign per transcript. NULL means no limit.}
+
+\item{audioMaxFiles}{Integer or NULL; maximum number of audio files to assign per transcript. NULL means no limit.}
+
+\item{videoPriority}{Character vector or NULL; regex patterns matched against video filenames for prioritization. First matching pattern wins. E.g. \code{c("hand.*_al", "_al", "hand.*_ac", "_ac")}.}
+
+\item{audioPriority}{Character vector or NULL; file extensions for audio prioritization. First matching extension wins. E.g. \code{c("aif", "wav", "mp3")}.}
 }
 \value{
 Corpus object.

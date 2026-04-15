@@ -1,39 +1,27 @@
 library(act)
 
 # We need three transcripts  to demonstrate the function \code{transcripts_merge}:
-# - the destination transcript: "update_destination"
-# - two transcripts that contain updates: "update_update1 and "update_update2"
+# - the destination transcript
+destinationTranscript <- 	examplecorpus@transcripts[["update_destination"]]
+# - two transcripts that contain updates
+updateTranscripts <- 		c(examplecorpus@transcripts[["update_update1" ]],
+                           examplecorpus@transcripts[["update_update2" ]])
 
-#Have a look at the annotations in the destination transcript first. 
-#It contains 2 annotations:
-examplecorpus@transcripts[["update_destination"]]@annotations
-#Have a look at the annotations in the update_update1 transcript, too: 
-#It contains 3 annotations:
-examplecorpus@transcripts[["update_update1"]]@annotations
+# Run the function
+test <- transcripts_merge(destinationTranscript, updateTranscripts)
 
-# Run the function with only one update:
-test <- act::transcripts_merge(x=examplecorpus,
-   destinationTranscriptName="update_destination", 
-   updateTranscriptNames = "update_update1")
+# Save the transcript to a TextGrid file.
+# Set the destination file path
+path <- tempfile(pattern = "merge_test", tmpdir = tempdir(),
+                 fileext = ".TextGrid")
 
-#Have a look at the annotations in the destination transcript again.
-#It now contains 5 annotations:
-test@transcripts[["update_destination"]]@annotations
+# It makes more sense, however, to you define a destination folder
+# that is easier to access on your computer:
+\dontrun{
+path <- file.path("PATH_TO_AN_EXISTING_FOLDER_ON_YOUR_COMPUTER",
+                    paste(t@name, ".TextGrid", sep=""))
+}
 
+# Export
+act::export_textgrid( t=test, pathOutput=path)
 
-# Run the function with two transcript objects for updates:
-test <- act::transcripts_merge(x=examplecorpus,
-	destinationTranscriptName="update_destination", 
-	updateTranscriptNames = c("update_update1","update_update2"))
-
-#Have a look at the annotations in the destination transcript again.
-#It now contains 8 annotations:
-test@transcripts[["update_destination"]]@annotations
-
-# Compare the transcript in the original and in the modified corpus object. 
-# The update transcript objects are gone:
-act::info_summarized(examplecorpus)$transcriptNames
-act::info_summarized(test)$transcriptNames
-	
-#Have a look at the history of the corpus object
-test@history

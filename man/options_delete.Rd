@@ -2,12 +2,12 @@
 % Please edit documentation in R/act_options.R
 \name{options_delete}
 \alias{options_delete}
-\title{delete all options set by the package from R options}
+\title{Delete all options set by the package from R options}
 \usage{
 options_delete()
 }
 \description{
-delete all options set by the package from R options
+Delete all options set by the package from R options
 }
 \examples{
 library(act)

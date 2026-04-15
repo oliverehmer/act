@@ -24,12 +24,12 @@ export_rpraat <- function(t,
 						  filterSectionStartsec = NULL, 
 						  filterSectionEndsec = NULL) {
 	
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
 	
 	#=== Get data
 	#--- Filter and cure transcript
 	t <- act::transcripts_filter_single(t, filterTierNames=filterTierNames, filterSectionStartsec = filterSectionStartsec, filterSectionEndsec = filterSectionEndsec)
-	t <- act::transcripts_cure_single(t, annotationsTimesReversed=TRUE, annotationsOverlap=TRUE, annotationsTimesBelowZero=FALSE, tiersMissing=TRUE, warning=TRUE)
+	t <- act::transcripts_cure_single(t, annotationsTimesReversed=TRUE, annotationsOverlap=TRUE, annotationsTimesBelowZero=FALSE, transcriptLengthZero=TRUE, annotationsZeroDuration=TRUE, tiersMissing=TRUE, warning=TRUE)
 	
 	#--- get data from transcript
 	ann <- t@annotations
@@ -37,7 +37,7 @@ export_rpraat <- function(t,
 	#--- get only relevant columns
 	myCols <- c("tierName", "startsec","endsec","content")
 	if (!all(myCols %in% colnames(ann))) {
-		stop(paste("Missing colums. Annotations need to contain: ", paste(myCols, collapse = " ", sep="")))
+		cli::cli_abort("Missing columns. Annotations need to contain: {.val {myCols}}")
 	}
 	ann <- ann[,myCols]
 	
@@ -93,10 +93,10 @@ export_rpraat <- function(t,
 					
 					#create empty intervals for all times
 					newAnnotations			<- data.frame(
-						tierName=t@tiers$name[tierNr], 
-						startsec=as.double(allTimes[1:length(allTimes)-1]), 
-						endsec=as.double(allTimes[2:length(allTimes)]), 
-						content="", 
+						tierName=t@tiers$name[tierNr],
+						startsec=as.double(allTimes[-length(allTimes)]),
+						endsec=as.double(allTimes[-1]),
+						content="",
 						stringsAsFactors=FALSE		)
 					
 					#merge new and actual annotations

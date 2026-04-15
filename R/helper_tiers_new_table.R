@@ -24,7 +24,7 @@ helper_tiers_new_table <- function(tierNames,
 	#---- check tier names
 	tierNames <- as.character(tierNames)
 	if (length(tierNames)!=length(unique(tierNames))) {
-		stop("The values given in 'tierNames' are not unique.")
+		cli::cli_abort("The values given in {.arg tierNames} are not unique.")
 	}
 	
 	#--- set and check tier types
@@ -32,10 +32,10 @@ helper_tiers_new_table <- function(tierNames,
 		tierTypes <- rep("IntervalTier", length(tierNames))
 	} else {
 		if (length(tierNames)!=length(tierTypes)) {
-			stop("The parameters 'tierNames' and 'tierTypes' do not have the same length.")	
+			cli::cli_abort("The parameters {.arg tierNames} and {.arg tierTypes} do not have the same length.")
 		}
 		if(length(setdiff(	tierTypes, 		c("IntervalTier","TextTier")))!=0) {
-			stop("The parameters 'tierTypes' contains unallowed values. Only 'IntervalTier' and 'TextTier' are allowed.")	
+			cli::cli_abort("The parameters {.arg tierTypes} contains unallowed values. Only {.arg IntervalTier} and {.arg TextTier} are allowed.")
 		}
 	}
 	
@@ -48,12 +48,12 @@ helper_tiers_new_table <- function(tierNames,
 		}
 	} else {
 		if (length(tierNames)!=length(tierPositions)) {
-			stop("The parameters 'tierNames' and 'tierPositions' do not have the same length.")	
+			cli::cli_abort("The parameters {.arg tierNames} and {.arg tierPositions} do not have the same length.")
 		}
 
 		tierPositions <- as.integer(tierPositions)
 		if (length(tierPositions)!=length(unique(tierPositions))) {
-			stop("The values given in 'tierPositions' are not unique.")	
+			cli::cli_abort("The values given in {.arg tierPositions} are not unique.")
 		}
 	}
 	

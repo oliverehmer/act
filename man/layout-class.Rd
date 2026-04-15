@@ -38,9 +38,11 @@ If you want to modify the layout of the print transcripts, create a new layout o
 
 \item{\code{docx.template.path}}{Character string;}
 
-\item{\code{docx.styles}}{Data.frame; Matrix with mappings of act variables and the format templates in the .docx template files. To change the styles matrix use \code{l@docx.styles <- act::export_docx_styles_load(path="...")}}
+\item{\code{docx.styles.base}}{Data.frame; Matrix with mappings of act style names to DOCX template paragraph styles. To change the styles matrix use \code{l@docx.styles.base <- act::export_styles_base_load(path="...")}}
+
+\item{\code{docx.styles.user}}{Data.frame; Matrix with user-defined tier-specific formatting rules (regex-based). Empty data.frame means all tiers use layout defaults.}
 }}
 
 \seealso{
-\link{act::matrix_load}
+\link{matrix_load}
 }

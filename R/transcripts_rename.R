@@ -27,7 +27,7 @@ transcripts_rename <- function(x,
 							   trim                = FALSE,
 							   stopNonUnique     = TRUE ) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
 	
 	#--- check
 	if (is.null(searchPatterns)) {
@@ -44,7 +44,7 @@ transcripts_rename <- function(x,
 		newTranscriptNames <- oldtranscriptNames
 	} else {
 		if (length(newTranscriptNames)!=length(x@transcripts)) {
-			stop(paste("Parameter 'newTranscriptNames' is not of the same length as list of trasncripts in the corpus: ", length(newTranscriptNames),":",length(x@transcripts),sep= " ", collapse=" "))	
+			cli::cli_abort("Parameter {.arg newTranscriptNames} is not of the same length as list of transcripts in the corpus: {length(newTranscriptNames)} vs {length(x@transcripts)}.")
 		}
 	}
 	
@@ -60,7 +60,7 @@ transcripts_rename <- function(x,
 	#--- check if there were duplicated names
 	if (stopNonUnique) {
 		if(length(transcriptNames.info$duplicated.ids)>0) {
-			stop("Transcript names would not be unique after renaming. Nothing renamed.")	
+			cli::cli_abort("Transcript names would not be unique after renaming. Nothing renamed.")
 		}
 	}
 	

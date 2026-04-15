@@ -37,9 +37,9 @@ tiers_add <- function( x,
 					   filterTranscriptNames=NULL,
 					   skipIfTierAlreadyExists=TRUE) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	if (missing(tierName))  									{stop("Parameter 'tierName' is missing.") 		}
-	if (!is.null(positionAbsolute) & !is.null(destinationTier)) {stop("You mey define either 'positionAbsolute' or 'destinationTier', not both.") 			}
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	if (missing(tierName))  									{cli::cli_abort("Parameter {.arg tierName} is missing.") 		}
+	if (!is.null(positionAbsolute) & !is.null(destinationTier)) {cli::cli_abort("You mey define either {.arg positionAbsolute} or {.arg destinationTier}, not both.") 			}
 	
 	
 	#=== get the transcript names
@@ -201,10 +201,10 @@ tiers_add <- function( x,
 	#--- raise error?
 	if(!skipIfTierAlreadyExists) {
 		if (length(alreadyExistsInTranscripts)>0) {
-			message <- sprintf("The tier '%s' already exists in the following transcripts: ",tierName)
-			m       <- stringr::str_c("    ", alreadyExistsInTranscripts, collapse="\n")
-			message <- stringr::str_c(message,"\n", m, collapse="\n")
-			stop(message)
+			cli::cli_abort(c(
+				"The tier {.val {tierName}} already exists in the following transcripts:",
+				stats::setNames(alreadyExistsInTranscripts, rep("*", length(alreadyExistsInTranscripts)))
+			))
 		}
 	}
 	

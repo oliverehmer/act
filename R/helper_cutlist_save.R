@@ -21,8 +21,8 @@ helper_cutlist_save <-  function(cutlistMac    = NULL,
 								 outFolder, 
 								 outFilename) {
 	
-	if (missing(outFolder)) {stop("Parameter 'outFolder' is missing")}
-	if (missing(outFilename)) {stop("Parameter 'outFilename' is missing")}
+	if (missing(outFolder)) {cli::cli_abort("Parameter {.arg outFolder} is missing")}
+	if (missing(outFilename)) {cli::cli_abort("Parameter {.arg outFilename} is missing")}
 	#-- make the destination folder, if it does not exist
 	if (!is.null(cutlistMac) | !is.null(cutlistWin)) {
 		if (dir.exists(outFolder)==FALSE) 	{

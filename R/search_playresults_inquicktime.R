@@ -18,25 +18,26 @@ search_playresults_inquicktime <- function(x,
 										  s, 
 										  bringToFront=FALSE) {
 	
-	if (missing(x))                          {stop("Corpus object x is missing.") 	}
-	if (missing(s))                          {stop("Search object s is missing.") 	}
-	if (Sys.info()["sysname"]!="Darwin")     {stop("You need to be on a Mac to use this function") 	}
+	if (missing(x))                          {cli::cli_abort("Corpus object x is missing.") 	}
+	if (missing(s))                          {cli::cli_abort("Search object s is missing.") 	}
+	if (Sys.info()["sysname"]!="Darwin")     {cli::cli_abort("You need to be on a Mac to use this function") 	}
 	
 	i <- 1
 	repeat {
 		if (i> nrow(s@results)){
 			break
 		}
-		cat("==== Result: ", i, "\n")
-		cat("transcriptName: ", s@results[i, ]$transcriptName, "\n")
-		cat("tier.name     : ", s@results[i, ]$tier.name, "\n")	
-		cat("startsec      : ", s@results[i, ]$startsec, "\n")
-		cat("endsec        : ", s@results[i, ]$endsec, "\n")
-		cat("content       : ", s@results[i, ]$content, "\n")
+		cli::cli_rule("Result {i}")
+		cli::cli_dl(c(
+			"transcriptName" = s@results[i, ]$transcriptName,
+			"tier.name"      = s@results[i, ]$tier.name,
+			"startsec"       = as.character(s@results[i, ]$startsec),
+			"endsec"         = as.character(s@results[i, ]$endsec),
+			"content"        = s@results[i, ]$content
+		))
 		if ("printtranscript" %in% colnames(s@results)) {
-			cat("\n")	
-			cat(s@results$printtranscript[i])
-			cat("\n")	
+			cli::cli_text("")
+			cli::cli_text(s@results$printtranscript[i])
 		}
 		played <- act::search_openresult_inquicktime(x=x, 
 													  s=s, 
@@ -45,6 +46,9 @@ search_playresults_inquicktime <- function(x,
 													  close = TRUE,
 													  bringToFront=FALSE)
 		if (played) {
+			if (rstudioapi::isAvailable()) {
+				rstudioapi::executeCommand("activateConsole")
+			}
 			key <- readline(prompt="Press: r=repeat, escape=stop, return=continue: ")
 			if (key=="r") {
 			} else { 

@@ -40,8 +40,8 @@ annotations_insert_from_search_to_tier <- function (x,
 	#	collapseString        <- " | "
 	#View(s@results)
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s,"search")   )	{stop("Parameter 's' needs to be a search object.") } }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a corpus object.") } }
+	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s,"search")   )	{cli::cli_abort("Parameter {.arg s} needs to be a search object.") } }
 	
 	transcripts_modified_ids      <- c()
 	annotations_inserted_nr       <- 0
@@ -71,7 +71,7 @@ annotations_insert_from_search_to_tier <- function (x,
 	filterTranscriptNames <- intersect(unique(s@results$transcriptName), filterTranscriptNames)
 	
 	if (length(filterTranscriptNames)==0) {
-		stop("Wrong filterTranscriptNames: Possibly modify parameter 'filterTranscriptNames'.")
+		cli::cli_abort("Wrong {.arg filterTranscriptNames}: Possibly modify parameter {.arg filterTranscriptNames}.")
 	}
 		
 	#=== Add the destination tier if it is missing and should be added
@@ -152,7 +152,7 @@ annotations_insert_from_search_to_tier <- function (x,
 	
 	#--- Stop if overlap
 	if (interruptOverlap & overlap) {
-		stop("Overlap in results detected.")
+		cli::cli_abort("Overlap in results detected.")
 	}
 	
 	#--- remove results that have been merged
@@ -167,32 +167,36 @@ annotations_insert_from_search_to_tier <- function (x,
 		
 		for (i in resultids)  {
 			#create new record set
-
-			#myrow                 <- x@transcripts[[t]]@annotations[j,]
-			#j<-nrow(x@transcripts[[t]]@annotations)
-			
-			myrow <- x@transcripts[[t]]@annotations[1,]
-			
 			if (nrow(x@transcripts[[t]]@annotations)>0) {
 				annID <- max(x@transcripts[[t]]@annotations$annotationID)+1
 			} else {
 				annID <- 1
 			}
-			myrow$annotationID		    <- annID
-			myrow$tierName				<- destTier
-			myrow$startsec				<- r$startsec[i]
-			myrow$endsec				<- r$endsec[i]
-			myrow$content 				<- r$mytext[i]
-			myrow$content.norm			<- ""
-			myrow$char.orig.bytime.start<- 0 
-			myrow$char.orig.bytime.end  <- 0
-			myrow$char.norm.bytime.start<- 0
-			myrow$char.norm.bytime.end  <- 0
-			myrow$char.orig.bytier.start<- 0
-			myrow$char.orig.bytier.end  <- 0
-			myrow$char.norm.bytier.start<- 0
-			myrow$char.norm.bytier.end  <- 0
-			
+
+			myrow <- data.frame(
+				annotationID            = as.integer(annID),
+				tierName                = as.character(destTier),
+				startsec                = as.double(r$startsec[i]),
+				endsec                  = as.double(r$endsec[i]),
+				content                 = as.character(r$mytext[i]),
+				content.norm            = as.character(""),
+				char.orig.bytime.start  = NA_integer_,
+				char.orig.bytime.end    = NA_integer_,
+				char.norm.bytime.start  = NA_integer_,
+				char.norm.bytime.end    = NA_integer_,
+				char.orig.bytier.start  = NA_integer_,
+				char.orig.bytier.end    = NA_integer_,
+				char.norm.bytier.start  = NA_integer_,
+				char.norm.bytier.end    = NA_integer_,
+				stringsAsFactors        = FALSE
+			)
+
+			extra_cols <- setdiff(names(x@transcripts[[t]]@annotations), names(myrow))
+			for (col in extra_cols) {
+				myrow[[col]] <- NA
+			}
+			myrow <- myrow[, names(x@transcripts[[t]]@annotations), drop = FALSE]
+
 			#add to table
 			x@transcripts[[t]]@annotations <- rbind(x@transcripts[[t]]@annotations, myrow)
 		}

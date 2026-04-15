@@ -38,7 +38,7 @@
 #' @slot results.transcripts.nr Integer; \code{[READ ONLY]} Number of transcripts over which the search results are distrubuted.
 #' @slot x.name Character string; \code{[READ ONLY]} name of the corpus object on which the search has been run.
 #'
-#' @seealso \link{act::export_docx}, \link{act::export_docx}, 
+#' @seealso \link{export_docx}
 #'
 #' @export
 #'
@@ -115,45 +115,62 @@ methods::setClass("search",
 )
 
 search_show <- function (object) {
-	#cat("search object", fill=TRUE)
-	cat("  name                          : ", paste("'", object@name,"'",sep="", collapse=""), fill=TRUE)
-	cat("  pattern                       : ", paste("'", object@pattern,"'",sep="", collapse=""), fill=TRUE)
-	cat("  search.mode                   : ", object@search.mode, fill=TRUE)
-	cat("  search.normalized             : ", object@search.normalized, fill=TRUE)
-	cat("  resultid.prefix               : ", paste("'", object@resultid.prefix,"'",sep="", collapse=""), fill=TRUE)
-	cat("  resultid.start                : ", paste("'", object@resultid.start,"'",sep="", collapse=""), fill=TRUE)
+	w <- 25
+	cli::cli_rule("search object: {.val {object@name}}")
 
-	cat("\n")
-	
-	cat("  filter.transcript.names       : ", paste("'", object@filter.transcript.names,"'",sep="", collapse=", "), fill=TRUE)
-	cat("  filter.transcript.includeRegEx: ", paste("'", object@filter.transcript.includeRegEx ,"'",sep="", collapse=""), fill=TRUE)
-	cat("  filter.transcript.excludeRegEx: ", paste("'", object@filter.transcript.excludeRegEx ,"'",sep="", collapse=""), fill=TRUE)
-	cat("  filter.tier.names             : ", paste("'", object@filter.tier.names,"'",sep="", collapse=", "), fill=TRUE)
-	cat("  filter.tier.includeRegEx      : ", paste("'", object@filter.tier.includeRegEx,"'",sep="", collapse=""), fill=TRUE)
-	cat("  filter.tier.excludeRegEx      : ", paste("'", object@filter.tier.excludeRegEx,"'",sep="", collapse=""), fill=TRUE)
-	cat("  filter.section.startsec       : ", if (length(object@filter.section.startsec)==0) {"[not set]"} else {if (is.na(object@filter.section.startsec)){"[not set]"} else {object@filter.section.startsec}}, fill=TRUE)
-	cat("  filter.section.endsec         : ", if (length(object@filter.section.endsec)==0) {"[not set]"} else {if (is.na(object@filter.section.endsec)){"[not set]"} else {object@filter.section.endsec}}, fill=TRUE)
-	cat("\n")
-	
-	cat("  concordance.make              : ", object@concordance.make, fill=TRUE)
-	cat("  concordance.width             : ", object@concordance.width , fill=TRUE)
-	cat("\n")
-	
-	cat("  cuts.span.beforesec           : ", object@cuts.span.beforesec , fill=TRUE)
-	cat("  cuts.span.aftersec            : ", object@cuts.span.aftersec, fill=TRUE)
-	cat("  cuts.column.srt               : ", paste("'", object@cuts.column.srt,"'",sep="", collapse=""), fill=TRUE)
-	cat("  cuts.column.printtranscript   : ", paste("'", object@cuts.column.printtranscript,"'",sep="", collapse=""), fill=TRUE)
-	cat("  cuts.printtranscripts         : ", if(length(object@cuts.printtranscripts)==0) {"[not created yet]"} else {"[check directly]"}, fill=TRUE)
-	cat("  cuts.cutlist.mac              : ", if(length(object@cuts.cutlist.mac)==0)      {"[not created yet]"} else {"[check directly]"}, fill=TRUE)
-	cat("  cuts.cutlist.win              : ", if(length(object@cuts.cutlist.win)==0)      {"[not created yet]"} else {"[check directly]"}, fill=TRUE)
-	cat("\n")
-	
-	cat("  results                       : ", if(!'hit' %in% colnames(object@results))        {"[search not run yet]"} else {"[check directly]"}, fill=TRUE)
-	cat("  results.nr                    : ", if(!'hit' %in% colnames(object@results))        {"[search not run yet]"} else {nrow(object@results)}                       , fill=TRUE)
-	cat("  results.tiers.nr              : ", if(!'tierName' %in% colnames(object@results))       {"[search not run yet]"} else {length(unique(object@results$tierName))}        , fill=TRUE)
-	cat("  results.transcripts.nr        : ", if(!'transcriptName' %in% colnames(object@results)) {"[search not run yet]"} else {length(unique(object@results$transcriptName))}  , fill=TRUE)
-	cat("  x.name                        : ", paste("'", object@x.name,"'",sep="", collapse=""), fill=TRUE)
-	cat()
+	cli::cli_text("{.strong Search}")
+	.show_dl(c(
+		"pattern"           = object@pattern,
+		"search.mode"       = object@search.mode,
+		"search.normalized" = as.character(object@search.normalized),
+		"resultid.prefix"   = object@resultid.prefix,
+		"resultid.start"    = as.character(object@resultid.start)
+	), width = w)
+
+	cli::cli_text("")
+	cli::cli_text("{.strong Filters}")
+	filter_startsec <- if (length(object@filter.section.startsec)==0 || is.na(object@filter.section.startsec)) "[not set]" else as.character(object@filter.section.startsec)
+	filter_endsec   <- if (length(object@filter.section.endsec)==0 || is.na(object@filter.section.endsec)) "[not set]" else as.character(object@filter.section.endsec)
+	.show_dl(c(
+		"transcript.names"        = paste(object@filter.transcript.names, collapse=", "),
+		"transcript.includeRegEx" = object@filter.transcript.includeRegEx,
+		"transcript.excludeRegEx" = object@filter.transcript.excludeRegEx,
+		"tier.names"              = paste(object@filter.tier.names, collapse=", "),
+		"tier.includeRegEx"       = object@filter.tier.includeRegEx,
+		"tier.excludeRegEx"       = object@filter.tier.excludeRegEx,
+		"section.startsec"        = filter_startsec,
+		"section.endsec"          = filter_endsec
+	), width = w)
+
+	cli::cli_text("")
+	cli::cli_text("{.strong Concordance}")
+	.show_dl(c(
+		"make"  = as.character(object@concordance.make),
+		"width" = as.character(object@concordance.width)
+	), width = w)
+
+	cli::cli_text("")
+	cli::cli_text("{.strong Cuts}")
+	.show_dl(c(
+		"span.beforesec"         = as.character(object@cuts.span.beforesec),
+		"span.aftersec"          = as.character(object@cuts.span.aftersec),
+		"column.srt"             = object@cuts.column.srt,
+		"column.printtranscript" = object@cuts.column.printtranscript,
+		"printtranscripts"       = if(length(object@cuts.printtranscripts)==0) "[not created yet]" else "[check directly]",
+		"cutlist.mac"            = if(length(object@cuts.cutlist.mac)==0) "[not created yet]" else "[check directly]",
+		"cutlist.win"            = if(length(object@cuts.cutlist.win)==0) "[not created yet]" else "[check directly]"
+	), width = w)
+
+	cli::cli_text("")
+	search_run <- 'hit' %in% colnames(object@results)
+	cli::cli_text("{.strong Results}")
+	.show_dl(c(
+		"results"              = if(!search_run) "[search not run yet]" else "[check directly]",
+		"results.nr"           = if(!search_run) "[search not run yet]" else as.character(nrow(object@results)),
+		"results.tiers.nr"     = if(!'tierName' %in% colnames(object@results)) "[search not run yet]" else as.character(length(unique(object@results$tierName))),
+		"results.transcripts.nr" = if(!'transcriptName' %in% colnames(object@results)) "[search not run yet]" else as.character(length(unique(object@results$transcriptName))),
+		"x.name"               = object@x.name
+	), width = w)
 }
 
 methods::setMethod("show", signature = "search", definition = search_show)

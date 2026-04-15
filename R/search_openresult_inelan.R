@@ -36,25 +36,25 @@ search_openresult_inelan  <- function(x,
 	#NOT IMPLEMENTED YET  @param filterMediaFile Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first matches with existing media files will set as linked media in the eaf file. If the aprameter is left open, media files assigned to the transcript object will be set as links in the .eaf file.
 	
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
-	if (missing(resultid)) {stop("Number of the search result 'resultid' is missing.") 	}
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
+	if (missing(resultid)) {cli::cli_abort("Number of the search result {.arg resultid} is missing.") 	}
 	
 	
 	#--- check if ELAN exists
 	path.elan<- getOption("act.path.elan", default="")
 	if(path.elan=="") {
-		stop("ELAN not found. Please set the path to the ELAN executable in the option 'act.path.elan' using options(act.path.elan='PATHTOYOURELANEXECUTABLE')")
+		cli::cli_abort("ELAN not found. Please set the path to the ELAN executable in the option {.arg act.path.elan} using options(act.path.elan={.arg PATHTOYOURELANEXECUTABLE})")
 	} else {
 		if(!file.exists(path.elan)) {
-			stop("ELAN not found. Please set the path to the ELAN executable in the option 'act.path.elan' using options(act.path.elan='PATHTOYOURELANEXECUTABLE')")
+			cli::cli_abort("ELAN not found. Please set the path to the ELAN executable in the option {.arg act.path.elan} using options(act.path.elan={.arg PATHTOYOURELANEXECUTABLE})")
 		}	
 	}
 	
 	#--- get corresponding transcript
 	t <- x@transcripts[[s@results$transcriptName[resultid]]]
 	if (is.null(t))	{
-		stop("Transcript not found in corpus object'.")
+		cli::cli_abort("Transcript not found in corpus object'.")
 	}
 	
 	#--- set paths to ""
@@ -75,7 +75,7 @@ search_openresult_inelan  <- function(x,
 		filePath.eaf <- file.path(tempdir(), stringr::str_c(t@name, ".eaf", collapse=""))
 		act::export_eaf(t, filePath.eaf)
 		if(openOriginal) {
-			warning("Original .eaf file has not been found. A temporary .eaf file has been created")
+			cli::cli_warn("Original .eaf file has not been found. A temporary .eaf file has been created")
 		}
 	}
 	
@@ -128,7 +128,7 @@ search_openresult_inelan  <- function(x,
 	
 	if(file.exists(filePath.pfsx)) {
 		#--- open eaf file
-		if (helper_detect_os()=="windows" ){
+		if (.detect_os()=="windows" ){
 			cmd <- sprintf("%s %s",   shQuote(path.elan), shQuote(filePath.eaf))
 		} else {
 			cmd <- sprintf("open %s -a %s",  shQuote(filePath.eaf), shQuote(path.elan))

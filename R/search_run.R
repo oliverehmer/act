@@ -20,8 +20,8 @@ search_run <- function(x, s) {
 	temp <- NULL
 	start.time <- Sys.time()
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
 	
 	#==== FILTER ====
 	#get transcripts and tiers to include
@@ -35,9 +35,10 @@ search_run <- function(x, s) {
 								 	 filterTranscriptExcludeRegex =s@filter.transcript.excludeRegEx ,
 									 filterTierNames              =s@filter.tier.names,	
 									 filterTierIncludeRegex       =s@filter.tier.includeRegEx,
-									 filterTierExcludeRegex       =s@filter.tier.excludeRegEx) 
+									 filterTierExcludeRegex       =s@filter.tier.excludeRegEx)
 	#View(myfilter)
-	
+	s@filter.tier.names <- myfilter$tierNames
+
 	#==== NORMALIZATION ====
 	#if needed
 	if (s@search.normalized) {	
@@ -55,53 +56,37 @@ search_run <- function(x, s) {
 											   tierNames   = myfilter$tierNames) 
 	}
 	
-	#==== COLUMNS =====
-	#set standard columns
-	allColNames <- c("resultID", "transcriptName", "annotationID", "tierName", "startsec", "endsec", "content", "content.norm", "char.orig.bytime.start", "char.orig.bytime.end", "char.norm.bytime.start", "char.norm.bytime.end", "char.orig.bytier.start", "char.orig.bytier.end", "char.norm.bytier.start", "char.norm.bytier.end", "hit", "hit.nr", "hit.length", "hit.pos.fulltext", "hit.pos.content", "searchMode", "hit.span", "stills.values", "stills.folder")
-	#get all columns from entire corpus object
-	#for (i in x@transcripts) {
-	#	allColNames<- unique(allColNames, colnames(x@transcripts[[i]]@results))
-	#}
-	myColNames <- setdiff(allColNames, "resultID")  
-	
 	#==== . SEARCH ====
 	helper_progress_set("Searching", length(myfilter$transcriptNames))
 	if (s@search.mode=="fulltext" | s@search.mode=="fulltext.byTime" | s@search.mode=="fulltext.byTier" ) {
 		temp 	  			<-	lapply(x@transcripts[myfilter$transcriptNames], search_transcript_fulltext, s=s)
-		temp	  			<-	do.call("rbind", temp)
-		
+		temp	  			<-	dplyr::bind_rows(temp)
+
 	} else if (s@search.mode=="content" ) {
 		temp 	  			<-	lapply(x@transcripts[myfilter$transcriptNames], search_transcript_content, s=s)
-		temp	  			<-	do.call("rbind", temp)
+		temp	  			<-	dplyr::bind_rows(temp)
 	} else {
 		#=== some user error
-		stop ("Unknow 'searchMode'. Please select 'fulltext', 'fulltext.byTime', 'fulltext.byTier' or 'content' .")
+		cli::cli_abort("Unknown {.arg searchMode}. Please select {.val fulltext}, {.val fulltext.byTime}, {.val fulltext.byTier} or {.val content}.")
 	}
 	#View(temp)
 
 	#---- . check results
 	#Check if there are results
-	if(is.null(temp)) {
-		#no results: create empty df
-		#temp <- data.frame(matrix(ncol = length(myColNames), nrow = 0), 
-		#				   stringsAsFactors		= FALSE)
-		#colnames(temp) <- myColNames
-		
-		# create empty df
-		temp <- as.data.frame(setNames(
+	if(is.null(temp) || nrow(temp) == 0) {
+		myColNames <- c("resultID", "transcriptName", "annotationID", "tierName", "startsec", "endsec", "content", "content.norm", "char.orig.bytime.start", "char.orig.bytime.end", "char.norm.bytime.start", "char.norm.bytime.end", "char.orig.bytier.start", "char.orig.bytier.end", "char.norm.bytier.start", "char.norm.bytier.end", "hit", "hit.nr", "hit.length", "hit.pos.fulltext", "hit.pos.content", "searchMode", "hit.span", "stills.values", "stills.folder")
+		temp <- as.data.frame(stats::setNames(
 			replicate(length(myColNames), logical(0), simplify = FALSE),
 			myColNames
 		))
-		# initialize  stills.values as list 
 		temp$stills.values  <- list()
 	} else {
 		#add columns for stills
 		temp$stills.folder <- rep("stills", nrow(temp))
 		temp$stills.values <- vector("list", nrow(temp))
 
-		#keep only some columns
-		temp <- temp[ , myColNames]
-		# XXX remove some columns
+		#reorder columns: standard, layers, search
+		temp <- helper_order_annotations_columns(temp)
 	}
 	
 	#---- . set return value
@@ -112,7 +97,7 @@ search_run <- function(x, s) {
 		s@results      <- 	cbind(resultID=as.character(), s@results)
 	} else	{
 		#=== add names for results
-		resultID  <- 	helper_makeNamesForSearch(s@results, s@resultid.prefix, s@resultid.start)
+		resultID  <- 	.make_names_for_search(s@results, s@resultid.prefix, s@resultid.start)
 		s@results <- 	cbind(resultID, s@results)
 		
 		#=== turn factors into strings

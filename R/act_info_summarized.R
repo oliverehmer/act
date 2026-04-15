@@ -22,7 +22,7 @@
 #' 
 info_summarized <- function(...) {
 	dots <- list(...)                
-	if(length(dots) == 0) {stop ("You need to pass a corpus object or a transcript object to this function.")}
+	if(length(dots) == 0) {cli::cli_abort("You need to pass a {.cls corpus} or {.cls transcript} object to this function.")}
 	x <- NULL
 	t <- NULL
 	
@@ -31,7 +31,7 @@ info_summarized <- function(...) {
 	} else if (methods::is(dots[[1]], "transcript" )) {
 		t <- dots[[1]]	
 	} else {
-		stop ("You need to pass a corpus object or a transcript object to this function. ")
+		cli::cli_abort("You need to pass a {.cls corpus} or {.cls transcript} object to this function.")
 	}
 
 	if (!is.null(x)) {

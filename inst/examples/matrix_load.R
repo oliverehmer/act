@@ -1,7 +1,7 @@
 library(act)
 
 # An example replacement matrix comes with the package.
-path <- system.file("extdata", "normalization", "normalizationMatrix.csv", package="act")
+path <- system.file("extdata", "normalization", "normalization_matrix.csv", package="act")
 
 # Load the matrix
 mymatrix <- act::matrix_load(path)

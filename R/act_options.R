@@ -1,94 +1,179 @@
-act.options.default <- list (
-	#--- do not reset
-	act.excamplecorpusURL                    = "https://github.com/oliverehmer/act_examplecorpus/archive/refs/heads/main.zip",
-	act.updateX                              = TRUE,
-	act.showprogress				    	 = TRUE,
-	
-	act.path.praat					        	= "",
-	act.path.sendpraat					     = "",
-	act.path.elan                            = "",
+.act_defaults <- list(
+	act.excamplecorpusURL = list(
+		value       = "https://github.com/oliverehmer/act_examplecorpus/archive/refs/heads/main.zip",
+		group       = "program",
+		description = "URL for downloading example corpus"
+	),
+	act.updateX = list(
+		value       = TRUE,
+		group       = "program",
+		description = "Update original corpus object in search"
+	),
+	act.showprogress = list(
+		value       = TRUE,
+		group       = "program",
+		description = "Show progress bars during time-consuming operations"
+	),
 
-	act.fileformats.video                    = c("mp4", "mov"),
-	act.fileformats.audio                    = c("wav", "aif", "aiff", "mp3"),
-	
-	act.ffmpeg.command.main	 	 	         = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
-	act.ffmpeg.command.main.fast             = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
-	act.ffmpeg.command.audioAsMP3            = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
-	act.ffmpeg.command.images                = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -frames:v 1 -q:v 2 -update 1 -y "OUTFILEPATH"',
-	act.ffmpeg.command.images.fast           = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -frames:v 1 -q:v 2 -update 1 -y "OUTFILEPATH"',
-	act.ffmpeg.exportchannels.fromColumnName = "channels", 
+	act.path.praat = list(
+		value       = "",
+		group       = "path",
+		description = "Path to Praat executable",
+		type        = "path"
+	),
+	act.path.sendpraat = list(
+		value       = "",
+		group       = "path",
+		description = "Path to sendpraat executable",
+		type        = "path"
+	),
+	act.path.elan = list(
+		value       = "",
+		group       = "path",
+		description = "Path to ELAN executable",
+		type        = "path"
+	),
 
-	act.import.readEmptyIntervals 			  = FALSE,
-	act.import.scanSubfolders                 = TRUE,
-	act.import.storefileContentInTranscript   = TRUE,
-	
-	act.export.filename.fromColumnName 		  = "resultID",
-	act.export.folder.grouping1.fromColumnName= "resultID",
-	act.export.folder.grouping2.fromColumnName= "",
+	act.fileformats.video = list(
+		value       = c("mp4", "mov"),
+		group       = "fileformats",
+		description = "Recognized video file suffixes"
+	),
+	act.fileformats.audio = list(
+		value       = c("wav", "aif", "aiff", "mp3"),
+		group       = "fileformats",
+		description = "Recognized audio file suffixes"
+	),
 
-	act.separator_between_intervals 		  = "&",
-	act.separator_between_tiers				  = "#",
-	act.separator_between_words				  = "^\\s|\\|\\'|\\#|\\/|\\\\\\\\",
-	act.wordCountRegEx 					      = '(?<=[^|\\b])[A-z\\u00C0-\\u00FA\\-\\:]+(?=\\b|\\s|_|$)',
-	act.pauseIdentifierGATRegEx               = '^\\s*\\([\\d\\.-]*\\)\\s*$'
+	act.ffmpeg.command.video = list(
+		value       = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
+		group       = "ffmpeg",
+		description = "FFmpeg command for video cuts"
+	),
+	act.ffmpeg.command.video.fast = list(
+		value       = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
+		group       = "ffmpeg",
+		description = "FFmpeg command for video cuts with fast positioning"
+	),
+	act.ffmpeg.command.audio = list(
+		value       = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION -c copy -y "OUTFILEPATH" -hide_banner',
+		group       = "ffmpeg",
+		description = "FFmpeg command for audio cuts"
+	),
+	act.ffmpeg.command.audio.mp3 = list(
+		value       = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
+		group       = "ffmpeg",
+		description = "FFmpeg command for MP3 audio export"
+	),
+	act.ffmpeg.command.images = list(
+		value       = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -frames:v 1 -q:v 2 -update 1 -y "OUTFILEPATH"',
+		group       = "ffmpeg",
+		description = "FFmpeg command for still image extraction"
+	),
+	act.ffmpeg.command.images.fast = list(
+		value       = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -frames:v 1 -q:v 2 -update 1 -y "OUTFILEPATH"',
+		group       = "ffmpeg",
+		description = "FFmpeg command for fast still image extraction"
+	),
+	act.ffmpeg.use_fast_positioning = list(
+		value       = TRUE,
+		group       = "ffmpeg",
+		description = "Use fast video positioning for large files"
+	),
+	act.ffmpeg.channels_from_column = list(
+		value       = "channels",
+		group       = "ffmpeg",
+		description = "Column name for audio channel export"
+	),
+
+	act.import.readEmptyIntervals = list(
+		value       = FALSE,
+		group       = "import",
+		description = "Read empty intervals from annotation files"
+	),
+	act.import.scanSubfolders = list(
+		value       = TRUE,
+		group       = "import",
+		description = "Scan subfolders for annotation files"
+	),
+	act.import.storefileContentInTranscript = list(
+		value       = TRUE,
+		group       = "import",
+		description = "Store original file content in transcript object"
+	),
+
+	act.export.filename.fromColumnName = list(
+		value       = "resultID",
+		group       = "export",
+		description = "Column name for export filenames"
+	),
+	act.export.folder.grouping1.fromColumnName = list(
+		value       = "resultID",
+		group       = "export",
+		description = "Column for folder grouping level 1"
+	),
+	act.export.folder.grouping2.fromColumnName = list(
+		value       = "",
+		group       = "export",
+		description = "Column for folder grouping level 2"
+	),
+
+	act.separator_between_intervals = list(
+		value       = "&",
+		group       = "parsing",
+		description = "Separator between intervals in fulltext"
+	),
+	act.separator_between_tiers = list(
+		value       = "#",
+		group       = "parsing",
+		description = "Separator between tiers in fulltext"
+	),
+	act.separator_between_words = list(
+		value       = "^\\s|\\|\\'|\\#|\\/|\\\\\\\\",
+		group       = "parsing",
+		description = "Regex for word separators in concordance"
+	),
+	act.wordCountRegEx = list(
+		value       = '(?<=[^|\\b])[A-z\\u00C0-\\u00FA\\-\\:]+(?=\\b|\\s|_|$)',
+		group       = "parsing",
+		description = "Regex for word counting"
+	),
+	act.pauseIdentifierGATRegEx = list(
+		value       = '^\\s*(\\([\\d\\.-]*\\)\\s*)+$',
+		group       = "parsing",
+		description = "Regex for GAT pause identification, supports multiple consecutive pauses"
+	)
 )
 
-
-
-
+# Simple named list of default values for .onLoad and options_reset
+act.options.default <- lapply(.act_defaults, function(x) x$value)
 
 
 #' Options of the package
 #'
 #' The package has numerous options that change the internal workings of the package.
-#' 
+#'
 #' There are several options that change the way the package works. They are set globally.
-#' * Use \code{options(name.of.option = value)} to set an option.
-#' * Use \code{options()$name.of.option} to get the current value of an option.
-#' * Use \code{act::options_reset} to set all options to the default value.
-#' * Use \code{act::options_delete} to clean up and delete all option settings.
+#' * Use `options(name.of.option = value)` to set an option.
+#' * Use `options()$name.of.option` to get the current value of an option.
+#' * Use `act::options_reset()` to set all options to the default value.
+#' * Use `act::options_delete()` to clean up and delete all option settings.
 #'
-#' The package uses the following options.
-#' 
-#' \emph{Program}
-#' * \code{act.excamplecorpusURL} character strings; where to download example media files.
-#' * \code{act.updateX} Logical; If \code{TRUE} the original corpus object 'x' passed passed to the search functions \code{search_new} and \code{search_run} will also be updated, in case that during the search fulltexts are created or the normalization is performed. 
-#' * \code{act.showprogress} logical; if \code{TRUE} a progress bar will be shown during (possibly) time consuming operations.
-#' 
-#' \emph{Paths}
-#' * \code{act.path.praat} Character string; path to the 'Praat' executable on your computer. Only necessary if you use the functions to remote control Praat using Praat scripts.
-#' * \code{act.path.sendpraat} Character string; path to the 'sendpraat' executable on your computer. Only necessary if you use the functions to remote control Praat using Praat scripts.
-#' * \code{act.path.elan} Character string; path to the 'ELAN' executable on your computer. Only necessary if you want to open search results in ELAN.
-#' 
-#' \emph{File formats}
-#' * \code{act.fileformats.video} Vector of character strings; Suffixes of video files that will be identified; default is 'c("mp4", "mov")'.
-#' * \code{act.fileformats.audio} Vector of character strings; Suffixes of audio files that will be identified; default is 'c("wav", "aif", "mp3")'.
+#' Options are organized in groups:
 #'
-#' \emph{FFMPEG commands and options}
-#' * \code{act.ffmpeg.command.main} Character string; 'FFmpeg' command that is used for cutting media files (audio & video).
-#' * \code{act.ffmpeg.command.main.fast} Character string; 'FFmpeg' command that is used for cutting video files using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
-#' * \code{act.ffmpeg.command.audioAsMP3} Character string; 'FFmpeg' command that is used for cutting/generating compressed audio files as mp3 (for other audio, the main command is used).
-#' * \code{act.ffmpeg.command.images} Character string; 'FFmpeg' command that is used for extracting still images.
-#' * \code{act.ffmpeg.command.images.fast} Character string; 'FFmpeg' command that is used for extracting still images using the 'FFmpeg' option  'fast video positioning'. This is considerably faster when working with long video files.
-#' * \code{act.ffmpeg.exportchannels.fromColumnName} Character string; Name of the column in the data frame \code{s@results} from information, which audio channel to export, will be taken.
+#' **Program:** General behavior settings (progress bars, corpus updates).
 #'
-#' \emph{Import annotation files}
-#' * \code{act.import.readEmptyIntervals} Logical; if \code{TRUE} empty intervals in you annotation files will be read, if \code{FALSE} empty intervals will be skipped.
-#' * \code{act.import.scanSubfolders} Logical; if \code{TRUE} sub folders will also be scanned for annotation files; if \code{FALSE} only the main level of the folders specified in \code{pathsAnnotationFiles} of your corpus object will be scanned. 
-#' * \code{act.import.storefileContentInTranscript} if \code{TRUE} the contents of the original annotation file will be stored in \code{transcript@file.content}. Set to \code{FALSE} if you want to keep your corpus object small.
-#' 
-#' \emph{Export}
-#' * \code{act.export.filename.fromColumnName} Character string; Name of the column from which the file names for exported files will be taken.
-#' * \code{act.export.folder.grouping1.fromColumnName} Character string; Name of sub folders that will be created in the folder of the search result, level 1.
-#' * \code{act.export.folder.grouping2.fromColumnName} Character string; Name of sub folders that will be created in the folder of the search result, level 2.
-#'  
-#' \emph{Miscellaneous}
-#' * \code{act.separator_between_intervals} Character; Single character that is used for separating intervals when creating the full text.
-#' * \code{act.separator_between_tiers} Character; Single character that is used for separating tiers when creating the full text.
-#' * \code{act.separator_between_words} Character string; regular expression with alternatives that count as separators between words. Used for preparing the concordance.
-#' * \code{act.wordCountRegEx} Character string; regular expression that is used to count words.
-#' * \code{act.pauseIdentifierGATRegEx} Character string; regular expression that is used to identify pauses in GAT transcription
-#' * 
+#' **Paths:** Paths to external programs (Praat, ELAN).
+#'
+#' **File formats:** Recognized audio and video file extensions.
+#'
+#' **FFmpeg:** Commands and options for media cutting and still extraction.
+#'
+#' **Import:** Settings for reading annotation files.
+#'
+#' **Export:** Settings for file naming and folder structure.
+#'
+#' **Parsing:** Separators, word counting, and pause identification patterns.
 #'
 #' @return Nothing.
 #' @export
@@ -98,53 +183,67 @@ act.options.default <- list (
 #' \dontrun{
 #' act::options_show()
 #' }
-#' 
-#' 
 
-options_show <- function () {
-	cat("options", fill=TRUE)
-	cat("  Program", fill=TRUE)
-	cat("    act.excamplecorpusURL                     : ",paste("'", options()$act.excamplecorpusURL,"'",sep="", collapse=""), fill=TRUE)
-	cat("    act.showprogress                          : ",paste("'", options()$act.showprogress,"'",sep="", collapse=""), fill=TRUE)
-	cat("    act.updateX                               : ",paste("'", options()$act.updateX,"'",sep="", collapse=""), fill=TRUE)
-	cat("  Paths", fill=TRUE)
-	cat("    act.path.praat                            : ",paste("'", options()$act.path.praat,"'",sep="", collapse=""), fill=TRUE)
-	cat("    act.path.sendpraat                        : ",paste("'", options()$act.path.sendpraat, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.path.elan                             : ",paste("'", options()$act.path.elan, "'",sep="", collapse=""),fill=TRUE)
-	cat("", fill=TRUE)
-	cat("  File formats", fill=TRUE)
-	cat("    act.fileformats.video                     : ",paste("'", options()$act.fileformats.video, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.fileformats.audio                     : ",paste("'", options()$act.fileformats.audio, "'",sep="", collapse=""),fill=TRUE)
-	cat("", fill=TRUE)	
-	cat("  FFMPEG commands and options", fill=TRUE)
-	cat("    act.ffmpeg.command.main                   : ",paste("'", options()$act.ffmpeg.command.main,"'",sep="", collapse=""), fill=TRUE)
-	cat("    act.ffmpeg.command.main.fast              : ",paste("'", options()$act.ffmpeg.command.main.fast, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.ffmpeg.command.audioAsMP3             : ",paste("'", options()$act.ffmpeg.command.audioAsMP3, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.ffmpeg.command.images                 : ",paste("'", options()$act.ffmpeg.command.images, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.ffmpeg.command.images.fast            : ",paste("'", options()$act.ffmpeg.command.images.fast, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.ffmpeg.exportchannels.fromColumnName  : ",paste("'", options()$act.ffmpeg.exportchannels.fromColumnName, "'",sep="", collapse=""),fill=TRUE)
-	cat("", fill=TRUE)
-	cat("  Import annotation files", fill=TRUE)
-	cat("    act.import.readEmptyIntervals             : ", options()$act.import.readEmptyIntervals, fill=TRUE)
-	cat("    act.import.scanSubfolders                 : ", options()$act.import.scanSubfolders, fill=TRUE)
-	cat("    act.import.storefileContentInTranscript   : ", options()$act.import.scanSubfolders, fill=TRUE)
-	cat("", fill=TRUE)
-	cat("  Export", fill=TRUE)
-	cat("    act.export.filename.fromColumnName        : ",paste("'", options()$act.export.filename.fromColumnName, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.export.folder.grouping1.fromColumnName: ",paste("'", options()$act.export.folder.grouping1.fromColumnName,"'",sep="", collapse=""), fill=TRUE)
-	cat("    act.export.folder.grouping2.fromColumnName: ",paste("'", options()$act.export.folder.grouping2.fromColumnName,"'",sep="", collapse=""), fill=TRUE)
+options_show <- function (group = NULL) {
+	groups <- list(
+		program     = "program",
+		path        = "path",
+		fileformats = "fileformats",
+		ffmpeg      = "ffmpeg",
+		import      = "import",
+		export      = "export",
+		parsing     = "parsing"
+	)
 
-	cat("", fill=TRUE)
-	cat("  Miscellaneous", fill=TRUE)
-	cat("    act.separator_between_intervals           : ",paste("'", options()$act.separator_between_intervals, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.separator_between_tiers               : ",paste("'", options()$act.separator_between_tiers, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.separator_between_words               : ",paste("'", options()$act.separator_between_words, "'",sep="", collapse=""),fill=TRUE)
-	cat("    act.wordCountRegEx                        : ",paste("'", options()$act.wordCountRegEx, "'",sep="", collapse=""), fill=TRUE)
-	cat("    act.pauseIdentifierGATRegEx               : ",paste("'", options()$act.pauseIdentifierGATRegEx, "'",sep="", collapse=""), fill=TRUE)
+	if (!is.null(group) && !group %in% names(groups)) {
+		cli::cli_abort("Unknown group {.val {group}}. Available: {.val {names(groups)}}")
+	}
+
+	all_names <- character()
+	for (grp_id in names(groups)) {
+		grp_opts <- Filter(function(x) identical(x$group, grp_id), .act_defaults)
+		all_names <- c(all_names, names(grp_opts))
+	}
+	w_name   <- max(nchar(all_names), na.rm = TRUE) + 2
+	w_source <- 12
+	total_w  <- 120
+
+	cli::cli_rule("act options")
+
+	for (grp_id in names(groups)) {
+		if (!is.null(group) && grp_id != group) next
+
+		grp_opts <- Filter(function(x) identical(x$group, grp_id), .act_defaults)
+		if (length(grp_opts) == 0) next
+
+		cat("\n")
+		cli::cli_text("{.strong {groups[[grp_id]]}}")
+
+		for (nm in names(grp_opts)) {
+			current <- getOption(nm)
+			default_val <- grp_opts[[nm]]$value
+
+			if (is.null(current)) {
+				val_str <- "NULL"
+			} else if (length(current) == 1 && is.na(current)) {
+				val_str <- "NA"
+			} else if (length(current) == 1 && is.character(current) && current == "") {
+				val_str <- "\"\""
+			} else {
+				val_str <- paste(as.character(current), collapse = ", ")
+			}
+
+			source_str <- if (identical(current, default_val)) "[default]" else "[user]"
+			label      <- stringr::str_pad(nm, w_name, side = "right")
+			source_pad <- stringr::str_pad(source_str, w_source, side = "right")
+			cat(paste0("  ", label, source_pad, val_str, "\n"))
+		}
+	}
+	cat("\n")
 }
 
-	
-#' delete all options set by the package from R options
+
+#' Delete all options set by the package from R options
 #'
 #' @export
 #'
@@ -152,38 +251,9 @@ options_show <- function () {
 #' library(act)
 #' act::options_delete()
 options_delete <- function() {
-
-	options(act.excamplecorpusURL                   = NULL)
-	options(act.showprogress                        = NULL)
-	options(act.updateX                             = NULL)
-
-	options(act.path.praat                          = NULL)
-	options(act.path.sendpraat						= NULL)
-	options(act.path.elan	  					    = NULL)
-	
-	options(act.fileformats.video                   = NULL)
-	options(act.fileformats.audio                   = NULL)
-	
-	options(act.ffmpeg.command.main	 	 	 	    = NULL)
-	options(act.ffmpeg.command.main.fast            = NULL)
-	options(act.ffmpeg.command.audioAsMP3       = NULL)
-	options(act.ffmpeg.command.images               = NULL)
-	options(act.ffmpeg.command.images.fast          = NULL)
-	options(act.ffmpeg.exportchannels.fromColumnName= NULL)
-	
-	options(act.import.readEmptyIntervals 		    = NULL)
-	options(act.import.scanSubfolders               = NULL)
-	options(act.import.storefileContentInTranscript = NULL)
-	
-	options(act.export.filename.fromColumnName        = NULL)
-	options(act.export.folder.grouping1.fromColumnName= NULL)
-	options(act.export.folder.grouping2.fromColumnName= NULL)
-
-	options(act.separator_between_intervals          = NULL)
-	options(act.separator_between_tiers              = NULL)
-	options(act.separator_between_words              = NULL)
-	options(act.wordCountRegEx                       = NULL)
-	options(act.pauseIdentifierGATRegEx              = NULL)
+	for (nm in names(.act_defaults)) {
+		do.call(options, setNames(list(NULL), nm))
+	}
 }
 
 
@@ -195,5 +265,5 @@ options_delete <- function() {
 #' library(act)
 #' act::options_reset()
 options_reset <- function () {
-	options(act.options.default[2:length(act.options.default)])
+	options(act.options.default)
 }

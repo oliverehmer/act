@@ -118,36 +118,52 @@ methods::setClass("transcript",
 )
 
 transcript_show <- function (object) {
-	cat("  transcript object", fill=TRUE)
-	cat("    name                       : ", paste("'",object@name,"'",sep="", collapse=""), fill=TRUE)
-	cat("    length.sec                 : ", object@length.sec, fill=TRUE)
-	cat("    tiers                      : ", nrow(object@tiers), fill=TRUE)
-	cat("    annotations                : ", nrow(object@annotations), fill=TRUE)
-	cat("\n")
-	cat("    file.path                  : ", paste("'", object@file.path, "'" , sep="", collapse=""), fill=TRUE)
-	cat("    file.encoding              : ", paste("'", object@file.encoding, "'" , sep="", collapse=""), fill=TRUE)
-	cat("    file.type                  : ", paste("'", object@file.type,"'", sep="", collapse=""), fill=TRUE)
-	cat("    file.content               : ", if(length(object@file.content)==0) {"[empty]"} else {"[check directly]"}, fill=TRUE)
-	cat("\n")
-	cat("    import.result              : ", paste("'", object@import.result, "'", sep="", collapse=""), fill=TRUE)
-	cat("    load.message               : ", paste("'", object@load.message, "'" , sep="", collapse=""), fill=TRUE)
-	cat("    media.path                 : ", if(length(object@media.path)==0) {"[empty]"} else {paste ("[check directly]", as.character(length(object@media.path)), " path(s)", sep= " ")}, fill=TRUE)
-	cat("\n")
-	cat("    normalization.systime      : ", paste("'", object@normalization.systime, "'", sep="", collapse=""), fill=TRUE)
-	cat("    fulltext.systime           : ", paste("'", object@fulltext.systime, "'", sep="", collapse=""), fill=TRUE)
-	cat("    fulltext.filter.tier.names : ", '[check directly]', length(object@fulltext.filter.tier.names), "name(s)", fill=TRUE) #paste("'", object@fulltext.filter.tier.names,"'",sep="", collapse=", ")
-	cat("    modification.systime       : ", paste("'", object@modification.systime, "'", sep="", collapse=""), fill=TRUE)
-	cat("    history                    : ", '[check directly]', length(object@history), "message(s)", fill=TRUE)
-	
-	cat("\n")
-	cat("  Aggregated info from act::info_summarized():", fill=TRUE)
+	w <- 26
+	cli::cli_rule("transcript object: {.val {object@name}}")
+
+	cli::cli_text("{.strong General}")
+	.show_dl(c(
+		"length.sec"  = as.character(object@length.sec),
+		"tiers"       = as.character(nrow(object@tiers)),
+		"annotations" = as.character(nrow(object@annotations))
+	), width = w)
+
+	cli::cli_text("")
+	cli::cli_text("{.strong File}")
+	.show_dl(c(
+		"file.path"     = object@file.path,
+		"file.encoding" = object@file.encoding,
+		"file.type"     = object@file.type,
+		"file.content"  = if(length(object@file.content)==0) "[empty]" else "[check directly]"
+	), width = w)
+
+	cli::cli_text("")
+	cli::cli_text("{.strong Import}")
+	.show_dl(c(
+		"import.result" = object@import.result,
+		"load.message"  = object@load.message,
+		"media.path"    = if(length(object@media.path)==0) "[empty]" else paste("[check directly]", length(object@media.path), "path(s)")
+	), width = w)
+
+	cli::cli_text("")
+	cli::cli_text("{.strong Processing}")
+	.show_dl(c(
+		"normalization.systime"      = as.character(object@normalization.systime),
+		"fulltext.systime"           = as.character(object@fulltext.systime),
+		"fulltext.filter.tier.names" = paste(length(object@fulltext.filter.tier.names), "name(s)"),
+		"modification.systime"       = as.character(object@modification.systime),
+		"history"                    = paste(length(object@history), "message(s)")
+	), width = w)
+
+	cli::cli_text("")
 	info <- act::info_summarized(object)
-	cat("    tier.count                 : ", info$tier.count, fill=TRUE)
-   #cat("    tierNames                 : ", paste("'", info$tierNames,"'",sep="", collapse=", "), fill=TRUE)
-	cat("    annotations.count          : ", info$annotations.count, fill=TRUE)
-	cat("    words.org.count            : ", info$words.org.count, fill=TRUE)
-	cat("    words.norm.count           : ", info$words.norm.count, fill=TRUE)
-	cat()
+	cli::cli_text("{.strong Summary}")
+	.show_dl(c(
+		"tier.count"       = as.character(info$tier.count),
+		"annotations.count" = as.character(info$annotations.count),
+		"words.org.count"  = as.character(info$words.org.count),
+		"words.norm.count" = as.character(info$words.norm.count)
+	), width = w)
 }
 
 methods::setMethod("show", signature = "transcript", definition = transcript_show)

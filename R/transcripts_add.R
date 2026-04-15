@@ -26,8 +26,8 @@ transcripts_add <- function(x,
 							createFulltext=TRUE, 
 							assignMedia=TRUE) {
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	if (missing(...)) 	{stop("Missing transcript object(s) in parameter '...'.") 	} 
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	if (missing(...)) 	{cli::cli_abort("Missing transcript object(s) in parameter '...'.") 	} 
 	
 	#--- get list with all transcript objects from arguments
 	arguments <- list(...)
@@ -53,7 +53,7 @@ transcripts_add <- function(x,
 			}
 		}
 	}
-	if (length(transcripts.new)==0) 	{stop("No valid transcript object(s) found in parameter '...'.") 	} 
+	if (length(transcripts.new)==0) 	{cli::cli_abort("No valid transcript object(s) found in parameter '...'.") 	} 
 	
 	#---remember ids of transcripts in list
 	transcripts_previous_ids <- names(x@transcripts)	

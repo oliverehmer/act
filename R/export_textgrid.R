@@ -25,27 +25,27 @@ export_textgrid <- function(t,
 							filterSectionStartsec = NULL, 
 							filterSectionEndsec = NULL) {
 	
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
 	
 	#--- check if output folder exists
 	if (!is.null(pathOutput)) {
 		if (!dir.exists(dirname(pathOutput))) {
-			stop("Output folder does not exist. Modify parameter 'pathOutput'.")
+			cli::cli_abort("Output folder does not exist. Modify parameter {.arg pathOutput}.")
 		}
 	}
 	
 	#=== Get data
 	#--- Filter and cure transcript
 	t <- act::transcripts_filter_single(t, filterTierNames=filterTierNames, filterSectionStartsec = filterSectionStartsec, filterSectionEndsec = filterSectionEndsec)
-	t <- act::transcripts_cure_single(t, annotationsTimesReversed=TRUE, annotationsOverlap=TRUE, annotationsTimesBelowZero=FALSE, tiersMissing=TRUE, warning=TRUE)
+	t <- act::transcripts_cure_single(t, annotationsTimesReversed=TRUE, annotationsOverlap=TRUE, annotationsTimesBelowZero=FALSE, transcriptLengthZero=TRUE, annotationsZeroDuration=TRUE, tiersMissing=TRUE, warning=TRUE)
 	
 	if (nrow(t@tiers)==0) {
-		warning(unique(sprintf('Textgrid for transcript "%s" not exported. Transcript did not contain any tiers (after filtering).', t@name)))
+		cli::cli_warn("Textgrid for transcript {.val {t@name}} not exported. Transcript did not contain any tiers (after filtering).")
 	} else {
 		#--- get only relevant columns
 		myCols <- c("tierName", "startsec","endsec","content")
 		if (!all(myCols %in% colnames(t@annotations))) {
-			stop(paste("Missing colums. Annotations need to contain: ", paste(myCols, collapse = " ", sep="")))
+			cli::cli_abort("Missing columns. Annotations need to contain: {.val {myCols}}")
 		}
 		ann <- t@annotations[,myCols]
 		
@@ -99,10 +99,10 @@ export_textgrid <- function(t,
 					
 					#create empty intervals for all times
 					newAnnotations			<- data.frame(
-						tierName=t@tiers$name[tierNr], 
-						startsec=as.double(allTimes[1:length(allTimes)-1]), 
-						endsec=as.double(allTimes[2:length(allTimes)]), 
-						content="", 
+						tierName=t@tiers$name[tierNr],
+						startsec=as.double(allTimes[-length(allTimes)]),
+						endsec=as.double(allTimes[-1]),
+						content="",
 						stringsAsFactors=FALSE		)
 					
 					

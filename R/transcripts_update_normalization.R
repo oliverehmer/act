@@ -4,7 +4,6 @@
 #' Function returns a corpus object with normalized transcription and updates the original corpus object passed as argument to x.
 #'
 #' @param x Corpus object.
-#' @param pathReplacementMatrix Character string; path to replacement matrix in CSV format. If empty, the default replacement matrix that comes with the package will be used.
 #' @param transcriptNames Vector of character strings; Names of the transcripts for which you want to search media files; leave empty if you want to search media for all transcripts in the corpus object.
 #' @param forceUpdate Logical; If \code{TRUE} transcripts will be normalized in any case, if \code{FALSE} transcripts will be only normalized if there was a modification to the transcript since the last normalization.
 #'
@@ -15,30 +14,29 @@
 #' 
 #' examplecorpus <- act::transcripts_update_normalization(x=examplecorpus)
 #' 
-transcripts_update_normalization <- function(x, 
-											 pathReplacementMatrix = "", 
-											 transcriptNames           = NULL, 
+transcripts_update_normalization <- function(x,
+											 transcriptNames           = NULL,
 											 forceUpdate               = FALSE){
 	#=== check data
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
 	if (is.null(x@transcripts))     {
-		warning("No transcripts found in corpus object x.")	
+		cli::cli_warn("No transcripts found in corpus object x.")
 		return(x)
 	}
 	if (length(x@transcripts)==0) 	{
-		warning("No transcripts found in corpus object x.")	
+		cli::cli_warn("No transcripts found in corpus object x.")
 		return(x)
 	}
 	
 	#=== get the matrix
 	if (is.null(x@normalization.matrix)) {	
-		stop("The corpus object does not contain a normalization matrix in '@normalization.matrix'. To set the normalization matrix use 'x@normalization.matrix <- act::matrix_load(path=...)'")		
+		cli::cli_abort("The corpus object does not contain a normalization matrix in '@normalization.matrix'. To set the normalization matrix use 'x@normalization.matrix <- act::matrix_load(path=...)'")
 	}
 	act_replacementMatrix <- x@normalization.matrix
 	
 	#=== check matrix
-	if ("search" %in% colnames(act_replacementMatrix)==FALSE) {	stop("Column 'search' is missing in normalization matrix. The matrix needs to contain colums 'search' and 'replace'")}
-	if ("replace" %in% colnames(act_replacementMatrix)==FALSE){	stop("Column 'replace' is missing in normalization matrix. The matrix needs to contain colums 'search' and 'replace'")	}
+	if ("search" %in% colnames(act_replacementMatrix)==FALSE) {	cli::cli_abort("Column {.arg search} is missing in normalization matrix. The matrix needs to contain colums {.arg search} and {.arg replace}")}
+	if ("replace" %in% colnames(act_replacementMatrix)==FALSE){	cli::cli_abort("Column {.arg replace} is missing in normalization matrix. The matrix needs to contain colums {.arg search} and {.arg replace}")	}
 	#replace NA by empty strings
 	act_replacementMatrix$replace[is.na(act_replacementMatrix$replace)] <- ""
 	
@@ -57,7 +55,7 @@ transcripts_update_normalization <- function(x,
 			NULL
 		}
 	)
-	if (is.null(out)) 						{	stop("Normalization matrix seems to be containing invalid regular expressions.")		}
+	if (is.null(out)) 						{	cli::cli_abort("Normalization matrix seems to be containing invalid regular expressions.")		}
 	
 	#=== if no filter is set, process all transcripts
 	if (is.null(transcriptNames)) {transcriptNames <- names(x@transcripts)}
@@ -94,7 +92,7 @@ transcripts_update_normalization <- function(x,
 	
 	#=== do the replacement
 	if (length(mymatrix)<1) {
-		warning("Replacement matrix is empty.")
+		cli::cli_warn("Replacement matrix is empty.")
 	} else {
 		
 	}

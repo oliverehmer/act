@@ -16,8 +16,7 @@ export_docx(
   headerTitle = NULL,
   headerSubtitle = NULL,
   headerDescription = NULL,
-  headerInsertSource = TRUE,
-  layerNames = NULL
+  headerInsertSource = TRUE
 )
 }
 \arguments{
@@ -44,19 +43,18 @@ export_docx(
 \item{headerDescription}{Character string; text used as description after sub title.}
 
 \item{headerInsertSource}{Logical; if \code{TRUE} standard information about the source and location of the sequence will be inserted after the heading.}
-
-\item{layerNames}{Vector of character strings; Names of columns present in 't@annotations' to be exported (in addition to column content').}
 }
 \value{
 Officer doc; transcript as object from library officer.
 }
 \description{
 LAYOUT
+If you want to modify the layout of the print transcripts, create a new layout object with \code{mylayout <- methods::new("layout")}, modify the settings and pass it as argument \code{l}.
 Using the layout object you may
 \itemize{
 \item Adjust with, abbreviation of speakers, etc.
 \item set filters to include/exclude tiers matching regular expressions.
-– assign template files for .docx formatting using format templates
+\item assign template files for .docx formatting using format templates
 }
 }
 \details{
@@ -64,8 +62,8 @@ FORMATING
 \itemize{
 \item adjust the the defaults format templates in the default .docx template.
 \item define further templates and add them to a styles matrix.
-The paths to both files need to be set in your l layout object. Please check the slots l@docx.template.path and l@docx.styles.
-You can see the structure of the default styles matrix in each new layout object in l@ l@docx.styles. Use the l@docx.styles<-act:: export_docx_styles_load(...) to assign a custom styles matrix from a csv files.
+The paths to both files need to be set in your l layout object. Please check the slots l@docx.template.path and l@docx.styles.base.
+You can see the structure of the default styles matrix in each new layout object in l@docx.styles.base. Use l@docx.styles.base <- act::export_styles_base_load(...) to assign a custom styles matrix.
 The default format templates are
 }
 \itemize{
@@ -81,12 +79,7 @@ The default format templates are
 \item Transcript body
 }
 \itemize{
-\item body.default (formats: any annotation in „t@annotations“
-}
-\itemize{
-\item LAYERS
-In addition to the original transcript content in transcript@annotations$content you can output further layers.
-The layers need to be assigned to the data.frame transcript@annotations as new columns. To output the layers, pass the name(s) of the repective column(s) as character vector in the parameter layerNames.
+\item transcript.default (formats: any annotation in "t@annotations"
 }
 }
 \examples{
@@ -103,5 +96,5 @@ printtranscript
 
 }
 \seealso{
-\link{corpus_export}, \link{export_eaf}, \link{export_exb}, \link{export_rpraat}, \link{export_srt}, \link{export_textgrid}
+\link{corpus_export}, \link{export_eaf}, \link{export_exb}, \link{export_rpraat}, \link{export_srt}, \link{export_textgrid}, \code{vignette("export_docx_styles", package = "act")}
 }

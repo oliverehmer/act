@@ -10,6 +10,8 @@ transcripts_cure(
   annotationsTimesReversed = TRUE,
   annotationsOverlap = TRUE,
   annotationsTimesBelowZero = TRUE,
+  transcriptLengthZero = TRUE,
+  annotationsZeroDuration = TRUE,
   tiersMissing = TRUE,
   warning = FALSE
 )
@@ -25,6 +27,10 @@ transcripts_cure(
 
 \item{annotationsTimesBelowZero}{Logical; If \code{TRUE} annotations before 0 sec will be corrected.}
 
+\item{transcriptLengthZero}{Logical; If \code{TRUE} a transcript with \code{@length.sec <= 0} will be corrected.}
+
+\item{annotationsZeroDuration}{Logical; If \code{TRUE} zero-duration annotations in IntervalTiers will be cured.}
+
 \item{tiersMissing}{Logical; If \code{TRUE} tiers missing in \code{@tiers} slot of the transcript object will be added.}
 
 \item{warning}{Logical; If \code{TRUE} a warning notice will be shown upon correction.}
@@ -39,6 +45,8 @@ This function may cure some of these errors in all transcript objects of a corpu
 \item Annotations with reversed times: annotations with \code{endsec} lower than \code{startsec} will be deleted.
 \item Overlapping annotations: earlier annotations will end where the next annotation starts.
 \item Annotations below 0 sec: Annotations that are starting and ending before 0 sec will be deleted; Annotations starting before but ending after 0 sec will be truncated.
+\item Transcript length zero: If \code{@length.sec} is missing or \code{<= 0} it will be set to the largest annotation endsec.
+\item Zero-duration annotations: In IntervalTiers, annotations with \code{startsec == endsec} will be merged (if multiple at same time), then extended to the next annotation, or deleted if no room is available.
 \item Missing tiers: Tiers that are present in the annotations but missing in the list of tiers in \code{@tiers} of the transcript object will be added.
 }
 }

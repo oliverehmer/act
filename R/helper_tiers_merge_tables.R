@@ -63,7 +63,10 @@ helper_tiers_merge_tables <- function (...) {
 	}
 	differing_tier_types <- unique(differing_tier_types)
 	if (length(differing_tier_types)>0) {
-		stop(paste("Some of the tiers in the transcripts have the same name but are of different types ('IntervalTier', 'TextTier'). The tiers with differing types are: ", paste(differing_tier_types, sep=", "), sep=""))
+		cli::cli_abort(c(
+		"Some tiers have the same name but different types ({.val IntervalTier}/{.val TextTier}).",
+		"Tiers with differing types: {.val {differing_tier_types}}"
+	))
 	}
 
 	#drop rows with non unique names

@@ -21,19 +21,11 @@
 #' 
 #' \emph{Output format}\cr
 #' The output format is predefined by in the options:
-#' * \code{act.ffmpeg.command.main}: defines the basic FFmpeg command (used for audio & video)
-#' * \code{act.ffmpeg.command.main.fast}: defines the FFmpeg command to be used with large video files.
-#' * \code{act.ffmpeg.command.audioAsMP3}: defines the FFmpeg used for converting audio files to MP3
-#' * \code{act.ffmpeg.command.images}. Defines the FFmpeg command used for extracting still images.
-#' 
-#' For video, the default is to generate mp4  cuts. You can also use the following commands to change the output format:\cr\cr
-#' MP4 video cuts with original video quality: 
-#' * \code{options(act.ffmpeg.command.main      = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH.mp4" -hide_banner')}
-#' * \code{options(act.ffmpeg.command.main.fast = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -t TIMEDURATION OPTIONS -y "OUTFILEPATH.mp4" -hide_banner')}
-#' 
-#' MP4 video cuts with reduced video quality:
-#' * \code{options(act.ffmpeg.command.main      = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -vf scale=1920:-1 -b:v 1M -b:a 192k -y "OUTFILEPATH.mp4" -hide_banner')}
-#' * \code{options(act.ffmpeg.command.main.fast = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -t TIMEDURATION OPTIONS -vf scale=1920:-1 -b:v 6M -b:a 192k -y "OUTFILEPATH.mp4" -hide_banner')}
+#' * \code{act.ffmpeg.command.video}: FFmpeg command for video cuts
+#' * \code{act.ffmpeg.command.video.fast}: FFmpeg command for video cuts with fast positioning
+#' * \code{act.ffmpeg.command.audio}: FFmpeg command for audio cuts (default: codec copy)
+#' * \code{act.ffmpeg.command.audio.mp3}: FFmpeg command for converting audio to MP3
+#' * \code{act.ffmpeg.command.images}: FFmpeg command for extracting still images
 #'  
 #'  
 #' \emph{Extract stills}\cr
@@ -66,16 +58,16 @@
 #' @param cutSpanAftersec Double; End the media cut some seconds before the hit to include some context; the default \code{NULL} will take the value as set in @cuts.span.beforesec of the search object.
 #' @param folderOutput Character string; path to folder where files will be written.
 #' @param filterMediaInclude Character string; regular expression to match only some of the media files in \code{corpus@transcripts[[ ]]@media.path}.
-#' @param videoFastPositioning Logical; If \code{TRUE} the FFmpeg command will be using the parameter fast video positioning as specified in \code{options()$act.ffmpeg.command.main.fast}.
+#' @param videoFastPositioning Logical; If \code{TRUE} the FFmpeg command will be using fast video positioning as specified in \code{options()$act.ffmpeg.command.video.fast}.
 #' @param videoCodecCopy Logical; If \code{TRUE} FFMPEG will use the option *codec copy* for videos.
-#' @param audioAsMP3 Logical; If \code{TRUE} audio cuts will be converted to .mp3 files, using  \code{options()$act.ffmpeg.command.audioAsMP3}(By default the file type of audio will be maintained. E.g. when the original media file is an .wav file, the output will be so, too.).
-#' @param panning Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.exportchannels.fromColumnName' .
+#' @param audioAsMP3 Logical; If \code{TRUE} audio cuts will be converted to .mp3 files using \code{options()$act.ffmpeg.command.audio.mp3}. If \code{FALSE} (default) audio format is preserved using \code{options()$act.ffmpeg.command.audio}.
+#' @param panning Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.channels_from_column' .
 #' @param outputOS Vector of character Strings; Saves FFMpeg cut list in format for \code{"win"}=windows, \code{"mac"}=apple ox/linux.
 #' @param outputFileName Character String; Name of the cut list.
 #' 
 #' @return Search object; cut lists will be stored in \code{s@cuts.cutlist.mac} and \code{s@cuts.cutlist.win}.
 #'
-#' @seealso \link{search_cuts_media},
+#' @seealso \link{search_cuts_media}, \code{vignette("install_ffmpeg", package = "act")}
 #' 
 #' @export
 #'
@@ -116,28 +108,28 @@ search_cuts_media <- function(x,
 	}
 	
 	#==== CHECKS ====
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
-	if (is.null(s@results$transcriptName))       	{ stop("Data frame s@results does not contain column 'transcriptName'.") 	}
-	if (nrow(s@results)==0) 	                    { stop("Data frame s@results does not contain any search results (data frame with 0 rows)") 	}
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
+	if (is.null(s@results$transcriptName))       	{ cli::cli_abort("Data frame s@results does not contain column {.arg transcriptName}.") 	}
+	if (nrow(s@results)==0) 	                    { cli::cli_abort("Data frame s@results does not contain any search results (data frame with 0 rows)") 	}
 	if (!options()$act.export.filename.fromColumnName %in% colnames(s@results)) {
-		stop("The column defined in the option 'options()$act.export.filename.fromColumnName' does not exist in the data.frame with the search results.")
+		cli::cli_abort("The column defined in the option 'options()$act.export.filename.fromColumnName' does not exist in the data.frame with the search results.")
 	}
 	if (!is.null(cutSpanBeforesec)) 	{
 		if (length(cutSpanBeforesec)!=1) {
-			stop("Parameter 'cutSpanBeforesec' needs to contain only one element as a numeric value.") 
+			cli::cli_abort("Parameter {.arg cutSpanBeforesec} needs to contain only one element as a numeric value.")
 		}
 		if (!is.numeric(cutSpanBeforesec)) {
-			stop("Parameter 'cutSpanBeforesec' needs to be a numeric value.") 
+			cli::cli_abort("Parameter {.arg cutSpanBeforesec} needs to be a numeric value.")
 		}
 		s@cuts.span.beforesec       <- cutSpanBeforesec
 	}
 	if (!is.null(cutSpanAftersec)) 	{
 		if (length(cutSpanAftersec)!=1) {
-			stop("Parameter 'cutSpanAftersec' needs to contain only one element as a numeric value.") 
+			cli::cli_abort("Parameter {.arg cutSpanAftersec} needs to contain only one element as a numeric value.")
 		}
 		if (!is.numeric(cutSpanAftersec)) {
-			stop("Parameter 'cutSpanAftersec' needs to be a numeric value.") 
+			cli::cli_abort("Parameter {.arg cutSpanAftersec} needs to be a numeric value.")
 		}
 		s@cuts.span.aftersec       <- cutSpanAftersec
 	}
@@ -145,20 +137,20 @@ search_cuts_media <- function(x,
 	#stills.values:	check if column exists
 	if (exportStills) {
 		if (!"stills.values" %in% colnames(s@results)) {
-			message <- paste0("The results data frame of your search object does not contain a column called 'stills.values'.")
-			stop(message)
+			cli::cli_abort("The results data frame of your search object does not contain a column called {.val stills.values}.")
 		}
 	} 
 	
 	#==== VARIABLES ====
 	myWarnings <- c()
 	#---- . out folder ----
-	#if cut list should be saved - check it  output folder exists
+	#if cut list should be saved : set output folder
 	if (is.null(folderOutput)) {
 		out_folder_main <- "."
 	} else {
 		out_folder_main <- normalizePath(folderOutput, winslash = "/", mustWork = FALSE)
 	}
+	
 	#---- . total cut lists ----
 	mac_cutlist <- c()
 	win_cutlist <- c()
@@ -239,10 +231,17 @@ search_cuts_media <- function(x,
 		} 
 		j<-1
 		for (j in 1:length(in_paths)) {
+			#skip if path is NA
+			if (is.na(in_paths[j])) {next}
+			
 			mac_cutlist <- c(mac_cutlist, paste0("#----  ", basename(in_paths[j])))
 			
 			#suffix of input media file
-			in_suffix<-stringr::str_to_lower(tools::file_ext(in_paths[j]))
+			in_suffix <- stringr::str_to_lower(tools::file_ext(in_paths[j]))
+	
+			if (in_suffix =="") {
+				in_suffix <- "mp4"
+			}
 			
 			#==== INFILEPATH ====
 			mac_infilepath <- sprintf('PATH_INPUT="%s"', in_paths[j])
@@ -264,9 +263,9 @@ search_cuts_media <- function(x,
 					CreatePannedVersions <- panning
 				} else { 
 					#check if channels are set in the search results
-					if(options()$act.ffmpeg.exportchannels.fromColumnName %in% colnames(s@results)) {
+					if(options()$act.ffmpeg.channels_from_column %in% colnames(s@results)) {
 						#if it is set, take the value given there
-						CreatePannedVersions <- s@results[res, options()$act.ffmpeg.exportchannels.fromColumnName]
+						CreatePannedVersions <- s@results[res, options()$act.ffmpeg.channels_from_column]
 						if (is.na(CreatePannedVersions)) {
 							CreatePannedVersions <-0
 						}
@@ -323,16 +322,21 @@ search_cuts_media <- function(x,
 				#get format / suffix of input media file
 				out_suffix <- in_suffix
 				
-				#set standard command
-				cmd <- options()$act.ffmpeg.command.main
-				#if it is a video file and fast positioning is used
-				if ((in_suffix %in% options()$act.fileformats.video) & videoFastPositioning) {
-					cmd <- options()$act.ffmpeg.command.main.fast
-				} 
-				
+				#set standard command based on media type
+				if (in_suffix %in% options()$act.fileformats.video) {
+					cmd <- options()$act.ffmpeg.command.video
+					if (videoFastPositioning) {
+						cmd <- options()$act.ffmpeg.command.video.fast
+					}
+				} else if (in_suffix %in% options()$act.fileformats.audio) {
+					cmd <- options()$act.ffmpeg.command.audio
+				} else {
+					cmd <- options()$act.ffmpeg.command.video
+				}
+
 				#if it is an audio file and should be converted to mp3
 				if ((in_suffix %in% options()$act.fileformats.audio) & audioAsMP3) {
-					cmd <- options()$act.ffmpeg.command.audioAsMP3
+					cmd <- options()$act.ffmpeg.command.audio.mp3
 					#replace destination file extension with mp3
 					out_suffix <- "mp3"
 				} 
@@ -355,10 +359,10 @@ search_cuts_media <- function(x,
 				#---- . command replacements ----
 				startsec 	<- max(0, s@results$startsec[res] - s@cuts.span.beforesec)
 				endsec 		<- min(s@results$endsec[res] + s@cuts.span.aftersec, t@length.sec)
-				cmd <- 	stringr::str_replace_all(cmd, "TIMESTART\\b", 			    as.character(startsec))
-				cmd <- 	stringr::str_replace_all(cmd, "TIMESTARTMINUS10SECONDS",	as.character(max(0, startsec - 10)))
-				cmd <- 	stringr::str_replace_all(cmd, "TIMEDURATION", 		     	as.character(endsec-startsec))
-				#cmd <- 	stringr::str_replace_all(cmd, "INFILEPATH", 				in_paths[j])
+				cmd 		<- 	stringr::str_replace_all(cmd, "TIMESTART\\b", 			    as.character(startsec))
+				cmd 		<- 	stringr::str_replace_all(cmd, "TIMESTARTMINUS10SECONDS",	as.character(max(0, startsec - 10)))
+				cmd 		<- 	stringr::str_replace_all(cmd, "TIMEDURATION", 		     	as.character(endsec-startsec))
+				#cmd		<- 	stringr::str_replace_all(cmd, "INFILEPATH", 				in_paths[j])
 				
 				#panning versions
 				cmd    <-   rep(cmd,3)
@@ -556,7 +560,7 @@ search_cuts_media <- function(x,
 	s@cuts.cutlist.win <- stringr::str_flatten(win_cutlist, collapse="\n")
 	s@cuts.cutlist.mac <- stringr::str_flatten(mac_cutlist, collapse="\n")
 	if (length(win_cutlist)==0) {
-		stop(c(myWarnings, "No cut list created."))
+		cli::cli_abort(c("No cut list created.", myWarnings))
 	} 
 	
 	#==== SAVE to file ====
@@ -570,7 +574,7 @@ search_cuts_media <- function(x,
 	}
 	
 	#=== print warnings
-	if (length(myWarnings)>0) { warning(unique(myWarnings)) }
+	if (length(myWarnings)>0) { cli::cli_warn(unique(myWarnings)) }
 	
 	#=== return
 	return(s)

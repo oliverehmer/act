@@ -14,7 +14,7 @@ helper_progress_set <- function(title, total) {
 	if (!getOption("act.showprogress", TRUE)) return(invisible(NULL))
 	if (!exists("act.environment", mode = "environment")) return(invisible(NULL))
 	if (!requireNamespace("progress", quietly = TRUE)) {
-		warning("Package 'progress' not available.")
+		cli::cli_warn("Package {.arg progress} not available.")
 		return(invisible(NULL))
 	}
 	
@@ -23,26 +23,10 @@ helper_progress_set <- function(title, total) {
 		format = paste("  ", title, "[:bar] :percent (:eta left)", sep = ""),
 		total = max(1, total),
 		clear = FALSE,
-		show_after = 0,
+		show_after = 0.5,
 		width = 70
 	)
 }
-#helper_progress_set <- function(title, total) {
-#	#set progress bar	
-#	if(getOption("act.showprogress", TRUE)) {
-#		if (exists("act.environment", mode="environment")) {
-#			if(exists("pb", envir=act.environment)) {
-#				title <- stringr::str_pad(title, width=24, side="right", pad=" ")
-#				act.environment$pb <- progress::progress_bar$new(
-#					format = paste("  ", title, "[:bar] :percent (:eta left)", sep=""),
-#					total = max(1,total), 
-#					clear = FALSE, 
-#					show_after = 0,
-#					width= 70)
-#			}
-#		}			
-#	}
-#}
 
 #' Helper: Advance progress bar by one tick
 #'
@@ -70,15 +54,3 @@ helper_progress_tick <- function() {
 		pb$tick()
 	}
 }
-#helper_progress_tick <- function() {
-#	#update progress
-#	if (getOption("act.showprogress", TRUE)) {
-#		if (exists("act.environment", mode="environment")) {
-#			if(exists("pb", envir=act.environment)) {
-#				if (!act.environment$pb$finished) {			
-#					act.environment$pb$tick()
-#				}
-#			}
-#		}
-#	}
-#}

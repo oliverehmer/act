@@ -35,22 +35,22 @@ search_openresult_inquicktime  <- function(x,
 	# close <- TRUE
 
 	
-	if (missing(x)) 	{stop("Corpus object in parameter 'x' is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{stop("Parameter 'x' needs to be a corpus object.") } }
-	if (missing(s)) 	{stop("Search object in parameter 's' is missing.") 		}	else { if (!methods::is(s, "search")	)	{stop("Parameter 's' needs to be a search object.") 	} }
-	if (missing(resultid))                   {stop("Number of the search result 'resultid' is missing.") 	}
-	if (Sys.info()["sysname"]!="Darwin")     {stop("You need to be on a Mac to use this function") 	}
+	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
+	if (missing(resultid))                   {cli::cli_abort("Number of the search result {.arg resultid} is missing.") 	}
+	if (Sys.info()["sysname"]!="Darwin")     {cli::cli_abort("You need to be on a Mac to use this function") 	}
 	
-	if (resultid>nrow(s@results)) {stop("Number of the search result exceeds rows in 's@results'.") 	}
+	if (resultid>nrow(s@results)) {cli::cli_abort("Number of the search result exceeds rows in 's@results'.") 	}
 	result <- s@results[resultid,]
 	
 	#--- get  corresponding transcript
 	t <- x@transcripts[[result$transcriptName]]
-	if (is.null(t))	{ 	stop("Transcript not found in corpus object x.") 	}
+	if (is.null(t))	{ 	cli::cli_abort("Transcript not found in corpus object x.") 	}
 	
 	#---get path of media file
 	pathMediaFile <- act::media_path_to_existing_file(t) 
 	if (is.null(pathMediaFile))	{
-		warning("No media file(s) found.")
+		cli::cli_warn("No media file(s) found.")
 		return (FALSE)
 	} 
 	

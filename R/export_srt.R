@@ -31,18 +31,18 @@ export_srt <- function(t,
 					   speakerWidth         = 3,
 					   speakerEnding        = ":") {
 	
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
 	
 	#--- check if output folder exists
 	if (!is.null(pathOutput)) {
 		if (!dir.exists(dirname(pathOutput))) {
-			stop("Output folder does not exist. Modify parameter 'pathOutput'.")
+			cli::cli_abort("Output folder does not exist. Modify parameter {.arg pathOutput}.")
 		}
 	}
 	#=== Get data
 	#--- Filter and cure transcript
 	t <- act::transcripts_filter_single(t, filterTierNames=filterTierNames, filterSectionStartsec = filterSectionStartsec, filterSectionEndsec = filterSectionEndsec, sort="tier>startsec")
-	t <- act::transcripts_cure_single(t, annotationsTimesReversed=TRUE, annotationsOverlap=TRUE, annotationsTimesBelowZero=TRUE, tiersMissing=FALSE, warning=TRUE)
+	t <- act::transcripts_cure_single(t, annotationsTimesReversed=TRUE, annotationsOverlap=TRUE, annotationsTimesBelowZero=TRUE, transcriptLengthZero=TRUE, annotationsZeroDuration=TRUE, tiersMissing=FALSE, warning=TRUE)
 	
 	#--- get all times
 	alltimes <- c(	t@annotations$startsec, t@annotations$endsec)

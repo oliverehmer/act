@@ -16,7 +16,7 @@ merge_docx(folderInput, pathTemplateInput, pathOutput = NULL, recursive = TRUE)
 \item{recursive}{Logical;  if \code{TRUE} folder input will be searched recursively.}
 }
 \value{
-merged .docx in \link{officeR} format,
+merged .docx in officer format,
 }
 \description{
 Loads all .docx files in a folder and merges them to a singe .docx file.

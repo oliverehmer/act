@@ -5,9 +5,14 @@
 #' ...
 #' @md
 #' 
+#' @section Vignettes:
+#' - \code{vignette("export_docx_styles", package = "act")} -- DOCX export style matrix reference
+#' - \code{vignette("install_ffmpeg", package = "act")} -- Install FFmpeg
+#' - \code{vignette("install_sendpraat", package = "act")} -- Install sendpraat
+#'
 #' @section Package options:
 #' The package has numerous options that change the internal workings of the package.
-#' Please see \code{act::options_show()} and the information given there. 
+#' Please see \code{act::options_show()} and the information given there.
 #'  
 #' @name act
 #' 

@@ -22,19 +22,19 @@ transcripts_filter_remove_single <- function (t,
 									   filterSectionEndsec = NULL, 
 									   sort=c("none", "tier>startsec", "startsec>tier")) {
 	#=== settings
-	if (missing(t)) 	{stop("Transcript object in parameter 't' is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{stop("Parameter 't' needs to be a transcript object.") 	} }
+	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
 	
 	#--- check parameter 'filterTierNames'
 	if (!is.null(filterTierNames)) {
 		if (length(filterTierNames)>0) {
 			if (!is.vector(filterTierNames)) {
-				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+				{cli::cli_abort("Parameter {.arg filterTierNames} needs to be a vector containing names of tiers.") 	}
 			}
 			if (!is.atomic(filterTierNames)) {
-				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+				{cli::cli_abort("Parameter {.arg filterTierNames} needs to be a vector containing names of tiers.") 	}
 			}
 			if (!is.character(filterTierNames)) {
-				{stop("Parameter 'filterTierNames' needs to be a vector containing names of tiers.") 	}
+				{cli::cli_abort("Parameter {.arg filterTierNames} needs to be a vector containing names of tiers.") 	}
 			}
 		}
 	}	
@@ -44,15 +44,15 @@ transcripts_filter_remove_single <- function (t,
 	if (!is.null(filterSectionStartsec)) {
 		filterSectionStartsec<- as.double(filterSectionStartsec)
 		if (filterSectionStartsec<0) {
-			{stop("Parameter 'filterSectionStartsec' needs to be at least 0") 	}
+			{cli::cli_abort("Parameter {.arg filterSectionStartsec} needs to be at least 0") 	}
 		}
 		if (is.null(filterSectionEndsec)) {
-			stop("If you set 'filterSectionStartsec' you also need to set 'filterSectionEndsec'") 
+			cli::cli_abort("If you set {.arg filterSectionStartsec} you also need to set {.arg filterSectionEndsec}")
 			filterSectionEndsec<- as.double(filterSectionEndsec)
 		}	
 	} else {
 		if (!is.null(filterSectionEndsec)) {
-			stop("If you set 'filterSectionEndsec' you also need to set 'filterSectionStartsec'") 
+			cli::cli_abort("If you set {.arg filterSectionEndsec} you also need to set {.arg filterSectionStartsec}")
 		}	
 	}
 	
