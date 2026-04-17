@@ -1,7 +1,7 @@
 Package: act
 Type: Package
 Title: Aligned Corpus Toolkit
-Version: 3.3.9
+Version: 3.5.1
 Date: 2026-04-15
 Authors@R: person("Oliver", "Ehmer", email = "oliver.ehmer@uos.de", role = c("aut", "cre"))
 Maintainer: Oliver Ehmer <oliver.ehmer@uos.de>
