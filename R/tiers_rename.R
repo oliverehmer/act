@@ -26,7 +26,7 @@ tiers_rename <- function(x,
 						 searchReplacement, 
 						 filterTranscriptNames=NULL) {
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	
 	transcripts_modified_ids <- c()
 	transcripts_problematic_ids <- c()
@@ -50,18 +50,14 @@ tiers_rename <- function(x,
 	if (is.null(filterTranscriptNames)) {	filterTranscriptNames <- names(x@transcripts)	}
 	#i<-1
 	for (i in filterTranscriptNames) {
-		#reset transcript log
-		x@transcripts[[i]]@modification.systime <- character()
-		
 		#create test names
 		tiers_before 		<- x@transcripts[[i]]@tiers
 		tiers_after 		<- tiers_before
 		tiers_after$name 	<- stringr::str_replace_all(x@transcripts[[i]]@tiers$name, searchPattern, searchReplacement)
-		
+
 		if(length(setdiff(tiers_before$name, tiers_after$name))==0) {
 			#HISTORY transcript:
-			x@transcripts[[i]]@modification.systime <- character()
-			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
+			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list(
 				modification        = "tiers_rename",
 				systime             = Sys.time(),
 				result              = "OK: no matches, no tiers renamed.",
@@ -77,8 +73,7 @@ tiers_rename <- function(x,
 			if (max(table(tiers_after$name))>1) {
 				#non-unique names
 				#HISTORY transcript:
-				x@transcripts[[i]]@modification.systime <- Sys.time()
-				x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
+				x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list(
 					modification                    = "tiers_rename",
 					systime                          = Sys.time(),
 					result="ERROR: No tiers renamed. Renaming would result in non unique tier names (see: tiers_problematic)",
@@ -97,8 +92,7 @@ tiers_rename <- function(x,
 			} else {
 				#all names only 1 occurrence (they are unique!)
 				#HISTORY transcript
-				x@transcripts[[i]]@modification.systime <- Sys.time()
-				x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
+				x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list(
 					modification         ="tiers_rename",
 					systime              = Sys.time(),
 					result               =paste("OK:", as.character(length(setdiff(tiers_after$name, tiers_before$name))), "tier(s) renamed"),

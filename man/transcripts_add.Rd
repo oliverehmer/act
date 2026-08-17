@@ -8,6 +8,7 @@ transcripts_add(
   x,
   ...,
   skipDuplicates = FALSE,
+  createNormalization = TRUE,
   createFulltext = TRUE,
   assignMedia = TRUE
 )
@@ -18,6 +19,8 @@ transcripts_add(
 \item{...}{transcript object, list of transcript objects, corpus object.}
 
 \item{skipDuplicates}{Logical; If \code{FALSE} double transcripts will be renamed to make the names unique, if \code{TRUE} double transcripts will not be added.}
+
+\item{createNormalization}{Logical; if \code{TRUE} the normalized content will be created.}
 
 \item{createFulltext}{Logical; if \code{TRUE} full text will be created.}
 

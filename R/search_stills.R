@@ -51,10 +51,8 @@ search_stills <- function (	x,
 	if ( missing(s) )	{cli::cli_abort("Search object in parameter {.arg s} is missing.") }
 			
 	if(is.null(s)) {
-		if (nrow(s@results)==0) {
-			return(s)
-		}
-	}	
+		return(s)
+	}
 	#no search results
 	if (nrow(s@results)==0) {
 		return(s)

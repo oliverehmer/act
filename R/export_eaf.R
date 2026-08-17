@@ -11,6 +11,8 @@
 #' @param filterSectionStartsec Double; start of selection in seconds.
 #' @param filterSectionEndsec Double; end of selection in seconds.
 #' @param createMediaLinks Logical; if \code{TRUE} media links will be created.
+#' @param mediaMaxFiles Integer or \code{NULL}; maximum number of media files to link (\code{NULL} = all).
+#' @param mediaWriteOffset Logical; if \code{TRUE} a negative \code{TIME_ORIGIN} attribute (in milliseconds) is written for clip media (rows with \code{kind == "clip"} and \code{startsec > 0}), derived from \code{startsec}. Default \code{FALSE} (no offset). Note: clip media are currently not linked at all in the exported .eaf, because 'ELAN' does not support negative media offsets - only full recordings (offset 0) are linked. This parameter takes effect once clip linking is re-enabled in the code.
 #'
 #' @return Contents of the .eaf file (only if \code{pathOutput} is left empty)
 #' @export
@@ -23,10 +25,12 @@ export_eaf <- function(t,
 					   pathOutput=NULL, 
 					   filterTierNames=NULL, 
 					   filterSectionStartsec = NULL,
-					   filterSectionEndsec = NULL, 
-					   createMediaLinks=TRUE) {
+					   filterSectionEndsec = NULL,
+					   createMediaLinks=TRUE,
+					   mediaMaxFiles=NULL,
+					   mediaWriteOffset=FALSE) {
 	
-	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
+	.assert_transcript(t, missing = missing(t))
 	
 	#--- check if output folder exists
 	if (!is.null(pathOutput)) {
@@ -82,17 +86,33 @@ export_eaf <- function(t,
 	#--- generate media header
 	myEAF <- append(myEAF, "    <HEADER MEDIA_FILE=\"\" TIME_UNITS=\"milliseconds\">")
 	if (createMediaLinks==TRUE) 	{
-		if (length(t@media.path)>0) 		{
-			for (mediaPath in t@media.path ) {
+		media_sel <- act::media_select(t@media, maxFiles = mediaMaxFiles, apply = FALSE)
+		if (nrow(media_sel)>0) 		{
+			elan_supports_negative_offset <- FALSE
+			for (i in seq_len(nrow(media_sel))) {
+				is_clip <- "kind" %in% colnames(media_sel) && !is.na(media_sel$kind[i]) && media_sel$kind[i] == "clip"
+				#--- clips are not linked while ELAN cannot use negative offsets
+				if (is_clip && !elan_supports_negative_offset) {
+					next
+				}
+				mediaPath <- media_sel$path[i]
 				myMimeType <- "unknown"
-				if (tools::file_ext(mediaPath) %in% c("wav")) {
+				if (tolower(tools::file_ext(mediaPath)) %in% c("wav")) {
 					myMimeType <-"audio/x-wav"
-				} else if (tools::file_ext(mediaPath) %in% c("mp3", "aif", "aiff")) {
+				} else if (tolower(tools::file_ext(mediaPath)) %in% c("mp3", "aif", "aiff")) {
 					myMimeType <-"audio/*"
-				} else if (tools::file_ext(mediaPath) %in% c("mp4", "mov", "mpg")) {
+				} else if (tolower(tools::file_ext(mediaPath)) %in% c("mp4", "mov", "mpg")) {
 					myMimeType <-"video/mp4"
 				}
-				myEAF <- append(myEAF, sprintf("         <MEDIA_DESCRIPTOR MEDIA_URL=\"file:///%s\" MIME_TYPE=\"%s\"/>", mediaPath, myMimeType))
+				#--- optional TIME_ORIGIN offset for clips
+				time_origin_attr <- ""
+				if (isTRUE(mediaWriteOffset) && is_clip) {
+					ss <- media_sel$startsec[i]
+					if (!is.na(ss) && ss > 0) {
+						time_origin_attr <- sprintf(" TIME_ORIGIN=\"%d\"", as.integer(round(-ss * 1000)))
+					}
+				}
+				myEAF <- append(myEAF, sprintf("         <MEDIA_DESCRIPTOR MEDIA_URL=\"file:///%s\" MIME_TYPE=\"%s\"%s/>", mediaPath, myMimeType, time_origin_attr))
 			}
 		}
 	}
@@ -183,10 +203,11 @@ export_eaf <- function(t,
 	if (is.null(pathOutput)) 	{
 		return(myEAF)
 	} else {
-		#---write to file
-		fileConn <- file(pathOutput, open="wb")
+		#---write to file as UTF-8 (matches encoding declared in XML header)
 		myEAF <- stringr::str_flatten(myEAF, collapse="\n")
+		myEAF <- enc2utf8(myEAF)
+		fileConn <- file(pathOutput, open="wb")
 		writeBin(charToRaw(myEAF), fileConn, endian="little")
-		close(fileConn)			
+		close(fileConn)
 	}
 }

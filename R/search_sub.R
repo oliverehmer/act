@@ -49,9 +49,11 @@ search_sub <- function(x,
 #	deleteEmptyLines <- FALSE
 #	excludeHitsInSameTier <- TRUE
 
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
-	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
-	
+	.assert_corpus(x, missing = missing(x))
+	.assert_search(s, missing = missing(s))
+
+	searchMode <- match.arg(searchMode)
+
 	if (destinationColumn=="") {
 		cli::cli_abort("Destination column name may not be empty.")
 	}
@@ -59,7 +61,7 @@ search_sub <- function(x,
 		#add column
 		newColumnName <- destinationColumn
 		for (i in 1:1000) {
-			newColumnName <- stringr::str_flatten(c(newColumnName, as.character(i)), collapse="")
+			newColumnName <- paste0(destinationColumn, i)
 			if (!newColumnName %in% colnames(s@results)) {
 				destinationColumn <- newColumnName
 				break
@@ -70,40 +72,84 @@ search_sub <- function(x,
 	s@results <- cbind(s@results, newCol=as.character(rep(times=nrow(s@results), "")), stringsAsFactors=FALSE)
 	colnames(s@results)[ncol(s@results)] <- destinationColumn
 	#View(s@results)
-	#i <- 1
-	for (i in 1:nrow(s@results)) {
-		#get all info
-		search.sub <- act::search_new(x=x, 
-									  pattern                     =pattern, 
-									  searchMode                  =searchMode,
+
+	if (nrow(s@results)==0) {
+		return(s)
+	}
+
+	if (searchMode=="content") {
+		search.all <- act::search_new(x=x,
+									  pattern                     =pattern,
+									  searchMode                  ="content",
 									  searchNormalized            =searchNormalized,
-									  filterTranscriptIncludeRegex=s@results$transcriptName[i], 
-									  filterTierIncludeRegex      =filterTierIncludeRegex, 
-									  filterTierExcludeRegex      =filterTierExcludeRegex, 
-									  filterSectionStartsec       =s@results$startsec[i], 
-									  filterSectionEndsec         =s@results$endsec[i], 
+									  filterTranscriptNames       =unique(s@results$transcriptName),
+									  filterTierIncludeRegex      =filterTierIncludeRegex,
+									  filterTierExcludeRegex      =filterTierExcludeRegex,
 									  concordanceMake             =FALSE)
-		searchResults.sub <- search.sub@results
-	#View(searchResults.sub)
-		
-		#add information to new column
-		if (length(searchResults.sub)==0) {
-			s@results[i, destinationColumn] <- NA
-		} else {
+		searchResults.all <- search.all@results
+		results           <- s@results
+		newValues         <- character(nrow(results))
+		rowsByTranscript  <- split(seq_len(nrow(searchResults.all)), searchResults.all$transcriptName)
+		for (i in 1:nrow(results)) {
+			rows <- rowsByTranscript[[results$transcriptName[i]]]
+			if (is.null(rows)) {
+				rows <- integer(0)
+			}
+			if (length(rows)>0 && !is.na(results$startsec[i])) {
+				rows <- rows[searchResults.all$endsec[rows] > results$startsec[i]]
+			}
+			if (length(rows)>0 && !is.na(results$endsec[i])) {
+				rows <- rows[searchResults.all$startsec[rows] < results$endsec[i]]
+			}
+
 			# if results from the same tier should be excluded
-			if (excludeHitsInSameTier) {
-				pos <- grep(pattern=s@results$tier[i], x=searchResults.sub$tierName)
+			if (excludeHitsInSameTier && length(rows)>0) {
+				pos <- grep(pattern=results$tierName[i], x=searchResults.all$tierName[rows])
 				if (length(pos)>0) {
-					searchResults.sub <- searchResults.sub[-pos, ]
+					rows <- rows[-pos]
 				}
 			}
-			
-			s@results[i, destinationColumn]
-			s@results[i, destinationColumn] <- stringr::str_flatten(searchResults.sub$content, collapse=collapseString)
-			
+
+			newValues[i] <- stringr::str_flatten(searchResults.all$content[rows], collapse=collapseString)
+		}
+		results[[destinationColumn]] <- newValues
+		s@results <- results
+
+	} else {
+		#i <- 1
+		for (i in 1:nrow(s@results)) {
+			#get all info
+			search.sub <- act::search_new(x=x,
+										  pattern                     =pattern,
+										  searchMode                  =searchMode,
+										  searchNormalized            =searchNormalized,
+										  filterTranscriptIncludeRegex=s@results$transcriptName[i],
+										  filterTierIncludeRegex      =filterTierIncludeRegex,
+										  filterTierExcludeRegex      =filterTierExcludeRegex,
+										  filterSectionStartsec       =s@results$startsec[i],
+										  filterSectionEndsec         =s@results$endsec[i],
+										  concordanceMake             =FALSE)
+			searchResults.sub <- search.sub@results
+		#View(searchResults.sub)
+
+			#add information to new column
+			if (length(searchResults.sub)==0) {
+				s@results[i, destinationColumn] <- NA
+			} else {
+				# if results from the same tier should be excluded
+				if (excludeHitsInSameTier) {
+					pos <- grep(pattern=s@results$tierName[i], x=searchResults.sub$tierName)
+					if (length(pos)>0) {
+						searchResults.sub <- searchResults.sub[-pos, ]
+					}
+				}
+
+				s@results[i, destinationColumn] <- stringr::str_flatten(searchResults.sub$content, collapse=collapseString)
+
+			}
 		}
 	}
-	
+
 	if (deleteEmptyLines==TRUE) {
 		s@results <- s@results[!is.na(s@results[, destinationColumn]), ]
 	}

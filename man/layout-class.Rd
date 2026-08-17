@@ -18,13 +18,27 @@ If you want to modify the layout of the print transcripts, create a new layout o
 
 \item{\code{filter.tier.excludeRegEx}}{Character string; as regular expression, tiers matching the expression will be excluded from the print transcript.}
 
-\item{\code{transcript.width}}{Integer; width of transcript, -1 for no line wrapping.}
+\item{\code{transcript.width}}{Integer; width of transcript. Use \code{-1} or \code{NA} to disable line wrapping.}
 
 \item{\code{speaker.regex}}{Character string; Regular expression to extract speaker abbreviation from tier name}
 
-\item{\code{speaker.width}}{Integer; maximum width of speaker abbreviation, -1 for full name without shortening.}
+\item{\code{speaker.width}}{Integer; maximum width of speaker abbreviation. Use \code{-1} or \code{NA} for full name without shortening.}
 
 \item{\code{speaker.ending}}{Character string; string that is added at the end of the speaker name.}
+
+\item{\code{speaker.repeat}}{Logical; if \code{TRUE} the speaker acronym is repeated in every line; if \code{FALSE} (default) the acronym is suppressed in consecutive lines of the same speaker.}
+
+\item{\code{line.nr.show}}{Logical; if \code{TRUE} (default) line numbers are shown in print transcripts (TXT and DOCX). In DOCX export, this is the global default; the per-tier setting \code{line.nr.show} in the styles matrix (slot \code{docx.styles.user}) overrides the layout default when not \code{NA}. Behaviour matrix:\cr
+\tabular{lll}{
+\strong{layout@line.nr.show} \tab \strong{tier line.nr.show (matrix)} \tab \strong{result} \cr
+TRUE  \tab NA    \tab TRUE  \cr
+TRUE  \tab FALSE \tab FALSE (tier wins) \cr
+TRUE  \tab TRUE  \tab TRUE  \cr
+FALSE \tab NA    \tab FALSE \cr
+FALSE \tab FALSE \tab FALSE \cr
+FALSE \tab TRUE  \tab TRUE  (tier wins) \cr
+}
+The TXT export has no per-tier styles, so the layout slot is the only control point.}
 
 \item{\code{spacesbefore}}{Integer; number of spaces inserted before line number.}
 
@@ -33,6 +47,10 @@ If you want to modify the layout of the print transcripts, create a new layout o
 \item{\code{header.insert}}{Logical; if \code{TRUE} a transcript header is inserted.}
 
 \item{\code{arrow.insert}}{Logical; is only used when transcripts are made based on a search results; if \code{TRUE} an arrow will be inserted, highlighting the transcript line containing the search hit.}
+
+\item{\code{layout.mode}}{Character string; rendering mode of the alignment engine: 'gat' (one line per annotation) or 'mondada' (score layout, rows of one tier joined).}
+
+\item{\code{symbol.merge}}{Logical; if \code{TRUE}, adjacent identical multimodal marks denoting the same moment are folded into one mark.}
 
 \item{\code{arrow.shape}}{Character string; shape of the arrow.}
 

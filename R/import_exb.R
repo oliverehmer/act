@@ -55,7 +55,6 @@ import_exb <- function(filePath=NULL,
 	t@import.result 		<- "ok"
 	t@load.message 	    	<- ""
 	t@file.encoding			<- "UTF8"
-	t@modification.systime	<- character()
 	
 	#=== take file content
 	if (!is.null(fileContent)) {
@@ -84,10 +83,17 @@ import_exb <- function(filePath=NULL,
 		myexb <- out
 	}
 	if(getOption("act.import.storefileContentInTranscript", default=TRUE)) {
-		myCon <- file(filePath, encoding = "UTF-8")
-		mytxt <- readLines(myCon, warn=FALSE)
-		close(myCon)
-		t@file.content <- mytxt
+		if (!is.null(filePath)) {
+			read_result <- helper_read_annotation_file(
+				filePath       = filePath,
+				expectedHeader = NULL,
+				fileType       = "exb",
+				verbose        = FALSE
+			)
+			if (!is.null(read_result$lines)) {
+				t@file.content <- read_result$lines
+			}
+		}
 	}
 	
 	#Check if it is an exb file
@@ -110,7 +116,7 @@ import_exb <- function(filePath=NULL,
 	transName <- xml2::xml_text(xml2::xml_find_all(meta, "transcription-name"))
 	mediafiles <- xml2::xml_find_all(meta, "referenced-file")
 	mediafiles <- xml2::xml_attr(mediafiles, "url")
-	t@media.path <- mediafiles
+	t@media <- media_build(mediafiles)
 	
 	#=== speakers metainfo
 	# ...
@@ -249,15 +255,13 @@ import_exb <- function(filePath=NULL,
 			t@annotations$startsec		<- as.double(t@annotations$startsec)
 			t@annotations$endsec  		<- as.double(t@annotations$endsec)
 			t@annotations$content  		<- as.character(t@annotations$content)
-			
-			
-			
+			t@annotations$content <- .replace_newlines(.strip_invalid_xml_chars(t@annotations$content))
+
 			#=== get rid of empty intervals
 			if (options()$act.import.readEmptyIntervals==FALSE) 		{
 				t@annotations <- t@annotations[t@annotations$content!="",]
 			}
 			t@annotations <- t@annotations[is.na(t@annotations["content"])==FALSE,]
-			t@annotations$content <- .strip_invalid_xml_chars(t@annotations$content)
 			
 			if (nrow(t@annotations)>0) 		{
 				#=== sort transcript by start times

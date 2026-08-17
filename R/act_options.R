@@ -33,63 +33,125 @@
 		description = "Path to ELAN executable",
 		type        = "path"
 	),
+	act.path.ffmpeg = list(
+		value       = "ffmpeg",
+		group       = "path",
+		description = "Path to the ffmpeg executable; default uses the binary on the system PATH",
+		type        = "path"
+	),
 
-	act.fileformats.video = list(
+	act.media.fileformats.video = list(
 		value       = c("mp4", "mov"),
-		group       = "fileformats",
+		group       = "media",
 		description = "Recognized video file suffixes"
 	),
-	act.fileformats.audio = list(
+	act.media.fileformats.audio = list(
 		value       = c("wav", "aif", "aiff", "mp3"),
-		group       = "fileformats",
+		group       = "media",
 		description = "Recognized audio file suffixes"
+	),
+	act.media.audio_as_fallback = list(
+		value       = FALSE,
+		group       = "media",
+		description = "If TRUE, audio files are only selected when no video file is present (used by media_select)"
+	),
+	act.media.video_max = list(
+		value       = NA_integer_,
+		group       = "media",
+		description = "Maximum number of video files selected per transcript (NA = all). Used by media_select."
+	),
+	act.media.audio_max = list(
+		value       = NA_integer_,
+		group       = "media",
+		description = "Maximum number of audio files selected per transcript (NA = all). Used by media_select."
+	),
+	act.media.video_priority = list(
+		value       = NULL,
+		group       = "media",
+		description = "Ordered regex patterns for video file priority; first matching pattern wins (used by media_select)"
+	),
+	act.media.audio_priority = list(
+		value       = NULL,
+		group       = "media",
+		description = "Ordered file extensions for audio priority; first matching extension wins (used by media_select)"
+	),
+
+	act.cutlist.os = list(
+		value       = c("mac", "win"),
+		group       = "export",
+		description = "Terminal script formats written by helper_cutlist_save(): 'mac' (POSIX sh, also runs on Linux) and/or 'win' (.cmd)."
 	),
 
 	act.ffmpeg.command.video = list(
-		value       = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
+		value       = 'ffmpeg INPUTARGS OPTIONS -y "OUTFILEPATH" -hide_banner',
 		group       = "ffmpeg",
-		description = "FFmpeg command for video cuts"
-	),
-	act.ffmpeg.command.video.fast = list(
-		value       = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
-		group       = "ffmpeg",
-		description = "FFmpeg command for video cuts with fast positioning"
+		description = "FFmpeg command for video cuts. INPUTARGS is filled by act based on videoFastPositioning."
 	),
 	act.ffmpeg.command.audio = list(
-		value       = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION -c copy -y "OUTFILEPATH" -hide_banner',
+		value       = 'ffmpeg INPUTARGS -c copy -y "OUTFILEPATH" -hide_banner',
 		group       = "ffmpeg",
-		description = "FFmpeg command for audio cuts"
+		description = "FFmpeg command for audio cuts (stream copy)."
 	),
 	act.ffmpeg.command.audio.mp3 = list(
-		value       = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -t TIMEDURATION OPTIONS -y "OUTFILEPATH" -hide_banner',
+		value       = 'ffmpeg INPUTARGS OPTIONS -y "OUTFILEPATH" -hide_banner',
 		group       = "ffmpeg",
-		description = "FFmpeg command for MP3 audio export"
+		description = "FFmpeg command for MP3 audio export."
 	),
 	act.ffmpeg.command.images = list(
-		value       = 'ffmpeg -i "INFILEPATH" -ss TIMESTART -frames:v 1 -q:v 2 -update 1 -y "OUTFILEPATH"',
+		value       = 'ffmpeg INPUTARGS -frames:v 1 -q:v 2 -update 1 -y "OUTFILEPATH"',
 		group       = "ffmpeg",
-		description = "FFmpeg command for still image extraction"
-	),
-	act.ffmpeg.command.images.fast = list(
-		value       = 'ffmpeg -ss TIMESTARTMINUS10SECONDS -i "INFILEPATH" -ss 10.000 -frames:v 1 -q:v 2 -update 1 -y "OUTFILEPATH"',
-		group       = "ffmpeg",
-		description = "FFmpeg command for fast still image extraction"
-	),
-	act.ffmpeg.use_fast_positioning = list(
-		value       = TRUE,
-		group       = "ffmpeg",
-		description = "Use fast video positioning for large files"
+		description = "FFmpeg command for still image extraction. INPUTARGS is filled by act based on videoFastPositioning."
 	),
 	act.ffmpeg.channels_from_column = list(
 		value       = "channels",
 		group       = "ffmpeg",
 		description = "Column name for audio channel export"
 	),
+	act.ffmpeg.write_metadata = list(
+		value       = TRUE,
+		group       = "ffmpeg",
+		description = "Write act.* metadata tags (and timecode track for MP4) into cut files. See helper_metadata_ffmpeg_args() and helper_metadata_exif_write()."
+	),
+	act.ffmpeg.audio.loudnorm = list(
+		value       = NULL,
+		group       = "ffmpeg",
+		description = "loudnorm filter string for audio normalization applied during cutting (NULL = disabled). Example: \"loudnorm=I=-16:LRA=7:TP=-2\""
+	),
+	act.ffmpeg.audio.anony_filter = list(
+		value       = NULL,
+		group       = "ffmpeg",
+		description = "Audio anonymization filter type: \"silence\", \"beep\", \"noise\", or NULL (disabled)"
+	),
+	act.ffmpeg.audio.anony_beep_freq = list(
+		value       = 1000L,
+		group       = "ffmpeg",
+		description = "Frequency in Hz for the beep audio anonymization filter"
+	),
 
 	act.import.readEmptyIntervals = list(
 		value       = FALSE,
 		group       = "import",
 		description = "Read empty intervals from annotation files"
+	),
+	act.layout.wrap.marker = list(
+		value       = "mondada",
+		group       = "layout",
+		description = "Continuation marker style of the alignment engine: 'mondada' (-> arrow) or 'arrow'"
+	),
+	act.layout.label.mode = list(
+		value       = "mondada",
+		group       = "layout",
+		description = "Tier label mode for multimodal layer lines: 'mondada' (label dropped when actor is the speaker) or 'always'"
+	),
+	act.layout.linebreak.char = list(
+		value       = "\u23ce",
+		group       = "layout",
+		description = "Character in annotation content that forces a manual line break in the alignment engine (corpus convention - do not change mid-project)"
+	),
+	act.import.replaceNewlinesWith = list(
+		value       = " ",
+		group       = "import",
+		description = "Replace line breaks in annotation content with this string on import (NA = keep line breaks)"
 	),
 	act.import.scanSubfolders = list(
 		value       = TRUE,
@@ -142,6 +204,11 @@
 		value       = '^\\s*(\\([\\d\\.-]*\\)\\s*)+$',
 		group       = "parsing",
 		description = "Regex for GAT pause identification, supports multiple consecutive pauses"
+	),
+	act.concordanceWidth = list(
+		value       = NULL,
+		group       = "parsing",
+		description = "Number of characters left/right of the search hit in the concordance (NULL = search class default of 120)"
 	)
 )
 
@@ -165,7 +232,8 @@ act.options.default <- lapply(.act_defaults, function(x) x$value)
 #'
 #' **Paths:** Paths to external programs (Praat, ELAN).
 #'
-#' **File formats:** Recognized audio and video file extensions.
+#' **Media:** Recognized audio and video file extensions and the media
+#' selection settings (priority, maximum number, audio fallback).
 #'
 #' **FFmpeg:** Commands and options for media cutting and still extraction.
 #'
@@ -174,6 +242,8 @@ act.options.default <- lapply(.act_defaults, function(x) x$value)
 #' **Export:** Settings for file naming and folder structure.
 #'
 #' **Parsing:** Separators, word counting, and pause identification patterns.
+#'
+#' @param group Character string; optional name of an option group to show. One of \code{"program"}, \code{"path"}, \code{"media"}, \code{"ffmpeg"}, \code{"import"}, \code{"export"}, \code{"parsing"}. If \code{NULL} (the default), all options are shown.
 #'
 #' @return Nothing.
 #' @export
@@ -188,7 +258,7 @@ options_show <- function (group = NULL) {
 	groups <- list(
 		program     = "program",
 		path        = "path",
-		fileformats = "fileformats",
+		media       = "media",
 		ffmpeg      = "ffmpeg",
 		import      = "import",
 		export      = "export",
@@ -252,7 +322,7 @@ options_show <- function (group = NULL) {
 #' act::options_delete()
 options_delete <- function() {
 	for (nm in names(.act_defaults)) {
-		do.call(options, setNames(list(NULL), nm))
+		do.call(options, stats::setNames(list(NULL), nm))
 	}
 }
 

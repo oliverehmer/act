@@ -25,7 +25,7 @@ export_textgrid <- function(t,
 							filterSectionStartsec = NULL, 
 							filterSectionEndsec = NULL) {
 	
-	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
+	.assert_transcript(t, missing = missing(t))
 	
 	#--- check if output folder exists
 	if (!is.null(pathOutput)) {
@@ -167,16 +167,8 @@ export_textgrid <- function(t,
 				if (pointNr>0) {
 					#add consecutive numbers
 					annotations.tier <- cbind(as.character(1:nrow(annotations.tier)),annotations.tier)
-					
-					#createPointBlock <- function(myPoint) {
-					#	myInter <- sprintf(                 "        points [%s]:" , myPoint[1])
-					#	myInter <- append(myInter, sprintf(	"            number = %s " , as.character(myPoint[3])))
-					#	myInter <- append(myInter, sprintf( "            mark = \"%s\" " , stringr::str_replace_all(  myPoint[5], "\"", "\"\"")))
-					#	return(myInter)
-					#}
-					#a <- unlist(apply(annotations.tier,  1, FUN=createPointBlock))
-					
-					myPoint <- paste(   '        points [%s]:', 
+
+					myPoint <- paste(   '        points [%s]:',
 										'            number = %s ',  
 										'            mark = \"%s\" ',
 										sep="\n", collapse="\n")
@@ -196,10 +188,11 @@ export_textgrid <- function(t,
 		if (is.null(pathOutput)) {
 			return(myTG)
 		} else {
-			#---write to file
-			fileConn <- file(pathOutput)
-			writeLines(myTG, fileConn)
-			close(fileConn)		
+			#---write to file as UTF-8
+			myTG <- enc2utf8(myTG)
+			fileConn <- file(pathOutput, open = "wb")
+			writeLines(myTG, fileConn, useBytes = TRUE)
+			close(fileConn)
 		}
 	}
 }

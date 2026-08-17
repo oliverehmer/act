@@ -37,7 +37,7 @@ info <- function(...) {
 	# INFO about CORPUS
 	if (!is.null(x)) {
 		#=== transcripts
-		transcripts <- 	data.frame( 
+		transcripts <- 	data.frame(
 			transcriptName      =character(),
 			length.sec           =double(),
 			length.formatted     =character(),
@@ -49,14 +49,17 @@ info <- function(...) {
 			file.encoding        =character(),
 			import.result        =character(),
 			load.message         =character(),
-			media.path.count     =integer(),
-			modification.systime =character(),
+			media.count          =integer(),
+			normalized           =character(),
+			fulltext             =character(),
 			stringsAsFactors     =FALSE
 		)
 		
 		if (length(x@transcripts)>0) {
+			helper_progress_set("Reading transcripts", length(x@transcripts))
 			#i<-1
 			for (i in 1:length(x@transcripts)) {
+				helper_progress_tick()
 				#--- words org
 				content.org     <- x@transcripts[[i]]@annotations$content
 				words.org.count <- lapply(content.org, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
@@ -73,14 +76,15 @@ info <- function(...) {
 					length.formatted     = helper_format_time(x@transcripts[[i]]@length.sec),
 					tier.count           = as.integer(nrow(x@transcripts[[i]]@tiers)),
 					annotations.count    = nrow(x@transcripts[[i]]@annotations),
-					words.org.count      = words.org.count, 
-					words.norm.count     = words.norm.count, 
+					words.org.count      = words.org.count,
+					words.norm.count     = words.norm.count,
 					filePath            = x@transcripts[[i]]@file.path,
 					file.encoding        = x@transcripts[[i]]@file.encoding,
 					import.result        = x@transcripts[[i]]@import.result,
 					load.message         = x@transcripts[[i]]@load.message,
-					media.path.count     = length(x@transcripts[[i]]@media.path),
-					modification.systime = as.character(x@transcripts[[i]]@modification.systime),
+					media.count          = nrow(x@transcripts[[i]]@media),
+					normalized           = if (length(x@transcripts[[i]]@normalization.signature) > 0) "yes" else "no",
+					fulltext             = if (length(x@transcripts[[i]]@fulltext.signature) > 0) "yes" else "no",
 					stringsAsFactors     = FALSE
 				)
 				transcripts[nrow(transcripts)+1,] <- myRow

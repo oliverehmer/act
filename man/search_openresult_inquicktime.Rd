@@ -11,7 +11,7 @@ search_openresult_inquicktime(
   play = TRUE,
   close = FALSE,
   bringToFront = TRUE,
-  filterFile = c(".*\\\\.(mp4|mov)", ".*\\\\.(aiff|aif|wav)", ".*\\\\.mp3")
+  filterFile = c("(?i).*\\\\.(mp4|mov)", "(?i).*\\\\.(aiff|aif|wav)", "(?i).*\\\\.mp3")
 )
 }
 \arguments{

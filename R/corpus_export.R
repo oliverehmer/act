@@ -45,7 +45,7 @@ corpus_export <-  function(x,
 	}
 	
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a corpus object.") } }
+	.assert_corpus(x, missing = missing(x))
 	
 	if (missing(folderOutput)) { cli::cli_abort("No output folder specified in parameter {.arg folderOutput}.") }
 	

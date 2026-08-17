@@ -116,9 +116,9 @@ methods::setClass("search",
 
 search_show <- function (object) {
 	w <- 25
-	cli::cli_rule("search object: {.val {object@name}}")
+	.show_title(paste0("search object: ", object@name))
 
-	cli::cli_text("{.strong Search}")
+	.show_head("Search")
 	.show_dl(c(
 		"pattern"           = object@pattern,
 		"search.mode"       = object@search.mode,
@@ -127,8 +127,8 @@ search_show <- function (object) {
 		"resultid.start"    = as.character(object@resultid.start)
 	), width = w)
 
-	cli::cli_text("")
-	cli::cli_text("{.strong Filters}")
+	.show_sep()
+	.show_head("Filters")
 	filter_startsec <- if (length(object@filter.section.startsec)==0 || is.na(object@filter.section.startsec)) "[not set]" else as.character(object@filter.section.startsec)
 	filter_endsec   <- if (length(object@filter.section.endsec)==0 || is.na(object@filter.section.endsec)) "[not set]" else as.character(object@filter.section.endsec)
 	.show_dl(c(
@@ -142,15 +142,15 @@ search_show <- function (object) {
 		"section.endsec"          = filter_endsec
 	), width = w)
 
-	cli::cli_text("")
-	cli::cli_text("{.strong Concordance}")
+	.show_sep()
+	.show_head("Concordance")
 	.show_dl(c(
 		"make"  = as.character(object@concordance.make),
 		"width" = as.character(object@concordance.width)
 	), width = w)
 
-	cli::cli_text("")
-	cli::cli_text("{.strong Cuts}")
+	.show_sep()
+	.show_head("Cuts")
 	.show_dl(c(
 		"span.beforesec"         = as.character(object@cuts.span.beforesec),
 		"span.aftersec"          = as.character(object@cuts.span.aftersec),
@@ -161,9 +161,9 @@ search_show <- function (object) {
 		"cutlist.win"            = if(length(object@cuts.cutlist.win)==0) "[not created yet]" else "[check directly]"
 	), width = w)
 
-	cli::cli_text("")
+	.show_sep()
 	search_run <- 'hit' %in% colnames(object@results)
-	cli::cli_text("{.strong Results}")
+	.show_head("Results")
 	.show_dl(c(
 		"results"              = if(!search_run) "[search not run yet]" else "[check directly]",
 		"results.nr"           = if(!search_run) "[search not run yet]" else as.character(nrow(object@results)),

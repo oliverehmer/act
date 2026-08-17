@@ -64,16 +64,16 @@ methods::setClass("corpus",
 
 corpus_show <- function (object) {
 	w <- 24
-	cli::cli_rule("corpus object: {.val {object@name}}")
+	.show_title(paste0("corpus object: ", object@name))
 
-	cli::cli_text("{.strong Paths}")
+	.show_head("Paths")
 	.show_dl(c(
 		"annotation.files" = as.character(length(object@paths.annotation.files)),
 		"media.files"      = as.character(length(object@paths.media.files))
 	), width = w)
 
-	cli::cli_text("")
-	cli::cli_text("{.strong Import}")
+	.show_sep()
+	.show_head("Import")
 	.show_dl(c(
 		"normalization.matrix"    = paste(nrow(object@normalization.matrix), "row(s)"),
 		"import.skip.double.files" = as.character(object@import.skip.double.files),
@@ -83,9 +83,9 @@ corpus_show <- function (object) {
 		"media.assign.results"    = paste(nrow(object@media.assign.results), "entry(s)")
 	), width = w)
 
-	cli::cli_text("")
+	.show_sep()
 	info <- act::info_summarized(object)
-	cli::cli_text("{.strong Summary}")
+	.show_head("Summary")
 	.show_dl(c(
 		"transcripts"  = as.character(info$transcript.count),
 		"tiers"        = as.character(info$tier.count),

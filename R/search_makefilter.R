@@ -1,11 +1,11 @@
-#' Makes a filter for transcript and tier names 
+#' Makes a filter for transcript and tier names
 #'
 #' Search a corpus object and return the names of all transcripts and tiers that match the given parameters.
 #' You can define parameters to include and/or exclude transcripts and tiers based on their names.
 #' All parameters passed to the function will be combined.
-#' 
+#'
 #' This functions is useful if you want to use functions of the package such as \code{transcripts_update_normalization}, \code{transcripts_update_fulltexts}, \code{corpus_export} and limit them to only some of the transcripts.
-#' 
+#'
 #' @param x Corpus object.
 #' @param filterTranscriptNames Vector of character strings; Names of the transcripts that you want to include; to include all transcripts in the corpus object leave parameter empty or set to  \code{character()} or \code{""}.
 #' @param filterTranscriptIncludeRegex Character string; as regular expression, include transcripts matching the expression.
@@ -15,53 +15,35 @@
 #' @param filterTierExcludeRegex Character string; as regular expression, exclude tiers matching the expression.
 #'
 #' @return List of character vectors. \code{$filterTranscriptNames} contains all transcript names in the corpus matching the expressions, \code{$filterTierNames} contains all tier names in the corpus matching the expressions.
-#' 
+#'
 #' @seealso \link{search_new}, \link{search_run}, \link{search_sub}
-#' 
+#'
 #' @export
 #'
 #' @example inst/examples/search_makefilter.R
-#' 
+#'
 search_makefilter <- function( x,
-						 filterTranscriptNames        =NULL,
-						 filterTranscriptIncludeRegex =NULL, 
-						 filterTranscriptExcludeRegex =NULL,
-						 filterTierNames              =NULL,
-						 filterTierIncludeRegex       =NULL,
-						 filterTierExcludeRegex       =NULL) {
-	
-	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
-	
-	# x<-corpus
-	# filterTranscriptNames<-NULL
-	# filterTranscriptIncludeRegex<-NULL
-	# filterTranscriptExcludeRegex<-NULL
-	# filterTierNames<-NULL
-	# filterTierIncludeRegex<-NULL
-	# filterTierExcludeRegex<-NULL
-	# 
-	# 
-	# filterTranscriptIncludeRegex <- "ARG"
-	# filterTierIncludeRegex       <- "A"
-	# 
-	# filterTranscriptIncludeRegex <- "(i)A"
-	
-	
+							 filterTranscriptNames        =NULL,
+							 filterTranscriptIncludeRegex =NULL,
+							 filterTranscriptExcludeRegex =NULL,
+							 filterTierNames              =NULL,
+							 filterTierIncludeRegex       =NULL,
+							 filterTierExcludeRegex       =NULL) {
+
+
+	.assert_corpus(x, missing = missing(x))
+
 	#=== TRANSCRIPT
-	#do some checks
-	if (!is.null(filterTranscriptNames)) {		
+	if (!is.null(filterTranscriptNames)) {
 		if (length(filterTranscriptNames)==0) {
 			filterTranscriptNames <- NULL
 		} else if (length(filterTranscriptNames)==1) {
 			if (filterTranscriptNames[1]=="") { filterTranscriptNames <- NULL }
 		}
 	}
-	
-	#if no filter is given, take all names
+
 	if (is.null(filterTranscriptNames)) {	filterTranscriptNames <- names(x@transcripts)	}
-	
-	#filter the names by regular expressions
+
 	if (!is.null(filterTranscriptIncludeRegex)) {
 		if (filterTranscriptIncludeRegex!="") {
 			filterTranscriptNames <- grep(pattern=filterTranscriptIncludeRegex, filterTranscriptNames, value=TRUE)
@@ -69,13 +51,15 @@ search_makefilter <- function( x,
 	}
 	if (!is.null(filterTranscriptExcludeRegex)) {
 		if (filterTranscriptExcludeRegex!="") {
-			filterTranscriptNames <- filterTranscriptNames[-grep(pattern=filterTranscriptExcludeRegex, filterTranscriptNames)]
+			pos <- grep(pattern=filterTranscriptExcludeRegex, filterTranscriptNames)
+			if (length(pos)>0) {
+				filterTranscriptNames <- filterTranscriptNames[-pos]
+			}
 		}
 	}
-	
+
 	#=== TIER
-	#do some checks
-	if (!is.null(filterTierNames)) {		
+	if (!is.null(filterTierNames)) {
 		if (length(filterTierNames)==0) {
 			filterTierNames <- NULL
 		} else if (length(filterTierNames)==1) {
@@ -84,24 +68,20 @@ search_makefilter <- function( x,
 			}
 		}
 	}
-	
-	#get all tier names from selected transcripts
+
 	tiers.all        <- lapply(x@transcripts[filterTranscriptNames], "slot", name = "tiers")
 	tiers.all        <- do.call("rbind", tiers.all)
 	tierNames.all    <- unique(tiers.all$name)
 	if (is.null(tierNames.all)) {
 		tierNames.all <- as.character()
 	}
-	
+
 	if (is.null(filterTierNames)) {
 		filterTierNames <- tierNames.all
 	} else {
-		# if tierNames have been passed to the function
-		# intersect the names : only names that are in both vectors
 		filterTierNames <- intersect(tierNames.all, filterTierNames)
 	}
 
-	#filter the filterTierNames by regular expressions
 	if (!is.null(filterTierIncludeRegex)) {
 		if (filterTierIncludeRegex!="") {
 			filterTierNames <- grep(pattern=filterTierIncludeRegex, filterTierNames, value=TRUE)
@@ -109,28 +89,24 @@ search_makefilter <- function( x,
 	}
 	if (!is.null(filterTierExcludeRegex)) {
 		if (filterTierExcludeRegex!="") {
-			filterTierNames <- filterTierNames[-grep(pattern=filterTierExcludeRegex, filterTierNames)]
+			pos <- grep(pattern=filterTierExcludeRegex, filterTierNames)
+			if (length(pos)>0) {
+				filterTierNames <- filterTierNames[-pos]
+			}
 		}
 	}
-	
-	#=== TRANSCRIPT
-	#now filter the transcripts again 
-	#check for each transcript if it contains one of the included tiers
-	filterTranscriptNames.new <- as.character()
-	for (transcriptName in filterTranscriptNames) {
-		myTrans <- x@transcripts[[transcriptName]]
-		if (!is.null(myTrans)) {
-			intersectingTiers <- intersect(x@transcripts[[transcriptName]]@tiers$name, filterTierNames)
-			#if current transcript contains tiers in the included filterTierNames
-			if (length(intersectingTiers)>0) {
-				filterTranscriptNames.new <- c(filterTranscriptNames.new, transcriptName)
-			}		
-		}
-	}	
-	filterTranscriptNames <- filterTranscriptNames.new
-	
-	#store names in a named list
+
+	#=== TRANSCRIPT: keep only transcripts that contain at least one of the kept tiers
+	# Vectorized via vapply (single S4 slot access per transcript, no growing c() vector).
+	if (length(filterTranscriptNames) > 0) {
+		has_tier <- vapply(filterTranscriptNames, function(tn) {
+			tr <- x@transcripts[[tn]]
+			if (is.null(tr)) return(FALSE)
+			any(tr@tiers$name %in% filterTierNames)
+		}, logical(1))
+		filterTranscriptNames <- filterTranscriptNames[has_tier]
+	}
+
 	meta <- list(transcriptNames=filterTranscriptNames, tierNames=filterTierNames)
-	#return this
 	return(meta)
 }

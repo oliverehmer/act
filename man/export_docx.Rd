@@ -11,12 +11,23 @@ export_docx(
   filterTierNames = NULL,
   filterSectionStartsec = NULL,
   filterSectionEndsec = NULL,
-  insertArrowAnnotationID = "",
+  insertArrowStartsec = NA_real_,
+  insertArrowEndsec = NA_real_,
+  insertArrowTierName = NA_character_,
   headerPreface = NULL,
   headerTitle = NULL,
   headerSubtitle = NULL,
   headerDescription = NULL,
-  headerInsertSource = TRUE
+  headerInsertSource = TRUE,
+  timeTolerancePoint = 0.2,
+  timeToleranceGesture = 0.5,
+  layerOrder = NULL,
+  minDescription = 10L,
+  maxSpanBlocks = 3L,
+  figReplace = TRUE,
+  figTierRegex = "^stills(#|$)",
+  report = FALSE,
+  pathReport = NULL
 )
 }
 \arguments{
@@ -32,7 +43,11 @@ export_docx(
 
 \item{filterSectionEndsec}{Double; end of selection in seconds.}
 
-\item{insertArrowAnnotationID}{Integer; ID of the annotation in front of which the arrow will be placed.}
+\item{insertArrowStartsec}{Numeric; start time (seconds) of the hit annotation for arrow placement. Currently without effect: the alignment engine does not support hit arrows yet. Used with \code{insertArrowEndsec} and \code{insertArrowTierName} to locate the annotation by time and tier. If \code{NA}, no arrow is placed.}
+
+\item{insertArrowEndsec}{Numeric; end time (seconds) of the hit annotation for arrow placement.}
+
+\item{insertArrowTierName}{Character string; tier name of the hit annotation for arrow placement.}
 
 \item{headerPreface}{Character string; text used as preface before title.}
 
@@ -43,6 +58,24 @@ export_docx(
 \item{headerDescription}{Character string; text used as description after sub title.}
 
 \item{headerInsertSource}{Logical; if \code{TRUE} standard information about the source and location of the sequence will be inserted after the heading.}
+
+\item{timeTolerancePoint}{Numeric; up to this distance in seconds two point marks (stills) count as the same moment.}
+
+\item{timeToleranceGesture}{Numeric; up to this distance in seconds two span marks (gestures) count as the same moment.}
+
+\item{layerOrder}{Vector of character strings; order of the multimodal layers within a block. \code{NULL} keeps the tier order of the annotation file.}
+
+\item{minDescription}{Integer; minimum room in characters a description needs before the verbal line breaks early.}
+
+\item{maxSpanBlocks}{Integer; maximum number of blocks a description may span before it is cut with a resume arrow.}
+
+\item{figReplace}{Logical; if \code{TRUE} the content of picture tiers is replaced by a number mark.}
+
+\item{figTierRegex}{Character string; regular expression identifying picture tiers.}
+
+\item{report}{Logical; if \code{TRUE} and \code{pathOutput} is set, an alignment report is written next to the output file.}
+
+\item{pathReport}{Character string; explicit path for the alignment report.}
 }
 \value{
 Officer doc; transcript as object from library officer.

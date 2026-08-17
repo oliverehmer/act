@@ -11,7 +11,7 @@
 #' @param s Search object.
 #' @param cutSpanBeforesec Double; Start the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param cutSpanAftersec Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
-#' @param folderOutput Character string; if parameter is not set, the srt subtitles will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.srt' format.
+#' @param folderOutput Character string; path to an existing folder for file export. If \code{NULL} (default), no files will be written to disk; the srt subtitles are inserted only into \code{s@results}. If set, .srt files will be written to disk in addition.
 #' @param speakerShow Logical; if \code{TRUE} name of speaker will be shown before the content of the annotation.
 #' @param speakerWidth Integer; width of speaker abbreviation, -1 for full name without shortening.
 #' @param speakerEnding Character string; string that is added at the end of the speaker name.
@@ -32,14 +32,10 @@ search_cuts_srt <- function(x,
 							speakerWidth=3, 
 							speakerEnding=":" ) {
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
-	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
+	.assert_corpus(x, missing = missing(x))
+	.assert_search(s, missing = missing(s))
 	if (is.null(s@results$transcriptName)) 		{ cli::cli_abort("Data frame s@results does not contain column {.arg transcriptName}") 	}
-	
-	if (!options()$act.export.filename.fromColumnName %in% colnames(s@results)) {
-		cli::cli_abort("The column defined in the option 'options()$act.export.filename.fromColumnName' does not exist in the data.frame with the search results.")
-	}
-	
+
 	if (!is.null(cutSpanBeforesec)) 	{
 		if (length(cutSpanBeforesec)!=1) {
 			cli::cli_abort("Parameter {.arg cutSpanBeforesec} needs to contain only one element as a numeric value.")
@@ -61,6 +57,9 @@ search_cuts_srt <- function(x,
 	#--- check if output folder is given
 	destination_folder <- NULL
 	if (!is.null(folderOutput)) {
+		if (!options()$act.export.filename.fromColumnName %in% colnames(s@results)) {
+			cli::cli_abort("The column defined in the option 'options()$act.export.filename.fromColumnName' does not exist in the data.frame with the search results.")
+		}
 		destination_folder <- normalizePath(folderOutput, winslash = "/", mustWork = FALSE)
 		if (destination_folder!="") {
 			if (dir.exists(destination_folder)==FALSE) 	{
@@ -113,7 +112,12 @@ search_cuts_srt <- function(x,
 			
 			if (!is.null(t)) {
 				#=== assemble_file NAME
-				filename <- as.character(s@results[i, options()$act.export.filename.fromColumnName])
+				filename.col <- options()$act.export.filename.fromColumnName
+				if (filename.col %in% colnames(s@results)) {
+					filename <- as.character(s@results[i, filename.col])
+				} else {
+					filename <- as.character(i)
+				}
 				if (!exists("filename")) {
 					filename <- as.character(i)
 				} else if (is.na(filename)) {
@@ -126,7 +130,7 @@ search_cuts_srt <- function(x,
 				
 				#=== get start & end
 				startsec 	<- max(0, s@results$startsec[i] - s@cuts.span.beforesec)
-				endsec 		<- min(s@results$endsec[i] + s@cuts.span.beforesec, t@length.sec)
+				endsec 		<- min(s@results$endsec[i] + s@cuts.span.aftersec, t@length.sec)
 				
 				#assemble file PATH
 				myfilePath <- NULL
@@ -139,9 +143,9 @@ search_cuts_srt <- function(x,
 										  filterTierNames       = s@filter.tier.names,
 										  filterSectionStartsec = startsec,
 										  filterSectionEndsec   = endsec,
-										  speakerShow          = TRUE, 
-										  speakerWidth         = 3, 
-										  speakerEnding        = ":"
+										  speakerShow          = speakerShow,
+										  speakerWidth         = speakerWidth,
+										  speakerEnding        = speakerEnding
 				)   
 				
 				

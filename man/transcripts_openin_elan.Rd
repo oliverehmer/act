@@ -10,7 +10,9 @@ transcripts_openin_elan(
   filePathOut = NULL,
   startSec = NULL,
   endSec = NULL,
-  tierName = NULL
+  tierName = NULL,
+  overwrite = TRUE,
+  mediaWriteOffset = FALSE
 )
 }
 \arguments{
@@ -25,6 +27,10 @@ transcripts_openin_elan(
 \item{endSec}{Double, Optional, end of selection en ELAN}
 
 \item{tierName}{Character string, Optional, Name of tier to select in ELAN grid view.}
+
+\item{overwrite}{Logical; if \code{TRUE} (default) an existing .pfsx file will be overwritten. If \code{FALSE} an existing .pfsx file is kept.}
+
+\item{mediaWriteOffset}{Logical; passed to \link{export_eaf} when a temporary .eaf is created. If \code{TRUE}, clip media get a \code{TIME_ORIGIN} offset. Default \code{FALSE}.}
 }
 \description{
 The function opens a transcript in ELAN-

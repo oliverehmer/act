@@ -9,12 +9,12 @@
 #' @param x Corpus object.
 #' @param s Search object.
 #' @param l Layout object.
-#' @param exportTxt Logical; If \code{TRUE} .docx transcript will be exported.
-#' @param exportDocx Logical; If \code{TRUE} .txt transcript will be exported.
+#' @param exportTxt Logical; If \code{TRUE} and \code{folderOutput} is set, .txt transcripts will be written to disk. The print transcripts are always inserted into the column \code{s@cuts.column.printtranscript} of \code{s@results}, independent of this parameter.
+#' @param exportDocx Logical; If \code{TRUE} and \code{folderOutput} is set, .docx transcripts will be written to disk.
 #' @param headerInsertSource Logical; if \code{TRUE} standard information about the source and location of the sequence will be inserted after the heading.
 #' @param cutSpanBeforesec Double; Start the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param cutSpanAftersec Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
-#' @param folderOutput Character string; if parameter is not set, the print transcripts will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.txt' format.
+#' @param folderOutput Character string; path to an existing folder for file export. If \code{NULL} (default), no files will be written to disk; the print transcripts are inserted only into \code{s@results}. If set, .txt and/or .docx files will be written depending on \code{exportTxt} and \code{exportDocx}.
 #'
 #' @return Search object; 
 #' 
@@ -42,8 +42,8 @@ search_cuts_printtranscript <- function(x,
 		folderOutput<-'/Users/oliverehmer/Downloads'
 	}
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
-	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
+	.assert_corpus(x, missing = missing(x))
+	.assert_search(s, missing = missing(s))
 	if (is.null(s@results$transcriptName)) 		{ cli::cli_abort("Data frame s@results does not contain column {.arg transcriptName}") 	}
 	
 	if (is.null(l)) 	{
@@ -74,13 +74,15 @@ search_cuts_printtranscript <- function(x,
 		s@cuts.span.aftersec       <- cutSpanAftersec
 	}
 	
-	if (!options()$act.export.filename.fromColumnName %in% colnames(s@results)) {
-		cli::cli_abort("The column defined in the option 'options()$act.export.filename.fromColumnName' does not exist in the data.frame with the search results.")
-	}
-	
 	#--- check if output folder is given
 	folder.destination <- NULL
 	if (!is.null(folderOutput)) {
+		if (!exportTxt && !exportDocx) {
+			cli::cli_warn("Parameter {.arg folderOutput} is set but both {.arg exportTxt} and {.arg exportDocx} are {.val FALSE} - no files will be written.")
+		}
+		if (!options()$act.export.filename.fromColumnName %in% colnames(s@results)) {
+			cli::cli_abort("The column defined in the option 'options()$act.export.filename.fromColumnName' does not exist in the data.frame with the search results.")
+		}
 		folder.destination <- normalizePath(folderOutput, winslash = "/", mustWork = FALSE)
 		if (dir.exists(folder.destination)==FALSE) 	{
 			cli::cli_abort("Output folder does not exist.")
@@ -95,7 +97,7 @@ search_cuts_printtranscript <- function(x,
 			}
 		}
 	}	
-	myWarnings <- ""
+	myWarnings <- character(0)
 	
 	#create sub folders for text
 	if(!is.null(folder.destination)) {
@@ -113,21 +115,26 @@ search_cuts_printtranscript <- function(x,
 			t <- NULL
 			if (is.null(s@results$transcriptName[i])) {
 				#transcript not found
-				myWarnings <- paste(myWarnings, sprintf("- result %s '%s': transcript '%s' not found in corpus. ", i, as.character(s@results[i, options()$act.export.filename.fromColumnName]),  as.character(s@results$transcriptName[i]) ), collapse="\n", sep="\n")
-				
+				myWarnings <- c(myWarnings, sprintf("result %s '%s': transcript '%s' not found in corpus", i, as.character(s@results[i, options()$act.export.filename.fromColumnName]), as.character(s@results$transcriptName[i])))
+
 			} else {
 				t <- x@transcripts[[ s@results$transcriptName[i] ]]
 				if (is.null(t)) {
 					#transcript not found
-					myWarnings <- paste(myWarnings, sprintf("- result %s '%s': transcript '%s' not found in corpus. ", i, as.character(s@results[i, options()$act.export.filename.fromColumnName]),  as.character(s@results$transcriptName[i]) ), collapse="\n", sep="\n")
+					myWarnings <- c(myWarnings, sprintf("result %s '%s': transcript '%s' not found in corpus", i, as.character(s@results[i, options()$act.export.filename.fromColumnName]), as.character(s@results$transcriptName[i])))
 				}
 			}
 			#next t is null
 			if (is.null(t)) { next}
 			
 			#==== FILE NAME ====
-			filename <- as.character(s@results[i, options()$act.export.filename.fromColumnName])
-			
+			filename.col <- options()$act.export.filename.fromColumnName
+			if (filename.col %in% colnames(s@results)) {
+				filename <- as.character(s@results[i, filename.col])
+			} else {
+				filename <- as.character(i)
+			}
+
 			if (!exists("filename")) {
 				filename <- as.character(i)
 			} else if (is.na(filename)) {
@@ -139,14 +146,18 @@ search_cuts_printtranscript <- function(x,
 			}
 			
 			#==== TIME ====
-			startSec 	<- max(0, s@results$startSec[i] - s@cuts.span.beforesec)
-			endSec 		<- min(s@results$endSec[i] + s@cuts.span.beforesec, t@length.sec)
+			startSec 	<- max(0, s@results$startsec[i] - s@cuts.span.beforesec)
+			endSec 		<- min(s@results$endsec[i] + s@cuts.span.aftersec, t@length.sec)
 			
 			#==== ARROW ====
 			if (!l@arrow.insert) {
-				arrowID <- -1
+				arrowStartsec  <- NA_real_
+				arrowEndsec    <- NA_real_
+				arrowTierName  <- NA_character_
 			} else {
-				arrowID <- s@results$annotationID[i]
+				arrowStartsec  <- s@results$startsec[i]
+				arrowEndsec    <- s@results$endsec[i]
+				arrowTierName  <- s@results$tierName[i]
 			}
 			#View(s@results)
 			#==== HEADER ====
@@ -156,7 +167,7 @@ search_cuts_printtranscript <- function(x,
 			headerDescription 	<- NULL
 			if (l@header.insert==TRUE) {
 				if ("header.preface" %in% colnames(s@results)) {
-					headerPreface <- as.character(s@resultsheader.preface[i])
+					headerPreface <- as.character(s@results$header.preface[i])
 				}
 				if ("header.title" %in% colnames(s@results)) {
 					headerTitle <- as.character(s@results$header.title[i])
@@ -176,37 +187,37 @@ search_cuts_printtranscript <- function(x,
 			
 			#==== CREATE TRANS =====
 			#---- .txt ----
+			path.file <- NULL
+			if (exportTxt && !is.null(folder.destination)) {
+				path.file <- file.path(folder.destination, "transcripts", paste(filename, ".txt", sep=""))
+			}
+
+			trans.txt <- act::export_txt(   t = x@transcripts[[ s@results$transcriptName[i] ]],
+											l = l,
+											pathOutput				  = path.file,
+											filterSectionStartsec     = startSec,
+											filterSectionEndsec       = endSec,
+											headerPreface 	 	      = headerPreface,
+											headerTitle 	 	      = headerTitle,
+											headerSubtitle 	          = headerSubtitle,
+											headerDescription 	      = headerDescription,
+											headerInsertSource        = headerInsertSource,
+											insertArrowStartsec       = arrowStartsec,
+											insertArrowEndsec         = arrowEndsec,
+											insertArrowTierName       = arrowTierName
+			)
+
+			#---- . store values to columns ----
+			#add  column if missing
+			if (!s@cuts.column.printtranscript %in% colnames(s@results)) {
+				s@results <- cbind(s@results, newcolumn=as.character(""), stringsAsFactors=FALSE)
+				colnames(s@results)[ncol(s@results)] <- s@cuts.column.printtranscript
+			}
+			#insert transcript into search results
+			output <- stringr::str_flatten(trans.txt, collapse="\n")
+			s@results[i, s@cuts.column.printtranscript] <- output
+
 			if (exportTxt) {
-				#path
-				path.file <- NULL
-				if (!is.null(folder.destination)) {
-					path.file <- file.path(folder.destination, "transcripts", paste(filename, ".txt", sep=""))
-				} 
-				
-				#export
-				trans.txt <- act::export_txt(   t = x@transcripts[[ s@results$transcriptName[i] ]],
-												l = l,
-												pathOutput				  = path.file,
-												filterSectionStartsec     = startSec,
-												filterSectionEndsec       = endSec,
-												headerPreface 	 	      = headerPreface,  	
-												headerTitle 	 	      = headerTitle,  						   
-												headerSubtitle 	          = headerSubtitle,  			
-												headerDescription 	      = headerDescription,  
-												headerInsertSource        = headerInsertSource,
-												insertArrowAnnotationID   = arrowID								
-				)    						
-				
-				#---- . store values to columns ----
-				#add  column if missing
-				if (!s@cuts.column.printtranscript %in% colnames(s@results)) {
-					s@results <- cbind(s@results, newcolumn=as.character(""), stringsAsFactors=FALSE)
-					colnames(s@results)[ncol(s@results)] <- s@cuts.column.printtranscript
-				}
-				#insert transcript into search results
-				output <- stringr::str_flatten(trans.txt, collapse="\n")
-				s@results[i, s@cuts.column.printtranscript] <- output
-				
 				#accumulate transcripts
 				trans.txt.all <- c(trans.txt.all, trans.txt, "","")
 			}
@@ -224,13 +235,15 @@ search_cuts_printtranscript <- function(x,
 												pathOutput				  = path.file,
 												filterSectionStartsec     = startSec,
 												filterSectionEndsec       = endSec,
-												insertArrowAnnotationID   = arrowID,			
-												headerPreface 	 	      = headerPreface,  	
-												headerTitle 	 	      = headerTitle,  						   
-												headerSubtitle 	          = headerSubtitle,  			
+												insertArrowStartsec       = arrowStartsec,
+												insertArrowEndsec         = arrowEndsec,
+												insertArrowTierName       = arrowTierName,
+												headerPreface 	 	      = headerPreface,
+												headerTitle 	 	      = headerTitle,
+												headerSubtitle 	          = headerSubtitle,
 												headerDescription 	      = headerDescription,
 												headerInsertSource        = headerInsertSource
-				) 
+				)
 			}
 		} #next i
 	}
@@ -244,27 +257,44 @@ search_cuts_printtranscript <- function(x,
 			#---- . txt ----
 			if(exportTxt) {
 				path.file 	<- file.path(folder.destination, paste("searchResults_",  s@name, ".txt", sep=""))
-				fileConn 	<- file(path.file)
-				writeLines(trans.txt.all, fileConn)
+				fileConn 	<- file(path.file, open="wb")
+				writeLines(enc2utf8(as.character(trans.txt.all)), fileConn, sep="\n", useBytes=TRUE)
 				close(fileConn)
 			}
 			
 			#---- . docx ----
 			if(exportDocx) {
-				path.file 	<- file.path(folder.destination, paste("searchResults_",  s@name, ".docx", sep=""))
-				
-				#if template path is not set, use the standard template
-				path.template <- l@docx.template.path
-				if (path.template==""){
-					path.template <- system.file("extdata", "docx", "template_transcript.docx", package="act")	
+				# Resolve all templates the layout carries (1..N).
+				# Per-result files were written by export_docx with the same suffix scheme,
+				# so each template merges only its own per-result files.
+				templates <- .resolve_docx_templates(l)
+				template_suffixes <- if (length(templates) <= 1) {
+					""
+				} else {
+					paste0("__", names(templates))
 				}
-				
-				#merge
+
 				folder.input <- folder.destination
-				result <- merge_docx (folderInput        = folder.input,
-									  pathTemplateInput  = path.template,  
-									  pathOutput         = file.path(folder.destination, "merged_transcripts.docx"),
-									  recursive          = TRUE)
+
+				for (ti in seq_along(templates)) {
+					suffix <- template_suffixes[ti]
+
+					# Filter per-result files by suffix. Empty suffix -> match any .docx.
+					filterRegex <- if (nzchar(suffix)) {
+						paste0(stringr::str_replace_all(suffix, "([\\.\\+\\*\\?\\^\\$\\(\\)\\[\\]\\{\\}\\|])", "\\\\\\1"), "\\.docx$")
+					} else {
+						NULL
+					}
+
+					out.path <- file.path(folder.destination,
+										  paste0("searchResults_", s@name, suffix, ".docx"))
+
+					result <- merge_docx(folderInput        = folder.input,
+										 pathTemplateInput  = templates[ti],
+										 pathOutput         = out.path,
+										 recursive          = TRUE,
+										 filterRegex        = filterRegex)
+				}
 			}
 			
 			#---- . R ----
@@ -282,8 +312,9 @@ search_cuts_printtranscript <- function(x,
 		
 	}
 	#=== print warnings
-	if (!myWarnings=="") {
-		cli::cli_warn(unique(myWarnings))	
+	if (length(myWarnings) > 0) {
+		w <- unique(myWarnings)
+		cli::cli_warn(c("{length(w)} transcript(s) not found in corpus:", stats::setNames(w, rep("-", length(w)))))
 	}
 	
 	#=== give modified results back

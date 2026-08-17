@@ -76,6 +76,3 @@ path <- file.path("PATH_TO_AN_EXISTING_FOLDER_ON_YOUR_COMPUTER",
 act::export_textgrid( t=test, pathOutput=path)
 
 }
-\seealso{
-\link{transcript_update}
-}

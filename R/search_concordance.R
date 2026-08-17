@@ -8,170 +8,325 @@
 #' @export
 #'
 #' @example inst/examples/search_concordance.R
-#' 
-search_concordance <- function(x, 
-							   s, 
+#'
+search_concordance <- function(x,
+							   s,
 							   searchNormalized=TRUE) {
-	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
-	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
-	
-	search_concordance_single <- function(mySR, x, showProgress)	{
-		if(is.na(mySR["annotationID"])) { return(rep("",5)) }
-		
-		#nrow(searchResults)
-		hit.pos.fulltext    <- 	strtoi(mySR["hit.pos.fulltext"])
-		hit.pos.content    	<- 	strtoi(mySR["hit.pos.content"])
-		hit.length	    	<-	strtoi(mySR["hit.length"])
-		myTName	<-	as.character(mySR["transcriptName"])
-		
-		#update progress bar
-		helper_progress_tick()
-		
-		# get text for concordance
-		if (s@search.mode=="fulltext") 		{
-			#get hit pos
-			hit.pos 				<- hit.pos.fulltext
-			
-			#get the full text
-			if (as.character(mySR["searchMode"]) =="byTier") {
-				if (s@search.normalized==TRUE) {
-					myFulltext     <- x@transcripts[[myTName]]@fulltext.bytier.norm
-				} else  {
-					myFulltext     <- x@transcripts[[myTName]]@fulltext.bytier.orig
+
+	.assert_corpus(x, missing = missing(x))
+	.assert_search(s, missing = missing(s))
+
+	conccolnames <- c("concLeft2", "concLeft1", "concHit",
+					  "concRight1", "concRight2",
+					  "nrWordsLeft", "nrWordsHitPosition", "nrWordsHit",
+					  "nrWordsRight", "nrWordsTotal")
+
+	# Strip any existing concordance columns from results.
+	keep_cols <- setdiff(colnames(s@results), conccolnames)
+	temp      <- s@results[, keep_cols, drop = FALSE]
+	n         <- nrow(temp)
+
+	# Empty result: keep same schema as the previous implementation.
+	if (n == 0) {
+		concs <- data.frame(
+			concLeft2          = character(0),
+			concLeft1          = character(0),
+			concHit            = character(0),
+			concRight1         = character(0),
+			concRight2         = character(0),
+			nrWordsLeft        = integer(0),
+			nrWordsHitPosition = integer(0),
+			nrWordsHit         = integer(0),
+			nrWordsRight       = integer(0),
+			nrWordsTotal       = integer(0),
+			stringsAsFactors   = FALSE
+		)
+		s@results <- cbind(temp, concs)
+		return(s)
+	}
+
+	#=== cache options and build regex ONCE
+	sep_words     <- getOption("act.separator_between_words")
+	sep_intervals <- getOption("act.separator_between_intervals")
+	sep_tiers     <- getOption("act.separator_between_tiers")
+
+	regex_last  <- paste0("(?<concLeft1>[",  sep_words, sep_intervals,
+						  sep_tiers, "]*[\\W]*$)")
+	regex_first <- paste0("(?<concRight1>^[\\W]*[", sep_words,
+						  sep_intervals, sep_tiers, "]*)")
+
+	#=== pre-allocate result vectors
+	concLeft2          <- character(n)
+	concLeft1          <- character(n)
+	concHit            <- as.character(temp$hit)
+	concRight1         <- character(n)
+	concRight2         <- character(n)
+
+	# Character NA for word-count columns to match the old output (the old
+	# implementation went through t(apply(..., MARGIN = 1)) which collapses
+	# all columns to character).
+	nrWordsLeft        <- rep(NA_character_, n)
+	nrWordsHitPosition <- rep(NA_character_, n)
+	nrWordsHit         <- rep(NA_character_, n)
+	nrWordsRight       <- rep(NA_character_, n)
+	nrWordsTotal       <- rep(NA_character_, n)
+
+	if (s@search.mode == "fulltext") {
+		#=== fulltext mode: group by (transcriptName, searchMode)
+		# fetch the fulltext slot ONCE per group instead of once per hit.
+		hit_pos    <- as.integer(temp$hit.pos.fulltext)
+		hit_length <- as.integer(temp$hit.length)
+
+		valid <- !is.na(temp$annotationID) &
+				 !is.na(hit_pos) &
+				 !is.na(hit_length)
+
+		group_key  <- paste(as.character(temp$transcriptName),
+							as.character(temp$searchMode), sep = "|")
+		unique_grp <- unique(group_key[valid])
+
+		for (g in unique_grp) {
+			idx <- which(group_key == g & valid)
+			if (length(idx) == 0) next
+
+			tname <- as.character(temp$transcriptName[idx[1]])
+			smode <- as.character(temp$searchMode[idx[1]])
+
+			if (smode == "byTier") {
+				if (isTRUE(s@search.normalized)) {
+					fulltext <- x@transcripts[[tname]]@fulltext.bytier.norm
+				} else {
+					fulltext <- x@transcripts[[tname]]@fulltext.bytier.orig
 				}
 			} else {
-				if (s@search.normalized==TRUE) {
-					myFulltext     <- x@transcripts[[myTName]]@fulltext.bytime.norm
-				} else  {
-					myFulltext     <- x@transcripts[[myTName]]@fulltext.bytime.orig
+				if (isTRUE(s@search.normalized)) {
+					fulltext <- x@transcripts[[tname]]@fulltext.bytime.norm
+				} else {
+					fulltext <- x@transcripts[[tname]]@fulltext.bytime.orig
 				}
 			}
-			
-			if (is.na(myFulltext) == TRUE) {
+
+			if (is.na(fulltext) || length(fulltext) == 0) {
 				cli::cli_abort("Please recreate full text.")
 			}
-		} else {
-			#get hit pos
-			hit.pos 				<- hit.pos.content
-			
-			#get content
-			if (s@search.normalized==TRUE) {
-				myFulltext     <- mySR["content.norm"]
-			} else  {
-				myFulltext     <- mySR["content"]
-			}
-		}
-		
-		#===left part
-		leftPart 	<- 	""
-		concLeft1	<- ""
-		concLeft2	<- ""
-		
-		if (hit.pos>1)		{
-			#get everything left of the hit
-			leftMargin 	<-	max(0, hit.pos-s@concordance.width-1)
-			leftPart  	<- 	substr(myFulltext, leftMargin, hit.pos-1)
-			
-			#regex
-			#regex_last_word <- paste("(?<concLeft1>[^\\s|\\|\\'|\\#|\\/|\\\\\\\\", options()$act.separator_between_intervals, options()$act.separator_between_tiers, "]*[\\W]*$)",sep="", collapse="")
-			regex_last_word <- paste("(?<concLeft1>[", options()$act.separator_between_words, options()$act.separator_between_intervals, options()$act.separator_between_tiers, "]*[\\W]*$)",sep="", collapse="")
-			
-			#get last word
-			concLeft1 <- stringr::str_extract(leftPart, regex_last_word)
-			
-			#get position last word
-			pos <- stringr::str_locate(leftPart, regex_last_word)[1]-1
-			
-			#get everything before
-			concLeft2 <-  stringr::str_sub(leftPart, 1, pos)
-			
-			if(is.na(concLeft1)) { concLeft1 <- ""}
-			if(is.na(concLeft2)) { concLeft2 <- ""}
-			
-			#remove spaces
-			concLeft1 <- stringr::str_trim(concLeft1, side="both")
-			concLeft2 <- stringr::str_trim(concLeft2, side="both")
-		}
-		
-		#===right part
-		concRight1	<- ""
-		concRight2	<- ""
-		rightPart 	<- 	""
-		if (hit.pos +  hit.length < nchar(myFulltext) )		{
-			#get everything right of the hit
-			rightMargin <- 	hit.pos +  hit.length + s@concordance.width
-			rightMargin <- 	min(rightMargin, nchar(myFulltext))
-			rightPart 	<- 	substr(myFulltext, hit.pos + hit.length , rightMargin)
-			
-			#regex
-			#regex_first_word <- paste("(?<concRight1>^[\\W]*[^\\s|\\|]", options()$act.separator_between_intervals, options()$act.separator_between_tiers, "]*)",sep="", collapse="")
-			regex_first_word <- paste("(?<concRight1>^[\\W]*[", options()$act.separator_between_words, options()$act.separator_between_intervals, options()$act.separator_between_tiers, "]*)",sep="", collapse="")
-			
-			#get first word
-			concRight1 <- stringr::str_extract(rightPart, regex_first_word)
-			
-			#get position last word
-			pos <- stringr::str_locate(rightPart, regex_first_word)[2]+1
-			
-			#get everything after
-			concRight2 <-  stringr::str_sub(rightPart,pos, nchar(rightPart))
-			
-			if(is.na(concRight1)) { concRight1 <- ""}
-			if(is.na(concRight2)) { concRight2 <- ""}
-			
-			#remove spaces
-			concRight1 <- stringr::str_trim(concRight1, side="both")
-			concRight2 <- stringr::str_trim(concRight2, side="both")
-		}
-		
-		concHit <- mySR["hit"]
-		concHit <- unname(unlist(concHit))
-		
-		#count words
-		if (s@search.mode=="content") 		{
-			nrWordsLeft <- as.integer(stringi::stri_count_words(leftPart))
-			nrWordsHitPosition <- as.integer(nrWordsLeft + 1)
-			nrWordsHit <- as.integer(stringi::stri_count_words(mySR["hit"]))
-			nrWordsRight <- as.integer(stringi::stri_count_words(rightPart))
-			nrWordsTotal <- as.integer(nrWordsLeft + nrWordsHit + nrWordsRight)
-		} else {
-			nrWordsLeft <- NA
-			nrWordsHitPosition <- NA
-			nrWordsHit <- NA
-			nrWordsRight <- NA
-			nrWordsTotal <- NA
-		}
-		return(c(concLeft2, concLeft1, concHit, concRight1, concRight2, nrWordsLeft, nrWordsHitPosition, nrWordsHit, nrWordsRight, nrWordsTotal))
-	}
-	
-	conccolnames	  	  <- c("concLeft2", "concLeft1", "concHit", "concRight1", "concRight2", "nrWordsLeft", "nrWordsHitPosition", "nrWordsHit", "nrWordsRight", "nrWordsTotal")
 
-	#remove old concordance
-	mynames <- setdiff(colnames(s@results),conccolnames)
-	temp <- s@results[,mynames]
-	
-	if (nrow(s@results)==0 ) {
-		concs 				  <- data.frame(concLeft2=character(), 
-								  concLeft1=character(), 
-								  concHit=character(), 
-								  concRight1=character(), 
-								  concRight2=character(), 
-								  nrWordsLeft=integer(), 
-								  nrWordsHitPosition=integer(), 
-								  nrWordsHit=integer(), 
-								  nrWordsRight=integer(), 
-								  nrWordsTotal=integer(), 
-								  stringsAsFactors		= FALSE)
+			res <- .concordance_compute_vec(
+				fulltext     = fulltext,
+				hit_pos      = hit_pos[idx],
+				hit_length   = hit_length[idx],
+				hit_text     = concHit[idx],
+				conc_width   = s@concordance.width,
+				regex_last   = regex_last,
+				regex_first  = regex_first
+			)
+
+			concLeft1[idx]  <- res$concLeft1
+			concLeft2[idx]  <- res$concLeft2
+			concRight1[idx] <- res$concRight1
+			concRight2[idx] <- res$concRight2
+			# word counts stay NA for fulltext mode
+		}
+
 	} else {
-		concs			      <- t(apply(temp, MARGIN=1, x=x, search_concordance_single))
-		concs			      <- data.frame(concs, stringsAsFactors		= FALSE)
-		colnames(concs) 	  <- conccolnames
+		#=== content mode: the "fulltext" of each hit is its annotation content
+		hit_pos    <- as.integer(temp$hit.pos.content)
+		hit_length <- as.integer(temp$hit.length)
+
+		valid <- !is.na(temp$annotationID) &
+				 !is.na(hit_pos) &
+				 !is.na(hit_length)
+
+		contents <- if (isTRUE(s@search.normalized))
+						as.character(temp$content.norm)
+					else
+						as.character(temp$content)
+
+		valid <- valid & !is.na(contents)
+
+		idx <- which(valid)
+		if (length(idx) > 0) {
+			res <- .concordance_compute_vec_percontent(
+				fulltexts   = contents[idx],
+				hit_pos     = hit_pos[idx],
+				hit_length  = hit_length[idx],
+				hit_text    = concHit[idx],
+				conc_width  = s@concordance.width,
+				regex_last  = regex_last,
+				regex_first = regex_first
+			)
+			concLeft1[idx]          <- res$concLeft1
+			concLeft2[idx]          <- res$concLeft2
+			concRight1[idx]         <- res$concRight1
+			concRight2[idx]         <- res$concRight2
+			nrWordsLeft[idx]        <- res$nrWordsLeft
+			nrWordsHitPosition[idx] <- res$nrWordsHitPosition
+			nrWordsHit[idx]         <- res$nrWordsHit
+			nrWordsRight[idx]       <- res$nrWordsRight
+			nrWordsTotal[idx]       <- res$nrWordsTotal
+		}
 	}
 
-	#add new concordance
+	concs <- data.frame(
+		concLeft2          = concLeft2,
+		concLeft1          = concLeft1,
+		concHit            = concHit,
+		concRight1         = concRight1,
+		concRight2         = concRight2,
+		nrWordsLeft        = nrWordsLeft,
+		nrWordsHitPosition = nrWordsHitPosition,
+		nrWordsHit         = nrWordsHit,
+		nrWordsRight       = nrWordsRight,
+		nrWordsTotal       = nrWordsTotal,
+		stringsAsFactors   = FALSE
+	)
+
 	s@results <- cbind(temp, concs)
-	
 	return(s)
 }
 
+
+# Internal helper for search_concordance (fulltext mode).
+#
+# Vectorized concordance computation for ONE group of hits that share the
+# SAME fulltext string. Operates on vectors of hit positions and lengths.
+#
+# @keywords internal
+.concordance_compute_vec <- function(fulltext, hit_pos, hit_length, hit_text,
+									  conc_width, regex_last, regex_first) {
+
+	# substring() requires integer start/stop; concordance.width is often
+	# stored as double, so cast explicitly.
+	conc_width <- as.integer(conc_width)
+
+	n   <- length(hit_pos)
+	nc  <- as.integer(nchar(fulltext))
+
+	concLeft1  <- character(n)
+	concLeft2  <- character(n)
+	concRight1 <- character(n)
+	concRight2 <- character(n)
+
+	#--- left context
+	has_left    <- hit_pos > 1
+	left_margin <- as.integer(pmax(0L, hit_pos - conc_width - 1L))
+	left_end    <- as.integer(hit_pos - 1L)
+	left_part   <- rep("", n)
+	if (any(has_left)) {
+		left_part[has_left] <- substring(fulltext, left_margin[has_left],
+										  left_end[has_left])
+		lp                <- left_part[has_left]
+		cL1               <- stringr::str_extract(lp, regex_last)
+		pos               <- stringr::str_locate(lp, regex_last)[, 1] - 1L
+		cL2               <- stringr::str_sub(lp, 1L, pos)
+		cL1[is.na(cL1)]   <- ""
+		cL2[is.na(cL2)]   <- ""
+		concLeft1[has_left] <- stringr::str_trim(cL1, side = "both")
+		concLeft2[has_left] <- stringr::str_trim(cL2, side = "both")
+	}
+
+	#--- right context
+	has_right    <- (hit_pos + hit_length) < nc
+	right_start  <- as.integer(hit_pos + hit_length)
+	right_end    <- as.integer(pmin(right_start + conc_width, nc))
+	right_part   <- rep("", n)
+	if (any(has_right)) {
+		right_part[has_right] <- substring(fulltext, right_start[has_right],
+											right_end[has_right])
+		rp                <- right_part[has_right]
+		cR1               <- stringr::str_extract(rp, regex_first)
+		pos               <- stringr::str_locate(rp, regex_first)[, 2] + 1L
+		cR2               <- stringr::str_sub(rp, pos, nchar(rp))
+		cR1[is.na(cR1)]   <- ""
+		cR2[is.na(cR2)]   <- ""
+		concRight1[has_right] <- stringr::str_trim(cR1, side = "both")
+		concRight2[has_right] <- stringr::str_trim(cR2, side = "both")
+	}
+
+	list(
+		concLeft1  = concLeft1,
+		concLeft2  = concLeft2,
+		concRight1 = concRight1,
+		concRight2 = concRight2
+	)
+}
+
+
+# Internal helper for search_concordance (content mode).
+#
+# Like .concordance_compute_vec() but each hit has its own "fulltext"
+# (the annotation content). Inputs fulltexts, hit_pos, hit_length are all
+# vectors of the same length n. Additionally computes word-count columns.
+#
+# Word-count columns are returned as character to match the bit-for-bit
+# output of the previous implementation (which went through
+# t(apply(..., MARGIN = 1)) and thus collapsed everything to character).
+#
+# @keywords internal
+.concordance_compute_vec_percontent <- function(fulltexts, hit_pos, hit_length,
+												 hit_text, conc_width,
+												 regex_last, regex_first) {
+
+	conc_width <- as.integer(conc_width)
+
+	n  <- length(hit_pos)
+	nc <- as.integer(nchar(fulltexts))
+
+	concLeft1  <- character(n)
+	concLeft2  <- character(n)
+	concRight1 <- character(n)
+	concRight2 <- character(n)
+
+	has_left    <- hit_pos > 1
+	left_margin <- as.integer(pmax(0L, hit_pos - conc_width - 1L))
+	left_end    <- as.integer(hit_pos - 1L)
+	left_part   <- rep("", n)
+	if (any(has_left)) {
+		left_part[has_left] <- substring(fulltexts[has_left],
+										  left_margin[has_left],
+										  left_end[has_left])
+		lp                <- left_part[has_left]
+		cL1               <- stringr::str_extract(lp, regex_last)
+		pos               <- stringr::str_locate(lp, regex_last)[, 1] - 1L
+		cL2               <- stringr::str_sub(lp, 1L, pos)
+		cL1[is.na(cL1)]   <- ""
+		cL2[is.na(cL2)]   <- ""
+		concLeft1[has_left] <- stringr::str_trim(cL1, side = "both")
+		concLeft2[has_left] <- stringr::str_trim(cL2, side = "both")
+	}
+
+	has_right    <- (hit_pos + hit_length) < nc
+	right_start  <- as.integer(hit_pos + hit_length)
+	right_end    <- as.integer(pmin(right_start + conc_width, nc))
+	right_part   <- rep("", n)
+	if (any(has_right)) {
+		right_part[has_right] <- substring(fulltexts[has_right],
+											right_start[has_right],
+											right_end[has_right])
+		rp                <- right_part[has_right]
+		cR1               <- stringr::str_extract(rp, regex_first)
+		pos               <- stringr::str_locate(rp, regex_first)[, 2] + 1L
+		cR2               <- stringr::str_sub(rp, pos, nchar(rp))
+		cR1[is.na(cR1)]   <- ""
+		cR2[is.na(cR2)]   <- ""
+		concRight1[has_right] <- stringr::str_trim(cR1, side = "both")
+		concRight2[has_right] <- stringr::str_trim(cR2, side = "both")
+	}
+
+	wL  <- as.integer(stringi::stri_count_words(left_part))
+	wH  <- as.integer(stringi::stri_count_words(hit_text))
+	wR  <- as.integer(stringi::stri_count_words(right_part))
+	wHP <- wL + 1L
+	wT  <- wL + wH + wR
+
+	list(
+		concLeft1          = concLeft1,
+		concLeft2          = concLeft2,
+		concRight1         = concRight1,
+		concRight2         = concRight2,
+		nrWordsLeft        = as.character(wL),
+		nrWordsHitPosition = as.character(wHP),
+		nrWordsHit         = as.character(wH),
+		nrWordsRight       = as.character(wR),
+		nrWordsTotal       = as.character(wT)
+	)
+}

@@ -20,8 +20,8 @@ search_run <- function(x, s) {
 	temp <- NULL
 	start.time <- Sys.time()
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
-	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
+	.assert_corpus(x, missing = missing(x))
+	.assert_search(s, missing = missing(s))
 	
 	#==== FILTER ====
 	#get transcripts and tiers to include
@@ -99,11 +99,7 @@ search_run <- function(x, s) {
 		#=== add names for results
 		resultID  <- 	.make_names_for_search(s@results, s@resultid.prefix, s@resultid.start)
 		s@results <- 	cbind(resultID, s@results)
-		
-		#=== turn factors into strings
-		fctr.cols <- sapply(s@results, is.factor)
-		s@results[, fctr.cols] <- sapply(s@results[, fctr.cols], as.character)
-		
+
 		if (s@concordance.make)	{
 			helper_progress_set("Concordance",max(1,nrow(s@results)))
 			s	<- act::search_concordance(x, s, searchNormalized=s@search.normalized)

@@ -27,7 +27,7 @@ search_openresult_inquicktime  <- function(x,
 										   play=TRUE, 
 										   close=FALSE, 
 										   bringToFront=TRUE, 
-										   filterFile=c('.*\\.(mp4|mov)', '.*\\.(aiff|aif|wav)', '.*\\.mp3') ) {
+										   filterFile=c('(?i).*\\.(mp4|mov)', '(?i).*\\.(aiff|aif|wav)', '(?i).*\\.mp3') ) {
 	
 	# result <- mysearch@results[1,]
 	# x <- examplecorpus
@@ -35,8 +35,8 @@ search_openresult_inquicktime  <- function(x,
 	# close <- TRUE
 
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
-	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
+	.assert_corpus(x, missing = missing(x))
+	.assert_search(s, missing = missing(s))
 	if (missing(resultid))                   {cli::cli_abort("Number of the search result {.arg resultid} is missing.") 	}
 	if (Sys.info()["sysname"]!="Darwin")     {cli::cli_abort("You need to be on a Mac to use this function") 	}
 	

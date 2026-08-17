@@ -23,7 +23,7 @@ helper_corpus_export_cured <- function(x,
 									   folderOutput,
 									   formats = "textgrid") {
 
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	if (missing(folderOutput) || is.null(folderOutput) || !nzchar(folderOutput)) {
 		cli::cli_abort("Parameter {.arg folderOutput} is required.")
 	}

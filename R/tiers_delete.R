@@ -21,7 +21,7 @@ tiers_delete <- function(x,
 						 tierNames, 
 						 filterTranscriptNames=NULL) {
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	
 	tiers_deleted_count_all <- 0
 	tiers_deleted_names_all <- c()
@@ -43,30 +43,30 @@ tiers_delete <- function(x,
 	}
 	if (is.null(filterTranscriptNames)) {	filterTranscriptNames <- names(x@transcripts)	}
 	
-	i<- filterTranscriptNames[2]
 	for (i in filterTranscriptNames) {
 
 		#check if transcript contains some of the tiers
 		tiers.ids<- which(x@transcripts[[i]]@tiers$name %in% tierNames)
-		if(length(tiers.ids>0)) {
+		if(length(tiers.ids) > 0) {
 			#remember name of the transcripts
 			transcripts_modified_ids <- c(transcripts_modified_ids, i)
-			
+
 			#delete tiers from the tier list
 			tiers_deleted_names <-  x@transcripts[[i]]@tiers$name[tiers.ids]
 			tiers_deleted_names_all <- unique(c(tiers_deleted_names_all, tiers_deleted_names))
 			tiers_deleted_count_all <- tiers_deleted_count_all+length(tiers.ids)
 			x@transcripts[[i]]@tiers <- x@transcripts[[i]]@tiers[-tiers.ids, ]
-				
+
 			#delete annotations
 			annotations.ids<- which(x@transcripts[[i]]@annotations$tierName %in% tierNames)
-			x@transcripts[[i]]@annotations <- x@transcripts[[i]]@annotations[-annotations.ids, ]
+			if (length(annotations.ids) > 0) {
+				x@transcripts[[i]]@annotations <- x@transcripts[[i]]@annotations[-annotations.ids, ]
+			}
 			annotations_deleted_count <- length(annotations.ids)
 			annotations_deleted_count_all <- annotations_deleted_count_all + annotations_deleted_count
-			
+
 			#HISTORY transcript
-			x@transcripts[[i]]@modification.systime <- Sys.time()
-			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
+			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list(
 				modification        = "tiers_delete",
 				systime             = Sys.time(),
 				tiersDeleted.count = length(tiers_deleted_names),

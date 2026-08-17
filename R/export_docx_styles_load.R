@@ -258,7 +258,8 @@ export_styles_user_load <- function(path = NULL) {
 	              "acronym.search", "acronym.replace", "acronym.width",
 	              "acronym.ending", "content.indent", "content.indent.text.skip",
 	              "content.indent.align.char", "content.indent.align.filler.inside",
-	              "content.indent.align.mode", "content.wrap", "space.after", "comment")
+	              "content.indent.align.mode", "content.indent.align.arrow",
+	              "content.wrap", "space.after", "comment")
 	for (col in all_cols) {
 		if (!col %in% names(temp)) {
 			temp[[col]] <- NA
@@ -275,12 +276,20 @@ export_styles_user_load <- function(path = NULL) {
 	                         "acronym.case", "acronym.search", "acronym.replace",
 	                         "acronym.ending", "content.indent", "content.indent.text.skip",
 	                         "content.indent.align.char", "content.indent.align.filler.inside",
-	                         "content.indent.align.mode", "space.after", "comment"), names(temp))
+	                         "content.indent.align.mode", "content.indent.align.arrow",
+	                         "space.after", "comment"), names(temp))
 	temp[char_cols] <- lapply(temp[char_cols], function(x) {
 		x <- as.character(x)
 		x[!is.na(x) & (x == "" | grepl("^#[A-Z]", x))] <- NA_character_
 		x
 	})
+	other_char_cols <- setdiff(names(temp)[vapply(temp, is.character, logical(1))], char_cols)
+	if (length(other_char_cols) > 0) {
+		temp[other_char_cols] <- lapply(temp[other_char_cols], function(x) {
+			x[!is.na(x) & (x == "" | grepl("^#[A-Z]", x))] <- NA_character_
+			x
+		})
+	}
 
 	# ===== TYPE CONVERSION =====
 	temp$show          <- as.logical(temp$show)

@@ -35,7 +35,7 @@ import <- function(..., transcriptName=NULL) {
 	if (typeof(argument)=="list") {
 			#check it if it is a rpraat object
 			if (length(setdiff(c("tmin", "tmax", "type", "name"), names(class(argument))))==0) {
-				test <- act::import_rpraat(fileContent=argument)
+				test <- act::import_rpraat(rpraatTextgrid=argument)
 			} else {
 				cli::cli_warn("Unable to identify the input format.")
 				return(NULL)

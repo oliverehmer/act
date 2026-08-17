@@ -25,7 +25,7 @@ tiers_sort <- function(x,
 					   tiersAddMissing=FALSE, 
 					   tiersDelete=FALSE) {
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	
 	transcripts_modified_ids <- c()
 	
@@ -64,8 +64,7 @@ tiers_sort <- function(x,
 		#if there are changes
 		if(anyChanges) {
 			#HISTORY transcript
-			x@transcripts[[i]]@modification.systime <- Sys.time()
-			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
+			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list(
 				modification        = "tiers_reorder",
 				systime             = Sys.time(),
 				tiers.orderchanged  = tiers_orderofcopiedtiershaschanged,

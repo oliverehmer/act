@@ -19,8 +19,7 @@
 #' @param filterTierExcludeRegex Character string; as regular expression, exclude certain tiers matching the expression.
 #' @param filterSectionStartsec Double; start time of region for search.
 #' @param filterSectionEndsec Double; end time of region for search. 
-#' @param concordanceMake Logical; if \code{TRUE} concordance will be added to search results.
-#' @param concordanceWidth Integer; number of characters  to the left and right of the search hit in the concordance , the default is \code{120}.
+#' @param concordanceMake Logical; if \code{TRUE} concordance will be added to search results. The width of the concordance is controlled by the option \code{act.concordanceWidth} (default \code{NULL} uses the search class default of 120 characters).
 #' @param cutSpanBeforesec Double; Start the media and transcript cut some seconds before the hit to include some context, the default is \code{0}.
 #' @param cutSpanAftersec Double; End the media and transcript cut some seconds before the hit to include some context, the default is \code{0}.
 #' @param runSearch Logical; if \code{TRUE} search will be run in corpus object, if \code{FALSE} only the search object will be created.
@@ -48,8 +47,7 @@ search_new <- function(x,
 					   filterTierExcludeRegex       = NULL, 
 					   filterSectionStartsec        = NULL, 
 					   filterSectionEndsec          = NULL,  
-					   concordanceMake              = TRUE, 
-					   concordanceWidth             = NULL,
+					   concordanceMake              = TRUE,
 					   cutSpanBeforesec             = 0,
 					   cutSpanAftersec              = 0,
 					   runSearch                    = TRUE) {
@@ -73,7 +71,6 @@ search_new <- function(x,
 		filterSectionStartsec        <-  NULL
 		filterSectionEndsec          <-  NULL
 		concordanceMake              <-  TRUE
-		concordanceWidth             <-  NULL
 		cutSpanBeforesec             <-  0
 		cutSpanAftersec              <-  0
 		runSearch                    <-  TRUE
@@ -86,7 +83,7 @@ search_new <- function(x,
 	start.time <- Sys.time()
 
 	#=== check x object
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	if (missing(pattern))			{cli::cli_abort("Pattern is missing.") 	}
 	if (is.null(x@transcripts)) 	{cli::cli_abort("No transcripts found in corpus object x.")	}
 
@@ -114,7 +111,7 @@ search_new <- function(x,
 	s@filter.section.endsec     	<- if(!is.null(filterSectionEndsec))    		{filterSectionEndsec}       	else {s@filter.section.endsec}
 	
 	s@concordance.make          	<- concordanceMake
-	s@concordance.width         	<- if(!is.null(concordanceWidth))   {concordanceWidth}   else {s@concordance.width}
+	s@concordance.width         	<- if(!is.null(getOption("act.concordanceWidth")))   {getOption("act.concordanceWidth")}   else {s@concordance.width}
 	s@cuts.span.beforesec       	<- as.double(cutSpanBeforesec)
 	s@cuts.span.aftersec        	<- as.double(cutSpanAftersec)	
 	

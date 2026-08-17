@@ -23,9 +23,9 @@ search_cuts_printtranscript(
 
 \item{l}{Layout object.}
 
-\item{exportTxt}{Logical; If \code{TRUE} .docx transcript will be exported.}
+\item{exportTxt}{Logical; If \code{TRUE} and \code{folderOutput} is set, .txt transcripts will be written to disk. The print transcripts are always inserted into the column \code{s@cuts.column.printtranscript} of \code{s@results}, independent of this parameter.}
 
-\item{exportDocx}{Logical; If \code{TRUE} .txt transcript will be exported.}
+\item{exportDocx}{Logical; If \code{TRUE} and \code{folderOutput} is set, .docx transcripts will be written to disk.}
 
 \item{headerInsertSource}{Logical; if \code{TRUE} standard information about the source and location of the sequence will be inserted after the heading.}
 
@@ -33,7 +33,7 @@ search_cuts_printtranscript(
 
 \item{cutSpanAftersec}{Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.}
 
-\item{folderOutput}{Character string; if parameter is not set, the print transcripts will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.txt' format.}
+\item{folderOutput}{Character string; path to an existing folder for file export. If \code{NULL} (default), no files will be written to disk; the print transcripts are inserted only into \code{s@results}. If set, .txt and/or .docx files will be written depending on \code{exportTxt} and \code{exportDocx}.}
 }
 \value{
 Search object;
@@ -73,4 +73,14 @@ s=mysearch)
 
 # Display all transcript snippets on screen
 cat(test@results[,mysearch@cuts.column.printtranscript])
+
+# Only insert print transcripts into the column, no file export.
+# The print transcripts are always inserted into the column,
+# independent of exportTxt and exportDocx.
+test <- act::search_cuts_printtranscript (x           = examplecorpus,
+                                          s           = mysearch,
+                                          exportTxt   = FALSE,
+                                          exportDocx  = FALSE,
+                                          folderOutput= NULL)
+cat(test@results[1, mysearch@cuts.column.printtranscript])
 }

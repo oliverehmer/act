@@ -37,7 +37,7 @@ tiers_add <- function( x,
 					   filterTranscriptNames=NULL,
 					   skipIfTierAlreadyExists=TRUE) {
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	if (missing(tierName))  									{cli::cli_abort("Parameter {.arg tierName} is missing.") 		}
 	if (!is.null(positionAbsolute) & !is.null(destinationTier)) {cli::cli_abort("You mey define either {.arg positionAbsolute} or {.arg destinationTier}, not both.") 			}
 	
@@ -183,8 +183,7 @@ tiers_add <- function( x,
 				x@transcripts[[i]]@tiers <- newTable
 				
 				#HISTORY transcript
-				x@transcripts[[i]]@modification.systime <- Sys.time()
-				x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
+				x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list(
 					modification        = "tiers_add",
 					systime             = Sys.time(),
 					tierName           = newRow$name,

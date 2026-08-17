@@ -15,7 +15,7 @@ transcripts_update_fulltexts(
 \arguments{
 \item{x}{Corpus object.}
 
-\item{searchMode}{Character string; Which full text should be created; accepts the following values: \code{fulltext.bytier, fulltext.bytime, fulltext}.}
+\item{searchMode}{Deprecated. Both fulltext modes (bytime and bytier) are always created together; this parameter has no effect and is kept only for backward compatibility.}
 
 \item{transcriptNames}{Vector of character strings; Names of the transcripts you want to update; leave empty if you want to process all transcripts that need an update.}
 

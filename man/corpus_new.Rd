@@ -10,6 +10,8 @@ corpus_new(
   name = "New Corpus",
   importFiles = TRUE,
   skipDoubleFiles = TRUE,
+  skipDoubleFilesDatePattern = "",
+  createNormalization = TRUE,
   createFulltext = TRUE,
   assignMedia = TRUE,
   pathNormalizationMatrix = NULL,
@@ -36,6 +38,10 @@ corpus_new(
 \item{importFiles}{Logical; if \code{TRUE} annotation files will be imported immediately when the function is called, if \code{FALSE} corpus object will be created without importing the annotation files.}
 
 \item{skipDoubleFiles}{Logical; if \code{TRUE} transcripts with the same names will be skipped (only one of them will be added), if \code{FALSE} transcripts will be renamed to make the names unique.}
+
+\item{skipDoubleFilesDatePattern}{Character string; regular expression matching a date (optionally followed by a version letter) in the file name. When set and \code{skipDoubleFiles = "warn_keep_newest"}, the newest of several same-named files is chosen by this date in the file name instead of by the file modification time. Leave empty (default) to keep the modification-time behaviour.}
+
+\item{createNormalization}{Logical; if \code{TRUE} the normalized content will be created.}
 
 \item{createFulltext}{Logical; if \code{TRUE} full text will be created.}
 
@@ -78,7 +84,7 @@ If \code{importFiles=TRUE} the corpus object will be created but files will not 
 \details{
 The parameter \code{pathsMediaFiles} defines where the corresponding media files are located.
 If \code{assignMedia=TRUE} the paths defined in \code{x@paths.media.files} will be scanned for media files and will be matched to the transcript object based on their names.
-Only the the file types set in \code{options()$act.fileformats.audio} and \code{options()$act.fileformats.video} will be recognized.
+Only the the file types set in \code{options()$act.media.fileformats.audio} and \code{options()$act.media.fileformats.video} will be recognized.
 You can modify these options to recognize other media types.
 
 See \code{@import.results} of the corpus object to check the results of importing the files.

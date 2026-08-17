@@ -28,7 +28,7 @@ transcripts_filter <- function (x,
 						   timesPreserve=TRUE, 
 						   sort=c("none", "tier>startsec", "startsec>tier")) {
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	
 	
 	#--- check parameter 'filterTierNames'

@@ -33,26 +33,40 @@ helper_cutlist_save <-  function(cutlistMac    = NULL,
 	#-- win
 	if (!is.null(cutlistWin)) {
 		out_path 	<- file.path(outFolder, paste(outFilename, "_win.cmd", sep=""))
-		fileConn 	<- file(out_path)
-		writeLines(cutlistWin, fileConn)
-		close(fileConn)
+		.cutlist_write_utf8(cutlistWin, out_path, eol="\r\n")
 	}
-	
+
 	#-- mac
 	if (!is.null(cutlistMac)) {
 		#add that it is an executable
 		cutlistMac <- c("#!/bin/sh", cutlistMac)
 		#save
 		out_path 	<- file.path(outFolder, paste(outFilename, "_mac", sep=""))
-		fileConn 	<- file(out_path)
-		writeLines(cutlistMac, fileConn)
-		close(fileConn)
+		.cutlist_write_utf8(cutlistMac, out_path, eol="\n")
 		#make executable on a mac or a linux machine
 		if (file.exists(out_path)) {
-			if (Sys.info()["sysname"]=="Darwin") {
-				system(paste("chmod 755 '", out_path, "'", sep=""))
-			}				
+			Sys.chmod(out_path, mode="0755")
 		}
 	}
+}
+
+
+# Write a cut list as UTF-8 with explicit line endings for the TARGET OS
+# (CRLF for the Windows .cmd, LF for the mac/linux shell script), regardless
+# of the OS that generates the list. A text-mode connection would use the
+# host's native encoding and line endings: a _mac script generated on Windows
+# would get CRLF after "#!/bin/sh" ("bad interpreter"), a _win.cmd generated
+# on macOS would get LF-only line endings, and non-ASCII file names would be
+# written in the host locale encoding.
+.cutlist_write_utf8 <- function(lines, path, eol = "\n") {
+	txt <- paste0(paste(lines, collapse = "\n"), "\n")
+	txt <- stringi::stri_replace_all_fixed(txt, "\r\n", "\n")
+	if (!identical(eol, "\n")) {
+		txt <- stringi::stri_replace_all_fixed(txt, "\n", eol)
+	}
+	con <- file(path, open = "wb")
+	on.exit(close(con))
+	writeBin(charToRaw(enc2utf8(txt)), con)
+	invisible(NULL)
 }
 

@@ -10,7 +10,7 @@ search_openresult_inpraat(
   resultid,
   play = TRUE,
   close = FALSE,
-  filterMediaFile = c(".*\\\\.(aiff|aif|wav)", ".*\\\\.mp3"),
+  filterMediaFile = c("(?i).*\\\\.(aiff|aif|wav)", "(?i).*\\\\.mp3"),
   delay = 0.5
 )
 }

@@ -43,13 +43,7 @@ annotations_fill_tier_section <- function(
     perl = TRUE
 ) {
   
-  if (missing(x)) {
-    cli::cli_abort("Transcript object in parameter {.arg x} is missing.")
-  }
-
-  if (!methods::is(x, "transcript")) {
-    cli::cli_abort("Parameter {.arg x} needs to be a transcript object.")
-  }
+  .assert_transcript(x, arg = "x", missing = missing(x))
 
   if (missing(tier_pattern)) {
     cli::cli_abort("Parameter {.arg tier_pattern} is missing.")
@@ -105,9 +99,6 @@ annotations_fill_tier_section <- function(
         x@annotations$content[i] <- content
       }
     }
-    
-    # Update modification time
-    x@modification.systime <- Sys.time()
     
     # Add to history
     x@history[[length(x@history) + 1]] <- list(

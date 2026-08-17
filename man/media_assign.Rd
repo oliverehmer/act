@@ -13,11 +13,7 @@ media_assign(
   transcriptNames = NULL,
   deleteExistingMedia = TRUE,
   onlyUniqueFiles = TRUE,
-  audioAsFallback = TRUE,
-  videoMaxFiles = NULL,
-  audioMaxFiles = NULL,
-  videoPriority = NULL,
-  audioPriority = NULL
+  readMetadata = FALSE
 )
 }
 \arguments{
@@ -37,15 +33,7 @@ media_assign(
 
 \item{onlyUniqueFiles}{Logical; if \code{TRUE} media files with the same name (in different locations) will only be added once; if \code{FALSE} all media files found will be added, irrespective of possible doublets.}
 
-\item{audioAsFallback}{Logical; if \code{TRUE} audio media files will only be assigned if no video files were found; if \code{FALSE} all media files found will be added, irrespective of type.}
-
-\item{videoMaxFiles}{Integer or NULL; maximum number of video files to assign per transcript. NULL means no limit.}
-
-\item{audioMaxFiles}{Integer or NULL; maximum number of audio files to assign per transcript. NULL means no limit.}
-
-\item{videoPriority}{Character vector or NULL; regex patterns matched against video filenames for prioritization. First matching pattern wins. E.g. \code{c("hand.*_al", "_al", "hand.*_ac", "_ac")}.}
-
-\item{audioPriority}{Character vector or NULL; file extensions for audio prioritization. First matching extension wins. E.g. \code{c("aif", "wav", "mp3")}.}
+\item{readMetadata}{Logical; if \code{TRUE} the read-derived media columns (\code{length.sec}, \code{video.*}, \code{startsec} etc.) are filled via \code{media_metadata_read} after assignment. Default \code{FALSE} (fast; no file reading).}
 }
 \value{
 Corpus object.
@@ -56,7 +44,7 @@ The function uses the name of the transcript to find the media files,
 e.g. the function assumes that the annotation files have the same name as the media files, except from the suffix/the file type.
 }
 \details{
-Only the the file types set in \code{options()$act.fileformats.audio} and \code{options()$act.fileformats.video} will be recognized.
+Only the the file types set in \code{options()$act.media.fileformats.audio} and \code{options()$act.media.fileformats.video} will be recognized.
 You can modify these options to recognize other media types.
 }
 \examples{
@@ -72,5 +60,5 @@ examplecorpus <- act::media_assign(examplecorpus)
 
 }
 \seealso{
-\link{media_delete}, \link{media_path_to_existing_file}
+\link{media_select}, \link{media_delete}, \link{media_path_to_existing_file}
 }

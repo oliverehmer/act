@@ -18,9 +18,7 @@
 #' @param healCuts Logical; if \code{TRUE} truncated annotations at the boundaries of update regions are automatically joined with adjacent annotations that have the same content. Default is \code{FALSE}.
 #'
 #' @return Transcript object
-#' 
-#' @seealso \link{transcript_update}
-#' 
+#'
 #' @export
 #'
 #' @example inst/examples/transcripts_merge.R
@@ -69,9 +67,7 @@ transcripts_merge <- function (destinationTranscript,
 		}
 		destinationTranscript <- destinationTranscript[[1]]
 	}
-	if (!methods::is(destinationTranscript,"transcript")) 	{
-		cli::cli_abort("Parameter {.arg destinationTranscript} needs to be a {.cls transcript} object.")
-	}
+	.assert_transcript(destinationTranscript, arg = "destinationTranscript")
 	#--> result should be a single Object as accessed by [[]]
 	
 	#check: updateTranscripts
@@ -147,12 +143,12 @@ transcripts_merge <- function (destinationTranscript,
 				
 				#---truncate intervals that do no fall entirely into the intervall
 				#intervals that start before
-				for (j in 1:nrow(annUpdate)) {
+				for (j in seq_len(nrow(annUpdate))) {
 					annUpdate$startsec[j] <- max(annUpdate$startsec[j], myDestInterval$startsec)
 				}
-				
+
 				#intervals that end after
-				for (j in 1:nrow(annUpdate)) {
+				for (j in seq_len(nrow(annUpdate))) {
 					annUpdate$endsec[j] <- min(annUpdate$endsec[j], myDestInterval$endsec)
 				}
 				
@@ -407,8 +403,7 @@ transcripts_merge <- function (destinationTranscript,
 	destinationTranscript@file.path <-""
 	
 	#HISTORY transcript
-	destinationTranscript@modification.systime <- Sys.time()
-	destinationTranscript@history[[length(destinationTranscript@history)+1]] <-	list( 
+	destinationTranscript@history[[length(destinationTranscript@history)+1]] <-	list(
 		modification               = "transcripts_merge",
 		systime                    = Sys.time(),
 		destinationTranscript      = destinationTranscript@name,

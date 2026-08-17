@@ -37,13 +37,13 @@ search_results_export <- function(s,
 		overwrite<-TRUE 
 	}
 	
-	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
+	.assert_search(s, missing = missing(s))
 	
 	#check colnames
 	mycolnames <- colnames(s@results)
 	necessarycolnames <- c("resultID", "transcriptName", "annotationID",  "tierName", "startsec", "endsec", "content", "content.norm", "hit", "hit.nr", "hit.length", "hit.pos.content", "hit.pos.fulltext", "searchMode", "hit.span")
 	missingcolnames <- necessarycolnames[!necessarycolnames %in% mycolnames]
-	if (length(missingcolnames>0)) {
+	if (length(missingcolnames) > 0) {
 		cli::cli_abort("Some necessary columns are missing in {.code s@results}. Missing columns: {.val {missingcolnames}}")
 	}
 	
@@ -74,11 +74,51 @@ search_results_export <- function(s,
 		s@results$concRight2	<-	stringr::str_replace_all(s@results$concRight2, searchString, replacementString )
 	}
 	if ("printtranscript" %in% mycolnames) {
-		s@results$transcript	<-	stringr::str_replace_all(s@results$printtranscript, searchString, replacementString )
+		s@results$printtranscript <- stringr::str_replace_all(s@results$printtranscript, searchString, replacementString )
 	}
 	if ("stills.values" %in% mycolnames) {
 		s@results$stills.values <- stringr::str_flatten(unlist(s@results$stills.values))
 	}
+
+	#rename columns to snake_case for output
+	col_rename <- c(
+		"resultID"               = "result_id",
+		"transcriptName"         = "transcript_name",
+		"annotationID"           = "annotation_id",
+		"tierName"               = "tier_name",
+		"searchMode"             = "search_mode",
+		"content.norm"           = "content_norm",
+		"hit.nr"                 = "hit_nr",
+		"hit.length"             = "hit_length",
+		"hit.pos.content"        = "hit_pos_content",
+		"hit.pos.fulltext"       = "hit_pos_fulltext",
+		"hit.span"               = "hit_span",
+		"stills.values"          = "stills_values",
+		"stills.folder"          = "stills_folder",
+		"char.orig.bytime.start" = "char_orig_bytime_start",
+		"char.orig.bytime.end"   = "char_orig_bytime_end",
+		"char.norm.bytime.start" = "char_norm_bytime_start",
+		"char.norm.bytime.end"   = "char_norm_bytime_end",
+		"char.orig.bytier.start" = "char_orig_bytier_start",
+		"char.orig.bytier.end"   = "char_orig_bytier_end",
+		"char.norm.bytier.start" = "char_norm_bytier_start",
+		"char.norm.bytier.end"   = "char_norm_bytier_end",
+		"concLeft1"              = "conc_left_1",
+		"concLeft2"              = "conc_left_2",
+		"concHit"                = "conc_hit",
+		"concRight1"             = "conc_right_1",
+		"concRight2"             = "conc_right_2",
+		"nrWordsLeft"            = "nr_words_left",
+		"nrWordsHitPosition"     = "nr_words_hit_position",
+		"nrWordsHit"             = "nr_words_hit",
+		"nrWordsRight"           = "nr_words_right",
+		"nrWordsTotal"           = "nr_words_total"
+	)
+	for (old in names(col_rename)) {
+		idx <- which(colnames(s@results) == old)
+		if (length(idx) > 0L) colnames(s@results)[idx] <- col_rename[[old]]
+	}
+
 	#write
 	if (saveAsCSV) {
 		if (!file.exists(path)) {

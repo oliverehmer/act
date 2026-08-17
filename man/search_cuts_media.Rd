@@ -14,16 +14,18 @@ search_cuts_media(
   cutSpanAftersec = NULL,
   folderOutput = NULL,
   filterMediaInclude = "",
+  filterMediaExclude = "",
   videoFastPositioning = TRUE,
   videoCodecCopy = FALSE,
   audioAsMP3 = FALSE,
-  panning = NULL,
+  audioPanning = NULL,
+  audioNormalize = FALSE,
   outputOS = c("mac", "win"),
   outputFileName = "FFMPEG_cutlist"
 )
 }
 \arguments{
-\item{x}{Corpus object; Please note: all media paths for a transcript need to be given as a list in the corpus object in \code{corpus@transcripts[[ ]]@media.path} . You can use the respective media functions. .}
+\item{x}{Corpus object; Please note: all media paths for a transcript need to be given as a list in the corpus object in \code{corpus@transcripts[[ ]]@media} . You can use the respective media functions. .}
 
 \item{s}{Search object.}
 
@@ -39,15 +41,19 @@ search_cuts_media(
 
 \item{folderOutput}{Character string; path to folder where files will be written.}
 
-\item{filterMediaInclude}{Character string; regular expression to match only some of the media files in \code{corpus@transcripts[[ ]]@media.path}.}
+\item{filterMediaInclude}{Character string; regular expression to match only some of the media files in \code{corpus@transcripts[[ ]]@media}.}
 
-\item{videoFastPositioning}{Logical; If \code{TRUE} the FFmpeg command will be using fast video positioning as specified in \code{options()$act.ffmpeg.command.video.fast}.}
+\item{filterMediaExclude}{Character string; regular expression to exclude some of the media files in \code{corpus@transcripts[[ ]]@media}. Empty string (default) excludes none.}
+
+\item{videoFastPositioning}{Logical; If \code{TRUE} the input args use double \code{-ss} for fast frame-accurate seeking (slow decode only over the last few seconds). If \code{FALSE} a single \code{-ss} after \code{-i} is used (full decode). Only affects video cuts and still extraction; audio cuts always use the slow form.}
 
 \item{videoCodecCopy}{Logical; If \code{TRUE} FFMPEG will use the option \emph{codec copy} for videos.}
 
 \item{audioAsMP3}{Logical; If \code{TRUE} audio cuts will be converted to .mp3 files using \code{options()$act.ffmpeg.command.audio.mp3}. If \code{FALSE} (default) audio format is preserved using \code{options()$act.ffmpeg.command.audio}.}
 
-\item{panning}{Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.channels_from_column' .}
+\item{audioPanning}{Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.channels_from_column' .}
+
+\item{audioNormalize}{Logical; If \code{TRUE} and option \code{act.ffmpeg.audio.loudnorm} is set, a loudnorm filter is appended to the audio filter chain. Default is \code{FALSE}.}
 
 \item{outputOS}{Vector of character Strings; Saves FFMpeg cut list in format for \code{"win"}=windows, \code{"mac"}=apple ox/linux.}
 
@@ -71,19 +77,18 @@ The cut lists that can be executed in the Terminal (Apple) or the Command Line I
 }
 
 \emph{Input media files}\cr
-The function will use all files in  \code{corpus@transcripts[[ ]]@media.path}.
+The function will use all files in  \code{corpus@transcripts[[ ]]@media}.
 Therefore you will need to set the options \code{filterMediaInclude} filtering for which input media files you want to create the cuts.
 The filter is a regular expression, e.g.  \code{'\\.(wav|aif)'} for '.wav' and '.aif' audio files or \code{'\\.mp4'} for '.mp4' video files.
 
 \emph{Output file names}\cr
 The file names of the cuts are taken from the \code{resultID} column in the search results table. To change this, modify the contents of this column or define a different column using \code{options(act.export.filename.fromColumnName}.
-By default, the name of the original media will be appended to the file name. The name of the media file will be taken from the \code{names()} attribute of each media file listed in the \code{corpus@transcripts[]@media.path}. To change this, modify the \code{names()}attribute.
+By default, the device descriptor of the original media will be appended to the file name. It is taken from the \code{devices} column of \code{corpus@transcripts[[ ]]@media}. To change this, modify that column.
 
 \emph{Output format}\cr
 The output format is predefined by in the options:
 \itemize{
 \item \code{act.ffmpeg.command.video}: FFmpeg command for video cuts
-\item \code{act.ffmpeg.command.video.fast}: FFmpeg command for video cuts with fast positioning
 \item \code{act.ffmpeg.command.audio}: FFmpeg command for audio cuts (default: codec copy)
 \item \code{act.ffmpeg.command.audio.mp3}: FFmpeg command for converting audio to MP3
 \item \code{act.ffmpeg.command.images}: FFmpeg command for extracting still images
@@ -101,12 +106,13 @@ Please see the section \code{options_show} to customize the behavior of the func
 You can adjust the FFmpeg commands according to your needs.
 The following options define the FFmpeg command that will be used by the package. The command needs to contain place holders which will be replaced by the actual values in the package. If you want to define your own ffmpeg command, please make sure to use the following placeholders:
 \itemize{
-\item \code{INfilePath} path to the input media file.
+\item \code{INPUTARGS} the input + seek arguments, generated by act based
+on the media type and \code{videoFastPositioning}. Replaces the
+previous \code{INFILEPATH} + \code{TIMESTART}/\code{TIMEDURATION}
+placeholders. Contains an \code{INFILEPATH} sub-placeholder that is
+replaced by act with the actual input file path.
 \item \code{OUTFILEPATH} path where the output media file will be saved
-\item \code{OPTIONS} FFmpeg options that will be applied additionally, in particular fast video positioning.
-\item \code{TIMESTART} time in seconds where to begin the cutting
-\item \code{TIMESTARTMINUS10SECONDS} time in seconds where to begin the cutting, in case that fast video positioning is being used.
-\item \code{TIMEDURATION} duration of cuts.
+\item \code{OPTIONS} FFmpeg options that will be applied additionally, in particular pan/channel args.
 }
 }
 \examples{

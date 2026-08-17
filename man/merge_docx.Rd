@@ -4,7 +4,13 @@
 \alias{merge_docx}
 \title{Merge .docx files in a folder}
 \usage{
-merge_docx(folderInput, pathTemplateInput, pathOutput = NULL, recursive = TRUE)
+merge_docx(
+  folderInput,
+  pathTemplateInput,
+  pathOutput = NULL,
+  recursive = TRUE,
+  filterRegex = NULL
+)
 }
 \arguments{
 \item{folderInput}{Character string; Path to a existing folder containing the .docx files}
@@ -14,6 +20,8 @@ merge_docx(folderInput, pathTemplateInput, pathOutput = NULL, recursive = TRUE)
 \item{pathOutput}{Character string; Optional. Output path were to save result. If parameter is not set, the print transcripts will only be returned.}
 
 \item{recursive}{Logical;  if \code{TRUE} folder input will be searched recursively.}
+
+\item{filterRegex}{Character string; optional regular expression applied to the matched .docx file paths. Only files matching the expression are included in the merge. Default \code{NULL} (no filtering).}
 }
 \value{
 merged .docx in officer format,

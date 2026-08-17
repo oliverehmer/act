@@ -20,10 +20,10 @@ helper_progress_set <- function(title, total) {
 	
 	title <- stringr::str_pad(title, width = 24, side = "right", pad = " ")
 	act.environment$pb <- progress::progress_bar$new(
-		format = paste("  ", title, "[:bar] :percent (:eta left)", sep = ""),
+		format = paste0(title, "[:bar] :percent (:eta left)"),
 		total = max(1, total),
 		clear = FALSE,
-		show_after = 0.5,
+		show_after = 0.1,
 		width = 70
 	)
 }

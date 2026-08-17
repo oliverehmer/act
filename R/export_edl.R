@@ -56,7 +56,7 @@ export_edl <- function(t,
 					   "ResolveColorCream")
 	resolveColors <- rep(resolveColors,20)
 	
-	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
+	.assert_transcript(t, missing = missing(t))
 	
 	#--- check if output folder exists
 	if (!is.null(pathOutput)) {
@@ -151,10 +151,10 @@ export_edl <- function(t,
 	if (is.null(pathOutput)) {
 		return(text)
 	} else {
-		#---write to file
-		fileConn <- file(pathOutput)
-		writeLines(text, fileConn)
-		close(fileConn)		
+		#---write to file as UTF-8
+		fileConn <- file(pathOutput, open="wb")
+		writeLines(enc2utf8(text), fileConn, sep="\n", useBytes=TRUE)
+		close(fileConn)
 	}
 }
 

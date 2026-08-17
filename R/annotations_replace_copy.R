@@ -31,7 +31,7 @@ annotations_replace_copy <- function (x,
 									  filterTierNames       = NULL, 
 									  collapseString        = " | ") {
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	
 	transcripts_modified_ids      <- c()
 	annotations_copied_nr         <- 0
@@ -81,7 +81,7 @@ annotations_replace_copy <- function (x,
 			filterTierNames.current <- filterTierNames
 		}
 		#exclude the destination tier from the filter
-		if(is.null(destTier)) {
+		if(!is.null(destTier)) {
 			filterTierNames.current <- setdiff(filterTierNames.current, destTier)
 		}
 		
@@ -155,8 +155,7 @@ annotations_replace_copy <- function (x,
 		#update info for transcript
 		if (anyChanges) {
 			#HISTORY transcript
-			x@transcripts[[i]]@modification.systime <- Sys.time()
-			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
+			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list(
 				modification               = "annotations_search_replace_copy",
 				systime                    = Sys.time(),
 				annotations.replaced.count = annotations_replaced_nr,

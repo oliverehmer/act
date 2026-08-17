@@ -35,7 +35,7 @@ transcripts_cure_single <- function (t,
 									 tiersMissing              = TRUE,
 									 warning                   = FALSE) {
 
-	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
+	.assert_transcript(t, missing = missing(t))
 
 	#--- annotationsTimesReversed
 	annotationsTimesReversed.deleted.count <- 0
@@ -59,8 +59,8 @@ transcripts_cure_single <- function (t,
 				ids <- which(t@annotations$tierName==tier)
 				if (length(ids)>1) {
 					for (i in 1:(length(ids)-1)) {
-						if 	(t@annotations$endsec[ids[i]]>t@annotations$startsec[ids[i]+1]) {
-							t@annotations$endsec[ids[i]] <- t@annotations$startsec[ids[i]+1]
+						if 	(t@annotations$endsec[ids[i]]>t@annotations$startsec[ids[i+1]]) {
+							t@annotations$endsec[ids[i]] <- t@annotations$startsec[ids[i+1]]
 							annotationsOverlap.corrected.count <- annotationsOverlap.corrected.count +1
 						}
 					}
@@ -236,7 +236,6 @@ transcripts_cure_single <- function (t,
 	}
 
 	#HISTORY transcript
-	t@modification.systime <- Sys.time()
 	t@history[[length(t@history)+1]] <-	list(
 		modification                                  = "transcripts_cure_single",
 		systime                                       = Sys.time(),

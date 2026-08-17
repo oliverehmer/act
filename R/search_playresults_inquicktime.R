@@ -46,7 +46,7 @@ search_playresults_inquicktime <- function(x,
 													  close = TRUE,
 													  bringToFront=FALSE)
 		if (played) {
-			if (rstudioapi::isAvailable()) {
+			if (requireNamespace("rstudioapi", quietly=TRUE) && rstudioapi::isAvailable()) {
 				rstudioapi::executeCommand("activateConsole")
 			}
 			key <- readline(prompt="Press: r=repeat, escape=stop, return=continue: ")

@@ -2,268 +2,226 @@
 #'
 #' @param t Transcript object; transcript to search in.
 #' @param s Search object.
-#' 
+#'
 #' @return \code{Data.frame} data frame with search results.
-#' 
+#'
 #' @export
-#'   
+#'
 #' @example inst/examples/search_transcript_fulltext.R
-#' 
-#' 
+#'
 search_transcript_fulltext <- function(t, s) {
-	#progress
 	helper_progress_tick()
-	
-	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
-	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
-	
-	search.results 	 	    <- NULL
-	search.results.byTime	<- NULL
-	search.results.byTier	<- NULL
-	
-	
-	#==== get  annotations ====
+
+	.assert_transcript(t, missing = missing(t))
+	.assert_search(s, missing = missing(s))
+
+	#==== cache options ONCE (old code read these per-hit inside a closure) ====
+	sep_tiers     <- getOption("act.separator_between_tiers")
+	sep_intervals <- getOption("act.separator_between_intervals")
+
 	ann <- t@annotations
-	
-	#==== helper functions ====
-	#---- get the numbers of the record set where the hit starts
-	getRecordsetForHit <- function(hit.length, start, end)	{
-		#compare the position of the match with the cummulated positions 	= where the recordset ENDS in the big text
-		# start <- ann$char.norm.bytime.start
-		# end <- ann$char.norm.bytime.end
-		# XXX XXX min(which(hit.length<end))
-		
-		#this gives an arror for hits that are length==1
-		#which(hit.length>=start & hit.length<end)[1]
-		which(hit.length>=start & hit.length<=end)[1]
-	}
-	
-	#---- detect the extension of a hit, based on separators
-	detectHitSpan <- function (myhit) {
-		if (is.na(myhit)) 	{ return ("error")}
-		if (myhit=="") 		{ return ("error")}
-		
-		#=== across tiers
-		#check if hit contains separator
-		p <- options()$act.separator_between_tiers
-		if (stringr::str_detect(myhit, stringr::fixed(p))) {
-			#check if separator ist not at the beginning of the hit
-			results <- data.frame(stringr::str_locate_all(myhit, stringr::fixed(p)), 
-								  stringsAsFactors		= FALSE)
-			
-			#get rid of separators at the beginning
-			results <- results[!(results$start==1),]
-			
-			#get rid of separators at the end
-			results <- results[!(results$end==nchar(myhit)),]
-			
-			#if there is a hit left
-			if (nrow(results)>0) {
-				return("across tiers")
-			}
-		}
-		
-		#=== across intervals
-		p <- options()$act.separator_between_intervals
-		if (stringr::str_detect(myhit, stringr::fixed(p))) {
-			#check if separator ist not at the beginning of the hit
-			results <- data.frame(stringr::str_locate_all(myhit, stringr::fixed(p)), 
-								  stringsAsFactors		= FALSE)
-			
-			#get rid of separators at the beginning
-			results <- results[!(results$start==1),]
-			
-			#get rid of sepearators at the end
-			results <- results[!(results$end==nchar(myhit)),]
-			
-			#if there is a hit left
-			if (nrow(results)>0) {
-				return("across intervals")
-			}
-		}
-		return("within interval")
-	}
-	
-	#==== By TIME ====
-	if (s@search.mode=="fulltext" | s@search.mode=="fulltext.byTime") {
-		#---- get full text----
-		if (s@search.normalized==TRUE)  {
-			myFulltext <- t@fulltext.bytime.norm
-		} else {
-			myFulltext <- t@fulltext.bytime.orig
-		}
-		
-		#----check if fulltext is given----
-		continue <- TRUE
-		if (length(myFulltext) == 0)  	{
-			continue <- FALSE
-		} else {
-			if (is.na(myFulltext) == TRUE)  {
-				continue <- FALSE
-			}
-		}
-		
-		if (continue) {
-			#check if there are results
-			if (stringr::str_detect(myFulltext, s@pattern))	{
-				#---- get the text and info of the matches----
-				hit 		  		<- 	unlist(stringr::str_extract_all(myFulltext, s@pattern))
-				hit.length			<- 	stringr::str_length(hit)
-				hit.nr		  		<-	c(1:length(hit))
-				hit.pos.fulltext	<- 	data.frame(stringr::str_locate_all(myFulltext, s@pattern), 
-												stringsAsFactors		= FALSE)$start
-				if (s@search.normalized==TRUE) 	{
-					#calculate the interval that contains the hit
-					matches.recordsetNrs <- sapply(hit.pos.fulltext, getRecordsetForHit, start = ann$char.norm.bytime.start, end = ann$char.norm.bytime.end)
-					
-					#select the recordsets that contain the match
-					search.results.byTime 	<-	ann[matches.recordsetNrs,]
 
-					# calculate position start of hit in content
-					hit.pos.content <- hit.pos.fulltext - search.results.byTime$char.norm.bytime.start + 1
-					
-					#subtract length of separator
-					hit.pos.content <- hit.pos.content - (search.results.byTime$char.norm.bytime.end - search.results.byTime$char.norm.bytime.start - nchar(search.results.byTime$content.norm) + 1)
-				} else {
-					#calculate the interval that contains the hit
-					matches.recordsetNrs <- sapply(hit.pos.fulltext, getRecordsetForHit, start = ann$char.orig.bytime.start, end = ann$char.orig.bytime.end)
-					
-					#select the recordsets that contain the match
-					search.results.byTime 	<-	ann[matches.recordsetNrs,]
+	search.results.byTime <- NULL
+	search.results.byTier <- NULL
 
-					#calculate position start of hit in content
-					hit.pos.content <- hit.pos.fulltext - search.results.byTime$char.orig.bytime.start + 1
-					
-					#subtract length of separator
-					hit.pos.content <- hit.pos.content - (search.results.byTime$char.orig.bytime.end - search.results.byTime$char.orig.bytime.start - nchar(search.results.byTime$content) + 1)
-				}
-				
-				
-				#---- calculate if hit is across tiers ----
-				hit.span 			<- unlist(lapply(hit, detectHitSpan))
-				
-				#---- add further columns----
-				search.results.byTime 	<-	cbind(search.results.byTime, hit, hit.nr, hit.length, hit.pos.fulltext, hit.pos.content, searchMode="byTime", hit.span=hit.span)
-				rowNumbers				<-	row.names(search.results.byTime)
-			}
+	#==== byTime ====
+	if (s@search.mode == "fulltext" || s@search.mode == "fulltext.byTime") {
+		search.results.byTime <- .search_fulltext_one_mode(
+			t             = t,
+			ann           = ann,
+			s             = s,
+			mode          = "byTime",
+			sep_tiers     = sep_tiers,
+			sep_intervals = sep_intervals
+		)
+	}
+
+	#==== byTier ====
+	if (s@search.mode == "fulltext" || s@search.mode == "fulltext.byTier") {
+		search.results.byTier <- .search_fulltext_one_mode(
+			t             = t,
+			ann           = ann,
+			s             = s,
+			mode          = "byTier",
+			sep_tiers     = sep_tiers,
+			sep_intervals = sep_intervals
+		)
+		#=== delete results that are across tiers
+		if (!is.null(search.results.byTier) && nrow(search.results.byTier) > 0) {
+			search.results.byTier <-
+				search.results.byTier[search.results.byTier$hit.span != "across tiers", ]
 		}
 	}
-	
-	#================================ By TIER
-	if (s@search.mode=="fulltext" | s@search.mode=="fulltext.byTier") {
-		#=== get full text
-		if (s@search.normalized==TRUE)  {
-			myFulltext <- t@fulltext.bytier.norm
-		} else {
-			myFulltext <- t@fulltext.bytier.orig
-		}
-		
-		#=== check if fulltext is given
-		continue <- TRUE
-		if (length(myFulltext) == 0)  	{
-			continue <- FALSE
-		} else {
-			if (is.na(myFulltext) == TRUE)  {
-				continue <- FALSE
-			}
-		}
-		
-		if (continue) {
-			#check if there are results
-			if (stringr::str_detect(myFulltext, s@pattern))	{
-				#=== get the text and info of the matches
-				hit 		  		<- 	unlist(stringr::str_extract_all(myFulltext, s@pattern))
-				hit.length			<- 	stringr::str_length(hit)
-				hit.nr		  		<-	c(1:length(hit))
-				hit.pos.fulltext	<- 	data.frame(stringr::str_locate_all(myFulltext, s@pattern), 
-												stringsAsFactors		= FALSE)$start
-				if (s@search.normalized==TRUE) 	{
-					#calculate the interval that contains the hit
-					matches.recordsetNrs <- sapply(hit.pos.fulltext, getRecordsetForHit, start = ann$char.norm.bytier.start, end = ann$char.norm.bytier.end)
-					
-					#select the record sets that contain the match
-					search.results.byTier 	<-	ann[matches.recordsetNrs,]
 
-					#calculate position start of hit in content
-					hit.pos.content <- hit.pos.fulltext - search.results.byTier$char.norm.bytier.start + 1
-					
-					#subtract length of separator
-					hit.pos.content <- hit.pos.content - (search.results.byTier$char.norm.bytier.end - search.results.byTier$char.norm.bytier.start - nchar(search.results.byTier$content.norm )+ 1)
-					
-				} else {
-					#calculate the interval that contains the hit
-					matches.recordsetNrs <- sapply(hit.pos.fulltext, getRecordsetForHit, start = ann$char.orig.bytier.start, end = ann$char.orig.bytier.end)
-					
-					#select the recordsets that contain the match
-					search.results.byTier 	<-	ann[matches.recordsetNrs,]
-
-					#calculate position start of hit in content
-					hit.pos.content <- hit.pos.fulltext - search.results.byTier$char.orig.bytier.start + 1
-					
-					#subtract length of separator
-					hit.pos.content <- hit.pos.content - (search.results.byTier$char.orig.bytier.end - search.results.byTier$char.orig.bytier.start - nchar(search.results.byTier$content)+ 1)
-				}
-				
-				#=== calculate if hit is across tiers
-				hit.span 	<- unlist(lapply(hit, detectHitSpan))
-				
-				#=== add further columns
-				search.results.byTier 	<-	cbind(search.results.byTier, hit, hit.nr, hit.length, hit.pos.fulltext, hit.pos.content, searchMode="byTier", hit.span=hit.span)
-				rowNumbers				<-	row.names(search.results.byTier)
-				
-				#=== delete results that are across tiers
-				search.results.byTier <- search.results.byTier[search.results.byTier$hit.span!="across tiers", ]
-			}
-		}
-	}
-	
-	#=== get rid of duplicated results
-	#only by time
-	if (!is.null(search.results.byTime) & is.null(search.results.byTier)) {
+	#==== merge / dedup ====
+	if (!is.null(search.results.byTime) && is.null(search.results.byTier)) {
 		search.results <- search.results.byTime
-		
-		#only by Tier
-	} else if (is.null(search.results.byTime) & !is.null(search.results.byTier)) {
+	} else if (is.null(search.results.byTime) && !is.null(search.results.byTier)) {
 		search.results <- search.results.byTier
-		
-		#both
-	} else if (!is.null(search.results.byTime) & !is.null(search.results.byTier) ) {
-		#merge the results of both searches
+	} else if (!is.null(search.results.byTime) && !is.null(search.results.byTier)) {
 		search.results <- rbind(search.results.byTime, search.results.byTier)
-		
-		#delete double hits
 		compare <- search.results[, c("annotationID", "hit.pos.content")]
-		
 		doubles <- duplicated(compare)
-		search.results <- search.results[!doubles,]
-		
+		search.results <- search.results[!doubles, ]
 	} else {
 		search.results <- NULL
 	}
-	
-	#=== filter by time
-	#--- time section
-	if (length(s@filter.section.startsec)!=0) {
+
+	#==== time section filter ====
+	if (length(s@filter.section.startsec) != 0) {
 		if (!is.na(s@filter.section.startsec)) {
-			search.results <- search.results[(search.results$endsec>s@filter.section.startsec), ]
-			#include: also annotations that only share the boundary
-			#search.results <- search.results[(search.results$endsec>=s@filter.section.startsec), ]
+			search.results <- search.results[search.results$endsec > s@filter.section.startsec, ]
 		}
 	}
-	if (length(s@filter.section.endsec)!=0) {
+	if (length(s@filter.section.endsec) != 0) {
 		if (!is.na(s@filter.section.endsec)) {
-			search.results <- search.results[(search.results$startsec<s@filter.section.endsec), ]
+			search.results <- search.results[search.results$startsec < s@filter.section.endsec, ]
 		}
 	}
-	
-	if(	is.null(search.results)) {
-		return(NULL)
-	}
 
-	#add column transcript name
-	search.results <- cbind(transcriptName=rep(t@name, times=nrow(search.results)), search.results)
+	if (is.null(search.results)) return(NULL)
 
-	#=== return results
-	return(search.results)
+	search.results <- cbind(transcriptName = rep(t@name, times = nrow(search.results)),
+							search.results)
+
+	search.results
 }
 
+
+# Internal helper: runs the fulltext search for exactly one mode
+# ("byTime" or "byTier") and returns a data.frame (or NULL if no hits).
+#
+# @keywords internal
+.search_fulltext_one_mode <- function(t, ann, s, mode,
+									   sep_tiers, sep_intervals) {
+
+	if (mode == "byTime") {
+		if (isTRUE(s@search.normalized)) {
+			myFulltext <- t@fulltext.bytime.norm
+			col_start  <- ann$char.norm.bytime.start
+			col_end    <- ann$char.norm.bytime.end
+		} else {
+			myFulltext <- t@fulltext.bytime.orig
+			col_start  <- ann$char.orig.bytime.start
+			col_end    <- ann$char.orig.bytime.end
+		}
+	} else {
+		if (isTRUE(s@search.normalized)) {
+			myFulltext <- t@fulltext.bytier.norm
+			col_start  <- ann$char.norm.bytier.start
+			col_end    <- ann$char.norm.bytier.end
+		} else {
+			myFulltext <- t@fulltext.bytier.orig
+			col_start  <- ann$char.orig.bytier.start
+			col_end    <- ann$char.orig.bytier.end
+		}
+	}
+
+	if (length(myFulltext) == 0) return(NULL)
+	if (is.na(myFulltext))       return(NULL)
+
+	if (!stringr::str_detect(myFulltext, s@pattern)) return(NULL)
+
+	hit              <- unlist(stringr::str_extract_all(myFulltext, s@pattern))
+	hit.length       <- stringr::str_length(hit)
+	hit.nr           <- seq_along(hit)
+	hit.pos.fulltext <- data.frame(stringr::str_locate_all(myFulltext, s@pattern),
+								   stringsAsFactors = FALSE)$start
+
+	matches.recordsetNrs <- sapply(hit.pos.fulltext,
+								   function(hp) {
+									   which(hp >= col_start & hp <= col_end)[1]
+								   })
+
+	search.results <- ann[matches.recordsetNrs, ]
+
+	if (mode == "byTime") {
+		if (isTRUE(s@search.normalized)) {
+			hit.pos.content <- hit.pos.fulltext - search.results$char.norm.bytime.start + 1
+			hit.pos.content <- hit.pos.content -
+				(search.results$char.norm.bytime.end -
+				 search.results$char.norm.bytime.start -
+				 nchar(search.results$content.norm) + 1)
+		} else {
+			hit.pos.content <- hit.pos.fulltext - search.results$char.orig.bytime.start + 1
+			hit.pos.content <- hit.pos.content -
+				(search.results$char.orig.bytime.end -
+				 search.results$char.orig.bytime.start -
+				 nchar(search.results$content) + 1)
+		}
+	} else {
+		if (isTRUE(s@search.normalized)) {
+			hit.pos.content <- hit.pos.fulltext - search.results$char.norm.bytier.start + 1
+			hit.pos.content <- hit.pos.content -
+				(search.results$char.norm.bytier.end -
+				 search.results$char.norm.bytier.start -
+				 nchar(search.results$content.norm) + 1)
+		} else {
+			hit.pos.content <- hit.pos.fulltext - search.results$char.orig.bytier.start + 1
+			hit.pos.content <- hit.pos.content -
+				(search.results$char.orig.bytier.end -
+				 search.results$char.orig.bytier.start -
+				 nchar(search.results$content) + 1)
+		}
+	}
+
+	hit.span <- .detect_hit_span_vec(hit, sep_tiers, sep_intervals)
+
+	searchMode <- if (mode == "byTime") "byTime" else "byTier"
+
+	cbind(search.results,
+		  hit, hit.nr, hit.length, hit.pos.fulltext, hit.pos.content,
+		  searchMode = searchMode,
+		  hit.span   = hit.span)
+}
+
+
+# Internal helper: vectorized hit span detection.
+#
+# A separator is considered "inside" the hit iff there is at least one
+# character on each side of it (i.e. NOT at position 1 and NOT at the last
+# position).
+#
+# @keywords internal
+.detect_hit_span_vec <- function(hits, sep_tiers, sep_intervals) {
+	n      <- length(hits)
+	result <- rep("within interval", n)
+
+	is_bad <- is.na(hits) | hits == ""
+	result[is_bad] <- "error"
+
+	good_mask <- !is_bad
+	if (!any(good_mask)) return(result)
+
+	good_hits <- hits[good_mask]
+	good_lens <- nchar(good_hits)
+
+	tier_positions <- stringr::str_locate_all(good_hits,
+											   stringr::fixed(sep_tiers))
+	has_tier_inside <- vapply(seq_along(tier_positions), function(i) {
+		pos <- tier_positions[[i]]
+		if (nrow(pos) == 0) return(FALSE)
+		any(pos[, "start"] != 1L & pos[, "end"] != good_lens[i])
+	}, logical(1))
+
+	has_interval_inside <- logical(length(good_hits))
+	not_yet <- !has_tier_inside
+	if (any(not_yet)) {
+		int_positions <- stringr::str_locate_all(good_hits[not_yet],
+												  stringr::fixed(sep_intervals))
+		not_yet_lens <- good_lens[not_yet]
+		has_interval_inside_ny <- vapply(seq_along(int_positions), function(i) {
+			pos <- int_positions[[i]]
+			if (nrow(pos) == 0) return(FALSE)
+			any(pos[, "start"] != 1L & pos[, "end"] != not_yet_lens[i])
+		}, logical(1))
+		has_interval_inside[not_yet] <- has_interval_inside_ny
+	}
+
+	result_good <- rep("within interval", length(good_hits))
+	result_good[has_tier_inside]     <- "across tiers"
+	result_good[has_interval_inside] <- "across intervals"
+	result[good_mask] <- result_good
+
+	result
+}

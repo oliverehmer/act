@@ -58,7 +58,6 @@ import_eaf <- function(filePath=NULL,
 	t@file.encoding          <- "UTF-8"
 	t@import.result 		 <- "ok"
 	t@load.message 	         <- ""
-	t@modification.systime   <- character()
 	#t@annotations				<- .emptyAnnotations
 
 	if (!is.null(filePath)) {
@@ -69,11 +68,20 @@ import_eaf <- function(filePath=NULL,
 			return(t)
 		}
 		
-		#=== READ lines
-		myCon <- file(filePath, encoding = "UTF-8")
-		myeaf <- readLines(myCon, warn=FALSE)
-		close(myCon)
-		t@file.encoding <- "UTF-8"
+		#=== READ lines via robust encoding detection
+		read_result <- helper_read_annotation_file(
+			filePath       = filePath,
+			expectedHeader = NULL,
+			fileType       = "eaf",
+			verbose        = TRUE
+		)
+		if (read_result$status != "ok") {
+			t@import.result <- "error"
+			t@load.message  <- if (nzchar(read_result$message)) read_result$message else "File could not be read."
+			return(t)
+		}
+		myeaf <- read_result$lines
+		t@file.encoding <- read_result$encoding_detected
 		if (!length(options()$act.import.storefileContentInTranscript)==0) {
 			if (options()$act.import.storefileContentInTranscript==TRUE) {
 				t@file.content <- myeaf
@@ -218,21 +226,11 @@ import_eaf <- function(filePath=NULL,
 		#View(tiers.m)
 		
 		#---create unique tierNames
-		#	while (length(tiers$tierName[duplicated(tiers$tierName)])>0)  	{
-		#		#get multiple tierNames
-		#		multiple <- tiers$tierName[duplicated(tiers$tierName)]
-		#		for (myName in multiple) {
-		#			tiers$tierName[tiers$tierName==myName]<- paste(tiers$tierName[tiers$tierName==myName],1:length(tiers$tierName[tiers$tierName==myName]),sep="-")
-		#		}
-		#		t@import.result 		<- "ok"
-		#		t@load.message   <- "Some tiers have been renamed since their names were not unique."
-		#}
-	
-		#---create unique tierNames
 		if (length(tiers$tierName[duplicated(tiers$tierName)])>0) {
+			renamed_tiers <- unique(tiers$tierName[duplicated(tiers$tierName)])
 			tiers$tierName <- make.unique(tiers$tierName)
 			t@import.result 		<- "ok"
-			t@load.message   <- "Some tiers have been renamed since their names were not unique."
+			t@load.message   <- paste0("Some tiers have been renamed since their names were not unique: ", paste(renamed_tiers, collapse=", "))
 		}
 		
 			
@@ -514,6 +512,8 @@ import_eaf <- function(filePath=NULL,
 		
 		#=== if it is not a completely empty transcript
 		if (!nrow(ann)==0)  	{
+			ann$content <- .replace_newlines(.strip_invalid_xml_chars(textutils::HTMLdecode(ann$content)))
+
 			#=== get rid of empty intervals
 			if (options()$act.import.readEmptyIntervals==FALSE) 		{
 				ann <- ann[ann$content!="",]
@@ -538,7 +538,6 @@ import_eaf <- function(filePath=NULL,
 			t@length.sec <- max( t@length.sec, as.double(annotations$startsec)+1, as.double(annotations$endsec)+1)
 			
 			#=== html conversion
-			ann$content      <- .strip_invalid_xml_chars(textutils::HTMLdecode(ann$content))
 			ann$tierName    <- textutils::HTMLdecode(ann$tierName)
 			
 		}
@@ -551,7 +550,7 @@ import_eaf <- function(filePath=NULL,
 	t@annotations 	<- ann
 	
 	#media
-	t@media.path <- medialinks
+	t@media <- media_build(medialinks)
 	
 	#tiers: all are interval tiers 
 	t@tiers <- act::helper_tiers_new_table(tierNames=tiers$tierName)

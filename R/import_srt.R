@@ -35,7 +35,6 @@ import_srt <- function(filePath,
 	t@import.result 		<- "ok"
 	t@file.encoding			<- "UTF8"
 	t@load.message    	    <- ""
-	t@modification.systime  <- character()
 	
 	
 	
@@ -52,10 +51,17 @@ import_srt <- function(filePath,
 		mysrt <- srt::read_srt(	t@file.path 		)	
 	}
 	if(getOption("act.import.storefileContentInTranscript", default=TRUE)) {
-		myCon <- file(filePath, encoding = "UTF-8")
-		mytxt <- readLines(myCon, warn=FALSE)
-		close(myCon)
-		t@file.content <- mytxt
+		if (!is.null(filePath)) {
+			read_result <- helper_read_annotation_file(
+				filePath       = filePath,
+				expectedHeader = NULL,
+				fileType       = "srt",
+				verbose        = FALSE
+			)
+			if (!is.null(read_result$lines)) {
+				t@file.content <- read_result$lines
+			}
+		}
 	}
 	
 	
@@ -108,7 +114,8 @@ import_srt <- function(filePath,
 		ann$startsec		<- as.double(ann$startsec)
 		ann$endsec  		<- as.double(ann$endsec)
 		ann$content  		<- as.character(ann$content)
-		
+		ann$content <- .replace_newlines(.strip_invalid_xml_chars(ann$content))
+
 		#=== get rid of empty intervals
 		if (options()$act.import.readEmptyIntervals==FALSE) 		{
 			ann <- ann[ann$content!="",]
@@ -138,7 +145,7 @@ import_srt <- function(filePath,
 	t@length.sec <- max(as.double(ann$startsec)+1, as.double(ann$endsec)+1)
 	
 	t@history <- list( 
-						 list(modification                               = "import_rpraat",
+						 list(modification                               = "import_srt",
 						 	 systime                                       = Sys.time()
 						 )
 	)

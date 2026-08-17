@@ -6,15 +6,18 @@
 #' 
 #' If \code{assignMedia=TRUE} the paths defined in \code{x@paths.media.files} will be scanned for media files.
 #' Based on their file names the media files and annotations files will be matched.
-#' Only the the file types set in \code{options()$act.fileformats.audio} and \code{options()$act.fileformats.video} will be recognized. 
+#' Only the the file types set in \code{options()$act.media.fileformats.audio} and \code{options()$act.media.fileformats.video} will be recognized. 
 #' You can modify these options to recognize other media types.
 #' 
 #' See \code{@import.results} of the corpus object to check the results of importing the files.
 #' To get a detailed overview of the corpus object use \code{act::info(x)}, for a summary use \code{act::info_summarized(x)}.
 #' 
 #' @param x Corpus object.
+#' @param createNormalization Logical; if \code{TRUE} the normalized content will be created.
 #' @param createFulltext Logical; if \code{TRUE} full text will be created.
-#' @param assignMedia Logical; if \code{TRUE} the folder(s) specified in \code{@paths.media.files} of your corpus object will be scanned for media. 
+#' @param assignMedia Logical; if \code{TRUE} the folder(s) specified in \code{@paths.media.files} of your corpus object will be scanned for media.
+#' @param cureTranscripts Logical; if \code{TRUE} transcripts are cured (cleaned up) after loading. Default is \code{TRUE}.
+#' @param verbose Logical; if \code{TRUE} progress and result messages are printed to the console. Default is \code{TRUE}.
 #'
 #' @return Corpus object.
 #' 
@@ -25,6 +28,7 @@
 #' @example inst/examples/corpus_import.R
 #' 
 corpus_import <- function(x,
+						  createNormalization = TRUE,
 						  createFulltext     = TRUE,
 						  assignMedia        = TRUE,
 						  cureTranscripts    = TRUE,
@@ -34,7 +38,7 @@ corpus_import <- function(x,
 	#createFulltext     <- TRUE 
 	#assignMedia        <- TRUE
 	#x<-corpus
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a corpus object.") } }
+	.assert_corpus(x, missing = missing(x))
 	
 	#--- check if files and folders exist
 	paths <- x@paths.annotation.files
@@ -130,10 +134,25 @@ corpus_import <- function(x,
 		} else if (duplicate_handling %in% c("warn_keep_first", "warn_keep_newest")) {
 			dup_names <- unique(transcriptNames.info$names.before.unique[duplicated(transcriptNames.info$names.before.unique)])
 			if (duplicate_handling == "warn_keep_newest") {
+				date_pattern <- x@import.names.modify$datePattern
+				use_date <- !is.null(date_pattern) && length(date_pattern) == 1L && nzchar(date_pattern)
 				for (dn in dup_names) {
 					dup_idx <- which(transcriptNames.info$names.before.unique == dn)
-					file_dates <- file.info(results$filePath[dup_idx])$mtime
-					keep_idx <- dup_idx[which.max(file_dates)]
+					sort_key <- if (use_date) {
+						.corpus_import_date_key(basename(results$filePath[dup_idx]), date_pattern)
+					} else {
+						rep("", length(dup_idx))
+					}
+					if (any(nzchar(sort_key))) {
+						win <- .which_max_key(sort_key)
+					} else {
+						# no file carries a date in its name - the modification time is the
+						# last resort here (it must never override a date, only stand in
+						# when there is none)
+						file_dates <- file.info(results$filePath[dup_idx])$mtime
+						win <- if (all(is.na(file_dates))) 1L else which.max(file_dates)
+					}
+					keep_idx <- dup_idx[win]
 					skip_idx <- setdiff(dup_idx, keep_idx)
 					results$status[skip_idx] <- "skipped"
 					results$message[skip_idx] <- paste0("Duplicate: newer file kept (", basename(results$filePath[keep_idx]), ")")
@@ -178,8 +197,9 @@ corpus_import <- function(x,
 						if (new.transcript@load.message!="") {
 							if (results$message[i]=="") {
 								results$message[i] <- new.transcript@load.message
+							} else {
+								results$message[i] <- paste (results$message[i], new.transcript@load.message, sep=", ", collapse=", ")
 							}
-							results$message[i] <- paste (results$message[i], new.transcript@load.message, sep=", ", collapse=", ")
 						}
 						
 						#add to the list
@@ -252,9 +272,10 @@ corpus_import <- function(x,
 	if (length(test)==0) {
 		cli::cli_abort("No annotation files found in input path(s).")
 	} else {
-		x <- act::transcripts_add(x=x, 
-								 test, 
-								 createFulltext=createFulltext, 
+		x <- act::transcripts_add(x=x,
+								 test,
+								 createNormalization=createNormalization,
+								 createFulltext=createFulltext,
 								 assignMedia=assignMedia)
 	}
 
@@ -263,6 +284,26 @@ corpus_import <- function(x,
 		cli::cli_warn(unique(message))
 	}
 
-	
+
 	return(x)
+}
+
+
+# Build a sortable key from the date (and optional version letter) in a file
+# name, used to pick the newest of several same-named files without relying on
+# the modification time. No date -> empty key (sorts lowest). A plain date sorts
+# before the same date with a version letter (no letter is version "0" < "b").
+.corpus_import_date_key <- function(filenames, date_pattern) {
+	raw <- stringr::str_extract(filenames, date_pattern)
+	dv  <- stringr::str_match(raw, "([0-9]{4}-[0-9]{2}-[0-9]{2})([a-z]?)")
+	d   <- dv[, 2]
+	v   <- dv[, 3]
+	v[is.na(v)] <- ""
+	ifelse(is.na(d), "", paste0(d, ifelse(nzchar(v), v, "0")))
+}
+
+
+.which_max_key <- function(keys) {
+	keys[is.na(keys)] <- ""
+	which(keys == max(keys))[1]
 }

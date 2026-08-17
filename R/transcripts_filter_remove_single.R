@@ -22,7 +22,7 @@ transcripts_filter_remove_single <- function (t,
 									   filterSectionEndsec = NULL, 
 									   sort=c("none", "tier>startsec", "startsec>tier")) {
 	#=== settings
-	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
+	.assert_transcript(t, missing = missing(t))
 	
 	#--- check parameter 'filterTierNames'
 	if (!is.null(filterTierNames)) {
@@ -121,7 +121,6 @@ transcripts_filter_remove_single <- function (t,
 	}
 
 	#HISTORY transcript
-	t@modification.systime <- Sys.time()
 	t@history[[length(t@history)+1]] <-	list(
 		modification              = "transcripts_filter_single",
 		systime                   = Sys.time(),

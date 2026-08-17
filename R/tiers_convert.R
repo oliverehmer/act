@@ -27,7 +27,7 @@ tiers_convert <- function(x,
 						  filterTranscriptNames=NULL
 						  ) {
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	
 	#=== get the transcript names
 	#if none are given, take all names
@@ -59,11 +59,11 @@ tiers_convert <- function(x,
 					x@transcripts[[i]]@tiers$type[j]<-'TextTier'
 					
 					#--modify times
-					ids <- which(x@transcripts[[i]]@annotations$tierName==j)
+					ids <- which(x@transcripts[[i]]@annotations$tierName==filterTierNamesCurrent[j])
 					if (length(ids)>0) {
 						x@transcripts[[i]]@annotations$endsec[ids]<- x@transcripts[[i]]@annotations$startsec[ids]
 					}
-					tiers_converted_transcript <- c(tiers_converted_transcript,j)
+					tiers_converted_transcript <- c(tiers_converted_transcript,filterTierNamesCurrent[j])
 					transcripts_modified_ids <- c(transcripts_modified_ids, i)
 					TierAlreadyConverted <- TRUE
 				}
@@ -74,21 +74,20 @@ tiers_convert <- function(x,
 					
 					#--modify times
 					#get all end times
-					ids <- which(x@transcripts[[i]]@annotations$tierName==j)
+					ids <- which(x@transcripts[[i]]@annotations$tierName==filterTierNamesCurrent[j])
 					if (length(ids)>0) {
 						newTimes <- c(x@transcripts[[i]]@annotations$endsec[ids], x@transcripts[[i]]@length.sec)
 						newTimes <- newTimes[2:length(newTimes)]
 						x@transcripts[[i]]@annotations$endsec[ids]<- newTimes
 					}
-					tiers_converted_transcript <- c(tiers_converted_transcript,j)
+					tiers_converted_transcript <- c(tiers_converted_transcript,filterTierNamesCurrent[j])
 					transcripts_modified_ids <- c(transcripts_modified_ids, i)
 				}
 			}
 		}
 		
 		#HISTORY transcript
-		x@transcripts[[i]]@modification.systime <- Sys.time()
-		x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
+		x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list(
 			modification          ="tiers_convert",
 			systime               = Sys.time(),
 			result                = paste("OK:", length(tiers_converted_transcript), "tier(s) converted"),

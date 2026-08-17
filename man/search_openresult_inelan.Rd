@@ -4,7 +4,13 @@
 \alias{search_openresult_inelan}
 \title{Open a search result in 'ELAN'}
 \usage{
-search_openresult_inelan(x, s, resultid, openOriginal = FALSE)
+search_openresult_inelan(
+  x,
+  s,
+  resultid,
+  openOriginal = FALSE,
+  overwrite = TRUE
+)
 }
 \arguments{
 \item{x}{Corpus object.}
@@ -14,6 +20,8 @@ search_openresult_inelan(x, s, resultid, openOriginal = FALSE)
 \item{resultid}{Integer; Number of the search result (row in the data frame \code{s@results}) to be opened.}
 
 \item{openOriginal}{Logical; if \code{TRUE} the function will check if the original annotation file was an .eaf file and if it still exists in the original location. If so, the function will not create a temporary .eaf file but open the original file. Warning: The original .pfsx file (if it exists) will be overwritten.}
+
+\item{overwrite}{Logical; if \code{TRUE} (default) an existing .pfsx file will be overwritten. If \code{FALSE} an existing .pfsx file is kept.}
 }
 \description{
 The function creates an temporary .eaf file and a .psfx file that locates the search hit.

@@ -19,7 +19,7 @@ annotations_delete <- function (x,
 								filterTranscriptNames=NULL, 
 								filterTierNames=NULL) {
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	
 	transcripts_modified_ids <- c()
 	annotations_deleted_total_nr <- 0
@@ -64,10 +64,9 @@ annotations_delete <- function (x,
 			x@transcripts[[i]]@annotations <- x@transcripts[[i]]@annotations[-annotations_deleted_ids, ]
 			
 			#update modification info
-			
+
 			#HISTORY transcript
-			x@transcripts[[i]]@modification.systime <- Sys.time()		
-			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
+			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list(
 				modification              = "annotations_delete",
 				systime                   = Sys.time(),
 				pattern                   = pattern,

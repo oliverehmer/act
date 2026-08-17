@@ -13,18 +13,20 @@
 #' @param filePath Character string; input path of a single 'Praat' .TextGrid file.
 #' @param fileContent Vector of character strings; contents of a 'Praat' .TextGrid file read with \code{readLines()}.
 #' @param transcriptName Character string; name of the transcript.
-#' 
+#' @param verbose Logical; if \code{TRUE} warnings about encoding issues are printed to the console. If \code{FALSE} messages are only stored in \code{t@load.message}. Default is \code{TRUE}.
+#'
 #' @return Transcript object.
-#' 
-#' @seealso \link{corpus_import}, \link{corpus_new}, \link{import}, \link{import_eaf}, \link{import_exb}, \link{import_rpraat} 
-#' 
+#'
+#' @seealso \link{corpus_import}, \link{corpus_new}, \link{import}, \link{import_eaf}, \link{import_exb}, \link{import_rpraat}
+#'
 #' @export
 #'
 #' @example inst/examples/import_textgrid.R
-#' 
-import_textgrid <- function(filePath=NULL, 
-							fileContent=NULL, 
-							transcriptName=NULL) {
+#'
+import_textgrid <- function(filePath=NULL,
+							fileContent=NULL,
+							transcriptName=NULL,
+							verbose=TRUE) {
 	
 	#filePath<-	'/Users/oliverehmer/Desktop/Mary_John_bell.TextGrid'
 	
@@ -56,8 +58,10 @@ import_textgrid <- function(filePath=NULL,
 	t@file.type 			   <- "textgrid"
 	t@import.result 		   <- "ok"
 	t@load.message 	           <- ""
-	t@modification.systime     <- character()
-	
+
+	mytg <- NULL
+	t@file.encoding <- "unknown"
+
 	if (!is.null(filePath)) {
 		#--- check if file exists
 		if (!file.exists(filePath)) {
@@ -65,57 +69,35 @@ import_textgrid <- function(filePath=NULL,
 			t@load.message   <- "File does not exist."
 			return(t)
 		}
-		
-		#=========================================================================================
-		# Trying to read files (actually in LATIN1)  with option enc=UTF-18/-8 will result in an error.
-		# Function will not work when trying to read files (actually in UTF8) with enc=LATIN1		# (
-		#--> that's why i need to try first with utf
-		myEncodings	<- c("UTF-16", "UTF-8", "LATIN1")
-		
-		#test all encondings, tell me in the end which worked
-		mytg <- NULL
-		t@file.encoding <- "unknown"
-		#myEncoding <- "UTF-8"
-		#result <- readLines(con=filePath, encoding=myEncoding)
-		for (myEncoding in myEncodings)	{
-			#try to read first 2 lines
-			result	<- .test_read(filePath, myEncoding, 2)
-			
-			#if that worked
-			if (result[1]!="error")		{
-				# try to read all lines
-				result	<- .test_read(filePath, myEncoding, -1)
-				
-				#if that worked
-				if (result[1]!="error") 			{
-					#  Check here if firstline[1] contains "ooTextFile"
-					#  check if the second line says textgrid
-					if(length(grep("ooTextFile", result[1]))!=0) {
-						if(length(grep("TextGrid", result[2]))!=0) {
-							mytg <- result
-							t@file.encoding 		<- myEncoding
-							break()
-						}
-					}
-				}
-			}
+
+		#--- read file via robust encoding detection
+		read_result <- helper_read_annotation_file(
+			filePath       = filePath,
+			expectedHeader = c('File type = "ooTextFile"',
+							   'Object class = "TextGrid"'),
+			fileType       = "textgrid",
+			verbose        = verbose
+		)
+		if (read_result$status != "ok") {
+			t@import.result <- "error"
+			t@load.message  <- if (nzchar(read_result$message))
+								read_result$message
+							   else
+								"File not recognized as TextGrid."
+			return(t)
 		}
+		mytg <- read_result$lines
+		t@file.encoding <- read_result$encoding_detected
 	}
 	if (!is.null(fileContent)) {
-		mytg <- fileContent 
+		mytg <- fileContent
 		t@file.encoding <-"UTF8"
 	}
-	
+
 	if(is.null(mytg)) 	{
 		t@import.result  <- "error"
 		t@load.message   <- "File not recognized as TextGrid."
 		return(t)
-	} else {
-		if (!any(!is.na(stringr::str_match(mytg, pattern="ooTextFile")))) {
-			t@import.result    <- "error"
-			t@load.message   <- "File not recognized as TextGrid."
-			return(t)
-		}
 	}
 	if(getOption("act.import.storefileContentInTranscript", default=TRUE)) {
 		t@file.content <- mytg
@@ -148,9 +130,10 @@ import_textgrid <- function(filePath=NULL,
 	} else {
 		#---create unique tierNames
 		if (length(tierinfo$tierName[duplicated(tierinfo$tierName)])>0) {
+			renamed_tiers <- unique(tierinfo$tierName[duplicated(tierinfo$tierName)])
 			tierinfo$tierName <- make.unique(tierinfo$tierName)
 			t@import.result 		<- "ok"
-			t@load.message   <- "Some tiers have been renamed since their names were not unique."
+			t@load.message   <- paste0("Some tiers have been renamed since their names were not unique: ", paste(renamed_tiers, collapse=", "))
 		}
 		alltierNames <- rep(tierinfo$tierName, tierinfo$size)
 		
@@ -165,6 +148,7 @@ import_textgrid <- function(filePath=NULL,
 		#replace double "" from praat TextGrids
 		tiercontent$content <- stringr::str_replace_all(tiercontent$content, "\"\"", "\"")
 		tiercontent$content <- .strip_invalid_xml_chars(tiercontent$content)
+		tiercontent$content <- .replace_newlines(tiercontent$content)
 		
 		#check if actual and calculated values are the same
 		if(	length(alltierNames)!=nrow(tiercontent) ) 	{

@@ -21,10 +21,34 @@
 .emptyAnnotations$endsec  		<- as.double(.emptyAnnotations$endsec)
 .emptyAnnotations$content  		<- as.character(.emptyAnnotations$content)
 
-.emptyTiers <- data.frame( 
-	name 				= as.character(), 
-	type 				= as.character(), 
-	position 			= as.integer(), 
+.emptyTiers <- data.frame(
+	name 				= as.character(),
+	type 				= as.character(),
+	position 			= as.integer(),
+	stringsAsFactors 	= FALSE)
+
+.emptyMedia <- data.frame(
+	path 				= as.character(),
+	source.path 		= as.character(),
+	clip.id 			= as.character(),
+	startsec 			= as.double(),
+	startsec.source 	= as.character(),
+	length.sec 			= as.double(),
+	video.width 		= as.integer(),
+	video.height 		= as.integer(),
+	video.fps 			= as.double(),
+	video.codec 		= as.character(),
+	video.bitrate 		= as.double(),
+	audio.sample.rate 	= as.integer(),
+	audio.channels 		= as.integer(),
+	audio.codec 		= as.character(),
+	audio.bitrate 		= as.double(),
+	container.format 	= as.character(),
+	file.size 			= as.double(),
+	volume.kind 		= as.character(),
+	volume.name 		= as.character(),
+	kind 				= as.character(),
+	type 				= as.character(),
 	stringsAsFactors 	= FALSE)
 
 #' transcript object
@@ -47,15 +71,14 @@
 #' @slot length.sec Double; \code{[READ ONLY]} Duration of the transcript in seconds.
 #' @slot tiers Data.frame; \code{[READ ONLY]} Table with the tiers. To modify the tiers it is highly recommended to use functions of the package to ensure for consistency of the data.
 #' @slot annotations Data.frame; Table with the annotations.
-#' @slot media.path Vector of character strings; Path(s) to the media files that correspond to this transcript object.
-#' @slot normalization.systime POSIXct; Time of the last normalization. 
-#' @slot fulltext.systime POSIXct; \code{[READ ONLY]} Time of the last creation of the full texts. 
+#' @slot media Data.frame; Table of the media files that correspond to this transcript object. Core columns: \code{path} (absolute file path), \code{source.path} (path of the source recording a clip was cut from), \code{clip.id} (clip identifier), \code{startsec} (start of the file in the original time reference, 0 for full recordings), \code{startsec.source} (where startsec came from: "tag"/"timecode"/"corpus"), \code{length.sec} (file duration), \code{video.width}, \code{video.height}, \code{video.fps}, \code{video.codec}, \code{video.bitrate}, \code{audio.sample.rate}, \code{audio.channels}, \code{audio.codec}, \code{audio.bitrate}, \code{container.format}, \code{file.size} (bytes), \code{kind} ("full" or "clip"), \code{type} ("video" or "audio"). Columns that are not yet read may be \code{NA}. Additional columns may be present.
+#' @slot normalization.signature Character string; \code{[READ ONLY]} Hash signature of the inputs that produced the current normalization (annotations content + normalization matrix). Used to detect when re-normalization is needed.
+#' @slot fulltext.signature Character string; \code{[READ ONLY]} Hash signature of the inputs that produced the current fulltexts (annotations + separators + tier filter). Used to detect when re-creation of the fulltexts is needed.
 #' @slot fulltext.filter.tier.names Vector of character strings; names of tiers that were included in the full text..
 #' @slot fulltext.bytime.orig Character string; \code{[READ ONLY]} full text of the transcript based on the ORIGINAL content of the annotations, sorting the annotations by TIME
 #' @slot fulltext.bytime.norm Character string; \code{[READ ONLY]} full text of the transcript based on the NORMALIZED content of the annotations, sorting the annotations by TIME
 #' @slot fulltext.bytier.orig Character string; \code{[READ ONLY]} full text of the transcript based on the ORIGINAL content of the annotations, sorting the annotations first by TIERS and then by time
 #' @slot fulltext.bytier.norm Character string; \code{[READ ONLY]} full text of the transcript based on the NORMALIZED content of the annotations, sorting the annotations first by TIERS and then by time
-#' @slot modification.systime POSIXct; \code{[READ ONLY]} Time of the last modification of the transcript. Modifications after importing the annotation file by applying one/some of the packages function(s). Manual changes of the transcript by the user are not tracked!
 #' @slot history List; \code{[READ ONLY]} History of the modifications made to the transcript object.
 #' @export
 #'
@@ -78,16 +101,15 @@ methods::setClass("transcript",
 				  	length.sec                 = "numeric",
 				  	tiers                      = "ANY",
 				  	annotations                = "ANY",
-				  	media.path                 = "character",
-				  	
-				  	normalization.systime      = "ANY",
-				  	fulltext.systime           = "ANY",
+				  	media                      = "data.frame",
+
+				  	normalization.signature    = "character",
+				  	fulltext.signature         = "character",
 				  	fulltext.filter.tier.names = "character",
 				  	fulltext.bytime.orig       = "character",
 				  	fulltext.bytime.norm       = "character",
 				  	fulltext.bytier.orig       = "character",
 				  	fulltext.bytier.norm       = "character",
-				  	modification.systime       = "ANY",
 				  	history                    = "list"
 				  	
 				  ), prototype = list (
@@ -103,33 +125,32 @@ methods::setClass("transcript",
 				  	length.sec                 = 0,
 				  	tiers                      = .emptyTiers,
 				  	annotations                = .emptyAnnotations ,
-				  	media.path                 = character(),
-				  	
-				  	normalization.systime      = character(),
-				  	fulltext.systime           = character(),
+				  	media                      = .emptyMedia,
+
+				  	normalization.signature    = character(),
+				  	fulltext.signature         = character(),
 				  	fulltext.filter.tier.names = character(),
 				  	fulltext.bytime.orig       = "",
 				  	fulltext.bytime.norm       = "",
 				  	fulltext.bytier.orig       = "",
 				  	fulltext.bytier.norm       = "",
-				  	modification.systime       = FALSE,
 				  	history           = list()
 				  )
 )
 
 transcript_show <- function (object) {
 	w <- 26
-	cli::cli_rule("transcript object: {.val {object@name}}")
+	.show_title(paste0("transcript object: ", object@name))
 
-	cli::cli_text("{.strong General}")
+	.show_head("General")
 	.show_dl(c(
 		"length.sec"  = as.character(object@length.sec),
 		"tiers"       = as.character(nrow(object@tiers)),
 		"annotations" = as.character(nrow(object@annotations))
 	), width = w)
 
-	cli::cli_text("")
-	cli::cli_text("{.strong File}")
+	.show_sep()
+	.show_head("File")
 	.show_dl(c(
 		"file.path"     = object@file.path,
 		"file.encoding" = object@file.encoding,
@@ -137,27 +158,26 @@ transcript_show <- function (object) {
 		"file.content"  = if(length(object@file.content)==0) "[empty]" else "[check directly]"
 	), width = w)
 
-	cli::cli_text("")
-	cli::cli_text("{.strong Import}")
+	.show_sep()
+	.show_head("Import")
 	.show_dl(c(
 		"import.result" = object@import.result,
 		"load.message"  = object@load.message,
-		"media.path"    = if(length(object@media.path)==0) "[empty]" else paste("[check directly]", length(object@media.path), "path(s)")
+		"media"         = if(nrow(object@media)==0) "[empty]" else paste("[check directly]", nrow(object@media), "file(s)")
 	), width = w)
 
-	cli::cli_text("")
-	cli::cli_text("{.strong Processing}")
+	.show_sep()
+	.show_head("Processing")
 	.show_dl(c(
-		"normalization.systime"      = as.character(object@normalization.systime),
-		"fulltext.systime"           = as.character(object@fulltext.systime),
+		"normalized"                 = if (length(object@normalization.signature) > 0) "yes" else "no",
+		"fulltext"                   = if (length(object@fulltext.signature) > 0) "yes" else "no",
 		"fulltext.filter.tier.names" = paste(length(object@fulltext.filter.tier.names), "name(s)"),
-		"modification.systime"       = as.character(object@modification.systime),
 		"history"                    = paste(length(object@history), "message(s)")
 	), width = w)
 
-	cli::cli_text("")
+	.show_sep()
 	info <- act::info_summarized(object)
-	cli::cli_text("{.strong Summary}")
+	.show_head("Summary")
 	.show_dl(c(
 		"tier.count"       = as.character(info$tier.count),
 		"annotations.count" = as.character(info$annotations.count),

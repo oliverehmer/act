@@ -40,8 +40,8 @@ annotations_insert_from_search_to_tier <- function (x,
 	#	collapseString        <- " | "
 	#View(s@results)
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a corpus object.") } }
-	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s,"search")   )	{cli::cli_abort("Parameter {.arg s} needs to be a search object.") } }
+	.assert_corpus(x, missing = missing(x))
+	.assert_search(s, missing = missing(s))
 	
 	transcripts_modified_ids      <- c()
 	annotations_inserted_nr       <- 0

@@ -6,6 +6,7 @@
 \usage{
 corpus_import(
   x,
+  createNormalization = TRUE,
   createFulltext = TRUE,
   assignMedia = TRUE,
   cureTranscripts = TRUE,
@@ -15,9 +16,15 @@ corpus_import(
 \arguments{
 \item{x}{Corpus object.}
 
+\item{createNormalization}{Logical; if \code{TRUE} the normalized content will be created.}
+
 \item{createFulltext}{Logical; if \code{TRUE} full text will be created.}
 
 \item{assignMedia}{Logical; if \code{TRUE} the folder(s) specified in \code{@paths.media.files} of your corpus object will be scanned for media.}
+
+\item{cureTranscripts}{Logical; if \code{TRUE} transcripts are cured (cleaned up) after loading. Default is \code{TRUE}.}
+
+\item{verbose}{Logical; if \code{TRUE} progress and result messages are printed to the console. Default is \code{TRUE}.}
 }
 \value{
 Corpus object.
@@ -30,7 +37,7 @@ All previously loaded transcript objects will be deleted.
 \details{
 If \code{assignMedia=TRUE} the paths defined in \code{x@paths.media.files} will be scanned for media files.
 Based on their file names the media files and annotations files will be matched.
-Only the the file types set in \code{options()$act.fileformats.audio} and \code{options()$act.fileformats.video} will be recognized.
+Only the the file types set in \code{options()$act.media.fileformats.audio} and \code{options()$act.media.fileformats.video} will be recognized.
 You can modify these options to recognize other media types.
 
 See \code{@import.results} of the corpus object to check the results of importing the files.

@@ -11,22 +11,24 @@
 #' @param x Corpus object
 #' @param ... transcript object, list of transcript objects, corpus object.
 #' @param skipDuplicates Logical; If \code{FALSE} double transcripts will be renamed to make the names unique, if \code{TRUE} double transcripts will not be added.
+#' @param createNormalization Logical; if \code{TRUE} the normalized content will be created.
 #' @param createFulltext Logical; if \code{TRUE} full text will be created.
-#' @param assignMedia Logical; if \code{TRUE} the folder(s) specified in \code{@paths.media.files} of your corpus object will be scanned for media. 
+#' @param assignMedia Logical; if \code{TRUE} the folder(s) specified in \code{@paths.media.files} of your corpus object will be scanned for media.
 #'
 #' @return Corpus object
 #' @export
 #'
 #' @example inst/examples/transcripts_add.R
-#' 
-#' 
-transcripts_add <- function(x, 
-							..., 
-							skipDuplicates=FALSE, 
-							createFulltext=TRUE, 
+#'
+#'
+transcripts_add <- function(x,
+							...,
+							skipDuplicates=FALSE,
+							createNormalization=TRUE,
+							createFulltext=TRUE,
 							assignMedia=TRUE) {
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	if (missing(...)) 	{cli::cli_abort("Missing transcript object(s) in parameter '...'.") 	} 
 	
 	#--- get list with all transcript objects from arguments
@@ -95,10 +97,10 @@ transcripts_add <- function(x,
 	if (length(transcripts_added_ids)==0) {transcripts_added_ids <- c()}
 	
 	#=== update
-	if (length(transcripts_added_ids)!=0) 	{	
+	if (length(transcripts_added_ids)!=0) 	{
 		#=== normalize transcription content in object : normalized content will be in $content.norm
-		x <- act::transcripts_update_normalization(x, transcriptNames=transcripts_added_ids)
-		
+		if (createNormalization) {	x <- act::transcripts_update_normalization(x, transcriptNames=transcripts_added_ids) }
+
 		#=== create full text for searches
 		if (createFulltext) {	x <- act::transcripts_update_fulltexts(x,transcriptNames=transcripts_added_ids) }
 		

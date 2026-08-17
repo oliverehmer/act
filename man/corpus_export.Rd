@@ -67,7 +67,7 @@ act::corpus_export(x=examplecorpus,
 
 # Same same, but now WITHOUT media links.
 # Only Media links are only exported that are in
-# the '@media.path' attribute in the transcript object(s))
+# the '@media' table in the transcript object(s))
 act::corpus_export(x=examplecorpus,
 						folderOutput=folderOutput,
 						formats="eaf",

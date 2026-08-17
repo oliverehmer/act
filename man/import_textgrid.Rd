@@ -4,7 +4,12 @@
 \alias{import_textgrid}
 \title{Import a single 'Praat' .TextGrid file}
 \usage{
-import_textgrid(filePath = NULL, fileContent = NULL, transcriptName = NULL)
+import_textgrid(
+  filePath = NULL,
+  fileContent = NULL,
+  transcriptName = NULL,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{filePath}{Character string; input path of a single 'Praat' .TextGrid file.}
@@ -12,6 +17,8 @@ import_textgrid(filePath = NULL, fileContent = NULL, transcriptName = NULL)
 \item{fileContent}{Vector of character strings; contents of a 'Praat' .TextGrid file read with \code{readLines()}.}
 
 \item{transcriptName}{Character string; name of the transcript.}
+
+\item{verbose}{Logical; if \code{TRUE} warnings about encoding issues are printed to the console. If \code{FALSE} messages are only stored in \code{t@load.message}. Default is \code{TRUE}.}
 }
 \value{
 Transcript object.

@@ -24,3 +24,13 @@ s=mysearch)
 
 # Display all transcript snippets on screen
 cat(test@results[,mysearch@cuts.column.printtranscript])
+
+# Only insert print transcripts into the column, no file export.
+# The print transcripts are always inserted into the column,
+# independent of exportTxt and exportDocx.
+test <- act::search_cuts_printtranscript (x           = examplecorpus,
+                                          s           = mysearch,
+                                          exportTxt   = FALSE,
+                                          exportDocx  = FALSE,
+                                          folderOutput= NULL)
+cat(test@results[1, mysearch@cuts.column.printtranscript])

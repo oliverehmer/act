@@ -37,11 +37,11 @@ on the object.
 
 \item{\code{annotations}}{Data.frame; Table with the annotations.}
 
-\item{\code{media.path}}{Vector of character strings; Path(s) to the media files that correspond to this transcript object.}
+\item{\code{media}}{Data.frame; Table of the media files that correspond to this transcript object. Core columns: \code{path} (absolute file path), \code{source.path} (path of the source recording a clip was cut from), \code{clip.id} (clip identifier), \code{startsec} (start of the file in the original time reference, 0 for full recordings), \code{startsec.source} (where startsec came from: "tag"/"timecode"/"corpus"), \code{length.sec} (file duration), \code{video.width}, \code{video.height}, \code{video.fps}, \code{video.codec}, \code{video.bitrate}, \code{audio.sample.rate}, \code{audio.channels}, \code{audio.codec}, \code{audio.bitrate}, \code{container.format}, \code{file.size} (bytes), \code{kind} ("full" or "clip"), \code{type} ("video" or "audio"). Columns that are not yet read may be \code{NA}. Additional columns may be present.}
 
-\item{\code{normalization.systime}}{POSIXct; Time of the last normalization.}
+\item{\code{normalization.signature}}{Character string; \code{[READ ONLY]} Hash signature of the inputs that produced the current normalization (annotations content + normalization matrix). Used to detect when re-normalization is needed.}
 
-\item{\code{fulltext.systime}}{POSIXct; \code{[READ ONLY]} Time of the last creation of the full texts.}
+\item{\code{fulltext.signature}}{Character string; \code{[READ ONLY]} Hash signature of the inputs that produced the current fulltexts (annotations + separators + tier filter). Used to detect when re-creation of the fulltexts is needed.}
 
 \item{\code{fulltext.filter.tier.names}}{Vector of character strings; names of tiers that were included in the full text..}
 
@@ -52,8 +52,6 @@ on the object.
 \item{\code{fulltext.bytier.orig}}{Character string; \code{[READ ONLY]} full text of the transcript based on the ORIGINAL content of the annotations, sorting the annotations first by TIERS and then by time}
 
 \item{\code{fulltext.bytier.norm}}{Character string; \code{[READ ONLY]} full text of the transcript based on the NORMALIZED content of the annotations, sorting the annotations first by TIERS and then by time}
-
-\item{\code{modification.systime}}{POSIXct; \code{[READ ONLY]} Time of the last modification of the transcript. Modifications after importing the annotation file by applying one/some of the packages function(s). Manual changes of the transcript by the user are not tracked!}
 
 \item{\code{history}}{List; \code{[READ ONLY]} History of the modifications made to the transcript object.}
 }}

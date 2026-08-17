@@ -22,7 +22,7 @@
 #' alltiers
 #' 
 tiers_all <- function(x, compact=TRUE) {
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	
 	#=== base data
 	tiers <- data.frame()

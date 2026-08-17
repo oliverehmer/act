@@ -27,7 +27,7 @@ export_exb <- function(t,
 					   filterSectionEndsec = NULL, 
 					   createMediaLinks=TRUE) {
 	
-	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
+	.assert_transcript(t, missing = missing(t))
 	
 	#--- check if output folder exists
 	if (!is.null(pathOutput)) {
@@ -53,21 +53,16 @@ export_exb <- function(t,
 	#--- get annotations from transcript
 	ann <- t@annotations
 	
-	#convert annotations to html safe characters
-	ann$content   <-	XML::xmlValue(XML::xmlTextNode(as.vector(ann$content)))
-	ann$tierName <-	XML::xmlValue(XML::xmlTextNode(as.vector(ann$tierName)))
-	
-	
 	#--- get only relevant columns
 	myCols <- c("tierName", "startsec","endsec","content")
 	if (!all(myCols %in% colnames(ann))) {
 		cli::cli_abort("Missing columns. Annotations need to contain: {.val {myCols}}")
 	}
 	ann <- ann[,myCols]
-	
-	#convert annotations to html save characters
-	ann$content <-	XML::xmlValue(XML::xmlTextNode(as.vector(ann$content)))
-	ann$tierName <-	XML::xmlValue(XML::xmlTextNode(as.vector(ann$tierName)))
+
+	#convert annotations to html safe characters
+	ann$content  <- vapply(ann$content, function(x) XML::xmlValue(XML::xmlTextNode(x)), character(1))
+	ann$tierName <- vapply(ann$tierName, function(x) XML::xmlValue(XML::xmlTextNode(x)), character(1))
 	
 	#--- generate EAF-XML-document
 	myEXB <- paste(
@@ -155,7 +150,7 @@ export_exb <- function(t,
 
 	#--- files
 	if (createMediaLinks) {
-		files   <- sprintf(files, basename(t@media.path))
+		files   <- sprintf(files, basename(t@media$path))
 		files   <- paste(files, collapse='\n')
 		if (length(files)==0) {
 			files <- '<referenced-file url=""/>'
@@ -256,9 +251,9 @@ export_exb <- function(t,
 	if (is.null(pathOutput)) 	{
 		return(myEXB)
 	} else {
-		#---write to file
+		#---write to file as UTF-8 (matches encoding declared in XML header)
 		fileConn <- file(pathOutput, open="wb")
-		writeBin(charToRaw(myEXB), fileConn, endian="little")
-		close(fileConn)			
+		writeBin(charToRaw(enc2utf8(myEXB)), fileConn, endian="little")
+		close(fileConn)
 	}
 }

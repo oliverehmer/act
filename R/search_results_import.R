@@ -39,11 +39,67 @@ search_results_import <- function(path,
 		temp <- openxlsx::read.xlsx(xlsxFile=path, sheet=sheetName)
 	}
 	
+	# Normalize column names: both new snake_case exports and old legacy formats
+	legacy_names <- c(
+		# new snake_case export format -> internal
+		"result_id"              = "resultID",
+		"transcript_name"        = "transcriptName",
+		"annotation_id"          = "annotationID",
+		"tier_name"              = "tierName",
+		"search_mode"            = "searchMode",
+		"content_norm"           = "content.norm",
+		"hit_nr"                 = "hit.nr",
+		"hit_length"             = "hit.length",
+		"hit_pos_content"        = "hit.pos.content",
+		"hit_pos_fulltext"       = "hit.pos.fulltext",
+		"hit_span"               = "hit.span",
+		"stills_values"          = "stills.values",
+		"stills_folder"          = "stills.folder",
+		"char_orig_bytime_start" = "char.orig.bytime.start",
+		"char_orig_bytime_end"   = "char.orig.bytime.end",
+		"char_norm_bytime_start" = "char.norm.bytime.start",
+		"char_norm_bytime_end"   = "char.norm.bytime.end",
+		"char_orig_bytier_start" = "char.orig.bytier.start",
+		"char_orig_bytier_end"   = "char.orig.bytier.end",
+		"char_norm_bytier_start" = "char.norm.bytier.start",
+		"char_norm_bytier_end"   = "char.norm.bytier.end",
+		"conc_left_1"            = "concLeft1",
+		"conc_left_2"            = "concLeft2",
+		"conc_hit"               = "concHit",
+		"conc_right_1"           = "concRight1",
+		"conc_right_2"           = "concRight2",
+		"nr_words_left"          = "nrWordsLeft",
+		"nr_words_hit_position"  = "nrWordsHitPosition",
+		"nr_words_hit"           = "nrWordsHit",
+		"nr_words_right"         = "nrWordsRight",
+		"nr_words_total"         = "nrWordsTotal",
+		# old legacy formats -> internal
+		"recording"              = "transcriptName",
+		"transcript.name"        = "transcriptName",
+		"transcript"             = "printtranscript",
+		"tier.name"              = "tierName",
+		"startSec"               = "startsec",
+		"endSec"                 = "endsec",
+		"search.mode"            = "searchMode"
+	)
+	for (old in names(legacy_names)) {
+		idx <- which(colnames(temp) == old)
+		if (length(idx) > 0 && !legacy_names[[old]] %in% colnames(temp)) {
+			colnames(temp)[idx] <- legacy_names[[old]]
+		}
+	}
+
+	# Drop redundant 'transcript' column when 'printtranscript' already exists
+	# (produced by old export bug that wrote both columns simultaneously)
+	if ("transcript" %in% colnames(temp) && "printtranscript" %in% colnames(temp)) {
+		temp <- temp[, colnames(temp) != "transcript", drop = FALSE]
+	}
+
 	#check colnames
 	necessarycolnames <- c("resultID", "transcriptName", "annotationID",  "tierName", "startsec", "endsec", "content", "content.norm", "hit", "hit.nr", "hit.length", "hit.pos.content", "hit.pos.fulltext", "searchMode", "hit.span")
 	mycolnames <- colnames(temp)
 	missingcolnames <- necessarycolnames[!necessarycolnames %in% mycolnames]
-	if (length(missingcolnames>0)) {
+	if (length(missingcolnames) > 0) {
 		cli::cli_abort("Some necessary columns are missing in your input file. Missing columns: {.val {missingcolnames}}")
 	}
 	
@@ -63,7 +119,9 @@ search_results_import <- function(path,
 		temp$concHit		<-	stringr::str_replace_all(temp$concHit, searchString, replacementString )
 		temp$concRight1		<-	stringr::str_replace_all(temp$concRight1, searchString, replacementString )
 		temp$concRight2		<-	stringr::str_replace_all(temp$concRight2, searchString, replacementString )
-		temp$transcript		<-	stringr::str_replace_all(temp$transcript, searchString, replacementString )
+		if ("printtranscript" %in% colnames(temp)) {
+			temp$printtranscript <- stringr::str_replace_all(temp$printtranscript, searchString, replacementString)
+		}
 	}
 	
 	#turn factors into vectors

@@ -13,7 +13,8 @@
 #' @param s Search object. 
 #' @param resultid Integer; Number of the search result (row in the data frame \code{s@results}) to be opened.
 #' @param openOriginal Logical; if \code{TRUE} the function will check if the original annotation file was an .eaf file and if it still exists in the original location. If so, the function will not create a temporary .eaf file but open the original file. Warning: The original .pfsx file (if it exists) will be overwritten.
-#' 
+#' @param overwrite Logical; if \code{TRUE} (default) an existing .pfsx file will be overwritten. If \code{FALSE} an existing .pfsx file is kept.
+#'
 #' @export
 #'
 #' @examples
@@ -28,16 +29,17 @@
 #' }
 #' 
 
-search_openresult_inelan  <- function(x, 
-									  s, 
-									  resultid, 
-									  openOriginal=FALSE) {
+search_openresult_inelan  <- function(x,
+									  s,
+									  resultid,
+									  openOriginal=FALSE,
+									  overwrite=TRUE) {
 	
 	#NOT IMPLEMENTED YET  @param filterMediaFile Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first matches with existing media files will set as linked media in the eaf file. If the aprameter is left open, media files assigned to the transcript object will be set as links in the .eaf file.
 	
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
-	if (missing(s)) 	{cli::cli_abort("Search object in parameter {.arg s} is missing.") 		}	else { if (!methods::is(s, "search")	)	{cli::cli_abort("Parameter {.arg s} needs to be a {.cls search} object.") 	} }
+	.assert_corpus(x, missing = missing(x))
+	.assert_search(s, missing = missing(s))
 	if (missing(resultid)) {cli::cli_abort("Number of the search result {.arg resultid} is missing.") 	}
 	
 	
@@ -80,58 +82,19 @@ search_openresult_inelan  <- function(x,
 	}
 	
 	#--- create pfsx file
-	#check if pfsx file already exists - make a backup
-	#	filePath.eaf<-'/Users/oliverehmer/Desktop/Quiz.eaf'
-	#	pattern<- stringr::str_replace(basename(filePath.eaf), pattern='eaf',replacement="*pfsx$") 
-	#	filenames <- list.files(dirname(filePath.eaf), pattern=pattern)
-	#	filenames <- tools::file_path_sans_ext(filenames)
-	#	destination.name <- tools::file_path_sans_ext(basename(filePath.eaf))
-	#   check if destinatino name already exists
-	#	if(destination.name %in% filenames) {
-	#		uniquename<- make.unique(filenames, destination.name)
-	#}
-	
-	pfsx<-	   '<?xml version="1.0" encoding="UTF-8"?>
-				<preferences version="1.1"
-				    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/Prefs_v1.1.xsd">
-				        <pref key="SelectionBeginTime">
-				            <Long>%s</Long>
-				        </pref>
-				        <pref key="SelectionEndTime">
-				            <Long>%s</Long>
-				        </pref>
-				        <pref key="TimeScaleBeginTime">
-				            <Long>%s</Long>
-				        </pref>
-				        <pref key="MediaTime">
-				            <Long>%s</Long>
-				    </pref>
-				</preferences>'
-	startMiliSec <- round(s@results$startsec[resultid]*1000, 0) 
-	endMiliSec <- round(s@results$endsec[resultid]*1000, 0) 
-	pfsx.1 <- sprintf(pfsx, startMiliSec, endMiliSec, max(0, startMiliSec-1000),  startMiliSec)
-	#cat(pfsx.1)
-	
-	#write to file
-	filePath.pfsx<- stringr::str_replace(filePath.eaf, pattern='\\.eaf', replacement=".pfsx")
-	fileConn <- file(filePath.pfsx, open="wb")
-	writeBin(charToRaw(pfsx.1), fileConn, endian="little")
-	close(fileConn)
-	
-	#wait until pfsx exists
-	for (i in 1:10) {
-		if(file.exists(filePath.pfsx)) {
-			break	
-		}
-		Sys.sleep(0.02)
-	}
-	
+	filePath.pfsx<- stringr::str_replace(filePath.eaf, pattern=stringr::regex('\\.eaf$', ignore_case=TRUE), replacement=".pfsx")
+	export_create_pfsx(path.out.eaf  = filePath.eaf,
+					   startSec      = s@results$startsec[resultid],
+					   endSec        = s@results$endsec[resultid],
+					   tierName      = NULL,
+					   overwrite     = overwrite)
+
 	if(file.exists(filePath.pfsx)) {
 		#--- open eaf file
-		if (.detect_os()=="windows" ){
-			cmd <- sprintf("%s %s",   shQuote(path.elan), shQuote(filePath.eaf))
-		} else {
+		if (.detect_os()=="macos"){
 			cmd <- sprintf("open %s -a %s",  shQuote(filePath.eaf), shQuote(path.elan))
+		} else {
+			cmd <- sprintf("%s %s",   shQuote(path.elan), shQuote(filePath.eaf))
 		}
 		#--- open file
 		rslt <- system(cmd, wait=FALSE)

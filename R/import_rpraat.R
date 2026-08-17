@@ -42,7 +42,6 @@ import_rpraat <- function(rpraatTextgrid,
 	t@file.type 			 <- "rpraat"
 	t@import.result 		 <- "ok"
 	t@load.message    	     <- ""
-	t@modification.systime   <- character()
 	t@length.sec        	 <- as.double(attr(rpraatTextgrid, "class")["tmax"])
 	if(getOption("act.import.storefileContentInTranscript", default=TRUE)) {
 		t@file.content <- rpraatTextgrid
@@ -114,13 +113,13 @@ import_rpraat <- function(rpraatTextgrid,
 		ann$startsec		<- as.double(ann$startsec)
 		ann$endsec  		<- as.double(ann$endsec)
 		ann$content  		<- as.character(ann$content)
-		
+		ann$content <- .replace_newlines(.strip_invalid_xml_chars(ann$content))
+
 		#=== get rid of empty intervals
 		if (options()$act.import.readEmptyIntervals==FALSE) 		{
 			ann <- ann[ann$content!="",]
 		}
 		ann <- ann[is.na(ann["content"])==FALSE,]
-		ann$content <- .strip_invalid_xml_chars(ann$content)
 
 		if (nrow(ann)>0) 		{
 			#=== sort transcript by start times

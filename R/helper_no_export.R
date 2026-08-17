@@ -18,31 +18,62 @@
 
 
 
+# Assert that `x` is an act corpus object.
+#
+# Aborts with a standardized cli message otherwise. Pass missing = missing(x)
+# from the calling function so the dedicated "is missing" message is shown
+# without forcing the (possibly missing) argument.
+#
+.assert_corpus <- function(x, arg = "x", missing = FALSE) {
+	if (missing) cli::cli_abort("Corpus object in parameter {.arg {arg}} is missing.")
+	if (!methods::is(x, "corpus")) cli::cli_abort("Parameter {.arg {arg}} needs to be a {.cls corpus} object.")
+	invisible(TRUE)
+}
+
+
+# Assert that `t` is an act transcript object.
+#
+.assert_transcript <- function(t, arg = "t", missing = FALSE) {
+	if (missing) cli::cli_abort("Transcript object in parameter {.arg {arg}} is missing.")
+	if (!methods::is(t, "transcript")) cli::cli_abort("Parameter {.arg {arg}} needs to be a {.cls transcript} object.")
+	invisible(TRUE)
+}
+
+
+# Assert that `s` is an act search object.
+#
+.assert_search <- function(s, arg = "s", missing = FALSE) {
+	if (missing) cli::cli_abort("Search object in parameter {.arg {arg}} is missing.")
+	if (!methods::is(s, "search")) cli::cli_abort("Parameter {.arg {arg}} needs to be a {.cls search} object.")
+	invisible(TRUE)
+}
+
+
 # Make names for search results
 #
 # @param search.results Data frame; data frame containing search results.
 # @param resultidPrefix Character string; prefix for the name of the consecutively numbered search results.
-# @param resultidStart Integer; start number of results 
+# @param resultidStart Integer; start number of results
 # @return Vector of character strings; names created for the search results.
 # @export
 #
 # @examples
 # library(act)
 
-# # Search 
+# # Search
 # myRegEx <- "yo"
 # searchresults <- act::search_corpus(examplecorpus, pattern=myRegEx, concordanceMake=FALSE)
-# 
+#
 # # Make custom names
 # mynames <- act::search_names(searchresults, resultidPrefix="yo")
-# 
+#
 # # Replace old names in search by new names
 # searchresults$resultID <- mynames
 # @keywords internal
-.make_names_for_search <- function(search.results, 
+.make_names_for_search <- function(search.results,
 									  resultidPrefix = "result",
 									  resultidStart  = 1) {
-	
+
 	myFormat <- paste(resultidPrefix, "%0", nchar(toString(nrow(search.results)-1+resultidStart)), "d", sep="")
 	myNames <- sprintf(myFormat, resultidStart:(nrow(search.results)+resultidStart-1))
 	return (myNames)
@@ -53,20 +84,20 @@
 # Gets the path of a .TextGrid for a transcript
 #
 # Returns either the path to the original .TextGrid file or to a temporary TextGrid created on the fly.
-# 
+#
 # @param t transcript object; transcript for which you want to get the TextGrid
 #
 # @return Character string; path to TextGrid file.
 #
-#@keywords internal# 
-# 
+#@keywords internal#
+#
 # @examples
 # print("")
 
 .get_textgrid_for_transcript <- function(t) {
-	
-	if (missing(t)) 	{cli::cli_abort("Transcript object t is missing.") }	
-	
+
+	if (missing(t)) 	{cli::cli_abort("Transcript object t is missing.") }
+
 	#=== check in corpus object if textgrid is given and exits
 	if (!is.na(t@file.path)) {
 		if (file.exists(t@file.path)) {
@@ -75,7 +106,7 @@
 			}
 		}
 	}
-	
+
 	#=== create temporary textgrid
 	path <- file.path(tempdir(), stringr::str_c(t@name, ".TextGrid", collapse=""))
 	act::export_textgrid(t, path)
@@ -142,44 +173,35 @@
 	gsub("[\x01-\x08\x0b\x0c\x0e-\x1f\x7f]", "", x)
 }
 
-.test_read <- function(input_path,
-							 testencoding, 
-							 testlinenrs) {
-	
-	#assign("last.warning", NULL, envir = baseenv())
-	input_path <- toString(input_path)
-	tryCatch(
-		{
-			myCon <- file(input_path, encoding = testencoding)
-			myLines <- readLines(myCon, n = testlinenrs)
-			close(myCon)
-			
-			if(	sum(stringr::str_length(myLines))==0) {
-				return("error")
-			}
-			return (myLines)
-		},
-		
-		error = function(c)
-		{
-			close(myCon)
-			return("error")
-		},
-		
-		warning = function(c)
-		{
-			close(myCon)
-			return("error")
-			#paste("warning:", warnings())
-		},
-		message = function(c)
-		{
-			return("error")
-			close(myCon)
-			#"message"
-		}
-	)
+.replace_newlines <- function(x, replacement = getOption("act.import.replaceNewlinesWith", default = " ")) {
+	if (length(x) == 0L) {
+		return(x)
+	}
+	if (is.null(replacement) || length(replacement) == 0L || is.na(replacement[1])) {
+		return(x)
+	}
+	has_newline <- stringr::str_detect(x, "[\r\n]")
+	has_newline[is.na(has_newline)] <- FALSE
+	if (!any(has_newline)) {
+		return(x)
+	}
+	x[has_newline] <- stringr::str_replace_all(x[has_newline], "[ \t]*[\r\n]+[ \t]*", replacement[1])
+	whitespace_only <- has_newline & stringr::str_detect(x, "^\\s*$")
+	whitespace_only[is.na(whitespace_only)] <- FALSE
+	x[whitespace_only] <- ""
+	x
 }
 
-
-
+.drop_empty_wrapped_lines <- function(turn, turn_initial, row_exdent) {
+	if (length(turn) <= 1L) return(turn)
+	prefix_lens <- ifelse(seq_along(turn) == 1L, nchar(turn_initial), row_exdent)
+	content_only <- substring(turn, prefix_lens + 1L)
+	is_empty <- stringr::str_detect(content_only, "^\\s*$")
+	if (!any(is_empty) || all(is_empty)) return(turn)
+	if (is_empty[1]) {
+		first_non_empty <- which(!is_empty)[1]
+		rest <- substring(turn[first_non_empty], row_exdent + 1L)
+		turn[first_non_empty] <- paste0(turn_initial, rest)
+	}
+	turn[!is_empty]
+}

@@ -31,7 +31,7 @@ export_srt <- function(t,
 					   speakerWidth         = 3,
 					   speakerEnding        = ":") {
 	
-	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
+	.assert_transcript(t, missing = missing(t))
 	
 	#--- check if output folder exists
 	if (!is.null(pathOutput)) {
@@ -68,7 +68,7 @@ export_srt <- function(t,
 		#which annotations span this interval
 		
 		#starts before the end of the segment, ends after the start of the segment
-		ids <- which(t@annotations$startsec<alltimes[i+1] & t@annotations$end > alltimes[i])
+		ids <- which(t@annotations$startsec<alltimes[i+1] & t@annotations$endsec > alltimes[i])
 		
 		#if content is not empty
 		if (paste(t@annotations$content[ids],collapse='', sep='')!='') {
@@ -102,10 +102,10 @@ export_srt <- function(t,
 	if (is.null(pathOutput)) {
 		return(text)
 	} else {
-		#---write to file
-		fileConn <- file(pathOutput)
-		writeLines(text, fileConn)
-		close(fileConn)		
+		#---write to file as UTF-8
+		fileConn <- file(pathOutput, open="wb")
+		writeLines(enc2utf8(text), fileConn, sep="\n", useBytes=TRUE)
+		close(fileConn)
 	}
 }
 

@@ -24,7 +24,7 @@ search_cuts_srt(
 
 \item{cutSpanAftersec}{Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.}
 
-\item{folderOutput}{Character string; if parameter is not set, the srt subtitles will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.srt' format.}
+\item{folderOutput}{Character string; path to an existing folder for file export. If \code{NULL} (default), no files will be written to disk; the srt subtitles are inserted only into \code{s@results}. If set, .srt files will be written to disk in addition.}
 
 \item{speakerShow}{Logical; if \code{TRUE} name of speaker will be shown before the content of the annotation.}
 

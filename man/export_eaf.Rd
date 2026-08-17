@@ -10,7 +10,9 @@ export_eaf(
   filterTierNames = NULL,
   filterSectionStartsec = NULL,
   filterSectionEndsec = NULL,
-  createMediaLinks = TRUE
+  createMediaLinks = TRUE,
+  mediaMaxFiles = NULL,
+  mediaWriteOffset = FALSE
 )
 }
 \arguments{
@@ -25,6 +27,10 @@ export_eaf(
 \item{filterSectionEndsec}{Double; end of selection in seconds.}
 
 \item{createMediaLinks}{Logical; if \code{TRUE} media links will be created.}
+
+\item{mediaMaxFiles}{Integer or \code{NULL}; maximum number of media files to link (\code{NULL} = all).}
+
+\item{mediaWriteOffset}{Logical; if \code{TRUE} a negative \code{TIME_ORIGIN} attribute (in milliseconds) is written for clip media (rows with \code{kind == "clip"} and \code{startsec > 0}), derived from \code{startsec}. Default \code{FALSE} (no offset). Note: clip media are currently not linked at all in the exported .eaf, because 'ELAN' does not support negative media offsets - only full recordings (offset 0) are linked. This parameter takes effect once clip linking is re-enabled in the code.}
 }
 \value{
 Contents of the .eaf file (only if \code{pathOutput} is left empty)

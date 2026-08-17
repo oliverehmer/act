@@ -6,7 +6,7 @@ library(act)
 
 # You can access the media files linked to a transcript directly using
 # the object properties.
-examplecorpus@transcripts[["SYNC_rotar_y_flexionar"]]@media.path
+examplecorpus@transcripts[["SYNC_rotar_y_flexionar"]]@media
 
 # Get only media files of a certain type, e.g. a wav file, and return only the first match:
 act::media_path_to_existing_file(examplecorpus@transcripts[["SYNC_rotar_y_flexionar"]],

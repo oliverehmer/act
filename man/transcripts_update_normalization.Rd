@@ -21,6 +21,10 @@ transcripts_update_normalization(
 Normalizes the contents of transcriptions in a corpus object using a normalization matrix.
 Function returns a corpus object with normalized transcription and updates the original corpus object passed as argument to x.
 }
+\details{
+If the normalization matrix is missing or empty (0 rows), a warning is issued
+and the corpus object is returned unchanged.
+}
 \examples{
 library(act)
 

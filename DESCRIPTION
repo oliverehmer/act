@@ -1,19 +1,21 @@
 Package: act
 Type: Package
 Title: Aligned Corpus Toolkit
-Version: 3.5.1
-Date: 2026-04-15
+Version: 3.2.5
+Date: 2026-08-04
 Authors@R: person("Oliver", "Ehmer", email = "oliver.ehmer@uos.de", role = c("aut", "cre"))
 Maintainer: Oliver Ehmer <oliver.ehmer@uos.de>
 Description: The Aligned Corpus Toolkit (act) is designed for linguists that work with time aligned transcription data. It offers functions to import and export various annotation file formats ('ELAN' .eaf, 'EXMARaLDA .exb and 'Praat' .TextGrid files), create print transcripts in the style of conversation analysis, search transcripts (span searches across multiple annotations, search in normalized annotations, make concordances etc.), export and re-import search results (.csv and 'Excel' .xlsx format), create cuts for the search results (print transcripts, audio/video cuts using 'FFmpeg' and video sub titles in 'Subrib title' .srt format), modify the data in a corpus (search/replace, delete, filter etc.), interact with 'Praat' using 'Praat'-scripts, and exchange data with the 'rPraat' package. The package is itself written in R and may be expanded by other users.
 License: GPL-3
 Encoding: UTF-8
 LazyData: TRUE
-RoxygenNote: 7.3.3
-Imports: cli, fs, dplyr, methods, srt, stringr, stringi, tools, textutils, utils, progress, XML, xml2, officer, openxlsx, openxlsx2, readr, glue
+Depends: R (>= 4.2.0)
+Imports: cli, digest, exifr, fs, dplyr, jsonlite, methods, srt, stringr, stringi, tools, textutils, utils, progress, XML, xml2, officer, openxlsx, openxlsx2, readr, glue
 Suggests: knitr, rmarkdown, rstudioapi
+SystemRequirements: FFmpeg
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 URL: http://www.oliverehmer.de, https://github.com/oliverehmer/act
 NeedsCompilation: no
 Author: Oliver Ehmer [aut, cre]
+Config/roxygen2/version: 8.0.0

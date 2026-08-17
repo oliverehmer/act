@@ -6,6 +6,9 @@
 \usage{
 options_show(group = NULL)
 }
+\arguments{
+\item{group}{Character string; optional name of an option group to show. One of \code{"program"}, \code{"path"}, \code{"media"}, \code{"ffmpeg"}, \code{"import"}, \code{"export"}, \code{"parsing"}. If \code{NULL} (the default), all options are shown.}
+}
 \value{
 Nothing.
 }
@@ -27,7 +30,8 @@ Options are organized in groups:
 
 \strong{Paths:} Paths to external programs (Praat, ELAN).
 
-\strong{File formats:} Recognized audio and video file extensions.
+\strong{Media:} Recognized audio and video file extensions and the media
+selection settings (priority, maximum number, audio fallback).
 
 \strong{FFmpeg:} Commands and options for media cutting and still extraction.
 

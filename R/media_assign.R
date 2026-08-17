@@ -4,7 +4,7 @@
 #' The function uses the name of the transcript to find the media files, 
 #' e.g. the function assumes that the annotation files have the same name as the media files, except from the suffix/the file type.
 #'
-#' Only the the file types set in \code{options()$act.fileformats.audio} and \code{options()$act.fileformats.video} will be recognized. 
+#' Only the the file types set in \code{options()$act.media.fileformats.audio} and \code{options()$act.media.fileformats.video} will be recognized. 
 #' You can modify these options to recognize other media types.
 #'
 #' @param x Corpus object.
@@ -15,16 +15,12 @@
 #' @param transcriptNames Vector of character strings; Names of the transcripts for which you want to search media files; leave empty if you want to search media for all transcripts in the corpus object.
 #' @param deleteExistingMedia Logical; if \code{TRUE} existing media links will be deleted, if \code{FALSE} existing media links will be preserved and new links will be added.
 #' @param onlyUniqueFiles Logical; if \code{TRUE} media files with the same name (in different locations) will only be added once; if \code{FALSE} all media files found will be added, irrespective of possible doublets.
-#' @param audioAsFallback Logical; if \code{TRUE} audio media files will only be assigned if no video files were found; if \code{FALSE} all media files found will be added, irrespective of type.
-#' @param videoMaxFiles Integer or NULL; maximum number of video files to assign per transcript. NULL means no limit.
-#' @param audioMaxFiles Integer or NULL; maximum number of audio files to assign per transcript. NULL means no limit.
-#' @param videoPriority Character vector or NULL; regex patterns matched against video filenames for prioritization. First matching pattern wins. E.g. \code{c("hand.*_al", "_al", "hand.*_ac", "_ac")}.
-#' @param audioPriority Character vector or NULL; file extensions for audio prioritization. First matching extension wins. E.g. \code{c("aif", "wav", "mp3")}.
+#' @param readMetadata Logical; if \code{TRUE} the read-derived media columns (\code{length.sec}, \code{video.*}, \code{startsec} etc.) are filled via \code{media_metadata_read} after assignment. Default \code{FALSE} (fast; no file reading).
 #'
 #'
 #' @return Corpus object.
-#' 
-#' @seealso \link{media_delete}, \link{media_path_to_existing_file}
+#'
+#' @seealso \link{media_select}, \link{media_delete}, \link{media_path_to_existing_file}
 #' 
 #' @export
 #'
@@ -38,11 +34,7 @@ media_assign <- function(x,
 						 transcriptNames             = NULL,
 						 deleteExistingMedia         = TRUE,
 						 onlyUniqueFiles             = TRUE,
-						 audioAsFallback             = TRUE,
-						 videoMaxFiles               = NULL,
-						 audioMaxFiles               = NULL,
-						 videoPriority               = NULL,
-						 audioPriority               = NULL) {
+						 readMetadata                = FALSE) {
 	# x <- corpus
 	# searchPaths        <- NULL
 	# searchSubfolders <- TRUE
@@ -55,9 +47,8 @@ media_assign <- function(x,
 
 	#					   filterFile          <- ""
 	#					   namesExtractPattern <- '[a-zA-Z]+_[a-zA-Z]*[0-9]+'
-	#					   audioAsFallback    <- TRUE
 
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	
 	message <- c()
 
@@ -69,20 +60,14 @@ media_assign <- function(x,
 		paths <- x@paths.media.files
 		paths.dont.exist <- which(!file.exists(paths))
 		if (length(paths.dont.exist)>0) {
-			message <- c(message, sprintf("%s of %s media path(s) in 'x@paths.media.files' do(s) not exist.", length(paths.dont.exist), length(x@paths.media.files)))
-			m       <- stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
-			message <- stringr::str_c(message,"\n", m, collapse="\n")
-			
+			message <- c(message, .media_missing_paths_summary(paths[paths.dont.exist]))
 			paths <- paths[-paths.dont.exist]
 		}
 	} else {
 		paths <- searchPaths
 		paths.dont.exist <- which(!file.exists(paths))
 		if (length(paths.dont.exist)>0) {
-			message <- c(message, sprintf("%s of %s media path(s) in the parameter 'searchPaths' do(s) not exist.", length(paths.dont.exist), length(x@paths.media.files)))
-			m       <- stringr::str_c("    ",paths[paths.dont.exist], collapse="\n")
-			message <- stringr::str_c(message,"\n", m, collapse="\n")
-			
+			message <- c(message, .media_missing_paths_summary(paths[paths.dont.exist]))
 			paths <- paths[-paths.dont.exist]
 		}
 	}
@@ -124,7 +109,7 @@ media_assign <- function(x,
 	}
 	
 	#--- get only the media files
-	filterFile.media <- c(options()$act.fileformats.audio, options()$act.fileformats.video)
+	filterFile.media <- c(options()$act.media.fileformats.audio, options()$act.media.fileformats.video)
 	filterFile.media <- stringr::str_flatten(filterFile.media, collapse="|")
 	filterFile.media <- stringr::str_flatten(c("(?i)\\.(", filterFile.media, ")"), collapse="")
 	paths.new <- unlist(paths.new[stringr::str_which(string=paths.new, pattern=filterFile.media, )		])
@@ -140,84 +125,66 @@ media_assign <- function(x,
 	#--- if no filter is set, process all transcripts
 	if (is.null(transcriptNames)) {transcriptNames <- names(x@transcripts)}
 
+	#--- pre-index media files by extracted ID (O(1) lookup per transcript
+	#    instead of O(N) grep, avoids quadratic blow-up on large corpora)
+	paths_by_id <- NULL
+	if (nzchar(namesExtractPattern)) {
+		media_ids   <- stringr::str_to_lower(stringr::str_extract(file.names, namesExtractPattern))
+		paths_by_id <- split(paths.new, media_ids)
+	}
+
 	#--- set progress bar
 #	if (exists('helper_progress_set')) {
 	if (!exists("pb", envir = act.environment)) {
 		act.environment$pb <- NULL
 	}
-		
+
 	helper_progress_set("Assigning media", length(transcriptNames))
 #	}
-	
+
 	#--- run through transcripts in the corpus file
 	for (nameTranscript in transcriptNames) {
 		#print(nameTranscript)
-		
+
 		#update progress bar
 		#if (exists('helper_progress_tick')) {
 			helper_progress_tick()
 		#}
-		
+
 		#get transcript name
 		nameTranscript	<- x@transcripts[[nameTranscript]]@name
 		#nameTranscript	<- gsub(" ", "_", nameTranscript)
-		
+
 		#if no part to extract from transcript name is set
 		if (namesExtractPattern=='') {
 			#use entire name
 			search <- paste("^", nameTranscript, sep="")
-			
+			myMediaFiles <- unlist(paths.new[grep(pattern=search, file.names, ignore.case=TRUE)])
 		} else {
-			#extract that part 
+			#extract that part
 			search <- stringr::str_extract(string=nameTranscript, pattern=namesExtractPattern)
-			if (is.na(search)) {
-				search <- ''
-			} 
-		}
-		
-		#get all media files
-		myMediaFiles <-	unlist(paths.new[grep(pattern=search, file.names)])
-
-		myMediaFiles.video <- myMediaFiles[tolower(tools::file_ext(myMediaFiles)) %in% tolower(options()$act.fileformats.video)]
-		myMediaFiles.audio <- myMediaFiles[tolower(tools::file_ext(myMediaFiles)) %in% tolower(options()$act.fileformats.audio)]
-
-		if (!is.null(videoPriority) && length(myMediaFiles.video) > 0) {
-			myMediaFiles.video <- .media_prioritize(myMediaFiles.video, videoPriority, "name")
-		}
-		if (!is.null(videoMaxFiles) && length(myMediaFiles.video) > videoMaxFiles) {
-			myMediaFiles.video <- myMediaFiles.video[seq_len(videoMaxFiles)]
-		}
-
-		if (!is.null(audioPriority) && length(myMediaFiles.audio) > 0) {
-			myMediaFiles.audio <- .media_prioritize(myMediaFiles.audio, audioPriority, "ext")
-		}
-		if (!is.null(audioMaxFiles) && length(myMediaFiles.audio) > audioMaxFiles) {
-			myMediaFiles.audio <- myMediaFiles.audio[seq_len(audioMaxFiles)]
-		}
-
-		if (audioAsFallback) {
-			if (length(myMediaFiles.video) > 0) {
-				myMediaFiles <- myMediaFiles.video
+			if (is.na(search) || !nzchar(search)) {
+				myMediaFiles <- character(0)
 			} else {
-				myMediaFiles <- myMediaFiles.audio
+				myMediaFiles <- paths_by_id[[stringr::str_to_lower(search)]]
+				if (is.null(myMediaFiles)) myMediaFiles <- character(0)
 			}
-		} else {
-			myMediaFiles <- c(myMediaFiles.video, myMediaFiles.audio)
 		}
-		
-		names(myMediaFiles) <- stringr::str_to_lower(
-			tools::file_path_sans_ext(basename(myMediaFiles))
-		)
-		
+
 		if (onlyUniqueFiles) {
 			#select for file paths only unique file names
 			myMediaFiles <- myMediaFiles[!duplicated(basename(myMediaFiles))]
 		}
-		
+
 		if (deleteExistingMedia) {
-			x@transcripts[[nameTranscript]]@media.path <- myMediaFiles
+			x@transcripts[[nameTranscript]]@media <- media_build(myMediaFiles)
 		} else {
-			x@transcripts[[nameTranscript]]@media.path <- c(x@transcripts[[nameTranscript]]@media.path, myMediaFiles)
+			x@transcripts[[nameTranscript]]@media <- rbind(
+				x@transcripts[[nameTranscript]]@media,
+				media_build(myMediaFiles))
+		}
+		if (readMetadata) {
+			x@transcripts[[nameTranscript]]@media <- media_metadata_fill(x@transcripts[[nameTranscript]]@media)
 		}
 	}
 	
@@ -230,14 +197,25 @@ media_assign <- function(x,
 	return (x)
 }
 
-.media_prioritize <- function(files, priority, match_by = "name") {
-	for (p in priority) {
-		if (match_by == "name") {
-			matched <- files[stringr::str_detect(basename(files), p)]
+
+# Build compact warning lines for media paths that do not exist, grouped by
+# storage medium. On macOS, paths under /Volumes/<name> are grouped by that
+# mount; other paths are grouped by their containing folder. Per group the
+# message reports only a count (never individual paths): if the group root is
+# not present it is reported as a disconnected storage medium, otherwise the
+# files are reported as not found.
+.media_missing_paths_summary <- function(missing_paths) {
+	if (length(missing_paths) == 0) { return(character(0)) }
+	vol   <- stringr::str_match(missing_paths, "^(/Volumes/[^/]+)")[, 2]
+	roots <- ifelse(is.na(vol), dirname(missing_paths), vol)
+	out   <- character(0)
+	for (r in unique(roots)) {
+		n <- sum(roots == r)
+		if (dir.exists(r)) {
+			out <- c(out, sprintf("%s: %s file(s) not found.", r, n))
 		} else {
-			matched <- files[tolower(tools::file_ext(files)) == tolower(p)]
+			out <- c(out, sprintf("Storage medium not connected: %s (%s file(s) unavailable)", r, n))
 		}
-		if (length(matched) > 0) return(matched)
 	}
-	return(files)
+	out
 }

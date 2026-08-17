@@ -14,14 +14,14 @@
 #' examplecorpus <- act::media_delete(examplecorpus)
 #' 
 media_delete <- function(x, transcriptNames=NULL) {
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	
 	#  if no filter is set, process all transcripts
 	if (is.null(transcriptNames)) {transcriptNames <- names(x@transcripts)}
 	
 	#--- run through all transcripts in the corpus file
 	for (i in transcriptNames) {
-			x@transcripts[[i]]@media.path <- character()
+			x@transcripts[[i]]@media <- .emptyMedia
 	}
 	return (x)
 }

@@ -6,7 +6,8 @@
 \usage{
 media_path_to_existing_file(
   t,
-  filterMediaFile = c(".*\\\\.(mp4|mov)", ".*\\\\.(aiff|aif|wav)", ".*\\\\.mp3")
+  filterMediaFile = c("(?i).*\\\\.(mp4|mov)", "(?i).*\\\\.(aiff|aif|wav)",
+    "(?i).*\\\\.mp3")
 )
 }
 \arguments{
@@ -29,7 +30,7 @@ library(act)
 
 # You can access the media files linked to a transcript directly using
 # the object properties.
-examplecorpus@transcripts[["SYNC_rotar_y_flexionar"]]@media.path
+examplecorpus@transcripts[["SYNC_rotar_y_flexionar"]]@media
 
 # Get only media files of a certain type, e.g. a wav file, and return only the first match:
 act::media_path_to_existing_file(examplecorpus@transcripts[["SYNC_rotar_y_flexionar"]],

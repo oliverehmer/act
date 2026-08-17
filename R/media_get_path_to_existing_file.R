@@ -10,16 +10,16 @@
 #'
 #' @example inst/examples/media_path_to_existing_file.R
 #' 
-media_path_to_existing_file <- function(t, 
-										filterMediaFile=c('.*\\.(mp4|mov)', '.*\\.(aiff|aif|wav)', '.*\\.mp3')) {
+media_path_to_existing_file <- function(t,
+										filterMediaFile=c('(?i).*\\.(mp4|mov)', '(?i).*\\.(aiff|aif|wav)', '(?i).*\\.mp3')) {
 	
-	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
+	.assert_transcript(t, missing = missing(t))
 	if (typeof(t)=="list")	{cli::cli_abort("Your transcript is of the wrong type (it is a list). Probably you have used single square brackets to access the transcript in your corpus object (corpus@transcripts[...]). Please use double square brackets (corpus@transcripts[[...]])")}
 	for (i in 1:length(filterMediaFile)) {
-		hits <- stringr::str_detect(t@media.path, filterMediaFile[i])
+		hits <- stringr::str_detect(t@media$path, filterMediaFile[i])
 		# if any of the media files matches to the filterMediaFile pattern
 		if (any(hits==TRUE)) {
-			hits_paths <- t@media.path[hits]
+			hits_paths <- t@media$path[hits]
 			#run through all files and check if it exists
 			for (j in 1:length(hits_paths)) {
 				if(file.exists(hits_paths[j])) {

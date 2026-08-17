@@ -27,7 +27,7 @@ annotations_matrix <- function(x,
 							   pathReplacementMatrix, 
 							   filterTranscriptNames=NULL) {
 	
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a corpus object.") } }
+	.assert_corpus(x, missing = missing(x))
 	
 	#=== get the transcript names
 	#if none are given, take all names
@@ -81,21 +81,22 @@ annotations_matrix <- function(x,
 		for (i in filterTranscriptNames) 		{
 			#update progress bar
 			helper_progress_tick()
-			
-			#towower
-			x@transcripts[[i]]@annotations$content <- stringr::str_to_lower(x@transcripts[[i]]@annotations$content)   
-				
+
+			#tolower for content.norm
+			x@transcripts[[i]]@annotations$content.norm <- stringr::str_to_lower(x@transcripts[[i]]@annotations$content)
+
 			#replace
-			annotations_modified_nr <- annotations_modified_nr+length(which(stringr::str_detect(x@transcripts[[i]]@annotations$content, "update.*_B")))
-			if (annotations_modified_nr>0) {
-				x@transcripts[[i]]@annotations$content <- stringr::str_replace_all(x@transcripts[[i]]@annotations$content, mymatrix)  
-				
+			content_before <- x@transcripts[[i]]@annotations$content.norm
+			x@transcripts[[i]]@annotations$content.norm <- stringr::str_replace_all(content_before, mymatrix)
+			annotations_modified_count <- sum(content_before != x@transcripts[[i]]@annotations$content.norm)
+			if (annotations_modified_count > 0) {
+				annotations_modified_nr <- annotations_modified_nr + annotations_modified_count
+
 				#HISTORY transcript
-				x@transcripts[[i]]@modification.systime <- Sys.time()		
-				x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list( 
+				x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list(
 					modification               = "annotations_matrix",
 					systime                    = Sys.time(),
-					annotations.modified.count = annotations_modified_nr
+					annotations.modified.count = annotations_modified_count
 				)
 				#increase counters for corpus object
 				transcripts_modified_ids               <- c(transcripts_modified_ids, i)

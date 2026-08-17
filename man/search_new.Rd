@@ -21,7 +21,6 @@ search_new(
   filterSectionStartsec = NULL,
   filterSectionEndsec = NULL,
   concordanceMake = TRUE,
-  concordanceWidth = NULL,
   cutSpanBeforesec = 0,
   cutSpanAftersec = 0,
   runSearch = TRUE
@@ -58,9 +57,7 @@ search_new(
 
 \item{filterSectionEndsec}{Double; end time of region for search.}
 
-\item{concordanceMake}{Logical; if \code{TRUE} concordance will be added to search results.}
-
-\item{concordanceWidth}{Integer; number of characters  to the left and right of the search hit in the concordance , the default is \code{120}.}
+\item{concordanceMake}{Logical; if \code{TRUE} concordance will be added to search results. The width of the concordance is controlled by the option \code{act.concordanceWidth} (default \code{NULL} uses the search class default of 120 characters).}
 
 \item{cutSpanBeforesec}{Double; Start the media and transcript cut some seconds before the hit to include some context, the default is \code{0}.}
 

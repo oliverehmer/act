@@ -18,7 +18,7 @@
 #' nrow(allannotations)
 #' 
 annotations_all <- function(x) {
-	if (missing(x)) 	{cli::cli_abort("Corpus object in parameter {.arg x} is missing.") 		}	else { if (!methods::is(x,"corpus")   )	{cli::cli_abort("Parameter {.arg x} needs to be a {.cls corpus} object.") } }
+	.assert_corpus(x, missing = missing(x))
 	temp <- NULL
 	for (t in x@transcripts) {
 		if (nrow(t@annotations)>0) {

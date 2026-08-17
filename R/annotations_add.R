@@ -74,13 +74,7 @@ annotations_add <- function(
   
   # ===== PARAMETER VALIDATION =====
   
-  if (missing(x)) {
-    cli::cli_abort("Transcript object in parameter {.arg x} is missing.")
-  }
-  
-  if (!methods::is(x, "transcript")) {
-    cli::cli_abort("Parameter {.arg x} needs to be a transcript object.")
-  }
+  .assert_transcript(x, arg = "x", missing = missing(x))
   
   if (missing(tierName)) {
     cli::cli_abort("Parameter {.arg tierName} is missing.")
@@ -233,10 +227,7 @@ annotations_add <- function(
   rownames(x@annotations) <- NULL
   
   # ===== UPDATE METADATA =====
-  
-  # Update modification time
-  x@modification.systime <- Sys.time()
-  
+
   # Add to history
   x@history[[length(x@history) + 1]] <- list(
     modification = "annotations_add",

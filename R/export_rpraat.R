@@ -24,7 +24,7 @@ export_rpraat <- function(t,
 						  filterSectionStartsec = NULL, 
 						  filterSectionEndsec = NULL) {
 	
-	if (missing(t)) 	{cli::cli_abort("Transcript object in parameter {.arg t} is missing.") 	}	else { if (!methods::is(t, "transcript")) 	{cli::cli_abort("Parameter {.arg t} needs to be a {.cls transcript} object.") 	} }
+	.assert_transcript(t, missing = missing(t))
 	
 	#=== Get data
 	#--- Filter and cure transcript
