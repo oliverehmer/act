@@ -11,7 +11,7 @@
 # ======================================================================
 # ==== source module: render_aligned.R ====
 
-HARD_BREAK_CHAR <- "⏎"
+HARD_BREAK_CHAR <- "\u23ce"
 
 # ===== TOP LEVEL =====
 
