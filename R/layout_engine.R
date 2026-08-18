@@ -4781,14 +4781,13 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	}
 
 	# ===== ENGINE FRAME =====
-	# Legacy wrapped at transcript.width MINUS text_exdent (stri_wrap counts
-	# the prefix within its width). The DOCX templates are sized for those
-	# narrower lines, so the engine width must match.
-	text_exdent <- l@spacesbefore + text_body_width_speaker + 3
+	# transcript.width is the TOTAL width of the printed transcript: the
+	# prefix column (line number + sigle) lies INSIDE it, the wrap edge and
+	# the page edge are the same value (user decision 2026-08-17).
 	engine_width <- if (is.na(l@transcript.width) || l@transcript.width == -1) {
 		Inf
 	} else {
-		max(20L, l@transcript.width - text_exdent)
+		max(20L, l@transcript.width)
 	}
 
 	# Catch-all multimodal tiers (#mm, #mm1, #mm2, ...) carry symbols of
