@@ -12,7 +12,9 @@ helper_layout_bracket_pairs(
   filterSectionEndsec = NULL,
   timeToleranceGesture = 0.5,
   figReplace = TRUE,
-  figTierRegex = "^stills(#|$)"
+  figTierRegex = "^stills(#|$)",
+  mainTierNames = NULL,
+  alignChars = NULL
 )
 }
 \arguments{
@@ -31,6 +33,10 @@ helper_layout_bracket_pairs(
 \item{figReplace}{Logical; if \code{TRUE} the content of picture tiers is replaced by a number mark.}
 
 \item{figTierRegex}{Character string; regular expression identifying picture tiers.}
+
+\item{mainTierNames}{Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.}
+
+\item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.}
 }
 \value{
 List with the engine frame \code{ann} and the data.frame

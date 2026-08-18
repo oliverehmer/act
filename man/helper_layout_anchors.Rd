@@ -16,7 +16,9 @@ helper_layout_anchors(
   minDescription = 10L,
   maxSpanBlocks = 3L,
   figReplace = TRUE,
-  figTierRegex = "^stills(#|$)"
+  figTierRegex = "^stills(#|$)",
+  mainTierNames = NULL,
+  alignChars = NULL
 )
 }
 \arguments{
@@ -43,11 +45,18 @@ helper_layout_anchors(
 \item{figReplace}{Logical; if \code{TRUE} the content of picture tiers is replaced by a number mark.}
 
 \item{figTierRegex}{Character string; regular expression identifying picture tiers.}
+
+\item{mainTierNames}{Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.}
+
+\item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.}
 }
 \value{
 Data.frame with one row per anchored symbol (columns include
 \code{row}, \code{tierName}, \code{char}, \code{occurrence},
-\code{target_col}, \code{target_line}, \code{source_row}, \code{type}).
+\code{target_col}, \code{target_line}, \code{source_row},
+\code{prefix_width}, \code{type}). \code{target_col} counts from the
+text body of the source row - line number and speaker sigle are already
+subtracted; their width is reported in \code{prefix_width}.
 }
 \description{
 Returns the anchor specification of every rendered row: which symbol of

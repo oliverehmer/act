@@ -4516,28 +4516,43 @@ detect_bracket_filler_new <- function(bracket_content, default_filler,
 
 prepare_annotations_new <- function(t, l, layout_mode = "gat",
                                     fig_replace = TRUE,
-                                    fig_tier_regex = "^stills(#|$)") {
+                                    fig_tier_regex = "^stills(#|$)",
+                                    main_tier_names = NULL,
+                                    align_chars = NULL) {
 	ann <- t@annotations
 	ann$tierName <- as.character(ann$tierName)
 
-	# ===== STYLE MATCHING (is.main) =====
-	ann$format.is.main <- FALSE
-	if (!is.null(l@docx.styles.user) && nrow(l@docx.styles.user) > 0) {
-		ann$format.style.matched <- FALSE
-		for (row_idx in seq_len(nrow(l@docx.styles.user))) {
-			style_row <- l@docx.styles.user[row_idx, ]
-			matched <- rep(FALSE, nrow(ann))
-			if (!is.na(style_row$match.regex)) {
-				matched <- matched | grepl(style_row$match.regex, ann$tierName, perl = TRUE)
+	# ===== MAIN TIERS =====
+	# Precedence: explicit parameter > styles table > standalone default.
+	# A styles table only counts as a source of the main flag when at least
+	# one of its rows sets is.main.tier TRUE. Otherwise every tier is a
+	# main tier, minus the rows a style row explicitly marks FALSE - inert
+	# and correct for purely verbal corpora (user decision 2026-08-18,
+	# PLAN_alignment_main_tier).
+	styles_user <- l@docx.styles.user
+	styles_have_main <- !is.null(styles_user) && nrow(styles_user) > 0 &&
+		!is.null(styles_user$is.main.tier) &&
+		any(styles_user$is.main.tier %in% TRUE)
+	if (!is.null(main_tier_names)) {
+		ann$format.is.main <- ann$tierName %in% main_tier_names
+	} else {
+		ann$format.is.main <- !styles_have_main
+		if (!is.null(styles_user) && nrow(styles_user) > 0) {
+			ann$format.style.matched <- FALSE
+			for (row_idx in seq_len(nrow(styles_user))) {
+				style_row <- styles_user[row_idx, ]
+				matched <- rep(FALSE, nrow(ann))
+				if (!is.na(style_row$match.regex)) {
+					matched <- matched | grepl(style_row$match.regex, ann$tierName, perl = TRUE)
+				}
+				unset <- !ann$format.style.matched & matched
+				ann$format.style.matched[unset] <- TRUE
+				if (!is.null(style_row$is.main.tier) && !is.na(style_row$is.main.tier)) {
+					ann$format.is.main[unset] <- style_row$is.main.tier
+				}
 			}
-			unset <- !ann$format.style.matched & matched
-			ann$format.style.matched[unset] <- TRUE
-			if (!is.null(style_row$is.main.tier) && !is.na(style_row$is.main.tier) &&
-			    style_row$is.main.tier) {
-				ann$format.is.main[unset] <- TRUE
-			}
+			ann$format.style.matched <- NULL
 		}
-		ann$format.style.matched <- NULL
 	}
 
 	# ===== SORT: time + tier order =====
@@ -4589,6 +4604,21 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		if (!is.null(format_tier$content.indent.align.arrow) &&
 		    !is.na(format_tier$content.indent.align.arrow)) {
 			ann$format.align.arrow[rows] <- format_tier$content.indent.align.arrow
+		}
+	}
+
+	# Explicit anchor characters win over the styles table, per tier. The
+	# other tiers keep whatever the styles table said.
+	if (!is.null(align_chars) && length(align_chars) > 0 &&
+	    !is.null(names(align_chars))) {
+		idx <- match(ann$tierName, names(align_chars))
+		hit <- which(!is.na(idx) & nzchar(align_chars[idx]))
+		if (length(hit) > 0) {
+			ann$format.align.char[hit]     <- unname(align_chars[idx[hit]])
+			ann$format.content.indent[hit] <- "align"
+			ann$format.align.mode[hit]     <- ifelse(
+				is.na(ann$format.align.mode[hit]), "bracket",
+				ann$format.align.mode[hit])
 		}
 	}
 
@@ -5526,10 +5556,13 @@ build_alignment_report <- function(result, plan, transcript_name,
 }
 
 .layout_frame <- function(t, l, layout_mode, timeToleranceGesture,
-                          figReplace, figTierRegex) {
+                          figReplace, figTierRegex,
+                          mainTierNames = NULL, alignChars = NULL) {
 	prep <- prepare_annotations_new(t, l, layout_mode = layout_mode,
 	                                fig_replace = figReplace,
-	                                fig_tier_regex = figTierRegex)
+	                                fig_tier_regex = figTierRegex,
+	                                main_tier_names = mainTierNames,
+	                                align_chars = alignChars)
 	ann <- prep$engine_ann
 	mm_anchor_chars <- unique(unlist(
 		lapply(ann$align_chars[!is.na(ann$align_chars)],
@@ -5592,6 +5625,8 @@ build_alignment_report <- function(result, plan, transcript_name,
 #' @param maxSpanBlocks Integer; maximum number of blocks a description may span before it is cut with a resume arrow.
 #' @param figReplace Logical; if \code{TRUE} the content of picture tiers is replaced by a number mark.
 #' @param figTierRegex Character string; regular expression identifying picture tiers.
+#' @param mainTierNames Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.
+#' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.
 #'
 #' @return List with the rendered \code{lines}, the line \code{plan}, the
 #' engine \code{result} frame, the filtered \code{transcript}, the
@@ -5609,7 +5644,9 @@ helper_layout_render <- function(t,
                                  minDescription        = 10L,
                                  maxSpanBlocks         = 3L,
                                  figReplace            = TRUE,
-                                 figTierRegex          = "^stills(#|$)") {
+                                 figTierRegex          = "^stills(#|$)",
+                                 mainTierNames         = NULL,
+                                 alignChars            = NULL) {
 	if (is.null(l)) l <- methods::new("layout")
 	layout_mode <- .layout_mode_of(l)
 	label_mode <- getOption("act.layout.label.mode", "mondada")
@@ -5626,7 +5663,9 @@ helper_layout_render <- function(t,
 	}
 	prep <- prepare_annotations_new(t, l, layout_mode = layout_mode,
 	                                fig_replace = figReplace,
-	                                fig_tier_regex = figTierRegex)
+	                                fig_tier_regex = figTierRegex,
+	                                main_tier_names = mainTierNames,
+	                                align_chars = alignChars)
 	result <- align_and_render(prep$engine_ann, prep$engine_width,
 	                           arrow_mode = prep$arrow_mode,
 	                           verbal_align = isTRUE(l@brackets.align),
@@ -5661,7 +5700,10 @@ helper_layout_render <- function(t,
 #'
 #' @return Data.frame with one row per anchored symbol (columns include
 #' \code{row}, \code{tierName}, \code{char}, \code{occurrence},
-#' \code{target_col}, \code{target_line}, \code{source_row}, \code{type}).
+#' \code{target_col}, \code{target_line}, \code{source_row},
+#' \code{prefix_width}, \code{type}). \code{target_col} counts from the
+#' text body of the source row - line number and speaker sigle are already
+#' subtracted; their width is reported in \code{prefix_width}.
 #'
 #' @export
 helper_layout_anchors <- function(t,
@@ -5675,7 +5717,9 @@ helper_layout_anchors <- function(t,
                                   minDescription        = 10L,
                                   maxSpanBlocks         = 3L,
                                   figReplace            = TRUE,
-                                  figTierRegex          = "^stills(#|$)") {
+                                  figTierRegex          = "^stills(#|$)",
+                                  mainTierNames         = NULL,
+                                  alignChars            = NULL) {
 	rendered <- helper_layout_render(t, l,
 		filterTierNames       = filterTierNames,
 		filterSectionStartsec = filterSectionStartsec,
@@ -5686,20 +5730,29 @@ helper_layout_anchors <- function(t,
 		minDescription        = minDescription,
 		maxSpanBlocks         = maxSpanBlocks,
 		figReplace            = figReplace,
-		figTierRegex          = figTierRegex)
+		figTierRegex          = figTierRegex,
+		mainTierNames         = mainTierNames,
+		alignChars            = alignChars)
 	result <- rendered$result
 	empty <- data.frame(row = integer(0), tierName = character(0),
 	                    char = character(0), occurrence = integer(0),
 	                    target_col = integer(0), target_line = integer(0),
-	                    source_row = integer(0), type = character(0),
+	                    source_row = integer(0), prefix_width = integer(0),
+	                    type = character(0),
 	                    stringsAsFactors = FALSE)
 	if (is.null(result)) return(empty)
+	.layout_warn_no_main(result$is_main)
+	prefix_width <- nchar(result$prefix_first)
+	prefix_width[is.na(result$prefix_first)] <- 0L
 	collected <- list()
 	for (i in seq_len(nrow(result))) {
 		spec <- result$anchor_specs[[i]]
 		if (is.null(spec) || nrow(spec) == 0) next
 		spec$row <- i
 		spec$tierName <- result$tierName[i]
+		spec$prefix_width <- ifelse(is.na(spec$source_row), 0L,
+		                            prefix_width[spec$source_row])
+		spec$target_col <- spec$target_col - spec$prefix_width
 		collected[[length(collected) + 1]] <- spec
 	}
 	if (length(collected) == 0) return(empty)
@@ -5726,7 +5779,9 @@ helper_layout_bracket_pairs <- function(t,
                                         filterSectionEndsec   = NULL,
                                         timeToleranceGesture  = 0.5,
                                         figReplace            = TRUE,
-                                        figTierRegex          = "^stills(#|$)") {
+                                        figTierRegex          = "^stills(#|$)",
+                                        mainTierNames         = NULL,
+                                        alignChars            = NULL) {
 	if (is.null(l)) l <- methods::new("layout")
 	layout_mode <- .layout_mode_of(l)
 	t <- .layout_filter_transcript(t, l, filterTierNames,
@@ -5739,7 +5794,9 @@ helper_layout_bracket_pairs <- function(t,
 		                               j_occurrence = integer(0))))
 	}
 	frame <- .layout_frame(t, l, layout_mode, timeToleranceGesture,
-	                       figReplace, figTierRegex)
+	                       figReplace, figTierRegex,
+	                       mainTierNames = mainTierNames,
+	                       alignChars = alignChars)
 	list(ann = frame$ann, pairs = compute_bracket_pairs(frame$ann))
 }
 
@@ -5763,7 +5820,9 @@ helper_layout_symbol_matches <- function(t,
                                          filterSectionEndsec   = NULL,
                                          timeToleranceGesture  = 0.5,
                                          figReplace            = TRUE,
-                                         figTierRegex          = "^stills(#|$)") {
+                                         figTierRegex          = "^stills(#|$)",
+                                         mainTierNames         = NULL,
+                                         alignChars            = NULL) {
 	if (is.null(l)) l <- methods::new("layout")
 	layout_mode <- .layout_mode_of(l)
 	t <- .layout_filter_transcript(t, l, filterTierNames,
@@ -5777,10 +5836,22 @@ helper_layout_symbol_matches <- function(t,
 		                                 main_occurrence = integer(0))))
 	}
 	frame <- .layout_frame(t, l, layout_mode, timeToleranceGesture,
-	                       figReplace, figTierRegex)
+	                       figReplace, figTierRegex,
+	                       mainTierNames = mainTierNames,
+	                       alignChars = alignChars)
+	.layout_warn_no_main(frame$ann$is_main)
 	ref_main <- resolve_reference_main(frame$ann)
 	list(ann = frame$ann,
 	     matches = compute_mm_symbol_matches(frame$ann, ref_main))
+}
+
+.layout_warn_no_main <- function(is_main) {
+	if (length(is_main) > 0 && !any(is_main, na.rm = TRUE)) {
+		cli::cli_warn(paste0(
+			"No main tiers known - pass mainTierNames or set is.main.tier ",
+			"in the styles table. Anchors will be missing or wrong."))
+	}
+	invisible(NULL)
 }
 
 # Collected end-of-export warnings (mixed wrap, unmatched symbols) - one
