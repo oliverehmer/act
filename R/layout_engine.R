@@ -12,9 +12,12 @@
 # ==== source module: render_aligned.R ====
 
 HARD_BREAK_CHAR <- "\u23ce"
-# Internal stand-in for the keep-together character: treated as a WORD
-# character by every guard (no break, no fill insertion at its spot),
-# printed as a plain space in the final lines.
+# Internal stand-in for a GLUED SPACE: a keep-together character next to a
+# space collapses with that space into this WORD character (no break, no
+# fill insertion at its spot), printed as a plain space in the final lines.
+# A keep-together character without adjacent space is dropped in prepare -
+# the parts it joins simply become one word. Both happen BEFORE alignment,
+# so no column ever shifts at render time.
 KEEP_TOGETHER_CHAR <- "\ue000"
 
 # ===== TOP LEVEL =====
@@ -4744,8 +4747,12 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	}
 	keep_char <- getOption("act.layout.keeptogether.char", "\u203f")
 	if (nzchar(keep_char)) {
+		keep_quoted <- paste0("\\Q", keep_char, "\\E")
 		ann$content_render <- stringr::str_replace_all(ann$content_render,
-			stringr::fixed(keep_char), KEEP_TOGETHER_CHAR)
+			paste0(" +", keep_quoted, " *|", keep_quoted, " +"),
+			KEEP_TOGETHER_CHAR)
+		ann$content_render <- stringr::str_replace_all(ann$content_render,
+			stringr::fixed(keep_char), "")
 	}
 
 	# ===== FIGURES: still id -> "#<number>" =====

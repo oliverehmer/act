@@ -146,7 +146,7 @@
 	act.layout.keeptogether.char = list(
 		value       = "\u203f",
 		group       = "layout",
-		description = "Character in annotation content that glues the adjacent parts together: no line break, no fill insertion at this spot; rendered as a plain space (corpus convention - do not change mid-project)"
+		description = "Character in annotation content that glues the adjacent parts together: no line break, no fill insertion at this spot; the character itself is not printed - an adjacent space is kept but glued (corpus convention - do not change mid-project)"
 	),
 	act.layout.linebreak.char = list(
 		value       = "\u23ce",

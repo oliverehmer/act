@@ -138,7 +138,7 @@ transcripts_update_normalization <- function(x,
 			}
 			if (nzchar(keep_char)) {
 				all.norm <- stringr::str_replace_all(all.norm,
-					stringr::fixed(keep_char), " ")
+					stringr::fixed(keep_char), "")
 			}
 			if (length(mymatrix) > 0) {
 				all.norm <- stringr::str_replace_all(all.norm, mymatrix)
