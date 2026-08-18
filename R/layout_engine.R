@@ -4292,6 +4292,7 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 					insert_char <- "_"
 				}
 			}
+			if (identical(insert_char, "_") && insert_n > 12L) next
 			graphemes <- append(graphemes, rep(insert_char, insert_n),
 			                    after = insert_at)
 			ann$text[main_row] <- paste(graphemes, collapse = "")
@@ -4440,6 +4441,12 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 				insert_char <- "_"
 			}
 		}
+		# Word-internal widening is capped: a handful of underscores keeps
+		# the word readable (CLA___ro), forty of them tear it apart and
+		# push the tail into a line break. Beyond the cap the span is not
+		# widened - the description continues with an arrow instead
+		# (user report 205_005 line 54, 2026-08-18).
+		if (identical(insert_char, "_") && (needed - available) > 12L) next
 		graphemes <- append(graphemes, rep(insert_char, needed - available),
 		                    after = insert_at)
 		ann$text[main_row] <- paste(graphemes, collapse = "")
