@@ -12,6 +12,10 @@
 # ==== source module: render_aligned.R ====
 
 HARD_BREAK_CHAR <- "\u23ce"
+# Internal stand-in for the keep-together character: treated as a WORD
+# character by every guard (no break, no fill insertion at its spot),
+# printed as a plain space in the final lines.
+KEEP_TOGETHER_CHAR <- "\ue000"
 
 # ===== TOP LEVEL =====
 
@@ -220,6 +224,8 @@ align_and_render <- function(ann, text_body_width, arrow_mode = "stem",
 			result$lines <- .duplicate_latch_at_break(
 				result$lines, nchar(ann$prefix_cont[i]), width_i)
 		}
+		result$lines <- gsub(KEEP_TOGETHER_CHAR, " ", result$lines,
+		                     fixed = TRUE)
 		rendered_lines[[i]] <<- result$lines
 		lead_lines[[i]] <<- result$lead_lines
 		if (!is.null(result$moved_anchors) && nrow(anchor_specs[[i]]) > 0) {
@@ -324,6 +330,8 @@ align_and_render <- function(ann, text_body_width, arrow_mode = "stem",
 		result$lines <- .collapse_latch_in_lines(result$lines, all_anchor_chars)
 		result$lines <- .drop_space_after_leading_mark(result$lines,
 			all_anchor_chars, nchar(ann$prefix_cont[i]))
+		result$lines <- gsub(KEEP_TOGETHER_CHAR, " ", result$lines,
+		                     fixed = TRUE)
 		cache[[i]] <- list(
 			lines     = result$lines,
 			positions = extract_anchor_positions(result$lines, all_anchor_chars))
@@ -1379,7 +1387,7 @@ interleave_layer_lines <- function(result, max_span_blocks = Inf,
 					if (is.na(line)) return(FALSE)
 					body <- substr(line, pad + 1L, nchar(line))
 					body <- stringr::str_trim(body)
-					nzchar(body) && !stringr::str_detect(body, "[\\p{L}\\p{N}]")
+					nzchar(body) && !stringr::str_detect(body, "[\\p{L}\\p{N}\\ue000]")
 				}, logical(1), USE.NAMES = FALSE)
 				in_block <- !is.na(span)
 				runs <- rle(fill_only & in_block)
@@ -1476,7 +1484,7 @@ interleave_layer_lines <- function(result, max_span_blocks = Inf,
 							body_end <- nchar(lines_row[mid])
 							if (body_end >= close_col) next
 							if (!stringr::str_detect(lines_row[mid],
-							                         "[\\p{L}\\p{N}]$")) next
+							                         "[\\p{L}\\p{N}\\ue000]$")) next
 							lines_row[mid] <- paste0(lines_row[mid],
 								strrep(fill_char, close_col - body_end))
 							changed_row <- TRUE
@@ -3787,9 +3795,9 @@ apply_symbol_merge <- function(ann, anchor_char_set, mm_matches = NULL,
 				" "
 			}
 			word_left <- stringr::str_detect(left_grapheme,
-			                                 "^[\\p{L}\\p{N}]$")
+			                                 "^[\\p{L}\\p{N}\\ue000]$")
 			word_right <- stringr::str_detect(right_grapheme,
-			                                  "^[\\p{L}\\p{N}]$")
+			                                  "^[\\p{L}\\p{N}\\ue000]$")
 			if (word_left && word_right) next
 		}
 		# The closing half may sit on EITHER of the two folded
@@ -4262,7 +4270,7 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 			# 2026-08-17, same behaviour as the same-line branch).
 			insert_char <- " "
 			word_char <- function(g) {
-				stringr::str_detect(g, "^[\\p{L}\\p{N}]$")
+				stringr::str_detect(g, "^[\\p{L}\\p{N}\\ue000]$")
 			}
 			cluster_end <- b$index[1]
 			while (cluster_end < length(graphemes) &&
@@ -4418,7 +4426,7 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 		}
 		insert_char <- " "
 		is_word_char <- function(g) {
-			stringr::str_detect(g, "^[\\p{L}\\p{N}]$")
+			stringr::str_detect(g, "^[\\p{L}\\p{N}\\ue000]$")
 		}
 		cluster_end <- b$index[1]
 		while (cluster_end < length(graphemes) &&
@@ -4733,6 +4741,11 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	if (!identical(linebreak_char, HARD_BREAK_CHAR) && nzchar(linebreak_char)) {
 		ann$content_render <- stringr::str_replace_all(ann$content_render,
 			stringr::fixed(linebreak_char), HARD_BREAK_CHAR)
+	}
+	keep_char <- getOption("act.layout.keeptogether.char", "\u203f")
+	if (nzchar(keep_char)) {
+		ann$content_render <- stringr::str_replace_all(ann$content_render,
+			stringr::fixed(keep_char), KEEP_TOGETHER_CHAR)
 	}
 
 	# ===== FIGURES: still id -> "#<number>" =====

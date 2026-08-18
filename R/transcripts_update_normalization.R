@@ -31,16 +31,22 @@ transcripts_update_normalization <- function(x,
 		return(x)
 	}
 
-	#=== matrix check: missing or empty -> warn and skip
+	#=== matrix check: missing or empty -> warn, continue without matrix rows
+	# The layout marker characters are stripped option-based further below,
+	# so normalization must run even when the matrix is unusable.
 	if (is.null(x@normalization.matrix) ||
 		!is.data.frame(x@normalization.matrix) ||
 		nrow(x@normalization.matrix) == 0) {
 		cli::cli_warn(paste0(
-			"Normalization matrix is missing or empty; skipping normalization. ",
+			"Normalization matrix is missing or empty; normalizing without matrix rows ",
+			"(lowercase, layout marker stripping, trim only). ",
 			"Set it via 'x@normalization.matrix <- act::matrix_load(path=...)'."))
-		return(x)
+		act_replacementMatrix <- data.frame(search = character(0),
+											replace = character(0),
+											stringsAsFactors = FALSE)
+	} else {
+		act_replacementMatrix <- x@normalization.matrix
 	}
-	act_replacementMatrix <- x@normalization.matrix
 
 	#=== check matrix
 	if ("search" %in% colnames(act_replacementMatrix)==FALSE) {	cli::cli_abort("Column {.arg search} is missing in normalization matrix. The matrix needs to contain colums {.arg search} and {.arg replace}")}
@@ -53,17 +59,19 @@ transcripts_update_normalization <- function(x,
 	names(mymatrix) <- act_replacementMatrix$search
 
 	#=== check if the matrix works
-	out <- tryCatch(
-		{
-			#This is the 'try' part
-			stringr::str_replace_all("test string", mymatrix)
-		},
-		error=function(cond) {
-			#this is the error part
-			NULL
-		}
-	)
-	if (is.null(out)) 						{	cli::cli_abort("Normalization matrix seems to be containing invalid regular expressions.")		}
+	if (length(mymatrix) > 0) {
+		out <- tryCatch(
+			{
+				#This is the 'try' part
+				stringr::str_replace_all("test string", mymatrix)
+			},
+			error=function(cond) {
+				#this is the error part
+				NULL
+			}
+		)
+		if (is.null(out)) 					{	cli::cli_abort("Normalization matrix seems to be containing invalid regular expressions.")		}
+	}
 
 	#=== if no filter is set, process all transcripts
 	if (is.null(transcriptNames)) {transcriptNames <- names(x@transcripts)}
@@ -118,7 +126,23 @@ transcripts_update_normalization <- function(x,
 		# Regex patterns are compiled once per chunk instead of once per transcript.
 		if (length(all.content) > 0) {
 			all.norm <- stringr::str_to_lower(all.content)
-			all.norm <- stringr::str_replace_all(all.norm, mymatrix)
+			# The layout marker characters (options act.layout.linebreak.char
+			# and act.layout.keeptogether.char) are ALWAYS stripped, before
+			# and independent of the user matrix: search must find the words
+			# even when a matrix does not know the markers.
+			linebreak_char <- getOption("act.layout.linebreak.char", "\u23ce")
+			keep_char <- getOption("act.layout.keeptogether.char", "\u203f")
+			if (nzchar(linebreak_char)) {
+				all.norm <- stringr::str_replace_all(all.norm,
+					stringr::fixed(linebreak_char), "")
+			}
+			if (nzchar(keep_char)) {
+				all.norm <- stringr::str_replace_all(all.norm,
+					stringr::fixed(keep_char), " ")
+			}
+			if (length(mymatrix) > 0) {
+				all.norm <- stringr::str_replace_all(all.norm, mymatrix)
+			}
 			all.norm <- stringr::str_trim(all.norm, side = "both")
 		} else {
 			all.norm <- character(0)
