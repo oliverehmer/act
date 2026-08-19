@@ -3147,6 +3147,12 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 			# sorting by time could cross two near-simultaneous marks.
 			layer_seq <- layer_seq[order(layer_seq$index), , drop = FALSE]
 			main_seq <- main_symbols[main_symbols$char == symbol_char, , drop = FALSE]
+			# Guard BEFORE the keys are built: on an empty main_seq the
+			# paste() below would still yield one key (the scalar char is
+			# recycled), and indexing a 0-row frame with that length-1
+			# logical materializes an all-NA row - which then reaches
+			# monotone_match() as an NA time.
+			if (nrow(main_seq) == 0) next
 			main_keys <- paste(main_seq$row, symbol_char, main_seq$occurrence)
 			consumed <- main_keys %in% used_main
 			shareable <- vapply(main_keys, function(key) {
