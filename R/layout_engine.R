@@ -4547,8 +4547,11 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 				}
 				unset <- !ann$format.style.matched & matched
 				ann$format.style.matched[unset] <- TRUE
-				if (!is.null(style_row$is.main.tier) && !is.na(style_row$is.main.tier)) {
-					ann$format.is.main[unset] <- style_row$is.main.tier
+				if (!is.null(style_row$is.main.tier)) {
+					is_main_value <- as.logical(style_row$is.main.tier)
+					if (!is.na(is_main_value)) {
+						ann$format.is.main[unset] <- is_main_value
+					}
 				}
 			}
 			ann$format.style.matched <- NULL
@@ -4612,7 +4615,8 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	if (!is.null(align_chars) && length(align_chars) > 0 &&
 	    !is.null(names(align_chars))) {
 		idx <- match(ann$tierName, names(align_chars))
-		hit <- which(!is.na(idx) & nzchar(align_chars[idx]))
+		hit <- which(!is.na(idx) & !is.na(align_chars[idx]) &
+		             nzchar(align_chars[idx]))
 		if (length(hit) > 0) {
 			ann$format.align.char[hit]     <- unname(align_chars[idx[hit]])
 			ann$format.content.indent[hit] <- "align"
