@@ -126,10 +126,11 @@ transcripts_update_normalization <- function(x,
 		# Regex patterns are compiled once per chunk instead of once per transcript.
 		if (length(all.content) > 0) {
 			all.norm <- stringr::str_to_lower(all.content)
-			# The layout marker characters (options act.layout.linebreak.char
-			# and act.layout.keeptogether.char) are ALWAYS stripped, before
-			# and independent of the user matrix: search must find the words
-			# even when a matrix does not know the markers.
+			# The layout marker characters (options act.layout.linebreak.char,
+			# act.layout.keeptogether.char and act.layout.rectangle.char with
+			# its number) are ALWAYS stripped, before and independent of the
+			# user matrix: search must find the words even when a matrix does
+			# not know the markers.
 			linebreak_char <- getOption("act.layout.linebreak.char", "\u23ce")
 			keep_char <- getOption("act.layout.keeptogether.char", "\u203f")
 			if (nzchar(linebreak_char)) {
@@ -139,6 +140,11 @@ transcripts_update_normalization <- function(x,
 			if (nzchar(keep_char)) {
 				all.norm <- stringr::str_replace_all(all.norm,
 					stringr::fixed(keep_char), "")
+			}
+			rectangle_char <- getOption("act.layout.rectangle.char", "\u25ad")
+			if (nzchar(rectangle_char)) {
+				all.norm <- stringr::str_replace_all(all.norm,
+					paste0("\\Q", rectangle_char, "\\E[0-9]*"), "")
 			}
 			if (length(mymatrix) > 0) {
 				all.norm <- stringr::str_replace_all(all.norm, mymatrix)

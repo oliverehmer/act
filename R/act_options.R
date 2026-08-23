@@ -148,6 +148,16 @@
 		group       = "layout",
 		description = "Character in annotation content that glues the adjacent parts together: no line break, no fill insertion at this spot; the character itself is not printed - an adjacent space is kept but glued (corpus convention - do not change mid-project)"
 	),
+	act.layout.rectangle.char = list(
+		value       = "\u25ad",
+		group       = "layout",
+		description = "Character in layer annotation content that controls the rectangle layout of its symbol segment: alone it forces the rectangle, a directly following number caps its line count, 1 forbids it; the character and its number are not printed (corpus convention - do not change mid-project)"
+	),
+	act.layout.rectangle.max.lines = list(
+		value       = 2L,
+		group       = "layout",
+		description = "Line cap of the automatic rectangle layout for layer descriptions: 0 disables rectangles entirely (manual markers included), 1 disables only the automatic ones, 2 and more allow automatic rectangles up to that many lines"
+	),
 	act.layout.linebreak.char = list(
 		value       = "\u23ce",
 		group       = "layout",

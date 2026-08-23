@@ -217,7 +217,10 @@ align_and_render <- function(ann, text_body_width, arrow_mode = "stem",
 			arrow_mode    = arrow_mode,
 			pair_mode     = identical(ann$align_mode[i], "bracket"),
 			lead_allowed  = lead_allowed,
-			min_description = min_description
+			min_description = min_description,
+			rect_directives = .remap_rect_directives(
+				if (is.null(ann$rect_directives)) NULL else ann$rect_directives[[i]],
+				merge_map, i)
 		)
 		if (isTRUE(ann$is_main[i])) {
 			result$lines <- .collapse_latch_in_lines(result$lines,
@@ -675,6 +678,21 @@ concatenate_mondada_rows <- function(ann, anchor_char_set,
 			new_fragment$content <- next_content
 			fragment_rows[[previous]] <- rbind(fragment_rows[[previous]],
 			                                   new_fragment)
+			# Rectangle directives of the joined fragment address symbol
+			# occurrences within THEIR fragment - shift them by the counts
+			# already present in the accumulated row.
+			if (!is.null(ann$rect_directives)) {
+				next_directives <- ann$rect_directives[[i]]
+				if (!is.null(next_directives) && nrow(next_directives) > 0) {
+					accumulated_g <- split_graphemes(ann$content[previous])
+					next_directives$occurrence <- next_directives$occurrence +
+						vapply(next_directives$char,
+						       function(ch) sum(accumulated_g == ch),
+						       integer(1), USE.NAMES = FALSE)
+					ann$rect_directives[[previous]] <- rbind(
+						ann$rect_directives[[previous]], next_directives)
+				}
+			}
 			ann$content[previous] <- paste0(ann$content[previous], separator,
 			                                next_content)
 			ann$endsec[previous] <- ann$endsec[i]
@@ -2001,7 +2019,9 @@ render_annotation_tokens <- function(text, anchors, width, prefix_first,
                                      prefix_cont, arrow_mode, pair_mode,
                                      start_col = NULL, lead_allowed = FALSE,
                                      min_description = 10L,
-                                     continuation_arrow = 2L) {
+                                     continuation_arrow = 2L,
+                                     rect_directives = NULL) {
+	rect_option <- as.integer(getOption("act.layout.rectangle.max.lines", 2L))
 	tokens <- tokenize_content(text)
 	prefix_first_g <- split_graphemes(prefix_first)
 	if (!is.null(start_col) && start_col > length(prefix_first_g) + 1L) {
@@ -2155,15 +2175,39 @@ render_annotation_tokens <- function(text, anchors, width, prefix_first,
 				             (is.na(own_line) | is.na(anchors$target_line) |
 				              anchors$target_line == own_line))
 				# The rectangle is an EMERGENCY layout and stays flat: it
-				# forms only when the description fits into at most TWO
-				# text lines of the rectangle (opening line plus one full
-				# line; the closing line carries the last word). Longer
-				# descriptions keep the full line width, and spans
-				# narrower than min_description never form one
-				# (user decision 2026-08-17).
-				if (length(nxt) > 0 &&
-				    anchors$target_col[nxt[1]] - prefix_len >=
-				    	min_description) {
+				# forms only when the description fits into the allowed
+				# line count (opening line plus full lines; the closing
+				# line carries the last word). The cap comes from a manual
+				# directive for THIS segment, otherwise from the option
+				# act.layout.rectangle.max.lines (0 = never, 1 = automatic
+				# off, N = automatic up to N lines). Manual directives skip
+				# the min_description threshold; longer descriptions keep
+				# the full line width (user decisions 2026-08-17 and
+				# 2026-08-19, PLAN_rectangle).
+				directive_cap <- NA_integer_
+				if (!is.null(rect_directives) && length(nxt) > 0 &&
+				    nrow(rect_directives) > 0) {
+					hit_directive <- which(
+						rect_directives$char == anchors$char[nxt[1]] &
+						rect_directives$occurrence == anchors$occurrence[nxt[1]])
+					if (length(hit_directive) > 0) {
+						directive_cap <- rect_directives$max_lines[
+							hit_directive[length(hit_directive)]]
+					}
+				}
+				rect_cap <- if (rect_option <= 0L) {
+					0L
+				} else if (!is.na(directive_cap)) {
+					directive_cap
+				} else if (rect_option >= 2L) {
+					rect_option
+				} else {
+					0L
+				}
+				if (length(nxt) > 0 && rect_cap >= 2L &&
+				    (!is.na(directive_cap) ||
+				     anchors$target_col[nxt[1]] - prefix_len >=
+				    	min_description)) {
 					close_col <- anchors$target_col[nxt[1]]
 					graphemes_text <- split_graphemes(text)
 					open_index <- .symbol_index_in_text(graphemes_text,
@@ -2180,7 +2224,8 @@ render_annotation_tokens <- function(text, anchors, width, prefix_first,
 						(if (!is.na(own_col)) own_col else prefix_len) - 1L
 					room_full <- close_col - prefix_len - 1L
 					if (!is.na(description_length) &&
-					    description_length <= room_first + room_full) {
+					    description_length <=
+					    	room_first + (rect_cap - 1L) * room_full) {
 						state$close_target <- close_col
 						state$mm_edge <- close_col
 						state$mm_fill <- state$pair_fill
@@ -3255,6 +3300,17 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 		main_row = vapply(rows_list, function(x) as.integer(x$main_row), integer(1)),
 		main_occurrence = vapply(rows_list,
 			function(x) as.integer(x$main_occurrence), integer(1)))
+}
+
+.remap_rect_directives <- function(directives, merge_map, row) {
+	if (is.null(directives) || nrow(directives) == 0 || is.null(merge_map)) {
+		return(directives)
+	}
+	directives$occurrence <- vapply(seq_len(nrow(directives)), function(k) {
+		remap_symbol_occurrence(merge_map, row, directives$char[k],
+		                        directives$occurrence[k])
+	}, integer(1))
+	directives
 }
 
 monotone_match <- function(layer_times, main_times, penalty) {
@@ -4883,6 +4939,23 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		ann$content_render <- stringr::str_replace_all(ann$content_render,
 			stringr::fixed(keep_char), "")
 	}
+	# The rectangle marker and its number are stripped BEFORE any width or
+	# anchor is computed - they must never occupy a column. The stripped
+	# positions are kept so the engine frame can resolve them to their
+	# symbol segments once the anchor characters are final.
+	rectangle_char <- getOption("act.layout.rectangle.char", "\u25ad")
+	ann$rect_marks <- rep(list(NULL), nrow(ann))
+	if (nzchar(rectangle_char)) {
+		has_marker <- stringr::str_detect(ann$content_render,
+			stringr::fixed(rectangle_char))
+		has_marker[is.na(has_marker)] <- FALSE
+		for (i in which(has_marker)) {
+			stripped <- .strip_rectangle_marks(ann$content_render[i],
+				rectangle_char)
+			ann$content_render[i] <- stripped$content
+			ann$rect_marks[[i]] <- stripped$marks
+		}
+	}
 
 	# ===== FIGURES: still id -> "#<number>" =====
 	# The number is the trailing digit group of the still id, kept EXACTLY
@@ -4977,6 +5050,17 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	ann$format.filler.inside[na_filler & align_from_param] <- "-"
 	ann$format.filler.inside[is.na(ann$format.filler.inside)] <- " "
 
+	ann$rect_directives <- rep(list(NULL), nrow(ann))
+	for (i in seq_len(nrow(ann))) {
+		marks <- ann$rect_marks[[i]]
+		if (is.null(marks) || nrow(marks) == 0) next
+		align_chars_i <- ann$format.align.char[i]
+		if (is.na(align_chars_i) || !nzchar(align_chars_i)) next
+		ann$rect_directives[[i]] <- .resolve_rectangle_marks(
+			ann$content_render[i], marks, align_chars_i,
+			getOption("act.layout.rectangle.max.lines", 2L))
+	}
+
 	# A space directly after the leading annotation symbol is dropped in
 	# layer content - the symbol sits glued to its description (user
 	# comment 206_003 K1, 2026-08-17).
@@ -5010,6 +5094,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		style         = ann$format.style,
 		number_lines  = ann$format.line.nr.show & ann$format.is.main
 	)
+	engine_ann$rect_directives <- ann$rect_directives
 
 	arrow_modes <- ann$format.align.arrow[!is.na(ann$format.align.arrow)]
 	arrow_mode <- if (length(arrow_modes) > 0 && arrow_modes[1] == "space") "space" else "stem"
@@ -5668,6 +5753,68 @@ build_alignment_report <- function(result, plan, transcript_name,
 
 .layout_mode_of <- function(l) {
 	if (identical(l@layout.mode, "mondada")) "mondada" else "gat"
+}
+
+.strip_rectangle_marks <- function(text, rectangle_char) {
+	graphemes <- split_graphemes(text)
+	keep <- rep(TRUE, length(graphemes))
+	marks_index <- integer(0)
+	marks_lines <- integer(0)
+	g_idx <- 1L
+	kept_count <- 0L
+	while (g_idx <= length(graphemes)) {
+		if (graphemes[g_idx] == rectangle_char) {
+			keep[g_idx] <- FALSE
+			digit_end <- g_idx
+			while (digit_end + 1L <= length(graphemes) &&
+			       grepl("^[0-9]$", graphemes[digit_end + 1L])) {
+				digit_end <- digit_end + 1L
+				keep[digit_end] <- FALSE
+			}
+			digits <- if (digit_end > g_idx) {
+				as.integer(paste(graphemes[(g_idx + 1L):digit_end],
+				                 collapse = ""))
+			} else {
+				NA_integer_
+			}
+			marks_index <- c(marks_index, kept_count + 1L)
+			marks_lines <- c(marks_lines, digits)
+			g_idx <- digit_end + 1L
+		} else {
+			kept_count <- kept_count + 1L
+			g_idx <- g_idx + 1L
+		}
+	}
+	list(content = paste(graphemes[keep], collapse = ""),
+	     marks = data.frame(index = marks_index, max_lines = marks_lines))
+}
+
+.resolve_rectangle_marks <- function(text, marks, align_chars, option_cap) {
+	anchor_set <- strsplit(align_chars, "")[[1]]
+	graphemes <- split_graphemes(text)
+	is_anchor <- graphemes %in% anchor_set
+	force_cap <- max(2L, as.integer(option_cap))
+	out_char <- character(0)
+	out_occurrence <- integer(0)
+	out_lines <- integer(0)
+	for (k in seq_len(nrow(marks))) {
+		from <- marks$index[k]
+		candidates <- which(is_anchor & seq_along(graphemes) >= from)
+		if (length(candidates) == 0) next
+		p <- candidates[1]
+		close_char <- graphemes[p]
+		occurrence <- sum(graphemes[seq_len(p)] == close_char)
+		cap <- marks$max_lines[k]
+		cap <- if (is.na(cap)) force_cap else max(1L, as.integer(cap))
+		out_char <- c(out_char, close_char)
+		out_occurrence <- c(out_occurrence, occurrence)
+		out_lines <- c(out_lines, cap)
+	}
+	if (length(out_char) == 0) return(NULL)
+	directives <- data.frame(char = out_char, occurrence = out_occurrence,
+	                         max_lines = out_lines)
+	directives[!duplicated(directives[, c("char", "occurrence")],
+	                       fromLast = TRUE), , drop = FALSE]
 }
 
 .layout_frame <- function(t, l, layout_mode, timeToleranceGesture,
