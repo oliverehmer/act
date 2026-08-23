@@ -1860,9 +1860,23 @@ apply_text_indent <- function(ann, i, rendered_cache, ref_main) {
 
 # ===== GRAPHEMES AND TOKENIZATION =====
 
+# Cache for grapheme splits: the engine re-splits the same contents and
+# rendered lines many times per run (rounds, anchors, span pass). Pure
+# function, so a global memo cannot change results; the cap only bounds
+# memory in long sessions.
+.GRAPHEME_CACHE <- new.env(parent = emptyenv(), hash = TRUE)
+
 split_graphemes <- function(text) {
 	if (is.na(text) || nchar(text) == 0) return(character(0))
-	stringi::stri_split_boundaries(text, type = "character")[[1]]
+	cached <- .GRAPHEME_CACHE[[text]]
+	if (!is.null(cached)) return(cached)
+	result <- stringi::stri_split_boundaries(text, type = "character")[[1]]
+	if (length(.GRAPHEME_CACHE) > 100000L) {
+		rm(list = ls(.GRAPHEME_CACHE, all.names = TRUE),
+		   envir = .GRAPHEME_CACHE)
+	}
+	.GRAPHEME_CACHE[[text]] <- result
+	result
 }
 
 tokenize_content <- function(text) {
@@ -2801,27 +2815,27 @@ shift_lone_bracket_line <- function(lines, line_index, prefix_cont, target_col) 
 # ===== POSITION EXTRACTION FROM RENDERED LINES =====
 
 extract_anchor_positions <- function(lines, chars) {
-	rows <- list()
-	occ_counter <- list()
+	char_parts <- list()
+	line_parts <- list()
+	col_parts <- list()
 	for (line_index in seq_along(lines)) {
 		graphemes <- split_graphemes(lines[line_index])
 		hits <- which(graphemes %in% chars)
-		for (h in hits) {
-			g <- graphemes[h]
-			n <- occ_counter[[g]]
-			if (is.null(n)) n <- 0L
-			occ_counter[[g]] <- n + 1L
-			rows[[length(rows) + 1]] <- data.frame(
-				char = g, occurrence = n + 1L,
-				line = line_index, col = h
-			)
-		}
+		if (length(hits) == 0) next
+		k <- length(char_parts) + 1L
+		char_parts[[k]] <- graphemes[hits]
+		line_parts[[k]] <- rep(line_index, length(hits))
+		col_parts[[k]] <- hits
 	}
-	if (length(rows) == 0) {
+	if (length(char_parts) == 0) {
 		return(data.frame(char = character(0), occurrence = integer(0),
 		                  line = integer(0), col = integer(0)))
 	}
-	do.call(rbind, rows)
+	all_chars <- unlist(char_parts, use.names = FALSE)
+	data.frame(char = all_chars,
+	           occurrence = .running_occurrence(all_chars),
+	           line = unlist(line_parts, use.names = FALSE),
+	           col = unlist(col_parts, use.names = FALSE))
 }
 
 # ======================================================================
@@ -2873,7 +2887,7 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 				)
 				next
 			}
-			anchor_rows[[length(anchor_rows) + 1]] <- data.frame(
+			anchor_rows[[length(anchor_rows) + 1]] <- list(
 				char = "[", occurrence = my_pairs$j_occurrence[p],
 				target_col = target_col, target_line = hit$line[1],
 				fill_before = " ",
@@ -2891,18 +2905,20 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 		positions <- which(graphemes == "[")
 		if (length(positions) >= 2 && positions[1] <= 2L &&
 		    positions[2] == positions[1] + 1L) {
-			anchors_so_far <- do.call(rbind, anchor_rows)
-			has_outer <- any(anchors_so_far$char == "[" & anchors_so_far$occurrence == 1L)
-			inner_hit <- anchors_so_far[anchors_so_far$char == "[" &
-			                            anchors_so_far$occurrence == 2L, , drop = FALSE]
-			if (!has_outer && nrow(inner_hit) > 0 &&
-			    !is.na(inner_hit$target_col[1]) && inner_hit$target_col[1] > 2) {
-				anchor_rows[[length(anchor_rows) + 1]] <- data.frame(
+			so_far_char <- vapply(anchor_rows, function(x) x$char, character(1))
+			so_far_occurrence <- vapply(anchor_rows,
+				function(x) as.integer(x$occurrence), integer(1))
+			has_outer <- any(so_far_char == "[" & so_far_occurrence == 1L)
+			inner <- which(so_far_char == "[" & so_far_occurrence == 2L)
+			inner_hit <- if (length(inner) > 0) anchor_rows[[inner[1]]] else NULL
+			if (!has_outer && !is.null(inner_hit) &&
+			    !is.na(inner_hit$target_col) && inner_hit$target_col > 2) {
+				anchor_rows[[length(anchor_rows) + 1]] <- list(
 					char = "[", occurrence = 1L,
-					target_col = inner_hit$target_col[1] - 1L,
-					target_line = inner_hit$target_line[1],
+					target_col = inner_hit$target_col - 1L,
+					target_line = inner_hit$target_line,
 					fill_before = " ", type = "open",
-					source_row = inner_hit$source_row[1],
+					source_row = inner_hit$source_row,
 					domain = "verbal", pair_fill = NA_character_,
 					status = "placed", pair_id = NA_integer_,
 					source_occurrence = NA_integer_
@@ -3050,7 +3066,7 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 			} else {
 				" "
 			}
-			anchor_rows[[length(anchor_rows) + 1]] <- data.frame(
+			anchor_rows[[length(anchor_rows) + 1]] <- list(
 				char = sym$char, occurrence = sym$occurrence,
 				target_col = target_col, target_line = target_line,
 				fill_before = fill_before,
@@ -3064,7 +3080,22 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 	}
 
 	anchors <- if (length(anchor_rows) > 0) {
-		do.call(rbind, anchor_rows)
+		field_chr <- function(name) vapply(anchor_rows,
+			function(x) as.character(x[[name]]), character(1))
+		field_int <- function(name) vapply(anchor_rows,
+			function(x) as.integer(x[[name]]), integer(1))
+		data.frame(char = field_chr("char"),
+		           occurrence = field_int("occurrence"),
+		           target_col = field_int("target_col"),
+		           target_line = field_int("target_line"),
+		           fill_before = field_chr("fill_before"),
+		           type = field_chr("type"),
+		           source_row = field_int("source_row"),
+		           domain = field_chr("domain"),
+		           pair_fill = field_chr("pair_fill"),
+		           status = field_chr("status"),
+		           pair_id = field_int("pair_id"),
+		           source_occurrence = field_int("source_occurrence"))
 	} else {
 		data.frame(char = character(0), occurrence = integer(0),
 		           target_col = integer(0), target_line = integer(0),
@@ -3197,7 +3228,7 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 			for (k in seq_along(assignment)) {
 				if (is.na(assignment[k])) next
 				m_idx <- assignment[k]
-				rows_list[[length(rows_list) + 1]] <- data.frame(
+				rows_list[[length(rows_list) + 1]] <- list(
 					layer_row = i, char = symbol_char,
 					layer_occurrence = layer_seq$occurrence[k],
 					main_row = main_seq$row[m_idx],
@@ -3216,7 +3247,14 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 		}
 	}
 	if (length(rows_list) == 0) return(empty)
-	do.call(rbind, rows_list)
+	data.frame(
+		layer_row = vapply(rows_list, function(x) as.integer(x$layer_row), integer(1)),
+		char = vapply(rows_list, function(x) x$char, character(1)),
+		layer_occurrence = vapply(rows_list,
+			function(x) as.integer(x$layer_occurrence), integer(1)),
+		main_row = vapply(rows_list, function(x) as.integer(x$main_row), integer(1)),
+		main_occurrence = vapply(rows_list,
+			function(x) as.integer(x$main_occurrence), integer(1)))
 }
 
 monotone_match <- function(layer_times, main_times, penalty) {
@@ -3309,7 +3347,7 @@ scan_layer_symbols <- function(text, char_vector) {
 		} else {
 			""
 		}
-		rows[[length(rows) + 1]] <- data.frame(
+		rows[[length(rows) + 1]] <- list(
 			char = g, occurrence = n + 1L, type = type,
 			stretch_before = stretch_before, index = g_idx
 		)
@@ -3320,7 +3358,12 @@ scan_layer_symbols <- function(text, char_vector) {
 		                  type = character(0), stretch_before = character(0),
 		                  index = integer(0)))
 	}
-	do.call(rbind, rows)
+	data.frame(
+		char = vapply(rows, function(x) x$char, character(1)),
+		occurrence = vapply(rows, function(x) as.integer(x$occurrence), integer(1)),
+		type = vapply(rows, function(x) x$type, character(1)),
+		stretch_before = vapply(rows, function(x) x$stretch_before, character(1)),
+		index = vapply(rows, function(x) as.integer(x$index), integer(1)))
 }
 
 detect_phase_fill <- function(stretch_before, default_filler) {
@@ -4492,17 +4535,38 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 	ann
 }
 
+# Running per-character counts in original order, without the factor and
+# data.frame overhead of stats::ave.
+.running_occurrence <- function(chars) {
+	group <- match(chars, unique(chars))
+	occurrence <- integer(length(group))
+	occurrence[order(group, seq_along(group))] <- sequence(tabulate(group))
+	occurrence
+}
+
+.SYMBOL_POSITIONS_CACHE <- new.env(parent = emptyenv(), hash = TRUE)
+
 symbol_positions_in_text <- function(text, char_vector) {
+	key <- paste0(text, "\u0001", paste(char_vector, collapse = ""))
+	cached <- .SYMBOL_POSITIONS_CACHE[[key]]
+	if (!is.null(cached)) return(cached)
 	graphemes <- split_graphemes(text)
 	hits <- which(graphemes %in% char_vector)
-	if (length(hits) == 0) {
-		return(data.frame(char = character(0), occurrence = integer(0),
-		                  index = integer(0)))
+	result <- if (length(hits) == 0) {
+		data.frame(char = character(0), occurrence = integer(0),
+		           index = integer(0))
+	} else {
+		chars <- graphemes[hits]
+		data.frame(char = chars,
+		           occurrence = .running_occurrence(chars),
+		           index = hits)
 	}
-	chars <- graphemes[hits]
-	occurrence <- stats::ave(seq_along(hits), chars, FUN = seq_along)
-	data.frame(char = chars, occurrence = as.integer(occurrence),
-	           index = hits)
+	if (length(.SYMBOL_POSITIONS_CACHE) > 100000L) {
+		rm(list = ls(.SYMBOL_POSITIONS_CACHE, all.names = TRUE),
+		   envir = .SYMBOL_POSITIONS_CACHE)
+	}
+	.SYMBOL_POSITIONS_CACHE[[key]] <- result
+	result
 }
 
 # Two-branch filler autodetect (same logic as fixed act code):
