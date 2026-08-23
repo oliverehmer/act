@@ -274,7 +274,7 @@ get_style_user <- function(l, name) {
 		content.indent    = NA_character_,
 		content.indent.text.skip        = NA_character_,
 		content.indent.align.char       = NA_character_,
-		content.indent.align.filler.inside = " ",
+		content.indent.align.filler.inside = NA_character_,
 		content.indent.align.mode       = NA_character_,
 		content.wrap      = TRUE,
 		space.after       = NA_character_,

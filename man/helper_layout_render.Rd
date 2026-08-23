@@ -18,7 +18,8 @@ helper_layout_render(
   figReplace = TRUE,
   figTierRegex = "^stills(#|$)",
   mainTierNames = NULL,
-  alignChars = NULL
+  alignChars = NULL,
+  alignModes = NULL
 )
 }
 \arguments{
@@ -48,12 +49,17 @@ helper_layout_render(
 
 \item{mainTierNames}{Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.}
 
-\item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.}
+\item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}. Catch-all multimodal tiers without an entry anchor on the union of all given characters.}
+
+\item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} for spans with open and close, \code{"point"} for single spots). \code{NULL} derives the mode from the styles table of \code{l}; without any source the mode defaults to \code{"bracket"}.}
 }
 \value{
 List with the rendered \code{lines}, the line \code{plan}, the
 engine \code{result} frame, the filtered \code{transcript}, the
-\code{engineWidth} and the \code{layoutMode}.
+\code{engineWidth}, the \code{layoutMode}, and - computed from the same
+single rendering - the \code{anchors} table (as in
+\code{helper_layout_anchors}), the bracket \code{pairs} and the
+multimodal symbol \code{matches}.
 }
 \description{
 Renders a single transcript into aligned print-transcript lines using the

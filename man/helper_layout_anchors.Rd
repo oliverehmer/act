@@ -18,7 +18,8 @@ helper_layout_anchors(
   figReplace = TRUE,
   figTierRegex = "^stills(#|$)",
   mainTierNames = NULL,
-  alignChars = NULL
+  alignChars = NULL,
+  alignModes = NULL
 )
 }
 \arguments{
@@ -48,15 +49,26 @@ helper_layout_anchors(
 
 \item{mainTierNames}{Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.}
 
-\item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.}
+\item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}. Catch-all multimodal tiers without an entry anchor on the union of all given characters.}
+
+\item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} for spans with open and close, \code{"point"} for single spots). \code{NULL} derives the mode from the styles table of \code{l}; without any source the mode defaults to \code{"bracket"}.}
 }
 \value{
 Data.frame with one row per anchored symbol (columns include
 \code{row}, \code{tierName}, \code{char}, \code{occurrence},
 \code{target_col}, \code{target_line}, \code{source_row},
-\code{prefix_width}, \code{type}). \code{target_col} counts from the
-text body of the source row - line number and speaker sigle are already
+\code{prefix_width}, \code{type}, \code{status}, \code{pair_id},
+\code{source_occurrence}). \code{target_col} counts from the text body
+of the source row - line number and speaker sigle are already
 subtracted; their width is reported in \code{prefix_width}.
+\code{status} explains an \code{NA} \code{target_col}:
+\code{"placed"}, \code{"flush_leading"} (leading symbol flush with its
+segment start, no counterpart needed), \code{"no_match"} (no
+time-matched main symbol), \code{"target_dropped"} (matched symbol not
+present in the rendered line), \code{"beyond_width"} (target outside
+the wrap width). \code{pair_id} joins the two brackets of one overlap
+pair; \code{source_occurrence} is the bracket occurrence in the source
+row.
 }
 \description{
 Returns the anchor specification of every rendered row: which symbol of

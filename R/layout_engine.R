@@ -303,6 +303,7 @@ align_and_render <- function(ann, text_body_width, arrow_mode = "stem",
 	}
 	attr(ann, "render_warnings") <- warning_list
 	attr(ann, "bracket_pairs") <- pairs
+	attr(ann, "mm_matches") <- mm_matches
 	attr(ann, "merge_events") <- merge_events
 	attr(ann, "ref_main") <- ref_main
 	ann
@@ -2847,7 +2848,8 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 
 	# ---- verbal anchors ----
 	if (isTRUE(ann$is_main[i]) && nrow(pairs) > 0) {
-		my_pairs <- pairs[pairs$j_row == i, , drop = FALSE]
+		my_pair_ids <- which(pairs$j_row == i)
+		my_pairs <- pairs[my_pair_ids, , drop = FALSE]
 		for (p in seq_len(nrow(my_pairs))) {
 			source_row <- my_pairs$i_row[p]
 			cache <- rendered_cache[[source_row]]
@@ -2876,7 +2878,9 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 				target_col = target_col, target_line = hit$line[1],
 				fill_before = " ",
 				type = "open", source_row = source_row,
-				domain = "verbal", pair_fill = NA_character_
+				domain = "verbal", pair_fill = NA_character_,
+				status = "placed", pair_id = my_pair_ids[p],
+				source_occurrence = my_pairs$i_occurrence[p]
 			)
 		}
 	}
@@ -2899,7 +2903,9 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 					target_line = inner_hit$target_line[1],
 					fill_before = " ", type = "open",
 					source_row = inner_hit$source_row[1],
-					domain = "verbal", pair_fill = NA_character_
+					domain = "verbal", pair_fill = NA_character_,
+					status = "placed", pair_id = NA_integer_,
+					source_occurrence = NA_integer_
 				)
 			}
 		}
@@ -2982,6 +2988,7 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 			target_col <- NA_integer_
 			target_line <- NA_integer_
 			source_row <- NA_integer_
+			beyond_width <- FALSE
 			if (nrow(match_hit) > 0) {
 				source_row <- match_hit$main_row[1]
 				cache <- rendered_cache[[source_row]]
@@ -3026,6 +3033,16 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 				)
 				target_col <- NA_integer_
 				target_line <- NA_integer_
+				beyond_width <- TRUE
+			}
+			status <- if (!is.na(target_col)) {
+				"placed"
+			} else if (beyond_width) {
+				"beyond_width"
+			} else if (nrow(match_hit) == 0) {
+				if (is_flush_leading(sym)) "flush_leading" else "no_match"
+			} else {
+				"target_dropped"
 			}
 			sym_type <- if (identical(align_mode, "point")) "point" else sym$type
 			fill_before <- if (sym_type %in% c("close", "both")) {
@@ -3039,7 +3056,9 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 				fill_before = fill_before,
 				type = sym_type,
 				source_row = if (is.na(source_row)) context_row else source_row,
-				domain = "multimodal", pair_fill = pair_fill
+				domain = "multimodal", pair_fill = pair_fill,
+				status = status, pair_id = NA_integer_,
+				source_occurrence = NA_integer_
 			)
 		}
 	}
@@ -3051,7 +3070,9 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 		           target_col = integer(0), target_line = integer(0),
 		           fill_before = character(0),
 		           type = character(0), source_row = integer(0),
-		           domain = character(0), pair_fill = character(0))
+		           domain = character(0), pair_fill = character(0),
+		           status = character(0), pair_id = integer(0),
+		           source_occurrence = integer(0))
 	}
 	list(anchors = anchors, warnings = warnings)
 }
@@ -4524,7 +4545,8 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
                                     fig_replace = TRUE,
                                     fig_tier_regex = "^stills(#|$)",
                                     main_tier_names = NULL,
-                                    align_chars = NULL) {
+                                    align_chars = NULL,
+                                    align_modes = NULL) {
 	ann <- t@annotations
 	ann$tierName <- as.character(ann$tierName)
 
@@ -4584,7 +4606,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	ann$format.acronym.ending  <- NA_character_
 	ann$format.space.after     <- NA_character_
 	ann$format.content.wrap    <- TRUE
-	ann$format.filler.inside   <- " "
+	ann$format.filler.inside   <- NA_character_
 	ann$format.align.char      <- NA_character_
 	ann$format.align.mode      <- NA_character_
 	ann$format.content.indent  <- NA_character_
@@ -4618,6 +4640,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 
 	# Explicit anchor characters win over the styles table, per tier. The
 	# other tiers keep whatever the styles table said.
+	align_from_param <- rep(FALSE, nrow(ann))
 	if (!is.null(align_chars) && length(align_chars) > 0 &&
 	    !is.null(names(align_chars))) {
 		idx <- match(ann$tierName, names(align_chars))
@@ -4629,6 +4652,16 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 			ann$format.align.mode[hit]     <- ifelse(
 				is.na(ann$format.align.mode[hit]), "bracket",
 				ann$format.align.mode[hit])
+			align_from_param[hit] <- TRUE
+		}
+	}
+	if (!is.null(align_modes) && length(align_modes) > 0 &&
+	    !is.null(names(align_modes))) {
+		mode_idx <- match(ann$tierName, names(align_modes))
+		mode_hit <- which(!is.na(mode_idx) & !is.na(align_modes[mode_idx]) &
+		                  nzchar(align_modes[mode_idx]))
+		if (length(mode_hit) > 0) {
+			ann$format.align.mode[mode_hit] <- unname(align_modes[mode_idx[mode_hit]])
 		}
 	}
 
@@ -4864,13 +4897,29 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	align_char_union <- paste(unique(unlist(strsplit(
 		ann$format.align.char[!is.na(ann$format.align.char)], ""))),
 		collapse = "")
-	derive_rows <- identical_chr(ann$format.content.indent, "align") &
+	# The derivation also fires on the parameter path (align chars given
+	# without a styles table) so callers need not know the union rule.
+	param_align_active <- any(align_from_param)
+	derive_rows <- (identical_chr(ann$format.content.indent, "align") |
+			(param_align_active & is.na(ann$format.content.indent))) &
 		is.na(ann$format.align.char) & nzchar(align_char_union) &
 		stringr::str_detect(ann$tierName, "#mm[0-9]*$")
 	ann$format.align.char[derive_rows] <- align_char_union
+	ann$format.content.indent[derive_rows] <- "align"
 	ann$format.align.mode[derive_rows] <-
 		ifelse(is.na(ann$format.align.mode[derive_rows]), "bracket",
 		       ann$format.align.mode[derive_rows])
+	if (param_align_active) {
+		align_from_param <- align_from_param | derive_rows
+	}
+
+	# Filler default (user rule 2026-08-19): verbal brackets keep the
+	# space; symbol spans of parameter or union tiers fill with "-" unless
+	# the styles table said otherwise. Everything else keeps the old
+	# space default.
+	na_filler <- is.na(ann$format.filler.inside)
+	ann$format.filler.inside[na_filler & align_from_param] <- "-"
+	ann$format.filler.inside[is.na(ann$format.filler.inside)] <- " "
 
 	# A space directly after the leading annotation symbol is dropped in
 	# layer content - the symbol sits glued to its description (user
@@ -5567,12 +5616,14 @@ build_alignment_report <- function(result, plan, transcript_name,
 
 .layout_frame <- function(t, l, layout_mode, timeToleranceGesture,
                           figReplace, figTierRegex,
-                          mainTierNames = NULL, alignChars = NULL) {
+                          mainTierNames = NULL, alignChars = NULL,
+                          alignModes = NULL) {
 	prep <- prepare_annotations_new(t, l, layout_mode = layout_mode,
 	                                fig_replace = figReplace,
 	                                fig_tier_regex = figTierRegex,
 	                                main_tier_names = mainTierNames,
-	                                align_chars = alignChars)
+	                                align_chars = alignChars,
+	                                align_modes = alignModes)
 	ann <- prep$engine_ann
 	mm_anchor_chars <- unique(unlist(
 		lapply(ann$align_chars[!is.na(ann$align_chars)],
@@ -5636,11 +5687,15 @@ build_alignment_report <- function(result, plan, transcript_name,
 #' @param figReplace Logical; if \code{TRUE} the content of picture tiers is replaced by a number mark.
 #' @param figTierRegex Character string; regular expression identifying picture tiers.
 #' @param mainTierNames Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.
-#' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.
+#' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}. Catch-all multimodal tiers without an entry anchor on the union of all given characters.
+#' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} for spans with open and close, \code{"point"} for single spots). \code{NULL} derives the mode from the styles table of \code{l}; without any source the mode defaults to \code{"bracket"}.
 #'
 #' @return List with the rendered \code{lines}, the line \code{plan}, the
 #' engine \code{result} frame, the filtered \code{transcript}, the
-#' \code{engineWidth} and the \code{layoutMode}.
+#' \code{engineWidth}, the \code{layoutMode}, and - computed from the same
+#' single rendering - the \code{anchors} table (as in
+#' \code{helper_layout_anchors}), the bracket \code{pairs} and the
+#' multimodal symbol \code{matches}.
 #'
 #' @export
 helper_layout_render <- function(t,
@@ -5656,7 +5711,8 @@ helper_layout_render <- function(t,
                                  figReplace            = TRUE,
                                  figTierRegex          = "^stills(#|$)",
                                  mainTierNames         = NULL,
-                                 alignChars            = NULL) {
+                                 alignChars            = NULL,
+                                 alignModes            = NULL) {
 	if (is.null(l)) l <- methods::new("layout")
 	layout_mode <- .layout_mode_of(l)
 	label_mode <- getOption("act.layout.label.mode", "mondada")
@@ -5669,13 +5725,17 @@ helper_layout_render <- function(t,
 	if (nrow(t@annotations) == 0) {
 		return(list(lines = character(0), plan = NULL, result = NULL,
 		            transcript = t, engineWidth = NA_integer_,
-		            layoutMode = layout_mode))
+		            layoutMode = layout_mode,
+		            anchors = .layout_collect_anchors(NULL),
+		            pairs = .layout_empty_pairs(),
+		            matches = .layout_empty_matches()))
 	}
 	prep <- prepare_annotations_new(t, l, layout_mode = layout_mode,
 	                                fig_replace = figReplace,
 	                                fig_tier_regex = figTierRegex,
 	                                main_tier_names = mainTierNames,
-	                                align_chars = alignChars)
+	                                align_chars = alignChars,
+	                                align_modes = alignModes)
 	result <- align_and_render(prep$engine_ann, prep$engine_width,
 	                           arrow_mode = prep$arrow_mode,
 	                           verbal_align = isTRUE(l@brackets.align),
@@ -5697,7 +5757,10 @@ helper_layout_render <- function(t,
 	}
 	lines <- .layout_assemble_lines(plan, result, layout_mode)
 	list(lines = lines, plan = plan, result = result, transcript = t,
-	     engineWidth = prep$engine_width, layoutMode = layout_mode)
+	     engineWidth = prep$engine_width, layoutMode = layout_mode,
+	     anchors = .layout_collect_anchors(result),
+	     pairs = attr(result, "bracket_pairs"),
+	     matches = attr(result, "mm_matches"))
 }
 
 #' Anchor positions of a rendered transcript
@@ -5711,9 +5774,18 @@ helper_layout_render <- function(t,
 #' @return Data.frame with one row per anchored symbol (columns include
 #' \code{row}, \code{tierName}, \code{char}, \code{occurrence},
 #' \code{target_col}, \code{target_line}, \code{source_row},
-#' \code{prefix_width}, \code{type}). \code{target_col} counts from the
-#' text body of the source row - line number and speaker sigle are already
+#' \code{prefix_width}, \code{type}, \code{status}, \code{pair_id},
+#' \code{source_occurrence}). \code{target_col} counts from the text body
+#' of the source row - line number and speaker sigle are already
 #' subtracted; their width is reported in \code{prefix_width}.
+#' \code{status} explains an \code{NA} \code{target_col}:
+#' \code{"placed"}, \code{"flush_leading"} (leading symbol flush with its
+#' segment start, no counterpart needed), \code{"no_match"} (no
+#' time-matched main symbol), \code{"target_dropped"} (matched symbol not
+#' present in the rendered line), \code{"beyond_width"} (target outside
+#' the wrap width). \code{pair_id} joins the two brackets of one overlap
+#' pair; \code{source_occurrence} is the bracket occurrence in the source
+#' row.
 #'
 #' @export
 helper_layout_anchors <- function(t,
@@ -5729,7 +5801,8 @@ helper_layout_anchors <- function(t,
                                   figReplace            = TRUE,
                                   figTierRegex          = "^stills(#|$)",
                                   mainTierNames         = NULL,
-                                  alignChars            = NULL) {
+                                  alignChars            = NULL,
+                                  alignModes            = NULL) {
 	rendered <- helper_layout_render(t, l,
 		filterTierNames       = filterTierNames,
 		filterSectionStartsec = filterSectionStartsec,
@@ -5742,31 +5815,12 @@ helper_layout_anchors <- function(t,
 		figReplace            = figReplace,
 		figTierRegex          = figTierRegex,
 		mainTierNames         = mainTierNames,
-		alignChars            = alignChars)
-	result <- rendered$result
-	empty <- data.frame(row = integer(0), tierName = character(0),
-	                    char = character(0), occurrence = integer(0),
-	                    target_col = integer(0), target_line = integer(0),
-	                    source_row = integer(0), prefix_width = integer(0),
-	                    type = character(0),
-	                    stringsAsFactors = FALSE)
-	if (is.null(result)) return(empty)
-	.layout_warn_no_main(result$is_main)
-	prefix_width <- nchar(result$prefix_first)
-	prefix_width[is.na(result$prefix_first)] <- 0L
-	collected <- list()
-	for (i in seq_len(nrow(result))) {
-		spec <- result$anchor_specs[[i]]
-		if (is.null(spec) || nrow(spec) == 0) next
-		spec$row <- i
-		spec$tierName <- result$tierName[i]
-		spec$prefix_width <- ifelse(is.na(spec$source_row), 0L,
-		                            prefix_width[spec$source_row])
-		spec$target_col <- spec$target_col - spec$prefix_width
-		collected[[length(collected) + 1]] <- spec
+		alignChars            = alignChars,
+		alignModes            = alignModes)
+	if (!is.null(rendered$result)) {
+		.layout_warn_no_main(rendered$result$is_main)
 	}
-	if (length(collected) == 0) return(empty)
-	do.call(rbind, collected)
+	rendered$anchors
 }
 
 #' Overlap bracket pairs of a transcript
@@ -5791,7 +5845,8 @@ helper_layout_bracket_pairs <- function(t,
                                         figReplace            = TRUE,
                                         figTierRegex          = "^stills(#|$)",
                                         mainTierNames         = NULL,
-                                        alignChars            = NULL) {
+                                        alignChars            = NULL,
+                                        alignModes            = NULL) {
 	if (is.null(l)) l <- methods::new("layout")
 	layout_mode <- .layout_mode_of(l)
 	t <- .layout_filter_transcript(t, l, filterTierNames,
@@ -5806,7 +5861,8 @@ helper_layout_bracket_pairs <- function(t,
 	frame <- .layout_frame(t, l, layout_mode, timeToleranceGesture,
 	                       figReplace, figTierRegex,
 	                       mainTierNames = mainTierNames,
-	                       alignChars = alignChars)
+	                       alignChars = alignChars,
+	                       alignModes = alignModes)
 	list(ann = frame$ann, pairs = compute_bracket_pairs(frame$ann))
 }
 
@@ -5832,7 +5888,8 @@ helper_layout_symbol_matches <- function(t,
                                          figReplace            = TRUE,
                                          figTierRegex          = "^stills(#|$)",
                                          mainTierNames         = NULL,
-                                         alignChars            = NULL) {
+                                         alignChars            = NULL,
+                                         alignModes            = NULL) {
 	if (is.null(l)) l <- methods::new("layout")
 	layout_mode <- .layout_mode_of(l)
 	t <- .layout_filter_transcript(t, l, filterTierNames,
@@ -5848,11 +5905,49 @@ helper_layout_symbol_matches <- function(t,
 	frame <- .layout_frame(t, l, layout_mode, timeToleranceGesture,
 	                       figReplace, figTierRegex,
 	                       mainTierNames = mainTierNames,
-	                       alignChars = alignChars)
+	                       alignChars = alignChars,
+	                       alignModes = alignModes)
 	.layout_warn_no_main(frame$ann$is_main)
 	ref_main <- resolve_reference_main(frame$ann)
 	list(ann = frame$ann,
 	     matches = compute_mm_symbol_matches(frame$ann, ref_main))
+}
+
+.layout_collect_anchors <- function(result) {
+	empty <- data.frame(row = integer(0), tierName = character(0),
+	                    char = character(0), occurrence = integer(0),
+	                    target_col = integer(0), target_line = integer(0),
+	                    source_row = integer(0), prefix_width = integer(0),
+	                    type = character(0), status = character(0),
+	                    pair_id = integer(0), source_occurrence = integer(0),
+	                    stringsAsFactors = FALSE)
+	if (is.null(result)) return(empty)
+	prefix_width <- nchar(result$prefix_first)
+	prefix_width[is.na(result$prefix_first)] <- 0L
+	collected <- list()
+	for (i in seq_len(nrow(result))) {
+		spec <- result$anchor_specs[[i]]
+		if (is.null(spec) || nrow(spec) == 0) next
+		spec$row <- i
+		spec$tierName <- result$tierName[i]
+		spec$prefix_width <- ifelse(is.na(spec$source_row), 0L,
+		                            prefix_width[spec$source_row])
+		spec$target_col <- spec$target_col - spec$prefix_width
+		collected[[length(collected) + 1]] <- spec
+	}
+	if (length(collected) == 0) return(empty)
+	do.call(rbind, collected)
+}
+
+.layout_empty_pairs <- function() {
+	data.frame(i_row = integer(0), i_occurrence = integer(0),
+	           j_row = integer(0), j_occurrence = integer(0))
+}
+
+.layout_empty_matches <- function() {
+	data.frame(layer_row = integer(0), char = character(0),
+	           layer_occurrence = integer(0),
+	           main_row = integer(0), main_occurrence = integer(0))
 }
 
 .layout_warn_no_main <- function(is_main) {
