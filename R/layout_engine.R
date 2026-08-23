@@ -4494,23 +4494,15 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 
 symbol_positions_in_text <- function(text, char_vector) {
 	graphemes <- split_graphemes(text)
-	occ_counter <- list()
-	rows <- list()
-	for (g_idx in seq_along(graphemes)) {
-		g <- graphemes[g_idx]
-		if (!g %in% char_vector) next
-		n <- occ_counter[[g]]
-		if (is.null(n)) n <- 0L
-		occ_counter[[g]] <- n + 1L
-		rows[[length(rows) + 1]] <- data.frame(
-			char = g, occurrence = n + 1L, index = g_idx
-		)
-	}
-	if (length(rows) == 0) {
+	hits <- which(graphemes %in% char_vector)
+	if (length(hits) == 0) {
 		return(data.frame(char = character(0), occurrence = integer(0),
 		                  index = integer(0)))
 	}
-	do.call(rbind, rows)
+	chars <- graphemes[hits]
+	occurrence <- stats::ave(seq_along(hits), chars, FUN = seq_along)
+	data.frame(char = chars, occurrence = as.integer(occurrence),
+	           index = hits)
 }
 
 # Two-branch filler autodetect (same logic as fixed act code):
