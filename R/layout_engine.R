@@ -308,6 +308,7 @@ align_and_render <- function(ann, text_body_width, arrow_mode = "stem",
 	attr(ann, "bracket_pairs") <- pairs
 	attr(ann, "mm_matches") <- mm_matches
 	attr(ann, "merge_events") <- merge_events
+	attr(ann, "merge_map") <- merge_map
 	attr(ann, "ref_main") <- ref_main
 	ann
 }
@@ -572,6 +573,11 @@ concatenate_mondada_rows <- function(ann, anchor_char_set,
 	main_fragment_starts <- ann$startsec[ann$is_main]
 	if (nrow(ann) < 2) {
 		ann <- .attach_symbol_time_tables(ann, NULL, anchor_char_set)
+		ann$fragments <- lapply(seq_len(nrow(ann)), function(i) {
+			data.frame(startsec = ann$startsec[i], endsec = ann$endsec[i],
+			           content = ann$content[i], sep_before = "",
+			           stringsAsFactors = FALSE)
+		})
 		attr(ann, "main_fragment_starts") <- main_fragment_starts
 		return(ann)
 	}
@@ -713,6 +719,7 @@ concatenate_mondada_rows <- function(ann, anchor_char_set,
 	}, character(1))
 	rownames(ann) <- NULL
 	ann <- .attach_symbol_time_tables(ann, fragment_rows, anchor_char_set)
+	ann$fragments <- fragment_rows
 	attr(ann, "main_fragment_starts") <- main_fragment_starts
 	ann
 }
