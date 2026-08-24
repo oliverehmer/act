@@ -5880,6 +5880,50 @@ build_alignment_report <- function(result, plan, transcript_name,
 	list(ann = ann, mm_anchor_chars = mm_anchor_chars, prep = prep)
 }
 
+# Mondada continuation convention for a layer annotation spanning blocks:
+# the opening line ends with "->", the resume line leads into its first
+# content with "->" (the published convention shows "+points->" at the
+# start and "->+" right before the closing symbol). Applied per plan line
+# once the interleaver has assigned the block homes: a layer line whose
+# predecessor of the same row lives in an EARLIER group is a resume; a
+# layer line with a successor in a LATER group is an opening.
+.apply_resume_markers <- function(plan, result, engine_width) {
+	if (is.null(plan) || nrow(plan) == 0) return(plan)
+	for (p in seq_len(nrow(plan))) {
+		row_p <- plan$row[p]
+		if (isTRUE(result$is_main[row_p])) next
+		siblings <- which(plan$row == plan$row[p])
+		position <- match(p, siblings)
+		has_earlier <- position > 1L &&
+			isTRUE(plan$group[siblings[position - 1L]] != plan$group[p])
+		has_later <- position < length(siblings) &&
+			isTRUE(plan$group[siblings[position + 1L]] != plan$group[p])
+		line_text <- plan$line[p]
+		if (has_earlier) {
+			prefix_len <- nchar(result$prefix_cont[row_p])
+			if (is.na(prefix_len)) prefix_len <- 0L
+			head_part <- substr(line_text, 1L, prefix_len)
+			body_part <- substring(line_text, prefix_len + 1L)
+			lead <- regmatches(body_part, regexpr("^ *", body_part))
+			body_start <- nchar(lead) + 1L
+			if (nchar(lead) >= 2L && body_start <= nchar(body_part)) {
+				plan$line[p] <- paste0(head_part,
+				                       substr(lead, 1L, nchar(lead) - 2L),
+				                       "->",
+				                       substring(body_part, body_start))
+			}
+		}
+		if (has_later) {
+			trimmed <- sub(" +$", "", plan$line[p])
+			if (!grepl("->$", trimmed) &&
+			    nchar(trimmed) + 2L <= engine_width) {
+				plan$line[p] <- paste0(trimmed, "->")
+			}
+		}
+	}
+	plan
+}
+
 .layout_assemble_lines <- function(plan, result, layout_mode) {
 	mondada <- identical(layout_mode, "mondada")
 	lines <- character(0)
@@ -5990,6 +6034,7 @@ helper_layout_render <- function(t,
 	                               label_mode = label_mode,
 	                               layer_order = layerOrder,
 	                               wrap_marker = wrap_marker)
+	plan <- .apply_resume_markers(plan, result, prep$engine_width)
 	if (identical(layout_mode, "mondada")) {
 		plan <- apply_mondada_line_numbers(plan, result,
 		                                   offset = prep$number_offset,
