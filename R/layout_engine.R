@@ -4323,10 +4323,17 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 				# the closing row is widened so the description does not
 				# shrivel to a crumb before its symbol - the symbol moves
 				# right through spaces in the verbal line (user comment
-				# K4, decision 2026-08-17).
+				# K4, decision 2026-08-17). The opening side is recorded
+				# too: phase 2 subtracts the room the description already
+				# has from the opening symbol to the transcript width, so
+				# only the genuine REST widens the closing row (user
+				# reports 2026-08-24).
 				occurrence_b <- remap_symbol_occurrence(merge_map,
 					match_b$main_row[1], match_b$char[1],
 					match_b$main_occurrence[1])
+				occurrence_a_open <- remap_symbol_occurrence(merge_map,
+					match_a$main_row[1], match_a$char[1],
+					match_a$main_occurrence[1])
 				span_list[[length(span_list) + 1]] <- data.frame(
 					main_row = match_b$main_row[1],
 					char_a = match_b$char[1], occurrence_a = occurrence_b,
@@ -4334,6 +4341,9 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 					needed = layer_positions$index[k + 1L] -
 						layer_positions$index[k],
 					char_set = chars, cross = TRUE,
+					open_row = match_a$main_row[1],
+					open_char = match_a$char[1],
+					open_occurrence = occurrence_a_open,
 					stringsAsFactors = FALSE)
 				next
 			}
@@ -4350,6 +4360,9 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 				char_b = match_b$char[1], occurrence_b = occurrence_b,
 				needed = layer_positions$index[k + 1L] - layer_positions$index[k],
 				char_set = chars, cross = FALSE,
+				open_row = NA_integer_,
+				open_char = NA_character_,
+				open_occurrence = NA_integer_,
 				stringsAsFactors = FALSE)
 		}
 	}
@@ -4389,7 +4402,24 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 			                 drop = FALSE]
 			if (nrow(b) == 0) next
 			prefix_b <- nchar(ann$prefix_cont[main_row])
-			target_index <- min(spans$needed[sp],
+			# The description already runs from its opening symbol to the
+			# transcript width in the opening block - only the rest that
+			# does not fit there may push the closing symbol right (user
+			# reports 2026-08-24, revising the blanket K4 widening).
+			needed_rest <- spans$needed[sp]
+			open_row <- spans$open_row[sp]
+			if (!is.na(open_row) && !is.null(preliminary[[open_row]])) {
+				positions_a <- preliminary[[open_row]]$positions
+				hit_open <- positions_a[positions_a$char == spans$open_char[sp] &
+				                        positions_a$occurrence ==
+				                        	spans$open_occurrence[sp], ,
+				                        drop = FALSE]
+				if (nrow(hit_open) > 0) {
+					room_opening <- text_body_width - hit_open$col[1]
+					needed_rest <- max(0L, needed_rest - room_opening)
+				}
+			}
+			target_index <- min(needed_rest,
 			                    text_body_width - prefix_b - 1L)
 			insert_n <- target_index - b$index[1]
 			if (insert_n <= 0) next
