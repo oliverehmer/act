@@ -3755,7 +3755,7 @@ apply_double_bracket_flattening <- function(ann, pairs) {
 		# would fabricate an empty "[]" pair, which broke the endless-roll
 		# guarantee of one line per annotation (task 3, 2026-08-24). The
 		# nested pair stays and anchors via the outer-hugs-inner rule.
-		if (startsWith(rest, "]")) next
+		if (rest == "" || startsWith(rest, "]")) next
 		ann$content[j] <- paste0(before, inner_segment, "[", rest)
 
 		swap <- pairs$j_row == j & pairs$j_occurrence %in% c(1L, 2L)
