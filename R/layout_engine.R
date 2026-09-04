@@ -3750,6 +3750,12 @@ apply_double_bracket_flattening <- function(ann, pairs) {
 			""
 		}
 		rest <- sub("^\\s+", "", rest)
+		# No rest segment: the outer bracket closes right after the inner
+		# one ("[[X]]"). There is nothing to sequentialize - flattening
+		# would fabricate an empty "[]" pair, which broke the endless-roll
+		# guarantee of one line per annotation (task 3, 2026-08-24). The
+		# nested pair stays and anchors via the outer-hugs-inner rule.
+		if (startsWith(rest, "]")) next
 		ann$content[j] <- paste0(before, inner_segment, "[", rest)
 
 		swap <- pairs$j_row == j & pairs$j_occurrence %in% c(1L, 2L)
@@ -5270,6 +5276,7 @@ build_alignment_report <- function(result, plan, transcript_name,
 		.report_findings_spare_marks(result),
 		.report_findings_merge_blocked(result),
 		.report_findings_unpaired_bracket(result),
+		.report_findings_empty_bracket_pair(result),
 		.report_findings_mixed_wrap(result),
 		.report_findings_degraded(result),
 		.report_findings_overflow(result, text_body_width),
@@ -5440,6 +5447,24 @@ build_alignment_report <- function(result, plan, transcript_name,
 			advice = paste0("Either the two annotations should share one moment (align their ",
 			                "times\n    in ELAN), or the marks belong at different places in ",
 			                "the verbal line."))
+	}
+	out
+}
+
+.report_findings_empty_bracket_pair <- function(result) {
+	out <- list()
+	for (i in which(result$is_main)) {
+		if (is.na(result$content[i])) next
+		if (!grepl("[]", result$content[i], fixed = TRUE)) next
+		out[[length(out) + 1]] <- list(
+			id = "A5", title = "Empty overlap bracket pair",
+			row = i, char = "[", occurrence = 1L,
+			tier = result$tierName[i],
+			startsec = result$startsec[i], endsec = result$endsec[i],
+			description = paste0("This annotation contains an empty \"[]\" - a bracket ",
+			                     "pair\n  without any text between the brackets."),
+			advice = paste0("Remove the empty pair in ELAN, or put the overlapping ",
+			                "text\n    between the brackets."))
 	}
 	out
 }
