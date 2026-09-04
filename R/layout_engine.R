@@ -5122,6 +5122,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		startsec      = ann$startsec,
 		endsec        = ann$endsec,
 		is_main       = ann$format.is.main,
+		line_number   = ifelse(nzchar(ann$line), ann$line, NA_character_),
 		prefix_first  = ann$format.prefix,
 		prefix_cont   = strrep(" ", nchar(ann$format.prefix)),
 		wrap          = ann$format.content.wrap,
@@ -6000,7 +6001,11 @@ build_alignment_report <- function(result, plan, transcript_name,
 #' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} for spans with open and close, \code{"point"} for single spots). \code{NULL} derives the mode from the styles table of \code{l}; without any source the mode defaults to \code{"bracket"}.
 #'
 #' @return List with the rendered \code{lines}, the line \code{plan}, the
-#' engine \code{result} frame, the filtered \code{transcript}, the
+#' engine \code{result} frame (one row per annotation; its column
+#' \code{line_number} carries the printed line number of a numbered main
+#' annotation as a character string and \code{NA} otherwise - in the
+#' \code{mondada} mode, which numbers printed lines rather than annotations,
+#' it is always \code{NA}), the filtered \code{transcript}, the
 #' \code{engineWidth}, the \code{layoutMode}, and - computed from the same
 #' single rendering - the \code{anchors} table (as in
 #' \code{helper_layout_anchors}), the bracket \code{pairs} and the

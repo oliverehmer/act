@@ -55,7 +55,11 @@ helper_layout_render(
 }
 \value{
 List with the rendered \code{lines}, the line \code{plan}, the
-engine \code{result} frame, the filtered \code{transcript}, the
+engine \code{result} frame (one row per annotation; its column
+\code{line_number} carries the printed line number of a numbered main
+annotation as a character string and \code{NA} otherwise - in the
+\code{mondada} mode, which numbers printed lines rather than annotations,
+it is always \code{NA}), the filtered \code{transcript}, the
 \code{engineWidth}, the \code{layoutMode}, and - computed from the same
 single rendering - the \code{anchors} table (as in
 \code{helper_layout_anchors}), the bracket \code{pairs} and the
