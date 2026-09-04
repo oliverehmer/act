@@ -18,4 +18,4 @@ Roxygen: list(markdown = TRUE)
 URL: http://www.oliverehmer.de, https://github.com/oliverehmer/act
 NeedsCompilation: no
 Author: Oliver Ehmer [aut, cre]
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.0

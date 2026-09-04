@@ -6,3 +6,4 @@ README.md
 ^.DS_Store$
 .DS_Store.*
 .*_Store.*
+^\.claude$
