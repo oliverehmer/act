@@ -69,6 +69,8 @@ align_and_render <- function(ann, text_body_width, arrow_mode = "stem",
 
 	ref_main <- resolve_reference_main(ann)
 	mm_matches <- compute_mm_symbol_matches(ann, ref_main)
+	ann_updated <- attr(mm_matches, "ann_updated")
+	if (!is.null(ann_updated)) ann <- ann_updated
 
 	all_anchor_chars <- unique(c("[", mm_anchor_chars))
 	ann_base <- ann
@@ -310,6 +312,7 @@ align_and_render <- function(ann, text_body_width, arrow_mode = "stem",
 	attr(ann, "merge_events") <- merge_events
 	attr(ann, "merge_map") <- merge_map
 	attr(ann, "ref_main") <- ref_main
+	attr(ann, "cluster_splits") <- attr(mm_matches, "cluster_splits")
 	ann
 }
 
@@ -3222,6 +3225,8 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 	used_main <- character(0)
 	handover <- list()
 	rows_list <- list()
+	splits_list <- list()
+	swapped_any <- FALSE
 
 	for (i in seq_len(nrow(ann))) {
 		chars <- ann$align_chars[i]
@@ -3243,6 +3248,20 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 			}
 		}
 		if (is.null(main_symbols)) next
+
+		cluster_pass <- .match_symbol_clusters(ann, i, layer_symbols,
+			main_symbols, used_main, handover)
+		if (!is.null(cluster_pass$ann)) {
+			ann <- cluster_pass$ann
+			swapped_any <- TRUE
+		}
+		used_main <- cluster_pass$used_main
+		handover <- cluster_pass$handover
+		rows_list <- c(rows_list, cluster_pass$matches)
+		splits_list <- c(splits_list, cluster_pass$splits)
+		layer_symbols <- cluster_pass$layer_symbols
+		if (nrow(layer_symbols) == 0) next
+		pins <- cluster_pass$pins[order(cluster_pass$pins$index), , drop = FALSE]
 
 		for (symbol_char in unique(layer_symbols$char)) {
 			layer_seq <- layer_symbols[layer_symbols$char == symbol_char, , drop = FALSE]
@@ -3276,37 +3295,336 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 			main_seq <- main_seq[order(main_seq$time, main_seq$row,
 			                           main_seq$index), , drop = FALSE]
 
-			assignment <- monotone_match(layer_seq$time, main_seq$time, row_penalty)
-			for (k in seq_along(assignment)) {
-				if (is.na(assignment[k])) next
-				m_idx <- assignment[k]
-				rows_list[[length(rows_list) + 1]] <- list(
-					layer_row = i, char = symbol_char,
-					layer_occurrence = layer_seq$occurrence[k],
-					main_row = main_seq$row[m_idx],
-					main_occurrence = main_seq$occurrence[m_idx])
-				key <- paste(main_seq$row[m_idx], symbol_char,
-				             main_seq$occurrence[m_idx])
-				if (key %in% used_main) {
-					handover[[key]] <- NULL
-				} else {
-					used_main <- c(used_main, key)
-					handover[[key]] <- list(
-						consumer_row = i,
-						trailing = isTRUE(layer_seq$trailing[k]))
+			segment <- if (nrow(pins) == 0) rep(0L, nrow(layer_seq)) else
+				findInterval(layer_seq$index, pins$index)
+			taken_now <- character(0)
+			for (g in sort(unique(segment))) {
+				seg_layer <- layer_seq[segment == g, , drop = FALSE]
+				lower <- if (g == 0L) -Inf else pins$time[g]
+				upper <- if (g >= nrow(pins)) Inf else pins$time[g + 1L]
+				seg_main <- main_seq[main_seq$time >= lower &
+				                     main_seq$time <= upper, , drop = FALSE]
+				if (nrow(seg_main) > 0 && length(taken_now) > 0) {
+					seg_keys <- paste(seg_main$row, symbol_char,
+					                  seg_main$occurrence)
+					seg_main <- seg_main[!(seg_keys %in% taken_now), ,
+					                     drop = FALSE]
+				}
+				if (nrow(seg_main) == 0) next
+				assignment <- monotone_match(seg_layer$time, seg_main$time,
+				                             row_penalty)
+				for (k in seq_along(assignment)) {
+					if (is.na(assignment[k])) next
+					m_idx <- assignment[k]
+					rows_list[[length(rows_list) + 1]] <- list(
+						layer_row = i, char = symbol_char,
+						layer_occurrence = seg_layer$occurrence[k],
+						main_row = seg_main$row[m_idx],
+						main_occurrence = seg_main$occurrence[m_idx])
+					key <- paste(seg_main$row[m_idx], symbol_char,
+					             seg_main$occurrence[m_idx])
+					taken_now <- c(taken_now, key)
+					if (key %in% used_main) {
+						handover[[key]] <- NULL
+					} else {
+						used_main <- c(used_main, key)
+						handover[[key]] <- list(
+							consumer_row = i,
+							trailing = isTRUE(seg_layer$trailing[k]))
+					}
 				}
 			}
 		}
 	}
-	if (length(rows_list) == 0) return(empty)
-	data.frame(
-		layer_row = vapply(rows_list, function(x) as.integer(x$layer_row), integer(1)),
-		char = vapply(rows_list, function(x) x$char, character(1)),
-		layer_occurrence = vapply(rows_list,
-			function(x) as.integer(x$layer_occurrence), integer(1)),
-		main_row = vapply(rows_list, function(x) as.integer(x$main_row), integer(1)),
-		main_occurrence = vapply(rows_list,
-			function(x) as.integer(x$main_occurrence), integer(1)))
+	result_frame <- if (length(rows_list) == 0) {
+		empty
+	} else {
+		data.frame(
+			layer_row = vapply(rows_list, function(x) as.integer(x$layer_row), integer(1)),
+			char = vapply(rows_list, function(x) x$char, character(1)),
+			layer_occurrence = vapply(rows_list,
+				function(x) as.integer(x$layer_occurrence), integer(1)),
+			main_row = vapply(rows_list, function(x) as.integer(x$main_row), integer(1)),
+			main_occurrence = vapply(rows_list,
+				function(x) as.integer(x$main_occurrence), integer(1)))
+	}
+	if (length(splits_list) > 0) {
+		attr(result_frame, "cluster_splits") <- data.frame(
+			layer_row = vapply(splits_list, function(x) as.integer(x$layer_row), integer(1)),
+			cluster = vapply(splits_list, function(x) x$cluster, character(1)),
+			tier = vapply(splits_list, function(x) x$tier, character(1)),
+			startsec = vapply(splits_list, function(x) as.numeric(x$startsec), numeric(1)),
+			endsec = vapply(splits_list, function(x) as.numeric(x$endsec), numeric(1)))
+	}
+	if (swapped_any) {
+		attr(result_frame, "ann_updated") <- ann
+	}
+	result_frame
+}
+
+.match_symbol_clusters <- function(ann, layer_row, layer_symbols,
+                                   main_symbols, used_main, handover) {
+	tie_tolerance <- 0.05
+	result <- list(ann = NULL, layer_symbols = layer_symbols,
+	               used_main = used_main, handover = handover,
+	               matches = list(), splits = list(),
+	               pins = data.frame(index = integer(0), time = numeric(0)))
+	if (nrow(layer_symbols) < 2) return(result)
+	ls <- layer_symbols[order(layer_symbols$index), , drop = FALSE]
+	run_id <- cumsum(c(1L, diff(ls$index) != 1L))
+	if (!any(table(run_id) >= 2L)) {
+		result$layer_symbols <- ls
+		return(result)
+	}
+	graphemes_layer <- split_graphemes(ann$content[layer_row])
+	keep_layer <- rep(TRUE, nrow(ls))
+	runs <- list()
+	for (rid in unique(run_id)) {
+		members <- which(run_id == rid)
+		if (length(members) < 2L) next
+		seq_chars <- ls$char[members]
+		if (anyDuplicated(seq_chars) > 0L) next
+		lead_g <- graphemes_layer[seq_len(max(0L, ls$index[members[1]] - 1L))]
+		runs[[length(runs) + 1L]] <- list(
+			members = members, seq_chars = seq_chars,
+			cluster_time = ls$time[members[1]],
+			cluster_open = length(lead_g) == 0 ||
+				all(stringr::str_detect(lead_g, "^\\s$")),
+			cluster_close = all(ls$trailing[members]))
+	}
+	if (length(runs) == 0) {
+		result$layer_symbols <- ls
+		return(result)
+	}
+	pending <- rep(TRUE, length(runs))
+	assigned_times <- rep(NA_real_, length(runs))
+	while (any(pending)) {
+		best_index <- NA_integer_
+		best_dist <- Inf
+		best_candidates <- NULL
+		for (ri in which(pending)) {
+			run <- runs[[ri]]
+			earlier <- assigned_times[seq_len(ri - 1L)]
+			later <- if (ri < length(runs)) {
+				assigned_times[(ri + 1L):length(runs)]
+			} else {
+				numeric(0)
+			}
+			t_lo <- if (all(is.na(earlier))) -Inf else max(earlier, na.rm = TRUE)
+			t_hi <- if (all(is.na(later))) Inf else min(later, na.rm = TRUE)
+			candidates <- list()
+			for (m in unique(main_symbols$row)) {
+				found <- .find_cluster_in_main(ann, m, run$cluster_time,
+					run$seq_chars, main_symbols,
+					result$used_main, result$handover)
+				for (f in found) {
+					if (f$time < t_lo || f$time > t_hi) next
+					candidates[[length(candidates) + 1L]] <- f
+				}
+			}
+			if (length(candidates) == 0) next
+			dists <- vapply(candidates,
+				function(cand) abs(cand$time - run$cluster_time), numeric(1))
+			if (min(dists) < best_dist) {
+				best_dist <- min(dists)
+				best_index <- ri
+				best_candidates <- candidates
+			}
+		}
+		if (is.na(best_index)) {
+			for (ri in which(pending)) {
+				result$splits[[length(result$splits) + 1L]] <- list(
+					layer_row = layer_row,
+					cluster = paste(runs[[ri]]$seq_chars, collapse = ""),
+					tier = as.character(ann$tierName[layer_row]),
+					startsec = ann$startsec[layer_row],
+					endsec = ann$endsec[layer_row])
+			}
+			break
+		}
+		run <- runs[[best_index]]
+		pending[best_index] <- FALSE
+		candidates <- best_candidates
+		dists <- vapply(candidates,
+			function(cand) abs(cand$time - run$cluster_time), numeric(1))
+		ranked <- order(dists)
+		chosen <- candidates[[ranked[1]]]
+		if (length(ranked) >= 2L &&
+		    abs(dists[ranked[1]] - dists[ranked[2]]) < tie_tolerance) {
+			tied <- candidates[dists - min(dists) < tie_tolerance]
+			edge_dist <- vapply(tied, function(cand) {
+				if (run$cluster_open && !run$cluster_close) {
+					abs(ann$startsec[cand$row] - run$cluster_time)
+				} else {
+					abs(ann$endsec[cand$row] - run$cluster_time)
+				}
+			}, numeric(1))
+			chosen <- tied[[which.min(edge_dist)]]
+		}
+		if (length(chosen$bracket_indices) > 0) {
+			relocated <- .relocate_cluster_brackets(ann, chosen)
+			if (is.null(relocated)) {
+				chosen <- NULL
+			} else {
+				ann <- relocated
+				result$ann <- ann
+			}
+		}
+		if (is.null(chosen)) {
+			result$splits[[length(result$splits) + 1L]] <- list(
+				layer_row = layer_row,
+				cluster = paste(run$seq_chars, collapse = ""),
+				tier = as.character(ann$tierName[layer_row]),
+				startsec = ann$startsec[layer_row],
+				endsec = ann$endsec[layer_row])
+			next
+		}
+		assigned_times[best_index] <- chosen$time
+		members <- run$members
+		for (k in seq_along(members)) {
+			member <- members[k]
+			key <- paste(chosen$row, ls$char[member], chosen$occurrences[k])
+			result$matches[[length(result$matches) + 1L]] <- list(
+				layer_row = layer_row, char = ls$char[member],
+				layer_occurrence = ls$occurrence[member],
+				main_row = chosen$row,
+				main_occurrence = chosen$occurrences[k])
+			if (key %in% result$used_main) {
+				result$handover[[key]] <- NULL
+			} else {
+				result$used_main <- c(result$used_main, key)
+				result$handover[[key]] <- list(consumer_row = layer_row,
+				                               trailing = isTRUE(ls$trailing[member]))
+			}
+			result$pins <- rbind(result$pins,
+				data.frame(index = ls$index[member], time = chosen$times[k]))
+		}
+		keep_layer[members] <- FALSE
+	}
+	result$layer_symbols <- ls[keep_layer, , drop = FALSE]
+	result
+}
+
+.find_cluster_in_main <- function(ann, main_row, cluster_time, seq_chars,
+                                  main_symbols, used_main, handover) {
+	handover_tolerance <- 0.02
+	graphemes <- split_graphemes(ann$content[main_row])
+	ms_row <- main_symbols[main_symbols$row == main_row, , drop = FALSE]
+	if (nrow(ms_row) == 0) return(list())
+	usable <- function(key) {
+		if (!(key %in% used_main)) return(TRUE)
+		info <- handover[[key]]
+		!is.null(info) && info$trailing &&
+			abs(ann$endsec[info$consumer_row] - cluster_time) <=
+				handover_tolerance
+	}
+	starts <- ms_row[ms_row$char == seq_chars[1], , drop = FALSE]
+	out <- list()
+	for (s in seq_len(nrow(starts))) {
+		if (!usable(paste(main_row, seq_chars[1], starts$occurrence[s]))) next
+		indices <- starts$index[s]
+		occurrences <- starts$occurrence[s]
+		times <- starts$time[s]
+		brackets <- integer(0)
+		pos <- starts$index[s] + 1L
+		ok <- TRUE
+		for (k in seq_along(seq_chars)[-1]) {
+			while (pos <= length(graphemes) && graphemes[pos] %in% c("[", "]")) {
+				brackets <- c(brackets, pos)
+				pos <- pos + 1L
+			}
+			if (pos > length(graphemes) || graphemes[pos] != seq_chars[k]) {
+				ok <- FALSE
+				break
+			}
+			hit <- ms_row[ms_row$char == seq_chars[k] & ms_row$index == pos, ,
+			              drop = FALSE]
+			if (nrow(hit) == 0) {
+				ok <- FALSE
+				break
+			}
+			if (!usable(paste(main_row, seq_chars[k], hit$occurrence[1]))) {
+				ok <- FALSE
+				break
+			}
+			indices <- c(indices, pos)
+			occurrences <- c(occurrences, hit$occurrence[1])
+			times <- c(times, hit$time[1])
+			pos <- pos + 1L
+		}
+		if (!ok) next
+		out[[length(out) + 1L]] <- list(row = main_row,
+			occurrences = occurrences, indices = indices, times = times,
+			bracket_indices = brackets, time = starts$time[s])
+	}
+	out
+}
+
+.relocate_cluster_brackets <- function(ann, chosen) {
+	main_row <- chosen$row
+	graphemes <- split_graphemes(ann$content[main_row])
+	span_from <- min(chosen$indices)
+	span_to <- max(chosen$indices)
+	span <- span_from:span_to
+	span_chars <- graphemes[span]
+	closing <- span_chars[span_chars == "]"]
+	opening <- span_chars[span_chars == "["]
+	body <- span_chars[!(span_chars %in% c("[", "]"))]
+	new_span <- c(closing, body, opening)
+	fragments <- if (!is.null(ann$fragments)) ann$fragments[[main_row]] else NULL
+	fragment_hit <- NA_integer_
+	if (!is.null(fragments) && nrow(fragments) > 0) {
+		offset <- 0L
+		for (f in seq_len(nrow(fragments))) {
+			sep_len <- length(split_graphemes(fragments$sep_before[f]))
+			content_len <- if (is.na(fragments$content[f])) 0L else
+				length(split_graphemes(fragments$content[f]))
+			from_f <- offset + sep_len + 1L
+			to_f <- offset + sep_len + content_len
+			if (span_from >= from_f && span_to <= to_f) {
+				fragment_hit <- f
+				fragment_local_from <- span_from - offset - sep_len
+				fragment_local_to <- span_to - offset - sep_len
+				break
+			}
+			offset <- to_f
+		}
+		if (is.na(fragment_hit)) return(NULL)
+	}
+	old_body_positions <- span[!(span_chars %in% c("[", "]"))]
+	old_open_positions <- span[span_chars == "["]
+	new_positions <- integer(0)
+	new_positions[old_body_positions - span_from + 1L] <- 0L
+	position_map <- list()
+	cursor <- span_from + length(closing)
+	for (old_pos in span) {
+		if (graphemes[old_pos] %in% c("[", "]")) next
+		position_map[[as.character(old_pos)]] <- cursor
+		cursor <- cursor + 1L
+	}
+	for (old_pos in old_open_positions) {
+		position_map[[as.character(old_pos)]] <- cursor
+		cursor <- cursor + 1L
+	}
+	graphemes[span] <- new_span
+	ann$content[main_row] <- paste(graphemes, collapse = "")
+	if (!is.na(fragment_hit) && !is.null(fragments)) {
+		fragment_graphemes <- split_graphemes(fragments$content[fragment_hit])
+		fragment_graphemes[fragment_local_from:fragment_local_to] <- new_span
+		fragments$content[fragment_hit] <- paste(fragment_graphemes, collapse = "")
+		ann$fragments[[main_row]] <- fragments
+	}
+	if (!is.null(ann$symbol_times_table)) {
+		times_table <- ann$symbol_times_table[[main_row]]
+		if (!is.null(times_table) && nrow(times_table) > 0) {
+			for (r in seq_len(nrow(times_table))) {
+				mapped <- position_map[[as.character(times_table$index[r])]]
+				if (!is.null(mapped)) times_table$index[r] <- mapped
+			}
+			ann$symbol_times_table[[main_row]] <- times_table
+		}
+	}
+	ann
 }
 
 .remap_rect_directives <- function(directives, merge_map, row) {
@@ -5278,6 +5596,7 @@ build_alignment_report <- function(result, plan, transcript_name,
 		.report_findings_merge_blocked(result),
 		.report_findings_unpaired_bracket(result),
 		.report_findings_empty_bracket_pair(result),
+		.report_findings_cluster_split(result),
 		.report_findings_mixed_wrap(result),
 		.report_findings_degraded(result),
 		.report_findings_overflow(result, text_body_width),
@@ -5466,6 +5785,33 @@ build_alignment_report <- function(result, plan, transcript_name,
 			                     "pair\n  without any text between the brackets."),
 			advice = paste0("Remove the empty pair in ELAN, or put the overlapping ",
 			                "text\n    between the brackets."))
+	}
+	out
+}
+
+.report_findings_cluster_split <- function(result) {
+	splits <- attr(result, "cluster_splits")
+	if (is.null(splits) || nrow(splits) == 0) return(list())
+	out <- list()
+	for (k in seq_len(nrow(splits))) {
+		row <- which(result$tierName == splits$tier[k] &
+		             result$startsec <= splits$startsec[k] + 1e-6 &
+		             result$endsec >= splits$endsec[k] - 1e-6)
+		if (length(row) == 0) next
+		row <- row[1]
+		out[[length(out) + 1]] <- list(
+			id = "A8", title = "Symbol cluster split across verbal lines",
+			row = row, char = substr(splits$cluster[k], 1, 1), occurrence = 1L,
+			tier = splits$tier[k],
+			startsec = splits$startsec[k], endsec = splits$endsec[k],
+			description = sprintf(paste0("The symbols \"%s\" stand side by side in this ",
+			                             "annotation, but no verbal\n  annotation offers the ",
+			                             "complete \"%s\" sequence at the matching time. The\n  ",
+			                             "symbols were anchored one by one and may end up on ",
+			                             "different lines."),
+			                      splits$cluster[k], splits$cluster[k]),
+			advice = paste0("Add the missing symbols to one verbal annotation in ELAN, ",
+			                "or split\n    the cluster in the layer annotation."))
 	}
 	out
 }
@@ -6224,8 +6570,10 @@ helper_layout_symbol_matches <- function(t,
 	                       alignModes = alignModes)
 	.layout_warn_no_main(frame$ann$is_main)
 	ref_main <- resolve_reference_main(frame$ann)
-	list(ann = frame$ann,
-	     matches = compute_mm_symbol_matches(frame$ann, ref_main))
+	matches <- compute_mm_symbol_matches(frame$ann, ref_main)
+	ann_out <- attr(matches, "ann_updated")
+	if (is.null(ann_out)) ann_out <- frame$ann
+	list(ann = ann_out, matches = matches)
 }
 
 .layout_collect_anchors <- function(result) {
