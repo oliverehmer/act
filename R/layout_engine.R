@@ -3262,6 +3262,9 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 		layer_symbols <- cluster_pass$layer_symbols
 		if (nrow(layer_symbols) == 0) next
 		pins <- cluster_pass$pins[order(cluster_pass$pins$index), , drop = FALSE]
+		graphemes_i <- split_graphemes(ann$content[i])
+		non_space <- which(!stringr::str_detect(graphemes_i, "^\\s$"))
+		lead_index <- if (length(non_space) == 0) NA_integer_ else non_space[1]
 
 		for (symbol_char in unique(layer_symbols$char)) {
 			layer_seq <- layer_symbols[layer_symbols$char == symbol_char, , drop = FALSE]
@@ -3313,6 +3316,8 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 				if (nrow(seg_main) == 0) next
 				assignment <- monotone_match(seg_layer$time, seg_main$time,
 				                             row_penalty)
+				assignment <- .apply_edge_tie_break(assignment, seg_layer,
+					seg_main, ann, lead_index)
 				for (k in seq_along(assignment)) {
 					if (is.na(assignment[k])) next
 					m_idx <- assignment[k]
@@ -3625,6 +3630,49 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 		}
 	}
 	ann
+}
+
+.apply_edge_tie_break <- function(assignment, seg_layer, seg_main, ann,
+                                  lead_index) {
+	tie_tolerance <- 0.05
+	for (k in seq_along(assignment)) {
+		if (is.na(assignment[k])) next
+		m_idx <- assignment[k]
+		symbol_time <- seg_layer$time[k]
+		closing <- isTRUE(seg_layer$trailing[k])
+		opening <- !closing && isTRUE(seg_layer$index[k] == lead_index)
+		if (!closing && !opening) next
+		fits <- function(j) {
+			if (closing) {
+				isTRUE(seg_main$trailing[j]) &&
+					abs(ann$endsec[seg_main$row[j]] - symbol_time) <=
+						tie_tolerance
+			} else {
+				!isTRUE(seg_main$trailing[j]) &&
+					abs(ann$startsec[seg_main$row[j]] - symbol_time) <=
+						tie_tolerance
+			}
+		}
+		if (fits(m_idx)) next
+		earlier <- assignment[seq_len(k - 1L)]
+		earlier <- earlier[!is.na(earlier)]
+		later <- if (k < length(assignment)) {
+			assignment[(k + 1L):length(assignment)]
+		} else {
+			integer(0)
+		}
+		later <- later[!is.na(later)]
+		lower <- if (length(earlier) == 0) 0L else max(earlier)
+		upper <- if (length(later) == 0) nrow(seg_main) + 1L else min(later)
+		free <- setdiff(seq_len(nrow(seg_main)), assignment[!is.na(assignment)])
+		free <- free[free > lower & free < upper]
+		free <- free[abs(seg_main$time[free] - seg_main$time[m_idx]) <=
+			tie_tolerance]
+		free <- free[vapply(free, fits, logical(1))]
+		if (length(free) == 0) next
+		assignment[k] <- free[which.min(abs(seg_main$time[free] - symbol_time))]
+	}
+	assignment
 }
 
 .remap_rect_directives <- function(directives, merge_map, row) {
