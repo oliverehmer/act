@@ -5,11 +5,11 @@ act.environment    <- new.env()
 	#progress bar is created at load time, not at install time (a build-time
 	#R6 object would be serialized into the package database)
 	act.environment$pb <- progress::progress_bar$new(
-		format = "  Default  [:bar] :percent (:eta left)",
+		format = paste0(stringr::str_pad("Default", .ACT_PROGRESS_LABEL_WIDTH, "right"), "[:bar] :percent:tail"),
 		total = NA,
 		clear = FALSE,
 		show_after = 0,
-		width= 60)
+		width = .ACT_PROGRESS_TOTAL_WIDTH)
 	#transfer the missing options to Rs options
 	toset <- !(names(act.options.default) %in% names(options()))
 	if (any(toset)) {

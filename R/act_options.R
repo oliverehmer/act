@@ -75,6 +75,11 @@
 		group       = "media",
 		description = "Ordered file extensions for audio priority; first matching extension wins (used by media_select)"
 	),
+	act.media.ffprobe.timeout = list(
+		value       = 10,
+		group       = "media",
+		description = "Seconds after which a single ffprobe call (media metadata, frame rate) is abandoned, so a hanging disk cannot block the session. NA or 0 = no limit."
+	),
 
 	act.cutlist.os = list(
 		value       = c("mac", "win"),

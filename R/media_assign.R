@@ -103,7 +103,7 @@ media_assign <- function(x,
 	#--- if there are no files at all in the folders
 	if (length(paths.new)==0) { 
 		if (length(message)>0){
-			cli::cli_warn(unique(message))
+			cli::cli_warn(message[!duplicated(message)])
 		}
 		return (x)
 	}
@@ -115,7 +115,7 @@ media_assign <- function(x,
 	paths.new <- unlist(paths.new[stringr::str_which(string=paths.new, pattern=filterFile.media, )		])
 	if (length(paths.new)==0) {
 		message<- c(message, "No media files found. Please check 'x@paths.media.files'.")
-		cli::cli_warn(unique(message))
+		cli::cli_warn(message[!duplicated(message)])
 		return (x)
 	}
 
@@ -190,7 +190,7 @@ media_assign <- function(x,
 	
 	#--- show warnings
 	if (length(message)>0){
-		cli::cli_warn(unique(message))
+		cli::cli_warn(message[!duplicated(message)])
 	}
 	
 	#--- return corpus object
@@ -198,24 +198,42 @@ media_assign <- function(x,
 }
 
 
-# Build compact warning lines for media paths that do not exist, grouped by
-# storage medium. On macOS, paths under /Volumes/<name> are grouped by that
-# mount; other paths are grouped by their containing folder. Per group the
-# message reports only a count (never individual paths): if the group root is
-# not present it is reported as a disconnected storage medium, otherwise the
-# files are reported as not found.
+# Build compact warning bullets for media paths that do not exist, grouped by
+# what is actually missing. On macOS, paths under /Volumes/<name> are grouped
+# by that mount and reported as a disconnected storage medium. Other paths are
+# grouped by the TOPMOST folder that does not exist (walking up from the file
+# until an existing folder is found), so a whole missing tree gives one line,
+# not one per subfolder. Per group only counts are reported, never individual
+# paths. The result is a named vector ready for cli bullets ("x" = ...); the
+# first element is the unnamed headline.
 .media_missing_paths_summary <- function(missing_paths) {
 	if (length(missing_paths) == 0) { return(character(0)) }
-	vol   <- stringr::str_match(missing_paths, "^(/Volumes/[^/]+)")[, 2]
-	roots <- ifelse(is.na(vol), dirname(missing_paths), vol)
-	out   <- character(0)
-	for (r in unique(roots)) {
-		n <- sum(roots == r)
-		if (dir.exists(r)) {
-			out <- c(out, sprintf("%s: %s file(s) not found.", r, n))
-		} else {
-			out <- c(out, sprintf("Storage medium not connected: %s (%s file(s) unavailable)", r, n))
+	vol <- stringr::str_match(missing_paths, "^(/Volumes/[^/]+)")[, 2]
+	top_missing <- function(p) {
+		cur <- dirname(p)
+		if (dir.exists(cur)) { return(cur) }
+		repeat {
+			parent <- dirname(cur)
+			if (identical(parent, cur) || dir.exists(parent)) { return(cur) }
+			cur <- parent
 		}
+	}
+	roots <- ifelse(is.na(vol), vapply(missing_paths, top_missing, character(1), USE.NAMES = FALSE), vol)
+	esc   <- function(txt) { gsub("}", "}}", gsub("{", "{{", txt, fixed = TRUE), fixed = TRUE) }
+	out   <- c(sprintf("%s media file(s) unavailable.", length(missing_paths)))
+	for (r in unique(roots)) {
+		sel      <- roots == r
+		n        <- sum(sel)
+		nfolders <- length(unique(dirname(missing_paths[sel])))
+		where    <- if (nfolders > 1) sprintf("%s file(s) in %s folders", n, nfolders) else sprintf("%s file(s)", n)
+		line <- if (!is.na(match(r, vol))) {
+			sprintf("Storage medium not connected: %s (%s)", esc(r), where)
+		} else if (dir.exists(r)) {
+			sprintf("Files not found: %s (%s)", esc(r), where)
+		} else {
+			sprintf("Folder not found: %s (%s)", esc(r), where)
+		}
+		out <- c(out, stats::setNames(line, "x"))
 	}
 	out
 }

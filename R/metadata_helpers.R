@@ -265,6 +265,7 @@ media_metadata_read <- function(file, tolerance_sec = 0.05) {
 
 	if (ext %in% c("mp4", "mov", "wav", "mp3")) {
 		row <- .metadata_read_ffprobe(file_path, row)
+		if (identical(row$comment, "ffprobe timeout")) return(row)
 	} else if (ext %in% c("jpg", "jpeg")) {
 		row <- .metadata_read_exifr(file_path, row)
 	} else {
@@ -316,21 +317,19 @@ media_metadata_read <- function(file, tolerance_sec = 0.05) {
 		return(row)
 	}
 
-	out <- tryCatch(
-		suppressWarnings(system2(
-			"ffprobe",
-			args = c(
-				"-v", "error",
-				"-print_format", "json",
-				"-show_format",
-				"-show_streams",
-				shQuote(file_path)
-			),
-			stdout = TRUE, stderr = FALSE
-		)),
-		error = function(e) character(0)
-	)
+	probe <- .metadata_ffprobe_run(c(
+		"-v", "error",
+		"-print_format", "json",
+		"-show_format",
+		"-show_streams",
+		file_path
+	))
+	out <- probe$out
 
+	if (isTRUE(probe$timeout)) {
+		row$comment <- "ffprobe timeout"
+		return(row)
+	}
 	if (length(out) == 0) {
 		row$comment <- "ffprobe failed"
 		return(row)
@@ -525,22 +524,35 @@ helper_metadata_probe_fps <- function(file_path) {
 # a video. Used by search_cuts_media to cache fps per source file.
 .metadata_probe_fps <- function(file_path) {
 	if (!file.exists(file_path)) return(NA_real_)
-	out <- tryCatch(
-		suppressWarnings(system2(
-			"ffprobe",
-			args = c(
-				"-v", "error",
-				"-select_streams", "v:0",
-				"-show_entries", "stream=r_frame_rate",
-				"-of", "csv=p=0",
-				shQuote(file_path)
-			),
-			stdout = TRUE, stderr = FALSE
-		)),
-		error = function(e) character(0)
-	)
+	out <- .metadata_ffprobe_run(c(
+		"-v", "error",
+		"-select_streams", "v:0",
+		"-show_entries", "stream=r_frame_rate",
+		"-of", "csv=p=0",
+		file_path
+	))$out
 	if (length(out) == 0 || !nzchar(out[1])) return(NA_real_)
 	.metadata_parse_rational(out[1])
+}
+
+.metadata_ffprobe_run <- function(args, timeout = getOption("act.media.ffprobe.timeout", 10)) {
+	out_file <- tempfile(fileext = ".txt")
+	on.exit(unlink(out_file), add = TRUE)
+	proc <- tryCatch(
+		processx::process$new(helper_ffprobe_path(), args = args,
+			stdout = out_file, stderr = NULL, cleanup = FALSE),
+		error = function(e) NULL
+	)
+	if (is.null(proc)) return(list(out = character(0), timeout = FALSE))
+	limit <- suppressWarnings(as.numeric(timeout)[1])
+	wait_ms <- if (length(limit) == 1 && is.finite(limit) && limit > 0) limit * 1000 else -1
+	proc$wait(timeout = wait_ms)
+	if (proc$is_alive()) {
+		try(proc$signal(tools::SIGKILL), silent = TRUE)
+		return(list(out = character(0), timeout = TRUE))
+	}
+	out <- if (file.exists(out_file)) readLines(out_file, warn = FALSE) else character(0)
+	list(out = out, timeout = FALSE)
 }
 
 
