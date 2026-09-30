@@ -205,3 +205,7 @@
 	}
 	turn[!is_empty]
 }
+
+.is_empty_content <- function(content) {
+	!is.na(content) & !nzchar(stringr::str_trim(content))
+}

@@ -259,7 +259,7 @@ import_exb <- function(filePath=NULL,
 
 			#=== get rid of empty intervals
 			if (options()$act.import.readEmptyIntervals==FALSE) 		{
-				t@annotations <- t@annotations[t@annotations$content!="",]
+				t@annotations <- t@annotations[!.is_empty_content(t@annotations$content),]
 			}
 			t@annotations <- t@annotations[is.na(t@annotations["content"])==FALSE,]
 			

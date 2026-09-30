@@ -136,7 +136,7 @@
 	act.import.readEmptyIntervals = list(
 		value       = FALSE,
 		group       = "import",
-		description = "Read empty intervals from annotation files"
+		description = "Read empty intervals (empty or whitespace-only content) from annotation files"
 	),
 	act.layout.wrap.marker = list(
 		value       = "mondada",

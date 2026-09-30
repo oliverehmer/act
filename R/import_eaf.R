@@ -516,7 +516,7 @@ import_eaf <- function(filePath=NULL,
 
 			#=== get rid of empty intervals
 			if (options()$act.import.readEmptyIntervals==FALSE) 		{
-				ann <- ann[ann$content!="",]
+				ann <- ann[!.is_empty_content(ann$content),]
 			}
 			ann <- ann[is.na(ann["content"])==FALSE,]
 			
