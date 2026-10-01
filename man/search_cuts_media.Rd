@@ -49,7 +49,7 @@ search_cuts_media(
 
 \item{videoCodecCopy}{Logical; If \code{TRUE} FFMPEG will use the option \emph{codec copy} for videos.}
 
-\item{audioAsMP3}{Logical; If \code{TRUE} audio cuts will be converted to .mp3 files using \code{options()$act.ffmpeg.command.audio.mp3}. If \code{FALSE} (default) audio format is preserved using \code{options()$act.ffmpeg.command.audio}.}
+\item{audioAsMP3}{Logical; If \code{TRUE} audio cuts will be converted to .mp3 files (bit rate \code{act.ffmpeg.audio.bitrate}). If \code{FALSE} (default) the audio format is preserved.}
 
 \item{audioPanning}{Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.channels_from_column' .}
 
@@ -89,8 +89,8 @@ By default, the device descriptor of the original media will be appended to the 
 The output format is predefined by in the options:
 \itemize{
 \item Video cuts are built by \link{helper_ffmpeg_args_clip}: picture and sound start at the time ELAN shows (edit list alignment), H.264 yuv420p with the options \code{act.ffmpeg.video.bitrate}, \code{.crf}, \code{.keyframe_interval}, \code{.max_height}, \code{.max_width} and AAC with \code{act.ffmpeg.audio.bitrate}. The option \code{act.ffmpeg.command.video} is no longer used.
-\item \code{act.ffmpeg.command.audio}: FFmpeg command for audio cuts (default: codec copy)
-\item \code{act.ffmpeg.command.audio.mp3}: FFmpeg command for converting audio to MP3
+\item Audio cuts are built by \link{helper_ffmpeg_args_audio}: copied without filter, otherwise written with the bit depth of the source; mp3 with \code{act.ffmpeg.audio.bitrate}. The options \code{act.ffmpeg.command.audio} and \code{act.ffmpeg.command.audio.mp3} are no longer used.
+\item The channel versions (\code{_ch1}, \code{_ch2}) are stereo files with the left resp. right channel on both sides; the filters come from \link{helper_audio_filter_parts}.
 \item Stills and thumbnails are built by \link{helper_ffmpeg_args} (exact seek, JPG quality from \code{act.ffmpeg.image.quality}; thumbnails at most \code{act.ffmpeg.thumbnail.max_height} pixels high); each still gets the act.* EXIF comment through an exiftool line in the cut list (skipped when exiftool is not installed).
 }
 

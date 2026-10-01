@@ -17,7 +17,7 @@ helper_ffmpeg_args_audio(
 )
 }
 \arguments{
-\item{output}{Character; path of the sound file (wav, mp3 or m4a).}
+\item{output}{Character; path of the sound file (wav, aif, aiff, mp3 or m4a).}
 
 \item{input}{Character; path of the source.}
 
@@ -48,9 +48,10 @@ Builds the argument vector (without the program name) for one FFmpeg call
 that writes a sound file (wav, mp3 or m4a) from a sound or video source.
 The sound of an MP4/MOV source is read with its edit list honoured, as ELAN
 plays it (with \code{act.media.timeline = "raw"} it is ignored, as VLC
-does). A wav is copied sample by sample when no filter is applied;
-otherwise it is written with the bit depth and sample rate of the source.
-mp3 and m4a are encoded with \code{act.ffmpeg.audio.bitrate}.
+does). Without filter, a wav/aif from a source of the same format and an
+mp3 from an mp3 are copied as they are; otherwise a wav/aif is written with
+the bit depth and sample rate of the source, mp3 and m4a are encoded with
+\code{act.ffmpeg.audio.bitrate}.
 }
 \examples{
 act::helper_ffmpeg_args_audio(output = "cut.wav", input = "sound.wav",

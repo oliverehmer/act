@@ -22,8 +22,8 @@
 #' \emph{Output format}\cr
 #' The output format is predefined by in the options:
 #' * Video cuts are built by \link{helper_ffmpeg_args_clip}: picture and sound start at the time ELAN shows (edit list alignment), H.264 yuv420p with the options \code{act.ffmpeg.video.bitrate}, \code{.crf}, \code{.keyframe_interval}, \code{.max_height}, \code{.max_width} and AAC with \code{act.ffmpeg.audio.bitrate}. The option \code{act.ffmpeg.command.video} is no longer used.
-#' * \code{act.ffmpeg.command.audio}: FFmpeg command for audio cuts (default: codec copy)
-#' * \code{act.ffmpeg.command.audio.mp3}: FFmpeg command for converting audio to MP3
+#' * Audio cuts are built by \link{helper_ffmpeg_args_audio}: copied without filter, otherwise written with the bit depth of the source; mp3 with \code{act.ffmpeg.audio.bitrate}. The options \code{act.ffmpeg.command.audio} and \code{act.ffmpeg.command.audio.mp3} are no longer used.
+#' * The channel versions (\code{_ch1}, \code{_ch2}) are stereo files with the left resp. right channel on both sides; the filters come from \link{helper_audio_filter_parts}.
 #' * Stills and thumbnails are built by \link{helper_ffmpeg_args} (exact seek, JPG quality from \code{act.ffmpeg.image.quality}; thumbnails at most \code{act.ffmpeg.thumbnail.max_height} pixels high); each still gets the act.* EXIF comment through an exiftool line in the cut list (skipped when exiftool is not installed).
 #'  
 #'  
@@ -61,7 +61,7 @@
 #' @param filterMediaExclude Character string; regular expression to exclude some of the media files in \code{corpus@transcripts[[ ]]@media}. Empty string (default) excludes none.
 #' @param videoFastPositioning Logical; If \code{TRUE} the input args use double \code{-ss} for fast frame-accurate seeking (slow decode only over the last few seconds). If \code{FALSE} a single \code{-ss} after \code{-i} is used (full decode). No longer used for video cuts, stills and thumbnails (they always seek exactly); audio cuts always use the slow form.
 #' @param videoCodecCopy Logical; If \code{TRUE} FFMPEG will use the option *codec copy* for videos.
-#' @param audioAsMP3 Logical; If \code{TRUE} audio cuts will be converted to .mp3 files using \code{options()$act.ffmpeg.command.audio.mp3}. If \code{FALSE} (default) audio format is preserved using \code{options()$act.ffmpeg.command.audio}.
+#' @param audioAsMP3 Logical; If \code{TRUE} audio cuts will be converted to .mp3 files (bit rate \code{act.ffmpeg.audio.bitrate}). If \code{FALSE} (default) the audio format is preserved.
 #' @param audioPanning Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.channels_from_column' .
 #' @param audioNormalize Logical; If \code{TRUE} and option \code{act.ffmpeg.audio.loudnorm} is set, a loudnorm filter is appended to the audio filter chain. Default is \code{FALSE}.
 #' @param outputOS Vector of character Strings; Saves FFMpeg cut list in format for \code{"win"}=windows, \code{"mac"}=apple ox/linux.
@@ -440,10 +440,29 @@ search_cuts_media <- function(x,
 					win_cmd  <- stringi::stri_replace_first_fixed(win_cmd, ' -y "', paste0(" ", win_meta, ' -y "'))
 				}
 
+				channel_af <- lapply(c("stereo", "left", "right"), function(ch) {
+					helper_audio_filter_parts(channel = ch, mono = FALSE, normalize = isTRUE(audioNormalize),
+						ranges = NULL, mode = "beep", strength = 0.8, distort = NULL)$af
+				})
+				if (is_audio_file) {
+					audio_args <- lapply(1:3, function(v) {
+						helper_ffmpeg_args_audio(
+							output        = out_filePath[v],
+							input         = in_paths[j],
+							startsec      = startsec,
+							duration      = duration,
+							audioFilter   = channel_af[[v]],
+							filterComplex = NULL,
+							audioBitrate  = getOption("act.ffmpeg.audio.bitrate", "192k"),
+							metadataArgs  = meta_argv)
+					})
+					mac_cmd <- vapply(audio_args, .ffmpeg_cmd_line, character(1), os = "mac", inputVariable = in_paths[j])
+					win_cmd <- vapply(audio_args, .ffmpeg_cmd_line, character(1), os = "win", inputVariable = in_paths[j])
+					win_cmd <- stringi::stri_replace_all_fixed(win_cmd, "/", "\u0001")
+				}
 				if (is_video_file) {
-					af_parts <- list(NULL, "pan=1c|c0=c0", "pan=1c|c0=c1")
 					clip_args <- lapply(1:3, function(v) {
-						af <- c(af_parts[[v]], loudnorm_str)
+						af <- channel_af[[v]]
 						helper_ffmpeg_args_clip(
 							output           = out_filePath[v],
 							input            = in_paths[j],

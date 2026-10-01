@@ -337,11 +337,12 @@ helper_ffmpeg_args_clip <- function(output,
 #' that writes a sound file (wav, mp3 or m4a) from a sound or video source.
 #' The sound of an MP4/MOV source is read with its edit list honoured, as ELAN
 #' plays it (with \code{act.media.timeline = "raw"} it is ignored, as VLC
-#' does). A wav is copied sample by sample when no filter is applied;
-#' otherwise it is written with the bit depth and sample rate of the source.
-#' mp3 and m4a are encoded with \code{act.ffmpeg.audio.bitrate}.
+#' does). Without filter, a wav/aif from a source of the same format and an
+#' mp3 from an mp3 are copied as they are; otherwise a wav/aif is written with
+#' the bit depth and sample rate of the source, mp3 and m4a are encoded with
+#' \code{act.ffmpeg.audio.bitrate}.
 #'
-#' @param output Character; path of the sound file (wav, mp3 or m4a).
+#' @param output Character; path of the sound file (wav, aif, aiff, mp3 or m4a).
 #' @param input Character; path of the source.
 #' @param startsec Numeric; start in seconds.
 #' @param duration Numeric; length in seconds.
@@ -380,8 +381,8 @@ helper_ffmpeg_args_audio <- function(output,
 		cli::cli_abort("Parameter {.arg output} is missing.")
 	}
 	out_ext <- tolower(tools::file_ext(output))
-	if (!out_ext %in% c("wav", "mp3", "m4a")) {
-		cli::cli_abort("Output format {.val {out_ext}} is not supported (wav, mp3, m4a).")
+	if (!out_ext %in% c("wav", "aif", "aiff", "mp3", "m4a")) {
+		cli::cli_abort("Output format {.val {out_ext}} is not supported (wav, aif, aiff, mp3, m4a).")
 	}
 	if (!is.null(audioFilter) && !is.null(filterComplex)) {
 		cli::cli_abort("Use either {.arg audioFilter} or {.arg filterComplex}, not both.")
@@ -399,11 +400,16 @@ helper_ffmpeg_args_audio <- function(output,
 		args <- c(args, "-map", "0:a:0")
 		if (!is.null(audioFilter)) args <- c(args, "-af", audioFilter)
 	}
-	codec <- switch(out_ext,
-		wav = if (!filtered && .ffmpeg_audio_is_pcm(input)) c("-c:a", "copy")
-		      else c("-c:a", .ffmpeg_pcm_codec(input)),
-		mp3 = c("-c:a", "libmp3lame", "-b:a", as.character(audioBitrate)),
-		m4a = c("-c:a", "aac", "-b:a", as.character(audioBitrate), "-movflags", "+faststart"))
+	in_ext <- tolower(tools::file_ext(input))
+	same_family <- (out_ext %in% c("wav", "aif", "aiff") && .ffmpeg_audio_is_pcm(input) &&
+	                  (identical(in_ext, out_ext) || (out_ext == "wav" && in_ext == "wav"))) ||
+	               (out_ext == "mp3" && in_ext == "mp3")
+	codec <- if (!filtered && same_family) c("-c:a", "copy") else switch(out_ext,
+		wav  = c("-c:a", .ffmpeg_pcm_codec(input)),
+		aif  = c("-c:a", sub("le$", "be", .ffmpeg_pcm_codec(input))),
+		aiff = c("-c:a", sub("le$", "be", .ffmpeg_pcm_codec(input))),
+		mp3  = c("-c:a", "libmp3lame", "-b:a", as.character(audioBitrate)),
+		m4a  = c("-c:a", "aac", "-b:a", as.character(audioBitrate), "-movflags", "+faststart"))
 	c(args, codec, if (filtered && is.finite(rate)) c("-ar", as.character(rate)),
 	  "-t", .ffmpeg_seconds(as.numeric(duration)), metadataArgs, "-y", output)
 }
