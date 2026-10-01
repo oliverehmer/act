@@ -169,7 +169,10 @@ helper_metadata_exif_argv <- function(file, sourcePath, startsec, clipID) {
 #' - container columns: `container.format`, `length.sec`, `file.size`,
 #'   `mtime`
 #' - video columns: `video.width`, `video.height`, `video.fps`,
-#'   `video.codec`, `video.bitrate`
+#'   `video.codec`, `video.bitrate`, `video.editlist.offset` (offset in
+#'   seconds of the video track's edit list, read from the MP4/MOV header:
+#'   raw time = time shown by players that honour the edit list + offset;
+#'   0 without edit list)
 #' - audio columns: `audio.sample.rate`, `audio.channels`, `audio.codec`,
 #'   `audio.bitrate`
 #' - image columns: `image.width`, `image.height`, `bit.depth`
@@ -310,6 +313,10 @@ media_metadata_read <- function(file, tolerance_sec = 0.05) {
 	if (ext %in% c("mp4", "mov", "wav", "mp3")) {
 		row <- .metadata_read_ffprobe(file_path, row)
 		if (identical(row$comment, "ffprobe timeout")) return(row)
+		if (ext %in% c("mp4", "mov") && !is.na(row$video.width)) {
+			row$video.editlist.offset <- tryCatch(.mp4_video_editlist_offset(file_path),
+				error = function(e) NA_real_)
+		}
 	} else if (ext %in% c("jpg", "jpeg")) {
 		row <- .metadata_read_exifr(file_path, row)
 	} else {
@@ -343,6 +350,7 @@ media_metadata_read <- function(file, tolerance_sec = 0.05) {
 		video.fps         = NA_real_,
 		video.codec       = NA_character_,
 		video.bitrate     = NA_real_,
+		video.editlist.offset = NA_real_,
 		audio.sample.rate = NA_integer_,
 		audio.channels    = NA_integer_,
 		audio.codec       = NA_character_,

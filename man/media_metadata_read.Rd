@@ -30,7 +30,10 @@ Column groups:
 \item container columns: \code{container.format}, \code{length.sec}, \code{file.size},
 \code{mtime}
 \item video columns: \code{video.width}, \code{video.height}, \code{video.fps},
-\code{video.codec}, \code{video.bitrate}
+\code{video.codec}, \code{video.bitrate}, \code{video.editlist.offset} (offset in
+seconds of the video track's edit list, read from the MP4/MOV header:
+raw time = time shown by players that honour the edit list + offset;
+0 without edit list)
 \item audio columns: \code{audio.sample.rate}, \code{audio.channels}, \code{audio.codec},
 \code{audio.bitrate}
 \item image columns: \code{image.width}, \code{image.height}, \code{bit.depth}

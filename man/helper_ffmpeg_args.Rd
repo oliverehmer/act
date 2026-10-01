@@ -14,7 +14,9 @@ helper_ffmpeg_args(
   filterComplex = NULL,
   filterMap = NULL,
   imageQuality = getOption("act.ffmpeg.image.quality", 100),
-  maxHeight = NULL
+  maxHeight = NULL,
+  videoOffset = NULL,
+  videoFps = NULL
 )
 }
 \arguments{
@@ -48,6 +50,13 @@ Default is the option \code{act.ffmpeg.image.quality}.}
 
 \item{maxHeight}{Integer or \code{NULL}; scale the image down to this height
 (never up). Only together with \code{videoFilter} or without a filter.}
+
+\item{videoOffset}{Numeric or \code{NULL}; edit list offset of the video
+track in seconds, e.g. column \code{video.editlist.offset} of
+\link{media_metadata_read}. \code{NULL} reads it from the file.}
+
+\item{videoFps}{Numeric or \code{NULL}; frame rate of the video, e.g.
+column \code{video.fps}. \code{NULL} reads it from the file.}
 }
 \value{
 Character vector of FFmpeg arguments.
@@ -68,7 +77,9 @@ filter chain instead, so the filter only processes the target frame.
 \item The seek target is the time as players that honour the edit list
 of the file show it (ELAN with AVFoundation, browsers): the edit list
 offset of the video track is added, and the frame that is on screen at
-that moment is taken (not the next one). Camera files with B-frames
+that moment is taken (not the next one). With the option
+\code{act.media.timeline = "raw"} (ELAN with VLC) the offset is not
+added. Camera files with B-frames
 carry an offset of their reorder delay (e.g. 2 frames), cuts made with
 stream copy may carry any offset.
 \item Video inputs (mp4, mov, m4a, m4v) get \code{-ignore_editlist 1

@@ -15,7 +15,9 @@
 #'   \item The seek target is the time as players that honour the edit list
 #'   of the file show it (ELAN with AVFoundation, browsers): the edit list
 #'   offset of the video track is added, and the frame that is on screen at
-#'   that moment is taken (not the next one). Camera files with B-frames
+#'   that moment is taken (not the next one). With the option
+#'   \code{act.media.timeline = "raw"} (ELAN with VLC) the offset is not
+#'   added. Camera files with B-frames
 #'   carry an offset of their reorder delay (e.g. 2 frames), cuts made with
 #'   stream copy may carry any offset.
 #'   \item Video inputs (mp4, mov, m4a, m4v) get \code{-ignore_editlist 1
@@ -47,6 +49,11 @@
 #'   Default is the option \code{act.ffmpeg.image.quality}.
 #' @param maxHeight Integer or \code{NULL}; scale the image down to this height
 #'   (never up). Only together with \code{videoFilter} or without a filter.
+#' @param videoOffset Numeric or \code{NULL}; edit list offset of the video
+#'   track in seconds, e.g. column \code{video.editlist.offset} of
+#'   \link{media_metadata_read}. \code{NULL} reads it from the file.
+#' @param videoFps Numeric or \code{NULL}; frame rate of the video, e.g.
+#'   column \code{video.fps}. \code{NULL} reads it from the file.
 #'
 #' @return Character vector of FFmpeg arguments.
 #'
@@ -66,7 +73,9 @@ helper_ffmpeg_args <- function(output,
                                filterComplex = NULL,
                                filterMap     = NULL,
                                imageQuality  = getOption("act.ffmpeg.image.quality", 100),
-                               maxHeight     = NULL) {
+                               maxHeight     = NULL,
+                               videoOffset   = NULL,
+                               videoFps      = NULL) {
 	if (missing(output) || length(output) != 1 || is.na(output) || !nzchar(output)) {
 		cli::cli_abort("Parameter {.arg output} is missing.")
 	}
@@ -86,8 +95,8 @@ helper_ffmpeg_args <- function(output,
 	if (!is.null(input)) {
 		if (!is.null(startsec)) {
 			target   <- max(0, as.numeric(startsec))
-			if (length(.ffmpeg_input_flags(input)) && file.exists(input)) {
-				timing <- .ffmpeg_video_timing(input)
+			if (length(.ffmpeg_input_flags(input))) {
+				timing <- .ffmpeg_seek_timing(input, videoOffset, videoFps)
 				target <- target + timing$offset
 				if (is.finite(timing$frame_dur)) target <- target - timing$frame_dur * 0.99
 				target <- max(0, target)
@@ -257,6 +266,24 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 }
 
 .FFMPEG_TIMING_CACHE <- new.env(parent = emptyenv())
+
+.ffmpeg_seek_timing <- function(input, videoOffset = NULL, videoFps = NULL) {
+	timeline <- getOption("act.media.timeline", "editlist")
+	if (!timeline %in% c("editlist", "raw")) {
+		cli::cli_abort("Option {.code act.media.timeline} must be {.val editlist} or {.val raw}, not {.val {timeline}}.")
+	}
+	offset <- suppressWarnings(as.numeric(videoOffset)[1])
+	fps    <- suppressWarnings(as.numeric(videoFps)[1])
+	if ((length(offset) == 0 || !is.finite(offset) || length(fps) == 0 || !is.finite(fps) || fps <= 0) &&
+	    file.exists(input)) {
+		from_file <- .ffmpeg_video_timing(input)
+		if (length(offset) == 0 || !is.finite(offset)) offset <- from_file$offset
+		if (length(fps) == 0 || !is.finite(fps) || fps <= 0) fps <- 1 / from_file$frame_dur
+	}
+	if (length(offset) == 0 || !is.finite(offset)) offset <- 0
+	list(offset    = if (identical(timeline, "raw")) 0 else offset,
+	     frame_dur = if (length(fps) == 1 && is.finite(fps) && fps > 0) 1 / fps else NA_real_)
+}
 
 .ffmpeg_video_timing <- function(path) {
 	info <- file.info(path)

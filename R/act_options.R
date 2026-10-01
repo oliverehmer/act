@@ -75,6 +75,11 @@
 		group       = "media",
 		description = "Ordered file extensions for audio priority; first matching extension wins (used by media_select)"
 	),
+	act.media.timeline = list(
+		value       = "editlist",
+		group       = "media",
+		description = "Time line on which stills and cuts are taken, matching the player the annotations were made with: 'editlist' (default) honours the edit list of MP4/MOV files like ELAN with AV Foundation or JavaFX and the browser; 'raw' ignores it like ELAN with the VLC player library. In both cases the frame on screen at the given time is taken."
+	),
 	act.media.ffprobe.timeout = list(
 		value       = 10,
 		group       = "media",
