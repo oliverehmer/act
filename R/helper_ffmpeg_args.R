@@ -331,6 +331,84 @@ helper_ffmpeg_args_clip <- function(output,
 }
 
 
+#' Helper: Build the FFmpeg arguments for a sound file
+#'
+#' Builds the argument vector (without the program name) for one FFmpeg call
+#' that writes a sound file (wav, mp3 or m4a) from a sound or video source.
+#' The sound of an MP4/MOV source is read with its edit list honoured, as ELAN
+#' plays it (with \code{act.media.timeline = "raw"} it is ignored, as VLC
+#' does). A wav is copied sample by sample when no filter is applied;
+#' otherwise it is written with the bit depth and sample rate of the source.
+#' mp3 and m4a are encoded with \code{act.ffmpeg.audio.bitrate}.
+#'
+#' @param output Character; path of the sound file (wav, mp3 or m4a).
+#' @param input Character; path of the source.
+#' @param startsec Numeric; start in seconds.
+#' @param duration Numeric; length in seconds.
+#' @param audioFilter Character or \code{NULL}; a simple filter chain
+#'   (\code{-af}), e.g. \code{af} of \link{helper_audio_filter_parts}.
+#' @param filterComplex Character or \code{NULL}; a filter graph reading
+#'   \code{[0:a]} and writing \code{audioMap}, e.g. \code{graph} of
+#'   \link{helper_audio_filter_parts}.
+#' @param audioMap Character; output label of \code{filterComplex}.
+#' @param audioBitrate Character; bit rate of mp3 and m4a. Default is the
+#'   option \code{act.ffmpeg.audio.bitrate}.
+#' @param metadataArgs Character vector or \code{NULL}; further output
+#'   arguments.
+#'
+#' @return Character vector of FFmpeg arguments.
+#'
+#' @seealso \link{helper_audio_filter_parts}, \link{helper_ffmpeg_args_clip},
+#'   \link{helper_ffmpeg_run}
+#'
+#' @export
+#'
+#' @examples
+#' act::helper_ffmpeg_args_audio(output = "cut.wav", input = "sound.wav",
+#'                               startsec = 12.5, duration = 4)
+#'
+helper_ffmpeg_args_audio <- function(output,
+                                     input,
+                                     startsec,
+                                     duration,
+                                     audioFilter   = NULL,
+                                     filterComplex = NULL,
+                                     audioMap      = "[aout]",
+                                     audioBitrate  = getOption("act.ffmpeg.audio.bitrate", "192k"),
+                                     metadataArgs  = NULL) {
+	if (missing(output) || length(output) != 1 || is.na(output) || !nzchar(output)) {
+		cli::cli_abort("Parameter {.arg output} is missing.")
+	}
+	out_ext <- tolower(tools::file_ext(output))
+	if (!out_ext %in% c("wav", "mp3", "m4a")) {
+		cli::cli_abort("Output format {.val {out_ext}} is not supported (wav, mp3, m4a).")
+	}
+	if (!is.null(audioFilter) && !is.null(filterComplex)) {
+		cli::cli_abort("Use either {.arg audioFilter} or {.arg filterComplex}, not both.")
+	}
+	raw_line <- identical(getOption("act.media.timeline", "editlist"), "raw")
+	rate     <- .ffmpeg_audio_rate(input)
+	filtered <- !is.null(audioFilter) || !is.null(filterComplex)
+
+	args <- c("-hide_banner", "-loglevel", "error",
+	          "-ss", .ffmpeg_seconds(max(0, as.numeric(startsec))), "-t", .ffmpeg_seconds(as.numeric(duration)),
+	          if (raw_line) .ffmpeg_input_flags(input), "-i", input, "-vn")
+	if (!is.null(filterComplex)) {
+		args <- c(args, "-filter_complex", filterComplex, "-map", audioMap)
+	} else {
+		args <- c(args, "-map", "0:a:0")
+		if (!is.null(audioFilter)) args <- c(args, "-af", audioFilter)
+	}
+	codec <- switch(out_ext,
+		wav = if (!filtered && .ffmpeg_audio_is_pcm(input)) c("-c:a", "copy")
+		      else c("-c:a", .ffmpeg_pcm_codec(input)),
+		mp3 = c("-c:a", "libmp3lame", "-b:a", as.character(audioBitrate)),
+		m4a = c("-c:a", "aac", "-b:a", as.character(audioBitrate), "-movflags", "+faststart"))
+	c(args, codec, if (filtered && is.finite(rate)) c("-ar", as.character(rate)),
+	  "-t", .ffmpeg_seconds(as.numeric(duration)), metadataArgs, "-y", output)
+}
+
+
 #' Helper: Run FFmpeg and check the written file
 #'
 #' Runs FFmpeg with an argument vector (as built by \link{helper_ffmpeg_args})
@@ -468,6 +546,37 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 }
 
 .FFMPEG_TIMING_CACHE <- new.env(parent = emptyenv())
+
+.ffmpeg_audio_stream <- function(path) {
+	if (!file.exists(path)) return(list(codec = NA_character_, fmt = NA_character_, bits = NA_real_))
+	key <- paste("astream", normalizePath(path, mustWork = FALSE), sep = "|")
+	hit <- .FFMPEG_TIMING_CACHE[[key]]
+	if (!is.null(hit)) return(hit)
+	out <- tryCatch(.metadata_ffprobe_run(c("-v", "error", "-select_streams", "a:0",
+		"-show_entries", "stream=codec_name,sample_fmt,bits_per_raw_sample,bits_per_sample",
+		"-of", "default=noprint_wrappers=1", path))$out, error = function(e) character(0))
+	val <- function(k) { v <- sub(paste0("^", k, "="), "", grep(paste0("^", k, "="), out, value = TRUE)[1]); if (is.na(v)) NA_character_ else v }
+	bits <- suppressWarnings(as.numeric(val("bits_per_raw_sample")))
+	if (!is.finite(bits)) bits <- suppressWarnings(as.numeric(val("bits_per_sample")))
+	res <- list(codec = val("codec_name"), fmt = val("sample_fmt"), bits = bits)
+	assign(key, res, envir = .FFMPEG_TIMING_CACHE)
+	res
+}
+
+.ffmpeg_audio_is_pcm <- function(path) {
+	codec <- .ffmpeg_audio_stream(path)$codec
+	!is.na(codec) && startsWith(codec, "pcm_")
+}
+
+.ffmpeg_pcm_codec <- function(path) {
+	st <- .ffmpeg_audio_stream(path)
+	if (!is.na(st$codec) && startsWith(st$codec, "pcm_")) {
+		if (st$codec %in% c("pcm_s16le", "pcm_s24le", "pcm_s32le", "pcm_f32le", "pcm_f64le")) return(st$codec)
+		if (is.finite(st$bits) && st$bits == 24) return("pcm_s24le")
+		if (is.finite(st$bits) && st$bits == 32) return("pcm_s32le")
+	}
+	"pcm_s16le"
+}
 
 .ffmpeg_audio_rate <- function(path) {
 	if (!file.exists(path)) return(NA_real_)

@@ -136,10 +136,10 @@
 	act.ffmpeg.audio.anony_filter = list(
 		value       = NULL,
 		group       = "ffmpeg",
-		description = "Audio anonymization filter type: \"silence\", \"beep\", \"noise\", or NULL (disabled)"
+		description = "Audio anonymization type: \"beep\", \"noise\", \"mute\" (also \"silence\") or \"distort\"; start value of the viewer. NULL: the viewer starts with \"beep\", helper_audio_filter_build() does not anonymize."
 	),
 	act.ffmpeg.audio.anony_beep_freq = list(
-		value       = 1000L,
+		value       = 800L,
 		group       = "ffmpeg",
 		description = "Frequency in Hz for the beep audio anonymization filter"
 	),

@@ -34,13 +34,11 @@ argument, e.g. \code{"-map \"[aout]\""}. \code{""} otherwise.}
 Constructs the audio filter arguments for an FFmpeg command that optionally
 combines loudness normalization (\code{loudnorm}) and audio anonymization
 (\code{silence}, \code{beep}, or \code{noise}) over specified time ranges.
+The filters are built by \link{helper_audio_filter_parts}; the
+anonymization comes first, the normalization last. The beep and the noise
+are generated inside the filter graph.
 }
 \details{
-The filter order is always: normalization first, then anonymization.
-For \code{silence}, a simple \code{-af} chain suffices. For \code{beep}
-and \code{noise}, a \code{filter_complex} graph is required because a
-synthetic audio source must be mixed in.
-
 Audio filter and beep frequency are read from options:
 \code{act.ffmpeg.audio.anony_filter},
 \code{act.ffmpeg.audio.anony_beep_freq},
