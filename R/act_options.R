@@ -138,6 +138,16 @@
 		group       = "ffmpeg",
 		description = "Frequency in Hz for the beep audio anonymization filter"
 	),
+	act.ffmpeg.image.quality = list(
+		value       = 100,
+		group       = "ffmpeg",
+		description = "JPG quality of still images from 1 (worst) to 100 (best); converted to the ffmpeg scale -q:v 31..2. ROI crops always use the best quality."
+	),
+	act.ffmpeg.thumbnail.max_height = list(
+		value       = 720L,
+		group       = "ffmpeg",
+		description = "Maximum height in pixels of thumbnails (sequence preview image, search hit thumbnail, recording keyframe). NULL or 0 = full size."
+	),
 
 	act.import.readEmptyIntervals = list(
 		value       = FALSE,

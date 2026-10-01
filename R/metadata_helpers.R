@@ -79,40 +79,80 @@ helper_metadata_ffmpeg_argv <- function(sourcePath, startsec, clipID, fps = NULL
 #' library primitive).
 #'
 #' Uses `-overwrite_original` to avoid `.jpg_original` backup files.
+#' Several files are tagged in ONE exiftool call (see
+#' [helper_metadata_exif_argv()]).
 #'
-#' @param file Character string. Path to the JPG file to tag.
-#' @param sourcePath Character string. Full path to the source media file
-#'   the still was extracted from.
-#' @param startsec Numeric. Time in original source media, in seconds,
-#'   where the still frame was captured.
-#' @param clipID Character string. Cut identifier.
+#' @param file Character vector. Path(s) to the JPG file(s) to tag.
+#' @param sourcePath Character vector. Full path to the source media file
+#'   each still was extracted from (recycled).
+#' @param startsec Numeric vector. Time in original source media, in seconds,
+#'   where each still frame was captured (recycled).
+#' @param clipID Character vector. Cut identifier (recycled).
 #'
 #' @return Invisibly `NULL`.
 #'
-#' @seealso [media_metadata_read()], [helper_metadata_ffmpeg_args()]
+#' @seealso [media_metadata_read()], [helper_metadata_ffmpeg_args()],
+#'   [helper_metadata_exif_argv()]
 #'
 #' @export
 helper_metadata_exif_write <- function(file, sourcePath, startsec, clipID) {
 	if (!requireNamespace("exifr", quietly = TRUE)) return(invisible(NULL))
 	if (!nzchar(Sys.which("perl")))                 return(invisible(NULL))
-	if (!file.exists(file))                          return(invisible(NULL))
+	n <- length(file)
+	if (n == 0) return(invisible(NULL))
+	sourcePath <- rep_len(as.character(sourcePath), n)
+	startsec   <- rep_len(startsec, n)
+	clipID     <- rep_len(as.character(clipID), n)
+	keep <- file.exists(file)
+	if (!any(keep)) return(invisible(NULL))
 
-	comment <- .metadata_comment_build(sourcePath, startsec, clipID)
+	argv <- helper_metadata_exif_argv(file[keep], sourcePath[keep], startsec[keep], clipID[keep])
 
 	tryCatch(
 		exifr::exiftool_call(
-			args   = c(
-				"-q",
-				paste0("-UserComment=", shQuote(comment)),
-				"-overwrite_original"
-			),
-			fnames = file,
-			quiet  = TRUE
+			args   = shQuote(argv),
+			quiet  = TRUE,
+			stdout = FALSE
 		),
 		error = function(e) invisible(NULL)
 	)
 
 	invisible(NULL)
+}
+
+
+#' Build the exiftool arguments that write act.* tags into JPG files
+#'
+#' Returns the argument vector (without the program name) for ONE exiftool
+#' call that writes the EXIF `UserComment` of several JPG files, each with
+#' its own value (\code{-execute} between the files, \code{-q} and
+#' \code{-overwrite_original} as common arguments). Used for direct writing
+#' ([helper_metadata_exif_write()]) and for the exiftool line in cut list
+#' scripts.
+#'
+#' @param file Character vector. Path(s) to the JPG file(s).
+#' @param sourcePath Character vector. Source media file of each still (recycled).
+#' @param startsec Numeric vector. Time in the source media in seconds (recycled).
+#' @param clipID Character vector. Cut identifier (recycled).
+#'
+#' @return Character vector of exiftool arguments.
+#'
+#' @seealso [helper_metadata_exif_write()]
+#'
+#' @export
+helper_metadata_exif_argv <- function(file, sourcePath, startsec, clipID) {
+	n <- length(file)
+	if (n == 0) return(character(0))
+	sourcePath <- rep_len(as.character(sourcePath), n)
+	startsec   <- rep_len(startsec, n)
+	clipID     <- rep_len(as.character(clipID), n)
+	argv <- character(0)
+	for (i in seq_len(n)) {
+		comment <- .metadata_comment_build(sourcePath[i], startsec[i], clipID[i])
+		if (i > 1) argv <- c(argv, "-execute")
+		argv <- c(argv, paste0("-UserComment=", comment), file[i])
+	}
+	c(argv, "-common_args", "-q", "-overwrite_original")
 }
 
 

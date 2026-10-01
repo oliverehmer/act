@@ -7,15 +7,15 @@
 helper_metadata_exif_write(file, sourcePath, startsec, clipID)
 }
 \arguments{
-\item{file}{Character string. Path to the JPG file to tag.}
+\item{file}{Character vector. Path(s) to the JPG file(s) to tag.}
 
-\item{sourcePath}{Character string. Full path to the source media file
-the still was extracted from.}
+\item{sourcePath}{Character vector. Full path to the source media file
+each still was extracted from (recycled).}
 
-\item{startsec}{Numeric. Time in original source media, in seconds,
-where the still frame was captured.}
+\item{startsec}{Numeric vector. Time in original source media, in seconds,
+where each still frame was captured (recycled).}
 
-\item{clipID}{Character string. Cut identifier.}
+\item{clipID}{Character vector. Cut identifier (recycled).}
 }
 \value{
 Invisibly \code{NULL}.
@@ -30,7 +30,10 @@ library primitive).
 }
 \details{
 Uses \code{-overwrite_original} to avoid \code{.jpg_original} backup files.
+Several files are tagged in ONE exiftool call (see
+\code{\link[=helper_metadata_exif_argv]{helper_metadata_exif_argv()}}).
 }
 \seealso{
-\code{\link[=media_metadata_read]{media_metadata_read()}}, \code{\link[=helper_metadata_ffmpeg_args]{helper_metadata_ffmpeg_args()}}
+\code{\link[=media_metadata_read]{media_metadata_read()}}, \code{\link[=helper_metadata_ffmpeg_args]{helper_metadata_ffmpeg_args()}},
+\code{\link[=helper_metadata_exif_argv]{helper_metadata_exif_argv()}}
 }
