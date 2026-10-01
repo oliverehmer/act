@@ -25,7 +25,8 @@ the format: \code{jpg}/\code{jpeg} or \code{png}.}
 extension decides whether the edit list flags are set, so the real path
 must be given (also when the call is written into a cut list).}
 
-\item{startsec}{Numeric or \code{NULL}; seek position in seconds.}
+\item{startsec}{Numeric or \code{NULL}; seek position in seconds, on the
+timeline of the file as players show it.}
 
 \item{duration}{Numeric or \code{NULL}; length of the input window in
 seconds (\code{-t} before \code{-i}).}
@@ -64,6 +65,12 @@ keyframe but decoded after it (B-frames): it then delivers the keyframe
 instead.
 With a filter, the rest is cut by a \code{trim} at the start of the
 filter chain instead, so the filter only processes the target frame.
+\item The seek target is the time as players that honour the edit list
+of the file show it (ELAN with AVFoundation, browsers): the edit list
+offset of the video track is added, and the frame that is on screen at
+that moment is taken (not the next one). Camera files with B-frames
+carry an offset of their reorder delay (e.g. 2 frames), cuts made with
+stream copy may carry any offset.
 \item Video inputs (mp4, mov, m4a, m4v) get \code{-ignore_editlist 1
   -avoid_negative_ts make_zero} in front of \code{-i}. Without these flags a
 file with an edit list delivers a black frame. Image inputs never get them

@@ -12,6 +12,12 @@
 #'   instead.
 #'   With a filter, the rest is cut by a \code{trim} at the start of the
 #'   filter chain instead, so the filter only processes the target frame.
+#'   \item The seek target is the time as players that honour the edit list
+#'   of the file show it (ELAN with AVFoundation, browsers): the edit list
+#'   offset of the video track is added, and the frame that is on screen at
+#'   that moment is taken (not the next one). Camera files with B-frames
+#'   carry an offset of their reorder delay (e.g. 2 frames), cuts made with
+#'   stream copy may carry any offset.
 #'   \item Video inputs (mp4, mov, m4a, m4v) get \code{-ignore_editlist 1
 #'   -avoid_negative_ts make_zero} in front of \code{-i}. Without these flags a
 #'   file with an edit list delivers a black frame. Image inputs never get them
@@ -25,7 +31,8 @@
 #' @param input Character; path of the source file (video or image). Its
 #'   extension decides whether the edit list flags are set, so the real path
 #'   must be given (also when the call is written into a cut list).
-#' @param startsec Numeric or \code{NULL}; seek position in seconds.
+#' @param startsec Numeric or \code{NULL}; seek position in seconds, on the
+#'   timeline of the file as players show it.
 #' @param duration Numeric or \code{NULL}; length of the input window in
 #'   seconds (\code{-t} before \code{-i}).
 #' @param inputsExtra Character vector or \code{NULL}; further inputs (e.g. a
@@ -79,6 +86,12 @@ helper_ffmpeg_args <- function(output,
 	if (!is.null(input)) {
 		if (!is.null(startsec)) {
 			target   <- max(0, as.numeric(startsec))
+			if (length(.ffmpeg_input_flags(input)) && file.exists(input)) {
+				timing <- .ffmpeg_video_timing(input)
+				target <- target + timing$offset
+				if (is.finite(timing$frame_dur)) target <- target - timing$frame_dur * 0.99
+				target <- max(0, target)
+			}
 			pre_sec  <- max(0, target - 1)
 			seek_out <- target - pre_sec
 			args <- c(args, "-ss", .ffmpeg_seconds(pre_sec))
@@ -241,4 +254,128 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 		a <- gsub("%", "%%", a, fixed = TRUE)
 		paste(c("where exiftool >nul 2>nul && exiftool", paste0('"', gsub('"', '""', a, fixed = TRUE), '"')), collapse = " ")
 	}
+}
+
+.FFMPEG_TIMING_CACHE <- new.env(parent = emptyenv())
+
+.ffmpeg_video_timing <- function(path) {
+	info <- file.info(path)
+	if (is.na(info$size)) return(list(offset = 0, frame_dur = NA_real_))
+	key <- paste(normalizePath(path, mustWork = FALSE), info$size, as.numeric(info$mtime), sep = "|")
+	hit <- .FFMPEG_TIMING_CACHE[[key]]
+	if (!is.null(hit)) return(hit)
+	offset <- tryCatch(.mp4_video_editlist_offset(path), error = function(e) 0)
+	fps <- tryCatch(.metadata_probe_fps(path), error = function(e) NA_real_)
+	res <- list(offset = if (is.finite(offset)) offset else 0,
+	            frame_dur = if (is.finite(fps) && fps > 0) 1 / fps else NA_real_)
+	assign(key, res, envir = .FFMPEG_TIMING_CACHE)
+	res
+}
+
+.mp4_video_editlist_offset <- function(path) {
+	con <- file(path, "rb")
+	on.exit(close(con), add = TRUE)
+	file_size <- file.info(path)$size
+	pos <- 0
+	moov <- NULL
+	while (pos + 8 <= file_size) {
+		seek(con, where = pos)
+		h <- .mp4_box_header(con)
+		if (is.null(h)) break
+		if (h$size <= 0) h$size <- file_size - pos
+		if (identical(h$type, "moov")) {
+			seek(con, where = pos + h$header)
+			moov <- readBin(con, "raw", n = h$size - h$header)
+			break
+		}
+		pos <- pos + h$size
+	}
+	if (is.null(moov)) return(0)
+	movie_ts <- NA_real_
+	for (b in .mp4_children(moov)) {
+		if (b$type == "mvhd") movie_ts <- .mp4_mvhd_timescale(b$data)
+	}
+	for (trak in Filter(function(b) b$type == "trak", .mp4_children(moov))) {
+		kids <- .mp4_children(trak$data)
+		mdia <- Filter(function(b) b$type == "mdia", kids)
+		if (!length(mdia)) next
+		mkids <- .mp4_children(mdia[[1]]$data)
+		hdlr <- Filter(function(b) b$type == "hdlr", mkids)
+		if (!length(hdlr) || rawToChar(hdlr[[1]]$data[9:12]) != "vide") next
+		mdhd <- Filter(function(b) b$type == "mdhd", mkids)
+		media_ts <- .mp4_mdhd_timescale(mdhd[[1]]$data)
+		edts <- Filter(function(b) b$type == "edts", kids)
+		if (!length(edts)) return(0)
+		elst <- Filter(function(b) b$type == "elst", .mp4_children(edts[[1]]$data))
+		if (!length(elst)) return(0)
+		e <- .mp4_elst_entries(elst[[1]]$data)
+		if (!nrow(e)) return(0)
+		empty <- e$media_time < 0
+		lead <- cumprod(empty) == 1
+		delay <- sum(e$segment_duration[lead]) / movie_ts
+		first <- which(!empty)[1]
+		media_time <- if (is.na(first)) 0 else e$media_time[first] / media_ts
+		return(media_time - delay)
+	}
+	0
+}
+
+.mp4_u32 <- function(r) sum(as.numeric(as.integer(r)) * 256^(3:0))
+.mp4_u64 <- function(r) .mp4_u32(r[1:4]) * 2^32 + .mp4_u32(r[5:8])
+.mp4_s32 <- function(r) { v <- .mp4_u32(r); if (v >= 2^31) v - 2^32 else v }
+.mp4_s64 <- function(r) { hi <- .mp4_u32(r[1:4]); v <- hi * 2^32 + .mp4_u32(r[5:8]); if (hi >= 2^31) v - 2^64 else v }
+
+.mp4_box_header <- function(con) {
+	r <- readBin(con, "raw", n = 8)
+	if (length(r) < 8) return(NULL)
+	size <- .mp4_u32(r[1:4])
+	type <- rawToChar(r[5:8])
+	header <- 8
+	if (size == 1) {
+		size <- .mp4_u64(readBin(con, "raw", n = 8))
+		header <- 16
+	}
+	list(size = size, type = type, header = header)
+}
+
+.mp4_children <- function(data) {
+	out <- list()
+	pos <- 1
+	n <- length(data)
+	while (pos + 7 <= n) {
+		size <- .mp4_u32(data[pos:(pos + 3)])
+		type <- rawToChar(data[(pos + 4):(pos + 7)])
+		header <- 8
+		if (size == 1) { size <- .mp4_u64(data[(pos + 8):(pos + 15)]); header <- 16 }
+		if (size == 0) size <- n - pos + 1
+		if (size < header || pos + size - 1 > n) break
+		out[[length(out) + 1]] <- list(type = type,
+			data = if (size > header) data[(pos + header):(pos + size - 1)] else raw(0))
+		pos <- pos + size
+	}
+	out
+}
+
+.mp4_mvhd_timescale <- function(d) {
+	if (as.integer(d[1]) == 1) .mp4_u32(d[21:24]) else .mp4_u32(d[13:16])
+}
+
+.mp4_mdhd_timescale <- function(d) {
+	if (as.integer(d[1]) == 1) .mp4_u32(d[21:24]) else .mp4_u32(d[13:16])
+}
+
+.mp4_elst_entries <- function(d) {
+	version <- as.integer(d[1])
+	n <- .mp4_u32(d[5:8])
+	step <- if (version == 1) 20 else 12
+	rows <- lapply(seq_len(n), function(i) {
+		p <- 9 + (i - 1) * step
+		if (version == 1) {
+			c(segment_duration = .mp4_u64(d[p:(p + 7)]), media_time = .mp4_s64(d[(p + 8):(p + 15)]))
+		} else {
+			c(segment_duration = .mp4_u32(d[p:(p + 3)]), media_time = .mp4_s32(d[(p + 4):(p + 7)]))
+		}
+	})
+	if (!length(rows)) return(data.frame(segment_duration = numeric(0), media_time = numeric(0)))
+	as.data.frame(do.call(rbind, rows))
 }
