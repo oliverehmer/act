@@ -262,6 +262,10 @@ media_metadata_read <- function(file, tolerance_sec = 0.05) {
 	vol <- .media_volume_info(file_path)
 	row$volume.kind <- vol$kind
 	row$volume.name <- vol$name
+	if (isTRUE(vol$timeout)) {
+		row$comment <- "volume timeout"
+		return(row)
+	}
 
 	if (ext %in% c("mp4", "mov", "wav", "mp3")) {
 		row <- .metadata_read_ffprobe(file_path, row)
@@ -536,10 +540,15 @@ helper_metadata_probe_fps <- function(file_path) {
 }
 
 .metadata_ffprobe_run <- function(args, timeout = getOption("act.media.ffprobe.timeout", 10)) {
+	.metadata_process_run(helper_ffprobe_path(), args, timeout)
+}
+
+.metadata_process_run <- function(command, args = character(0),
+                                  timeout = getOption("act.media.ffprobe.timeout", 10)) {
 	out_file <- tempfile(fileext = ".txt")
 	on.exit(unlink(out_file), add = TRUE)
 	proc <- tryCatch(
-		processx::process$new(helper_ffprobe_path(), args = args,
+		processx::process$new(command, args = args,
 			stdout = out_file, stderr = NULL, cleanup = FALSE),
 		error = function(e) NULL
 	)
@@ -595,9 +604,13 @@ helper_metadata_probe_fps <- function(file_path) {
 			fstype %in% c("smbfs", "afpfs", "nfs", "webdav", "cifs")) {
 		list(kind = "network", name = basename(mp))
 	} else {
-		info <- tryCatch(suppressWarnings(system2("diskutil",
-			args = c("info", shQuote(mp)), stdout = TRUE, stderr = FALSE)),
-			error = function(e) character(0))
+		run <- .metadata_process_run("diskutil", c("info", mp))
+		if (isTRUE(run$timeout)) {
+			res <- list(kind = NA_character_, name = basename(mp), timeout = TRUE)
+			assign(key, res, envir = .METADATA_VOLUME_CACHE)
+			return(res)
+		}
+		info <- run$out
 		internal <- any(grepl("^\\s*Internal:\\s*Yes", info)) ||
 			any(grepl("^\\s*Device Location:\\s*Internal", info))
 		external <- any(grepl("^\\s*Internal:\\s*No", info)) ||
@@ -685,8 +698,7 @@ helper_metadata_probe_fps <- function(file_path) {
 
 # Longest mount point that is a prefix of the path (unix mount table).
 .media_volume_mountpoint_unix <- function(p) {
-	out <- tryCatch(suppressWarnings(system2("mount", stdout = TRUE,
-		stderr = FALSE)), error = function(e) character(0))
+	out <- .metadata_process_run("mount")$out
 	mps <- sub("^.* on (.*) \\(.*$", "\\1", out)
 	mps <- mps[nzchar(mps)]
 	cand <- mps[startsWith(paste0(p, "/"), paste0(sub("/$", "", mps), "/"))]
@@ -696,8 +708,7 @@ helper_metadata_probe_fps <- function(file_path) {
 
 # File system type of a unix mount point (from the mount table).
 .media_volume_fstype_unix <- function(mp) {
-	out <- tryCatch(suppressWarnings(system2("mount", stdout = TRUE,
-		stderr = FALSE)), error = function(e) character(0))
+	out <- .metadata_process_run("mount")$out
 	ln <- out[grepl(paste0(" on ", mp, " ("), out, fixed = TRUE)][1]
 	if (is.na(ln)) return(NA_character_)
 	m <- regmatches(ln, regexec("\\(([^,)]+)", ln))[[1]]
