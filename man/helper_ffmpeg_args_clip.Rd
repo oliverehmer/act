@@ -100,9 +100,11 @@ The sound is read from a second input of the same file (or
 encoder delay at the start of AAC tracks is skipped like ELAN does, and
 picture and sound are in sync as in ELAN.
 An AAC encoder shifts its output by 1024 samples, which no player
-compensates in a file without edit list; the sound is therefore read
-1024 samples later, so it plays at the right time (the first 21 ms of the
-clip are silent). In a filter graph the sound of
+compensates in a file without edit list; the first 1024 samples are
+therefore cut at the very end of the sound chain, so the clip plays at the
+right time. Filters (e.g. an anonymization in a graph) still see the time
+of the clip, so their ranges stay exact. The sound keeps the sample rate of the source (a
+loudness filter would otherwise raise it and shift that delay). In a filter graph the sound of
 the source is therefore addressed as \code{[0:a]} as usual - it is
 rewritten to the sound input.
 }

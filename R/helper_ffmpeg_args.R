@@ -148,9 +148,11 @@ helper_ffmpeg_args <- function(output,
 #' encoder delay at the start of AAC tracks is skipped like ELAN does, and
 #' picture and sound are in sync as in ELAN.
 #' An AAC encoder shifts its output by 1024 samples, which no player
-#' compensates in a file without edit list; the sound is therefore read
-#' 1024 samples later, so it plays at the right time (the first 21 ms of the
-#' clip are silent). In a filter graph the sound of
+#' compensates in a file without edit list; the first 1024 samples are
+#' therefore cut at the very end of the sound chain, so the clip plays at the
+#' right time. Filters (e.g. an anonymization in a graph) still see the time
+#' of the clip, so their ranges stay exact. The sound keeps the sample rate of the source (a
+#' loudness filter would otherwise raise it and shift that delay). In a filter graph the sound of
 #' the source is therefore addressed as \code{[0:a]} as usual - it is
 #' rewritten to the sound input.
 #'
@@ -267,18 +269,24 @@ helper_ffmpeg_args_clip <- function(output,
 	}
 	audio_idx <- 1L + length(inputsExtra)
 	audio_src <- audioInput %||% input
-	audio_lead <- if (any(audioCodecArgs == "aac")) .ffmpeg_aac_delay(audio_src) else 0
-	args <- c(args, "-ss", .ffmpeg_seconds(startsec + audio_lead), "-t", .ffmpeg_seconds(duration),
+	audio_aac  <- any(audioCodecArgs == "aac")
+	audio_rate <- if (audio_aac) .ffmpeg_audio_rate(audio_src) else NA_real_
+	audio_lead <- if (audio_aac) 1024 / (if (is.finite(audio_rate)) audio_rate else 48000) else 0
+	args <- c(args, "-ss", .ffmpeg_seconds(startsec), "-t", .ffmpeg_seconds(duration + audio_lead),
 	          if (raw_line) .ffmpeg_input_flags(audio_src), "-i", audio_src)
+	lead_af <- if (audio_lead > 0)
+		sprintf("atrim=start=%s,asetpts=PTS-STARTPTS", .ffmpeg_seconds(audio_lead)) else NULL
 
 	trim_vf  <- if (!is.null(seek_out))
 		sprintf("trim=start=%s,setpts=PTS-STARTPTS", .ffmpeg_seconds(seek_out)) else NULL
 	scale_vf <- .ffmpeg_scale_filter(maxHeight, maxWidth)
 	audio_label <- sprintf("[%d:a]", audio_idx)
 
+	af <- c(audioFilter, lead_af)
+	af <- if (length(af)) paste(af, collapse = ",") else NULL
 	if (isTRUE(videoCopy)) {
 		args <- c(args, "-map", "0:v:0", "-map", paste0(audio_idx, ":a?"), "-c:v", "copy")
-		if (!is.null(audioFilter)) args <- c(args, "-af", audioFilter)
+		if (!is.null(af)) args <- c(args, "-af", af)
 	} else {
 		if (!is.null(filterComplex)) {
 			fc <- gsub("[0:v]", paste0("[0:v]", trim_vf, ","), filterComplex, fixed = TRUE)
@@ -288,24 +296,31 @@ helper_ffmpeg_args_clip <- function(output,
 				fc <- paste0(fc, ";", vmap, scale_vf, "[vmax]")
 				vmap <- "[vmax]"
 			}
+			amap <- audioMap
+			if (!is.null(amap) && !is.null(lead_af)) {
+				fc <- paste0(fc, ";", amap, lead_af, "[alead]")
+				amap <- "[alead]"
+			}
 			args <- c(args, "-filter_complex", fc, "-map", vmap)
 		} else {
 			vf <- c(trim_vf, scale_vf, videoFilter)
 			vf <- vf[!is.na(vf) & nzchar(vf)]
 			args <- c(args, "-vf", paste(vf, collapse = ","), "-map", "0:v:0")
+			amap <- audioMap
 		}
-		if (!is.null(audioMap)) {
-			args <- c(args, "-map", audioMap)
+		if (!is.null(amap)) {
+			args <- c(args, "-map", amap)
 		} else {
 			args <- c(args, "-map", paste0(audio_idx, ":a?"))
-			if (!is.null(audioFilter)) args <- c(args, "-af", audioFilter)
+			if (!is.null(af)) args <- c(args, "-af", af)
 		}
 		quality <- if (!is.null(videoCrf)) c("-crf", as.character(videoCrf)) else c("-b:v", as.character(videoBitrate))
 		args <- c(args, "-c:v", "libx264", quality, "-pix_fmt", "yuv420p", "-bf", "0",
 		          "-g", as.character(as.integer(keyframeInterval)),
 		          if (is.finite(timing$frame_dur)) c("-r", sprintf("%.6g", 1 / timing$frame_dur)))
 	}
-	c(args, audioCodecArgs, "-t", .ffmpeg_seconds(duration), metadataArgs,
+	c(args, audioCodecArgs, if (is.finite(audio_rate)) c("-ar", as.character(audio_rate)),
+	  "-t", .ffmpeg_seconds(duration), metadataArgs,
 	  "-use_editlist", "0", "-movflags", "+faststart", "-y", output)
 }
 
@@ -448,15 +463,15 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 
 .FFMPEG_TIMING_CACHE <- new.env(parent = emptyenv())
 
-.ffmpeg_aac_delay <- function(path) {
-	if (!file.exists(path)) return(1024 / 48000)
-	key <- paste("aac", normalizePath(path, mustWork = FALSE), sep = "|")
+.ffmpeg_audio_rate <- function(path) {
+	if (!file.exists(path)) return(NA_real_)
+	key <- paste("rate", normalizePath(path, mustWork = FALSE), sep = "|")
 	hit <- .FFMPEG_TIMING_CACHE[[key]]
 	if (!is.null(hit)) return(hit)
 	out <- tryCatch(.metadata_ffprobe_run(c("-v", "error", "-select_streams", "a:0",
 		"-show_entries", "stream=sample_rate", "-of", "csv=p=0", path))$out, error = function(e) character(0))
 	rate <- suppressWarnings(as.numeric(out[1]))
-	res <- 1024 / (if (length(rate) == 1 && is.finite(rate) && rate > 0) rate else 48000)
+	res <- if (length(rate) == 1 && is.finite(rate) && rate > 0) rate else NA_real_
 	assign(key, res, envir = .FFMPEG_TIMING_CACHE)
 	res
 }
