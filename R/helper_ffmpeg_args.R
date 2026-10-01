@@ -136,6 +136,180 @@ helper_ffmpeg_args <- function(output,
 }
 
 
+#' Helper: Build the FFmpeg arguments for a video clip
+#'
+#' Builds the argument vector (without the program name) for one FFmpeg call
+#' that writes a video clip (MP4). The rules of \link{helper_ffmpeg_args}
+#' apply to the picture: exact two-stage seek, edit list flags for video
+#' inputs, and the picture of a clip starts with the frame that players
+#' honouring the edit list (ELAN with AVFoundation) show at \code{startsec}.
+#' The sound is read from a second input of the same file (or
+#' \code{audioInput}) with its own seek: its edit list is honoured, so the
+#' encoder delay at the start of AAC tracks is skipped like ELAN does, and
+#' picture and sound are in sync as in ELAN.
+#' An AAC encoder shifts its output by 1024 samples, which no player
+#' compensates in a file without edit list; the sound is therefore read
+#' 1024 samples later, so it plays at the right time (the first 21 ms of the
+#' clip are silent). In a filter graph the sound of
+#' the source is therefore addressed as \code{[0:a]} as usual - it is
+#' rewritten to the sound input.
+#'
+#' Every clip is written as H.264 with \code{yuv420p} (PowerPoint plays
+#' nothing else), with \code{-use_editlist 0 -movflags +faststart}, without
+#' B-frames (\code{-bf 0}): with B-frames the picture of a file without edit
+#' list starts two frames after the sound. The frame rate is set explicitly
+#' (\code{-r}): after the trim the encoder would otherwise assume the time
+#' base as frame rate and, with a bit rate, write grey frames at the start.
+#'
+#' @param output Character; path of the clip (mp4, mov or m4v).
+#' @param input Character; path of the source video.
+#' @param startsec Numeric; start in seconds on the timeline of the file as
+#'   players show it.
+#' @param duration Numeric; length in seconds.
+#' @param inputsExtra List or \code{NULL}; further inputs after the video,
+#'   each a path or a complete argument vector (e.g.
+#'   \code{c("-f", "lavfi", "-t", "3", "-i", "sine")}). Their indices in a
+#'   filter graph follow the video (1, 2, ...); the sound input comes last.
+#' @param videoFilter Character or \code{NULL}; a simple video filter chain.
+#' @param filterComplex Character or \code{NULL}; a filter graph using
+#'   \code{[0:v]} and \code{[0:a]}.
+#' @param videoMap Character or \code{NULL}; output label of the picture in
+#'   \code{filterComplex}.
+#' @param audioMap Character or \code{NULL}; output label of the sound in
+#'   \code{filterComplex}. \code{NULL} takes the sound of the source.
+#' @param audioFilter Character or \code{NULL}; filter chain for the sound
+#'   of the source (\code{-af}), when \code{audioMap} is \code{NULL}.
+#' @param maxHeight,maxWidth Integer or \code{NULL}; scale the picture down
+#'   to fit into this height and/or width (never up). Defaults are the
+#'   options \code{act.ffmpeg.video.max_height} and
+#'   \code{act.ffmpeg.video.max_width}.
+#' @param videoBitrate Character; video bit rate, used when \code{videoCrf}
+#'   is \code{NULL}. Default is the option \code{act.ffmpeg.video.bitrate}.
+#' @param videoCrf Numeric or \code{NULL}; constant rate factor instead of a
+#'   bit rate. Default is the option \code{act.ffmpeg.video.crf}.
+#' @param keyframeInterval Integer; distance of keyframes in frames. Default
+#'   is the option \code{act.ffmpeg.video.keyframe_interval}.
+#' @param audioCodecArgs Character vector; codec arguments of the sound.
+#' @param metadataArgs Character vector or \code{NULL}; further output
+#'   arguments, e.g. from \link{helper_metadata_ffmpeg_argv}.
+#' @param videoOffset,videoFps See \link{helper_ffmpeg_args}.
+#' @param audioInput Character or \code{NULL}; file the sound is taken from.
+#'   \code{NULL} takes it from \code{input}.
+#' @param videoCopy Logical; copy the video stream instead of encoding it
+#'   (fast, but the clip starts at the keyframe before \code{startsec} and no
+#'   filter is possible).
+#'
+#' @return Character vector of FFmpeg arguments.
+#'
+#' @seealso \link{helper_ffmpeg_args}, \link{helper_ffmpeg_run}
+#'
+#' @export
+#'
+#' @examples
+#' act::helper_ffmpeg_args_clip(output = "cut.mp4", input = "video.mp4",
+#'                              startsec = 12.5, duration = 4)
+#'
+helper_ffmpeg_args_clip <- function(output,
+                                    input,
+                                    startsec,
+                                    duration,
+                                    inputsExtra      = NULL,
+                                    videoFilter      = NULL,
+                                    filterComplex    = NULL,
+                                    videoMap         = NULL,
+                                    audioMap         = NULL,
+                                    audioFilter      = NULL,
+                                    maxHeight        = getOption("act.ffmpeg.video.max_height"),
+                                    maxWidth         = getOption("act.ffmpeg.video.max_width"),
+                                    videoBitrate     = getOption("act.ffmpeg.video.bitrate", "8M"),
+                                    videoCrf         = getOption("act.ffmpeg.video.crf"),
+                                    keyframeInterval = getOption("act.ffmpeg.video.keyframe_interval", 25),
+                                    audioCodecArgs   = c("-c:a", "aac", "-b:a", getOption("act.ffmpeg.audio.bitrate", "192k")),
+                                    metadataArgs     = NULL,
+                                    videoOffset      = NULL,
+                                    videoFps         = NULL,
+                                    audioInput       = NULL,
+                                    videoCopy        = FALSE) {
+	if (missing(output) || length(output) != 1 || is.na(output) || !nzchar(output)) {
+		cli::cli_abort("Parameter {.arg output} is missing.")
+	}
+	if (!tolower(tools::file_ext(output)) %in% c("mp4", "mov", "m4v")) {
+		cli::cli_abort("Output format {.val {tools::file_ext(output)}} is not supported (mp4, mov, m4v).")
+	}
+	if (!is.null(videoFilter) && !is.null(filterComplex)) {
+		cli::cli_abort("Use either {.arg videoFilter} or {.arg filterComplex}, not both.")
+	}
+	if (isTRUE(videoCopy) && (!is.null(videoFilter) || !is.null(filterComplex))) {
+		cli::cli_abort("{.arg videoCopy} cannot be combined with a filter.")
+	}
+	startsec <- max(0, as.numeric(startsec))
+	duration <- as.numeric(duration)
+	timing   <- .ffmpeg_seek_timing(input, videoOffset, videoFps)
+	raw_line <- identical(getOption("act.media.timeline", "editlist"), "raw")
+
+	args <- c("-hide_banner", "-loglevel", "error")
+
+	if (isTRUE(videoCopy)) {
+		args <- c(args, "-ss", .ffmpeg_seconds(startsec + timing$offset), "-t", .ffmpeg_seconds(duration),
+		          .ffmpeg_input_flags(input), "-i", input)
+		seek_out <- NULL
+	} else {
+		target <- startsec + timing$offset
+		if (is.finite(timing$frame_dur)) target <- target - timing$frame_dur * 0.99
+		target   <- max(0, target)
+		pre_sec  <- max(0, target - 1)
+		seek_out <- target - pre_sec
+		args <- c(args, "-ss", .ffmpeg_seconds(pre_sec), "-t", .ffmpeg_seconds(seek_out + duration),
+		          .ffmpeg_input_flags(input), "-i", input)
+	}
+	for (extra in inputsExtra) {
+		args <- c(args, if (length(extra) == 1) c(.ffmpeg_input_flags(extra), "-i", extra) else extra)
+	}
+	audio_idx <- 1L + length(inputsExtra)
+	audio_src <- audioInput %||% input
+	audio_lead <- if (any(audioCodecArgs == "aac")) .ffmpeg_aac_delay(audio_src) else 0
+	args <- c(args, "-ss", .ffmpeg_seconds(startsec + audio_lead), "-t", .ffmpeg_seconds(duration),
+	          if (raw_line) .ffmpeg_input_flags(audio_src), "-i", audio_src)
+
+	trim_vf  <- if (!is.null(seek_out))
+		sprintf("trim=start=%s,setpts=PTS-STARTPTS", .ffmpeg_seconds(seek_out)) else NULL
+	scale_vf <- .ffmpeg_scale_filter(maxHeight, maxWidth)
+	audio_label <- sprintf("[%d:a]", audio_idx)
+
+	if (isTRUE(videoCopy)) {
+		args <- c(args, "-map", "0:v:0", "-map", paste0(audio_idx, ":a?"), "-c:v", "copy")
+		if (!is.null(audioFilter)) args <- c(args, "-af", audioFilter)
+	} else {
+		if (!is.null(filterComplex)) {
+			fc <- gsub("[0:v]", paste0("[0:v]", trim_vf, ","), filterComplex, fixed = TRUE)
+			fc <- gsub("[0:a]", audio_label, fc, fixed = TRUE)
+			vmap <- videoMap %||% "[out]"
+			if (!is.null(scale_vf)) {
+				fc <- paste0(fc, ";", vmap, scale_vf, "[vmax]")
+				vmap <- "[vmax]"
+			}
+			args <- c(args, "-filter_complex", fc, "-map", vmap)
+		} else {
+			vf <- c(trim_vf, scale_vf, videoFilter)
+			vf <- vf[!is.na(vf) & nzchar(vf)]
+			args <- c(args, "-vf", paste(vf, collapse = ","), "-map", "0:v:0")
+		}
+		if (!is.null(audioMap)) {
+			args <- c(args, "-map", audioMap)
+		} else {
+			args <- c(args, "-map", paste0(audio_idx, ":a?"))
+			if (!is.null(audioFilter)) args <- c(args, "-af", audioFilter)
+		}
+		quality <- if (!is.null(videoCrf)) c("-crf", as.character(videoCrf)) else c("-b:v", as.character(videoBitrate))
+		args <- c(args, "-c:v", "libx264", quality, "-pix_fmt", "yuv420p", "-bf", "0",
+		          "-g", as.character(as.integer(keyframeInterval)),
+		          if (is.finite(timing$frame_dur)) c("-r", sprintf("%.6g", 1 / timing$frame_dur)))
+	}
+	c(args, audioCodecArgs, "-t", .ffmpeg_seconds(duration), metadataArgs,
+	  "-use_editlist", "0", "-movflags", "+faststart", "-y", output)
+}
+
+
 #' Helper: Run FFmpeg and check the written file
 #'
 #' Runs FFmpeg with an argument vector (as built by \link{helper_ffmpeg_args})
@@ -208,10 +382,17 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 	sub("\\.$", "", s)
 }
 
-.ffmpeg_scale_filter <- function(maxHeight) {
-	h <- suppressWarnings(as.integer(maxHeight)[1])
-	if (is.null(maxHeight) || length(h) == 0 || is.na(h) || h <= 0) return(NULL)
-	sprintf("scale=-2:min(ih\\,%d)", h)
+.ffmpeg_scale_filter <- function(maxHeight, maxWidth = NULL) {
+	h <- if (is.null(maxHeight)) NA_integer_ else suppressWarnings(as.integer(maxHeight)[1])
+	w <- if (is.null(maxWidth))  NA_integer_ else suppressWarnings(as.integer(maxWidth)[1])
+	h_ok <- length(h) == 1 && !is.na(h) && h > 0
+	w_ok <- length(w) == 1 && !is.na(w) && w > 0
+	if (h_ok && w_ok) {
+		return(sprintf("scale=w=min(iw\\,%d):h=min(ih\\,%d):force_original_aspect_ratio=decrease:force_divisible_by=2", w, h))
+	}
+	if (h_ok) return(sprintf("scale=-2:min(ih\\,%d)", h))
+	if (w_ok) return(sprintf("scale=min(iw\\,%d):-2", w))
+	NULL
 }
 
 .ffmpeg_seek_hint <- function(args) {
@@ -267,6 +448,19 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 
 .FFMPEG_TIMING_CACHE <- new.env(parent = emptyenv())
 
+.ffmpeg_aac_delay <- function(path) {
+	if (!file.exists(path)) return(1024 / 48000)
+	key <- paste("aac", normalizePath(path, mustWork = FALSE), sep = "|")
+	hit <- .FFMPEG_TIMING_CACHE[[key]]
+	if (!is.null(hit)) return(hit)
+	out <- tryCatch(.metadata_ffprobe_run(c("-v", "error", "-select_streams", "a:0",
+		"-show_entries", "stream=sample_rate", "-of", "csv=p=0", path))$out, error = function(e) character(0))
+	rate <- suppressWarnings(as.numeric(out[1]))
+	res <- 1024 / (if (length(rate) == 1 && is.finite(rate) && rate > 0) rate else 48000)
+	assign(key, res, envir = .FFMPEG_TIMING_CACHE)
+	res
+}
+
 .ffmpeg_seek_timing <- function(input, videoOffset = NULL, videoFps = NULL) {
 	timeline <- getOption("act.media.timeline", "editlist")
 	if (!timeline %in% c("editlist", "raw")) {
@@ -300,6 +494,11 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 }
 
 .mp4_video_editlist_offset <- function(path) {
+	.mp4_editlist_offset(path, handler = "vide")
+}
+
+.mp4_editlist_offset <- function(path, handler = c("vide", "soun")) {
+	handler <- match.arg(handler)
 	con <- file(path, "rb")
 	on.exit(close(con), add = TRUE)
 	file_size <- file.info(path)$size
@@ -328,7 +527,7 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 		if (!length(mdia)) next
 		mkids <- .mp4_children(mdia[[1]]$data)
 		hdlr <- Filter(function(b) b$type == "hdlr", mkids)
-		if (!length(hdlr) || rawToChar(hdlr[[1]]$data[9:12]) != "vide") next
+		if (!length(hdlr) || rawToChar(hdlr[[1]]$data[9:12]) != handler) next
 		mdhd <- Filter(function(b) b$type == "mdhd", mkids)
 		media_ts <- .mp4_mdhd_timescale(mdhd[[1]]$data)
 		edts <- Filter(function(b) b$type == "edts", kids)

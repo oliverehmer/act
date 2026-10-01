@@ -143,6 +143,36 @@
 		group       = "ffmpeg",
 		description = "Frequency in Hz for the beep audio anonymization filter"
 	),
+	act.ffmpeg.video.bitrate = list(
+		value       = "8M",
+		group       = "ffmpeg",
+		description = "Video bit rate of clips (H.264), used when act.ffmpeg.video.crf is NULL."
+	),
+	act.ffmpeg.video.crf = list(
+		value       = NULL,
+		group       = "ffmpeg",
+		description = "Constant rate factor of clips instead of a bit rate (e.g. 18); NULL = use act.ffmpeg.video.bitrate."
+	),
+	act.ffmpeg.video.keyframe_interval = list(
+		value       = 25L,
+		group       = "ffmpeg",
+		description = "Distance of keyframes in clips, in frames (-g)."
+	),
+	act.ffmpeg.video.max_height = list(
+		value       = 1080L,
+		group       = "ffmpeg",
+		description = "Maximum height of clips in pixels (scaled down, never up). NULL = no limit."
+	),
+	act.ffmpeg.video.max_width = list(
+		value       = NULL,
+		group       = "ffmpeg",
+		description = "Maximum width of clips in pixels (scaled down, never up). NULL = no limit."
+	),
+	act.ffmpeg.audio.bitrate = list(
+		value       = "192k",
+		group       = "ffmpeg",
+		description = "Bit rate of AAC sound in clips and of MP3 files."
+	),
 	act.ffmpeg.image.quality = list(
 		value       = 100,
 		group       = "ffmpeg",
