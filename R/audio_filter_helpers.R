@@ -11,7 +11,8 @@
 #' Order: channel first, then the anonymization, then the loudness (in front of
 #' the timed volume the loudness filter shifted its time base). The timed volume
 #' is evaluated in blocks of 64 samples (1.5 ms), so a range starts and ends
-#' where it is annotated.
+#' where it is annotated. Beep and noise are mixed in the channel layout of
+#' the output (stereo, or mono with \code{mono = TRUE}).
 #'
 #' @param channel Character; \code{"stereo"} (default) keeps the channels,
 #'   \code{"left"} / \code{"right"} put the left / right channel on both sides
@@ -72,10 +73,11 @@ helper_audio_filter_parts <- function(channel   = "stereo",
 			sprintf("sine=frequency=%s:sample_rate=44100", format(as.numeric(beepFreq)))
 			else "anoisesrc=color=white:sample_rate=44100"
 		base <- if (mode == "beep") 0.5 else 0.3
-		graph <- sprintf(paste0("[0:a]%sasetnsamples=n=64,volume='if(%s,0,1)':eval=frame[a0];",
-			"%s,asetnsamples=n=64,volume='if(%s,%.4f,0)':eval=frame[a1];",
+		layout <- sprintf("aformat=channel_layouts=%s", if (isTRUE(mono)) "mono" else "stereo")
+		graph <- sprintf(paste0("[0:a]%s%s,asetnsamples=n=64,volume='if(%s,0,1)':eval=frame[a0];",
+			"%s,%s,asetnsamples=n=64,volume='if(%s,%.4f,0)':eval=frame[a1];",
 			"[a0][a1]amix=inputs=2:duration=first:normalize=0%s"),
-			pre_str, inrange, tone, inrange, base * strength, tail_ln)
+			pre_str, layout, inrange, tone, layout, inrange, base * strength, tail_ln)
 		return(list(af = NULL, graph = graph))
 	}
 

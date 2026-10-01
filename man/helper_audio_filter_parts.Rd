@@ -63,7 +63,8 @@ needed.
 Order: channel first, then the anonymization, then the loudness (in front of
 the timed volume the loudness filter shifted its time base). The timed volume
 is evaluated in blocks of 64 samples (1.5 ms), so a range starts and ends
-where it is annotated.
+where it is annotated. Beep and noise are mixed in the channel layout of
+the output (stereo, or mono with \code{mono = TRUE}).
 }
 \examples{
 act::helper_audio_filter_parts(channel = "left",
