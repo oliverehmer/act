@@ -200,6 +200,7 @@ helper_ffmpeg_args <- function(output,
 #' @param videoCopy Logical; copy the video stream instead of encoding it
 #'   (fast, but the clip starts at the keyframe before \code{startsec} and no
 #'   filter is possible).
+#' @param withAudio Logical; \code{FALSE} writes the picture only.
 #'
 #' @return Character vector of FFmpeg arguments.
 #'
@@ -231,7 +232,8 @@ helper_ffmpeg_args_clip <- function(output,
                                     videoOffset      = NULL,
                                     videoFps         = NULL,
                                     audioInput       = NULL,
-                                    videoCopy        = FALSE) {
+                                    videoCopy        = FALSE,
+                                    withAudio        = TRUE) {
 	if (missing(output) || length(output) != 1 || is.na(output) || !nzchar(output)) {
 		cli::cli_abort("Parameter {.arg output} is missing.")
 	}
@@ -269,11 +271,13 @@ helper_ffmpeg_args_clip <- function(output,
 	}
 	audio_idx <- 1L + length(inputsExtra)
 	audio_src <- audioInput %||% input
-	audio_aac  <- any(audioCodecArgs == "aac")
+	audio_aac  <- isTRUE(withAudio) && any(audioCodecArgs == "aac")
 	audio_rate <- if (audio_aac) .ffmpeg_audio_rate(audio_src) else NA_real_
 	audio_lead <- if (audio_aac) 1024 / (if (is.finite(audio_rate)) audio_rate else 48000) else 0
-	args <- c(args, "-ss", .ffmpeg_seconds(startsec), "-t", .ffmpeg_seconds(duration + audio_lead),
-	          if (raw_line) .ffmpeg_input_flags(audio_src), "-i", audio_src)
+	if (isTRUE(withAudio)) {
+		args <- c(args, "-ss", .ffmpeg_seconds(startsec), "-t", .ffmpeg_seconds(duration + audio_lead),
+		          if (raw_line) .ffmpeg_input_flags(audio_src), "-i", audio_src)
+	}
 	lead_af <- if (audio_lead > 0)
 		sprintf("atrim=start=%s,asetpts=PTS-STARTPTS", .ffmpeg_seconds(audio_lead)) else NULL
 
@@ -308,7 +312,9 @@ helper_ffmpeg_args_clip <- function(output,
 			args <- c(args, "-vf", paste(vf, collapse = ","), "-map", "0:v:0")
 			amap <- audioMap
 		}
-		if (!is.null(amap)) {
+		if (!isTRUE(withAudio)) {
+			args <- c(args, "-an")
+		} else if (!is.null(amap)) {
 			args <- c(args, "-map", amap)
 		} else {
 			args <- c(args, "-map", paste0(audio_idx, ":a?"))
@@ -319,7 +325,7 @@ helper_ffmpeg_args_clip <- function(output,
 		          "-g", as.character(as.integer(keyframeInterval)),
 		          if (is.finite(timing$frame_dur)) c("-r", sprintf("%.6g", 1 / timing$frame_dur)))
 	}
-	c(args, audioCodecArgs, if (is.finite(audio_rate)) c("-ar", as.character(audio_rate)),
+	c(args, if (isTRUE(withAudio)) audioCodecArgs, if (is.finite(audio_rate)) c("-ar", as.character(audio_rate)),
 	  "-t", .ffmpeg_seconds(duration), metadataArgs,
 	  "-use_editlist", "0", "-movflags", "+faststart", "-y", output)
 }

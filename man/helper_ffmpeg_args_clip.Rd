@@ -26,7 +26,8 @@ helper_ffmpeg_args_clip(
   videoOffset = NULL,
   videoFps = NULL,
   audioInput = NULL,
-  videoCopy = FALSE
+  videoCopy = FALSE,
+  withAudio = TRUE
 )
 }
 \arguments{
@@ -85,6 +86,8 @@ arguments, e.g. from \link{helper_metadata_ffmpeg_argv}.}
 \item{videoCopy}{Logical; copy the video stream instead of encoding it
 (fast, but the clip starts at the keyframe before \code{startsec} and no
 filter is possible).}
+
+\item{withAudio}{Logical; \code{FALSE} writes the picture only.}
 }
 \value{
 Character vector of FFmpeg arguments.
