@@ -33,7 +33,7 @@ search_cuts_media(
 
 \item{exportStills}{Logical; If \code{TRUE} stills (image) will be included in the cut list. For creating the list of stills to be exported see \link{search_cuts_media}.}
 
-\item{exportThumbnail}{Logical; If \code{TRUE} a thumbnail image (.jpg) will be exported to the main folder. The name will be the same as the media cut. By default the time value is the start of the search hit. To change this set time values in seconds in a column called \code{thumbnails} in \code{s@results}.}
+\item{exportThumbnail}{Logical; If \code{TRUE} a thumbnail image (.jpg, at most \code{act.ffmpeg.thumbnail.max_height} pixels high) will be exported to the main folder. The name will be the same as the media cut. By default the time value is the start of the search hit. To change this set time values in seconds in a column called \code{thumbnails} in \code{s@results}.}
 
 \item{cutSpanBeforesec}{Double; Start the media cut some seconds before the hit to include some context; the default \code{NULL} will take the value as set in @cuts.span.beforesec of the search object.}
 
@@ -91,7 +91,7 @@ The output format is predefined by in the options:
 \item \code{act.ffmpeg.command.video}: FFmpeg command for video cuts
 \item \code{act.ffmpeg.command.audio}: FFmpeg command for audio cuts (default: codec copy)
 \item \code{act.ffmpeg.command.audio.mp3}: FFmpeg command for converting audio to MP3
-\item Stills and thumbnails are built by \link{helper_ffmpeg_args} (seek before the input, JPG quality from \code{act.ffmpeg.image.quality}); each still gets the act.* EXIF comment through an exiftool line in the cut list (skipped when exiftool is not installed).
+\item Stills and thumbnails are built by \link{helper_ffmpeg_args} (exact seek, JPG quality from \code{act.ffmpeg.image.quality}; thumbnails at most \code{act.ffmpeg.thumbnail.max_height} pixels high); each still gets the act.* EXIF comment through an exiftool line in the cut list (skipped when exiftool is not installed).
 }
 
 \emph{Extract stills}\cr
