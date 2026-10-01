@@ -228,8 +228,8 @@ export_docx <- function (   t,
 	doc <- add_block(doc, headerDescription, "header.description")
 	if (isTRUE(headerInsertSource) && nrow(t@annotations) > 0) {
 		source_line <- paste0("(", t@name, ", ",
-			helper_format_time(min(t@annotations$startsec)), "-",
-			helper_format_time(max(t@annotations$endsec)), ")")
+			helper_format_time(min(t@annotations$startsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), "-",
+			helper_format_time(max(t@annotations$endsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), ")")
 		doc <- officer::body_add_par(doc, value = source_line,
 			style = get_style_base(l, "header.subtitle")$docx.template.name)
 	}

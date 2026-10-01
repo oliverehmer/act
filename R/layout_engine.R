@@ -5710,8 +5710,8 @@ build_alignment_report <- function(result, plan, transcript_name,
 				        w$char, w$occurrence, .report_shorten(w$content, 40), w$char,
 				        if (!is.na(w$main_tier)) w$main_tier else "(none)",
 				        .report_shorten(w$main_content, 40),
-				        helper_format_time(w$main_startsec),
-				        helper_format_time(w$main_endsec))
+				        helper_format_time(w$main_startsec, format = getOption("act.time.format.transcript", "h:mm:ss.s")),
+				        helper_format_time(w$main_endsec, format = getOption("act.time.format.transcript", "h:mm:ss.s")))
 			},
 			advice = if (is_stills) {
 				paste0("Add a \"", w$char, "\" to the verbal annotation at the moment the ",

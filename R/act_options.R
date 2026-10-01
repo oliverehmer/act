@@ -81,6 +81,12 @@
 		description = "Seconds after which a single ffprobe call (media metadata, frame rate) is abandoned, so a hanging disk cannot block the session. NA or 0 = no limit."
 	),
 
+	act.time.format.transcript = list(
+		value       = "h:mm:ss.s",
+		group       = "export",
+		description = "Time format in transcript outputs (DOCX/TXT header source line, layout reports). One of h:mm:ss.s, h:mm:ss.ss, h:mm:ss:ff, mm:ss.ss, s.s, s.ss."
+	),
+
 	act.cutlist.os = list(
 		value       = c("mac", "win"),
 		group       = "export",

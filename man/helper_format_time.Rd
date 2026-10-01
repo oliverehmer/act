@@ -4,7 +4,14 @@
 \alias{helper_format_time}
 \title{Formats time as HH:MM:SS,mmm}
 \usage{
-helper_format_time(t, digits = 1, addHrsMinSec = FALSE, addSec = FALSE)
+helper_format_time(
+  t,
+  digits = 1,
+  addHrsMinSec = FALSE,
+  addSec = FALSE,
+  format = NULL,
+  fps = 25
+)
 }
 \arguments{
 \item{t}{Double; time in seconds.}
@@ -14,6 +21,10 @@ helper_format_time(t, digits = 1, addHrsMinSec = FALSE, addSec = FALSE)
 \item{addHrsMinSec}{Logical; if \code{TRUE} 'hrs' 'min' 'sec' will be used instead of ':'.}
 
 \item{addSec}{Logical; if \code{TRUE} time value in seconds will be shown, too.}
+
+\item{format}{Character or \code{NULL}; a named time format. If set, \code{digits}, \code{addHrsMinSec} and \code{addSec} are ignored. One of \code{"h:mm:ss.s"}, \code{"h:mm:ss.ss"}, \code{"h:mm:ss:ff"} (frames), \code{"mm:ss.ss"} (hours are dropped), \code{"s.s"}, \code{"s.ss"}. Fractions are truncated, not rounded.}
+
+\item{fps}{Numeric; frames per second for \code{"h:mm:ss:ff"}.}
 }
 \value{
 Character string.
@@ -55,5 +66,7 @@ helper_format_time(2734.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
 helper_format_time(34.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
 helper_format_time(0.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
 
+helper_format_time(83.45, format="h:mm:ss.ss")
+helper_format_time(83.45, format="h:mm:ss:ff", fps=25)
 
 }
