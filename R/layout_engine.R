@@ -1296,12 +1296,19 @@ interleave_layer_lines <- function(result, max_span_blocks = Inf,
 
 	# rows a main block has to consider: homed lines plus adjacency
 	# fallback rows without any usable anchor
+	homed_by_main <- list()
+	for (r in seq_len(n)) {
+		if (is.null(homes[[r]])) next
+		for (m in unique(homes[[r]]$source[!is.na(homes[[r]]$source)])) {
+			key <- as.character(m)
+			homed_by_main[[key]] <- c(homed_by_main[[key]], r)
+		}
+	}
+	no_home <- vapply(homes, is.null, logical(1))
 	rows_for_main <- function(m) {
-		homed <- which(vapply(seq_len(n), function(r) {
-			!is.null(homes[[r]]) && any(homes[[r]]$source == m)
-		}, logical(1)))
-		fallback <- which(adjacency_main == m &
-		                  vapply(homes, is.null, logical(1)))
+		homed <- homed_by_main[[as.character(m)]]
+		if (is.null(homed)) homed <- integer(0)
+		fallback <- which(adjacency_main == m & no_home)
 		unique(c(homed, fallback))
 	}
 
@@ -2025,6 +2032,10 @@ tokenize_content <- function(text) {
 
 # ===== RENDERER =====
 
+.layout_empty_placements <- data.frame(char = character(0), occurrence = integer(0),
+                                        target_col = integer(0), placed_col = integer(0),
+                                        degraded = logical(0), note = character(0))
+
 render_annotation_tokens <- function(text, anchors, width, prefix_first,
                                      prefix_cont, arrow_mode, pair_mode,
                                      start_col = NULL, lead_allowed = FALSE,
@@ -2683,9 +2694,7 @@ render_annotation_tokens <- function(text, anchors, width, prefix_first,
 	placements <- if (length(state$placements) > 0) {
 		do.call(rbind, state$placements)
 	} else {
-		data.frame(char = character(0), occurrence = integer(0),
-		           target_col = integer(0), placed_col = integer(0),
-		           degraded = logical(0), note = character(0))
+		.layout_empty_placements
 	}
 	list(lines = lines, placements = placements, lead_lines = lead_lines,
 	     moved_anchors = if (length(state$moved_anchors) > 0) do.call(rbind, state$moved_anchors) else NULL)
@@ -2869,6 +2878,9 @@ shift_lone_bracket_line <- function(lines, line_index, prefix_cont, target_col) 
 
 # ===== POSITION EXTRACTION FROM RENDERED LINES =====
 
+.layout_empty_anchor_positions <- data.frame(char = character(0), occurrence = integer(0),
+                                              line = integer(0), col = integer(0))
+
 extract_anchor_positions <- function(lines, chars) {
 	char_parts <- list()
 	line_parts <- list()
@@ -2883,14 +2895,13 @@ extract_anchor_positions <- function(lines, chars) {
 		col_parts[[k]] <- hits
 	}
 	if (length(char_parts) == 0) {
-		return(data.frame(char = character(0), occurrence = integer(0),
-		                  line = integer(0), col = integer(0)))
+		return(.layout_empty_anchor_positions)
 	}
 	all_chars <- unlist(char_parts, use.names = FALSE)
-	data.frame(char = all_chars,
-	           occurrence = .running_occurrence(all_chars),
-	           line = unlist(line_parts, use.names = FALSE),
-	           col = unlist(col_parts, use.names = FALSE))
+	list2DF(list(char = all_chars,
+	             occurrence = .running_occurrence(all_chars),
+	             line = unlist(line_parts, use.names = FALSE),
+	             col = unlist(col_parts, use.names = FALSE)))
 }
 
 # ======================================================================
@@ -2908,6 +2919,14 @@ extract_anchor_positions <- function(lines, chars) {
 # only renderer-provided input is rendered_cache[[source_row]]$positions,
 # a data.frame (char, occurrence, col, line). Do not widen this interface -
 # an alternative lane renderer must be able to fill the same cache.
+
+.layout_empty_anchor_spec <- data.frame(char = character(0), occurrence = integer(0),
+                                         target_col = integer(0), target_line = integer(0),
+                                         fill_before = character(0),
+                                         type = character(0), source_row = integer(0),
+                                         domain = character(0), pair_fill = character(0),
+                                         status = character(0), pair_id = integer(0),
+                                         source_occurrence = integer(0))
 
 compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
                             ref_main, mm_matches, merge_map = NULL,
@@ -3139,26 +3158,20 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 			function(x) as.character(x[[name]]), character(1))
 		field_int <- function(name) vapply(anchor_rows,
 			function(x) as.integer(x[[name]]), integer(1))
-		data.frame(char = field_chr("char"),
-		           occurrence = field_int("occurrence"),
-		           target_col = field_int("target_col"),
-		           target_line = field_int("target_line"),
-		           fill_before = field_chr("fill_before"),
-		           type = field_chr("type"),
-		           source_row = field_int("source_row"),
-		           domain = field_chr("domain"),
-		           pair_fill = field_chr("pair_fill"),
-		           status = field_chr("status"),
-		           pair_id = field_int("pair_id"),
-		           source_occurrence = field_int("source_occurrence"))
+		list2DF(list(char = field_chr("char"),
+		             occurrence = field_int("occurrence"),
+		             target_col = field_int("target_col"),
+		             target_line = field_int("target_line"),
+		             fill_before = field_chr("fill_before"),
+		             type = field_chr("type"),
+		             source_row = field_int("source_row"),
+		             domain = field_chr("domain"),
+		             pair_fill = field_chr("pair_fill"),
+		             status = field_chr("status"),
+		             pair_id = field_int("pair_id"),
+		             source_occurrence = field_int("source_occurrence")))
 	} else {
-		data.frame(char = character(0), occurrence = integer(0),
-		           target_col = integer(0), target_line = integer(0),
-		           fill_before = character(0),
-		           type = character(0), source_row = integer(0),
-		           domain = character(0), pair_fill = character(0),
-		           status = character(0), pair_id = integer(0),
-		           source_occurrence = integer(0))
+		.layout_empty_anchor_spec
 	}
 	list(anchors = anchors, warnings = warnings)
 }
