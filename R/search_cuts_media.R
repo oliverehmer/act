@@ -378,12 +378,15 @@ search_cuts_media <- function(x,
 				startsec 	<- max(0, s@results$startsec[res] - s@cuts.span.beforesec)
 				endsec 		<- min(s@results$endsec[res] + s@cuts.span.aftersec, t@length.sec)
 				duration <- endsec - startsec
+				editlist_args <- if (is_video_file || in_suffix %in% c("mp4", "mov", "m4a", "m4v")) '-ignore_editlist 1 -avoid_negative_ts make_zero ' else ''
 				if (is_video_file && isTRUE(videoFastPositioning)) {
-					inputargs <- sprintf('-ignore_editlist 1 -avoid_negative_ts make_zero -ss %s -i "INFILEPATH" -ss 10.000 -t %s',
+					inputargs <- sprintf('%s-ss %s -i "INFILEPATH" -ss 10.000 -t %s',
+					                     editlist_args,
 					                     as.character(max(0, startsec - 10)),
 					                     as.character(duration))
 				} else {
-					inputargs <- sprintf('-ignore_editlist 1 -avoid_negative_ts make_zero -i "INFILEPATH" -ss %s -t %s',
+					inputargs <- sprintf('%s-i "INFILEPATH" -ss %s -t %s',
+					                     editlist_args,
 					                     as.character(startsec),
 					                     as.character(duration))
 				}
