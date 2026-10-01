@@ -45,7 +45,7 @@ search_cuts_media(
 
 \item{filterMediaExclude}{Character string; regular expression to exclude some of the media files in \code{corpus@transcripts[[ ]]@media}. Empty string (default) excludes none.}
 
-\item{videoFastPositioning}{Logical; If \code{TRUE} the input args use double \code{-ss} for fast frame-accurate seeking (slow decode only over the last few seconds). If \code{FALSE} a single \code{-ss} after \code{-i} is used (full decode). Only affects video cuts and still extraction; audio cuts always use the slow form.}
+\item{videoFastPositioning}{Logical; If \code{TRUE} the input args use double \code{-ss} for fast frame-accurate seeking (slow decode only over the last few seconds). If \code{FALSE} a single \code{-ss} after \code{-i} is used (full decode). Only affects video cuts; audio cuts always use the slow form, stills and thumbnails always seek before the input.}
 
 \item{videoCodecCopy}{Logical; If \code{TRUE} FFMPEG will use the option \emph{codec copy} for videos.}
 
@@ -91,7 +91,7 @@ The output format is predefined by in the options:
 \item \code{act.ffmpeg.command.video}: FFmpeg command for video cuts
 \item \code{act.ffmpeg.command.audio}: FFmpeg command for audio cuts (default: codec copy)
 \item \code{act.ffmpeg.command.audio.mp3}: FFmpeg command for converting audio to MP3
-\item \code{act.ffmpeg.command.images}: FFmpeg command for extracting still images
+\item Stills and thumbnails are built by \link{helper_ffmpeg_args} (seek before the input, JPG quality from \code{act.ffmpeg.image.quality}); each still gets the act.* EXIF comment through an exiftool line in the cut list (skipped when exiftool is not installed).
 }
 
 \emph{Extract stills}\cr

@@ -24,7 +24,7 @@
 #' * \code{act.ffmpeg.command.video}: FFmpeg command for video cuts
 #' * \code{act.ffmpeg.command.audio}: FFmpeg command for audio cuts (default: codec copy)
 #' * \code{act.ffmpeg.command.audio.mp3}: FFmpeg command for converting audio to MP3
-#' * \code{act.ffmpeg.command.images}: FFmpeg command for extracting still images
+#' * Stills and thumbnails are built by \link{helper_ffmpeg_args} (seek before the input, JPG quality from \code{act.ffmpeg.image.quality}); each still gets the act.* EXIF comment through an exiftool line in the cut list (skipped when exiftool is not installed).
 #'  
 #'  
 #' \emph{Extract stills}\cr
@@ -59,7 +59,7 @@
 #' @param folderOutput Character string; path to folder where files will be written.
 #' @param filterMediaInclude Character string; regular expression to match only some of the media files in \code{corpus@transcripts[[ ]]@media}.
 #' @param filterMediaExclude Character string; regular expression to exclude some of the media files in \code{corpus@transcripts[[ ]]@media}. Empty string (default) excludes none.
-#' @param videoFastPositioning Logical; If \code{TRUE} the input args use double \code{-ss} for fast frame-accurate seeking (slow decode only over the last few seconds). If \code{FALSE} a single \code{-ss} after \code{-i} is used (full decode). Only affects video cuts and still extraction; audio cuts always use the slow form.
+#' @param videoFastPositioning Logical; If \code{TRUE} the input args use double \code{-ss} for fast frame-accurate seeking (slow decode only over the last few seconds). If \code{FALSE} a single \code{-ss} after \code{-i} is used (full decode). Only affects video cuts; audio cuts always use the slow form, stills and thumbnails always seek before the input.
 #' @param videoCodecCopy Logical; If \code{TRUE} FFMPEG will use the option *codec copy* for videos.
 #' @param audioAsMP3 Logical; If \code{TRUE} audio cuts will be converted to .mp3 files using \code{options()$act.ffmpeg.command.audio.mp3}. If \code{FALSE} (default) audio format is preserved using \code{options()$act.ffmpeg.command.audio}.
 #' @param audioPanning Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.channels_from_column' .
@@ -491,27 +491,28 @@ search_cuts_media <- function(x,
 					out_filePath <- file.path(out_folder_current, filename)
 					
 					#get command
-					cmd <- .ffmpeg_apply_path(options()$act.ffmpeg.command.images)
-					if (isTRUE(videoFastPositioning)) {
-						pre_sec <- max(0, time - 10)
-						inputargs <- sprintf('-ignore_editlist 1 -avoid_negative_ts make_zero -ss %s -i "INFILEPATH" -ss %.3f', as.character(pre_sec), time - pre_sec)
-					} else {
-						inputargs <- sprintf('-ignore_editlist 1 -avoid_negative_ts make_zero -i "INFILEPATH" -ss %s', as.character(time))
-					}
-					cmd <- stringi::stri_replace_all_fixed(cmd, "INPUTARGS",   inputargs)
-					cmd <- stringi::stri_replace_all_fixed(cmd, "OUTFILEPATH", out_filePath)
-					win_cmd <- stringi::stri_replace_all_fixed(cmd, "INFILEPATH", "%PATH_INPUT%")
-					mac_cmd <- stringi::stri_replace_all_fixed(cmd, "INFILEPATH", "$PATH_INPUT")
-					#cmd
+					args <- helper_ffmpeg_args(
+						output       = out_filePath,
+						input        = in_paths[j],
+						startsec     = time,
+						imageQuality = getOption("act.ffmpeg.image.quality", 100),
+						maxHeight    = NULL)
+					exif_argv <- helper_metadata_exif_argv(
+						file       = out_filePath,
+						sourcePath = in_paths[j],
+						startsec   = time,
+						clipID     = tools::file_path_sans_ext(filename))
+					win_cmd <- paste(c(.ffmpeg_cmd_line(args, "win", inputVariable = in_paths[j]), .exif_cmd_line(exif_argv, "win")), collapse = "\n ")
+					mac_cmd <- paste(c(.ffmpeg_cmd_line(args, "mac", inputVariable = in_paths[j]), .exif_cmd_line(exif_argv, "mac")), collapse = "\n ")
 					
 					#windows version thumb 
 					#(flatten/ some replacements windows )
 					win_info         <- c()
 					win_makedir      <- sprintf('IF NOT EXIST "%s" ( md "%s" )', out_folder_current, out_folder_current)
+					win_makedir      <- stringr::str_replace_all(win_makedir, "/", "\\\\")
 					win_if_statement <- "\nIF EXIST \"%1$s\" ( \n %2$s\n)\n"
 					win_if_statement <- sprintf(win_if_statement, "%PATH_INPUT%" ,win_cmd)
 					win_thumbnail    <- c(win_info, win_makedir, win_if_statement)
-					win_thumbnail    <- stringr::str_replace_all(win_thumbnail, "/", "\\\\")
 					
 					#mac version thumb
 					mac_info         <- c("#.... thumbnail")
@@ -560,25 +561,27 @@ search_cuts_media <- function(x,
 					out_filePaths <- file.path(out_folder_stills, stills.names)
 					
 					#get command
-					cmd <- .ffmpeg_apply_path(options()$act.ffmpeg.command.images)
-					inputargs <- if (isTRUE(videoFastPositioning)) {
-						sprintf('-ignore_editlist 1 -avoid_negative_ts make_zero -ss %s -i "INFILEPATH" -ss %.3f', as.character(pmax(0, stills.values - 10)), stills.values - pmax(0, stills.values - 10))
-					} else {
-						sprintf('-ignore_editlist 1 -avoid_negative_ts make_zero -i "INFILEPATH" -ss %s', as.character(stills.values))
-					}
-					cmd <- vapply(seq_along(inputargs), function(k) {
-						c1 <- stringi::stri_replace_all_fixed(cmd, "INPUTARGS",   inputargs[k])
-						c1 <- stringi::stri_replace_all_fixed(c1,  "OUTFILEPATH", out_filePaths[k])
-						c1
-					}, character(1))
-					cmd <- stringr::str_flatten(cmd, collapse='\n')
-					win_cmd <- stringi::stri_replace_all_fixed(cmd, "INFILEPATH", "%PATH_INPUT%")
-					mac_cmd <- stringi::stri_replace_all_fixed(cmd, "INFILEPATH", "$PATH_INPUT")
+					args <- lapply(seq_along(stills.values), function(k) {
+						helper_ffmpeg_args(
+							output       = out_filePaths[k],
+							input        = in_paths[j],
+							startsec     = stills.values[k],
+							imageQuality = getOption("act.ffmpeg.image.quality", 100),
+							maxHeight    = NULL)
+					})
+					exif_argv <- helper_metadata_exif_argv(
+						file       = out_filePaths,
+						sourcePath = in_paths[j],
+						startsec   = stills.values,
+						clipID     = tools::file_path_sans_ext(stills.names))
+					win_cmd <- stringr::str_flatten(c(vapply(args, .ffmpeg_cmd_line, character(1), os = "win", inputVariable = in_paths[j]),
+						.exif_cmd_line(exif_argv, "win")), collapse = '\n')
+					mac_cmd <- stringr::str_flatten(c(vapply(args, .ffmpeg_cmd_line, character(1), os = "mac", inputVariable = in_paths[j]),
+						.exif_cmd_line(exif_argv, "mac")), collapse = '\n')
 					
 					#windows version stills
 					#(flatten/ some replacements windows )
 					win_info         <- c()
-					win_cmd          <- stringr::str_replace_all(win_cmd, "/", "\\\\")
 					win_makedir      <- sprintf('IF NOT EXIST "%s" ( md "%s" )', out_folder_stills, out_folder_stills)
 					win_makedir      <- stringr::str_replace_all(win_makedir, "/", "\\\\")
 					win_if_statement <-"\nIF EXIST \"%1$s\" (\n %2$s\n %3$s\n)\n"

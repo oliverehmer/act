@@ -4,8 +4,14 @@
 #' that writes a single image (JPG or PNG). All image outputs of act and iclo
 #' are built here, so the rules for reading video sources apply in one place:
 #' \itemize{
-#'   \item The seek is done before the input (\code{-ss t -i}), which is frame
-#'   accurate in current FFmpeg versions.
+#'   \item The seek is done in two stages: a fast seek to one second before
+#'   the target in front of the input, then an exact seek of the rest after
+#'   it (\code{-ss t-1 -i ... -ss 1}). A single seek in front of the input
+#'   (\code{-ss t -i}) can miss the frames that are displayed just before a
+#'   keyframe but decoded after it (B-frames): it then delivers the keyframe
+#'   instead.
+#'   With a filter, the rest is cut by a \code{trim} at the start of the
+#'   filter chain instead, so the filter only processes the target frame.
 #'   \item Video inputs (mp4, mov, m4a, m4v) get \code{-ignore_editlist 1
 #'   -avoid_negative_ts make_zero} in front of \code{-i}. Without these flags a
 #'   file with an edit list delivers a black frame. Image inputs never get them
@@ -16,8 +22,9 @@
 #'
 #' @param output Character; path of the image to write. The extension decides
 #'   the format: \code{jpg}/\code{jpeg} or \code{png}.
-#' @param input Character; path of the source file (video or image). The
-#'   literal \code{"INFILEPATH"} is kept as a placeholder for cut lists.
+#' @param input Character; path of the source file (video or image). Its
+#'   extension decides whether the edit list flags are set, so the real path
+#'   must be given (also when the call is written into a cut list).
 #' @param startsec Numeric or \code{NULL}; seek position in seconds.
 #' @param duration Numeric or \code{NULL}; length of the input window in
 #'   seconds (\code{-t} before \code{-i}).
@@ -68,25 +75,37 @@ helper_ffmpeg_args <- function(output,
 	}
 
 	args <- c("-hide_banner", "-loglevel", "error")
+	seek_out <- NULL
 	if (!is.null(input)) {
-		if (!is.null(startsec)) args <- c(args, "-ss", .ffmpeg_seconds(max(0, as.numeric(startsec))))
-		if (!is.null(duration)) args <- c(args, "-t",  .ffmpeg_seconds(as.numeric(duration)))
+		if (!is.null(startsec)) {
+			target   <- max(0, as.numeric(startsec))
+			pre_sec  <- max(0, target - 1)
+			seek_out <- target - pre_sec
+			args <- c(args, "-ss", .ffmpeg_seconds(pre_sec))
+			if (!is.null(duration)) args <- c(args, "-t", .ffmpeg_seconds(seek_out + as.numeric(duration)))
+		} else if (!is.null(duration)) {
+			args <- c(args, "-t", .ffmpeg_seconds(as.numeric(duration)))
+		}
 		args <- c(args, .ffmpeg_input_flags(input), "-i", input)
 	}
 	for (extra in inputsExtra) {
 		args <- c(args, .ffmpeg_input_flags(extra), "-i", extra)
 	}
 
+	trim_vf  <- if (!is.null(seek_out)) sprintf("trim=start=%s", .ffmpeg_seconds(seek_out)) else NULL
 	scale_vf <- .ffmpeg_scale_filter(maxHeight)
 	vf <- c(scale_vf, videoFilter)
 	vf <- vf[!is.na(vf) & nzchar(vf)]
 	if (length(vf) > 0) {
-		args <- c(args, "-vf", paste(vf, collapse = ","))
+		args <- c(args, "-vf", paste(c(trim_vf, vf), collapse = ","))
 	} else if (!is.null(filterComplex)) {
-		args <- c(args, "-filter_complex", filterComplex)
+		fc <- if (is.null(trim_vf)) filterComplex
+			else gsub("[0:v]", paste0("[0:v]", trim_vf, ","), filterComplex, fixed = TRUE)
+		args <- c(args, "-filter_complex", fc)
 		if (!is.null(filterMap)) args <- c(args, "-map", filterMap)
+	} else if (!is.null(seek_out)) {
+		args <- c(args, "-ss", .ffmpeg_seconds(seek_out))
 	}
-
 	args <- c(args, "-frames:v", "1")
 	if (out_ext %in% c("jpg", "jpeg")) {
 		args <- c(args, "-q:v", as.character(.ffmpeg_quality_qv(imageQuality)))
@@ -191,8 +210,10 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 }
 
 .ffmpeg_cmd_line <- function(args, os = c("mac", "win"),
-                             executable = getOption("act.path.ffmpeg", "ffmpeg")) {
+                             executable = getOption("act.path.ffmpeg", "ffmpeg"),
+                             inputVariable = NULL) {
 	os <- match.arg(os)
+	if (!is.null(inputVariable)) args[args == inputVariable] <- "INFILEPATH"
 	if (is.null(executable) || !nzchar(executable)) executable <- "ffmpeg"
 	simple <- "^[A-Za-z0-9_.:+=,@/-]+$"
 	if (os == "mac") {
@@ -214,7 +235,7 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 	os <- match.arg(os)
 	if (length(argv) == 0) return(character(0))
 	if (os == "mac") {
-		paste(c("command -v exiftool >/dev/null 2>&1 && exiftool", shQuote(argv, type = "sh")), collapse = " ")
+		paste(c("command -v exiftool >/dev/null 2>&1 && exiftool", shQuote(argv, type = "sh"), "|| :"), collapse = " ")
 	} else {
 		a <- ifelse(startsWith(argv, "/"), gsub("/", "\\", argv, fixed = TRUE), argv)
 		a <- gsub("%", "%%", a, fixed = TRUE)

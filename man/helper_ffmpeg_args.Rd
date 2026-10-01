@@ -21,8 +21,9 @@ helper_ffmpeg_args(
 \item{output}{Character; path of the image to write. The extension decides
 the format: \code{jpg}/\code{jpeg} or \code{png}.}
 
-\item{input}{Character; path of the source file (video or image). The
-literal \code{"INFILEPATH"} is kept as a placeholder for cut lists.}
+\item{input}{Character; path of the source file (video or image). Its
+extension decides whether the edit list flags are set, so the real path
+must be given (also when the call is written into a cut list).}
 
 \item{startsec}{Numeric or \code{NULL}; seek position in seconds.}
 
@@ -55,8 +56,14 @@ Builds the argument vector (without the program name) for one FFmpeg call
 that writes a single image (JPG or PNG). All image outputs of act and iclo
 are built here, so the rules for reading video sources apply in one place:
 \itemize{
-\item The seek is done before the input (\code{-ss t -i}), which is frame
-accurate in current FFmpeg versions.
+\item The seek is done in two stages: a fast seek to one second before
+the target in front of the input, then an exact seek of the rest after
+it (\code{-ss t-1 -i ... -ss 1}). A single seek in front of the input
+(\code{-ss t -i}) can miss the frames that are displayed just before a
+keyframe but decoded after it (B-frames): it then delivers the keyframe
+instead.
+With a filter, the rest is cut by a \code{trim} at the start of the
+filter chain instead, so the filter only processes the target frame.
 \item Video inputs (mp4, mov, m4a, m4v) get \code{-ignore_editlist 1
   -avoid_negative_ts make_zero} in front of \code{-i}. Without these flags a
 file with an edit list delivers a black frame. Image inputs never get them
