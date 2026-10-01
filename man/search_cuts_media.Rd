@@ -45,7 +45,7 @@ search_cuts_media(
 
 \item{filterMediaExclude}{Character string; regular expression to exclude some of the media files in \code{corpus@transcripts[[ ]]@media}. Empty string (default) excludes none.}
 
-\item{videoFastPositioning}{Logical; If \code{TRUE} the input args use double \code{-ss} for fast frame-accurate seeking (slow decode only over the last few seconds). If \code{FALSE} a single \code{-ss} after \code{-i} is used (full decode). Only affects video cuts; audio cuts always use the slow form, stills and thumbnails always seek before the input.}
+\item{videoFastPositioning}{Logical; If \code{TRUE} the input args use double \code{-ss} for fast frame-accurate seeking (slow decode only over the last few seconds). If \code{FALSE} a single \code{-ss} after \code{-i} is used (full decode). No longer used for video cuts, stills and thumbnails (they always seek exactly); audio cuts always use the slow form.}
 
 \item{videoCodecCopy}{Logical; If \code{TRUE} FFMPEG will use the option \emph{codec copy} for videos.}
 
@@ -88,7 +88,7 @@ By default, the device descriptor of the original media will be appended to the 
 \emph{Output format}\cr
 The output format is predefined by in the options:
 \itemize{
-\item \code{act.ffmpeg.command.video}: FFmpeg command for video cuts
+\item Video cuts are built by \link{helper_ffmpeg_args_clip}: picture and sound start at the time ELAN shows (edit list alignment), H.264 yuv420p with the options \code{act.ffmpeg.video.bitrate}, \code{.crf}, \code{.keyframe_interval}, \code{.max_height}, \code{.max_width} and AAC with \code{act.ffmpeg.audio.bitrate}. The option \code{act.ffmpeg.command.video} is no longer used.
 \item \code{act.ffmpeg.command.audio}: FFmpeg command for audio cuts (default: codec copy)
 \item \code{act.ffmpeg.command.audio.mp3}: FFmpeg command for converting audio to MP3
 \item Stills and thumbnails are built by \link{helper_ffmpeg_args} (exact seek, JPG quality from \code{act.ffmpeg.image.quality}; thumbnails at most \code{act.ffmpeg.thumbnail.max_height} pixels high); each still gets the act.* EXIF comment through an exiftool line in the cut list (skipped when exiftool is not installed).
