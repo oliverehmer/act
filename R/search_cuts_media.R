@@ -380,9 +380,11 @@ search_cuts_media <- function(x,
 				duration <- endsec - startsec
 				editlist_args <- if (is_video_file || in_suffix %in% c("mp4", "mov", "m4a", "m4v")) '-ignore_editlist 1 -avoid_negative_ts make_zero ' else ''
 				if (is_video_file && isTRUE(videoFastPositioning)) {
-					inputargs <- sprintf('%s-ss %s -i "INFILEPATH" -ss 10.000 -t %s',
+					pre_sec <- max(0, startsec - 10)
+					inputargs <- sprintf('%s-ss %s -i "INFILEPATH" -ss %.3f -t %s',
 					                     editlist_args,
-					                     as.character(max(0, startsec - 10)),
+					                     as.character(pre_sec),
+					                     startsec - pre_sec,
 					                     as.character(duration))
 				} else {
 					inputargs <- sprintf('%s-i "INFILEPATH" -ss %s -t %s',
@@ -491,7 +493,8 @@ search_cuts_media <- function(x,
 					#get command
 					cmd <- .ffmpeg_apply_path(options()$act.ffmpeg.command.images)
 					if (isTRUE(videoFastPositioning)) {
-						inputargs <- sprintf('-ignore_editlist 1 -avoid_negative_ts make_zero -ss %s -i "INFILEPATH" -ss 10.000', as.character(max(0, time - 10)))
+						pre_sec <- max(0, time - 10)
+						inputargs <- sprintf('-ignore_editlist 1 -avoid_negative_ts make_zero -ss %s -i "INFILEPATH" -ss %.3f', as.character(pre_sec), time - pre_sec)
 					} else {
 						inputargs <- sprintf('-ignore_editlist 1 -avoid_negative_ts make_zero -i "INFILEPATH" -ss %s', as.character(time))
 					}
@@ -559,7 +562,7 @@ search_cuts_media <- function(x,
 					#get command
 					cmd <- .ffmpeg_apply_path(options()$act.ffmpeg.command.images)
 					inputargs <- if (isTRUE(videoFastPositioning)) {
-						sprintf('-ignore_editlist 1 -avoid_negative_ts make_zero -ss %s -i "INFILEPATH" -ss 10.000', as.character(pmax(0, stills.values - 10)))
+						sprintf('-ignore_editlist 1 -avoid_negative_ts make_zero -ss %s -i "INFILEPATH" -ss %.3f', as.character(pmax(0, stills.values - 10)), stills.values - pmax(0, stills.values - 10))
 					} else {
 						sprintf('-ignore_editlist 1 -avoid_negative_ts make_zero -i "INFILEPATH" -ss %s', as.character(stills.values))
 					}
