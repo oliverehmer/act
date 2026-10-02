@@ -118,39 +118,42 @@ align_and_render <- function(ann, text_body_width, arrow_mode = "stem",
 	# break, and only then decide which mark really ends up at the very
 	# edge and has to travel to the next line. Deciding it the other way
 	# round moves marks that are nowhere near the edge in the final layout.
-	preliminary <- .render_main_positions(ann, pairs, text_body_width,
-	                                      ref_main, mm_matches, merge_map,
-	                                      main_fragment_starts, arrow_mode,
-	                                      all_anchor_chars)
-	ann <- apply_cluster_close_open_reorder(ann, mm_matches, preliminary,
-	                                        all_anchor_chars, time_tolerance,
-	                                        point_chars, time_tolerance_point)
-	ann <- .apply_unfold_breaks(ann, no_fold, merge_map)
-	ann <- apply_mm_span_stretch(ann, mm_matches, all_anchor_chars, merge_map,
-	                             preliminary, text_body_width)
-	preliminary <- .render_main_positions(ann, pairs, text_body_width,
-	                                      ref_main, mm_matches, merge_map,
-	                                      main_fragment_starts, arrow_mode,
-	                                      all_anchor_chars)
-	ann <- apply_main_break_hints(ann, mm_matches, preliminary,
-	                              text_body_width, min_description,
-	                              anchor_chars = all_anchor_chars,
-	                              merge_map = merge_map)
-	# Moving a mark to the next line changes the spans around it, so the
-	# widening has to run again on the new layout - otherwise the
-	# description that just moved down has no room to reach its closing
-	# symbol (user mock-up 2026-08-14). Widening itself shifts the line
-	# breaks again, so this repeats until nothing changes: a span that got
-	# too little room in one round is completed in the next.
-	for (pass in seq_len(4L)) {
+	preliminary <- NULL
+	if (nrow(mm_matches) > 0) {
 		preliminary <- .render_main_positions(ann, pairs, text_body_width,
 		                                      ref_main, mm_matches, merge_map,
 		                                      main_fragment_starts, arrow_mode,
 		                                      all_anchor_chars)
-		text_before <- ann$text
-		ann <- apply_mm_span_stretch(ann, mm_matches, all_anchor_chars,
-		                             merge_map, preliminary, text_body_width)
-		if (identical(ann$text, text_before)) break
+		ann <- apply_cluster_close_open_reorder(ann, mm_matches, preliminary,
+		                                        all_anchor_chars, time_tolerance,
+		                                        point_chars, time_tolerance_point)
+		ann <- .apply_unfold_breaks(ann, no_fold, merge_map)
+		ann <- apply_mm_span_stretch(ann, mm_matches, all_anchor_chars, merge_map,
+		                             preliminary, text_body_width)
+		preliminary <- .render_main_positions(ann, pairs, text_body_width,
+		                                      ref_main, mm_matches, merge_map,
+		                                      main_fragment_starts, arrow_mode,
+		                                      all_anchor_chars)
+		ann <- apply_main_break_hints(ann, mm_matches, preliminary,
+		                              text_body_width, min_description,
+		                              anchor_chars = all_anchor_chars,
+		                              merge_map = merge_map)
+		# Moving a mark to the next line changes the spans around it, so the
+		# widening has to run again on the new layout - otherwise the
+		# description that just moved down has no room to reach its closing
+		# symbol (user mock-up 2026-08-14). Widening itself shifts the line
+		# breaks again, so this repeats until nothing changes: a span that got
+		# too little room in one round is completed in the next.
+		for (pass in seq_len(4L)) {
+			preliminary <- .render_main_positions(ann, pairs, text_body_width,
+			                                      ref_main, mm_matches, merge_map,
+			                                      main_fragment_starts, arrow_mode,
+			                                      all_anchor_chars)
+			text_before <- ann$text
+			ann <- apply_mm_span_stretch(ann, mm_matches, all_anchor_chars,
+			                             merge_map, preliminary, text_body_width)
+			if (identical(ann$text, text_before)) break
+		}
 	}
 	# Unfold at break (user rule 2026-08-17): folded marks whose closing
 	# description runs across a line break are split again - one repeat
