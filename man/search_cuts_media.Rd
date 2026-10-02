@@ -47,7 +47,7 @@ search_cuts_media(
 
 \item{videoFastPositioning}{Logical; no longer used. Video cuts, stills and thumbnails always seek exactly (two-stage seek, see \link{helper_ffmpeg_args}). Kept for compatibility.}
 
-\item{videoCodecCopy}{Logical; If \code{TRUE} FFMPEG will use the option \emph{codec copy} for videos.}
+\item{videoCodecCopy}{Logical; If \code{TRUE} the video is copied instead of encoded (fast mode, e.g. for many search hits): a copy can only start at a keyframe, so each video cut starts at the keyframe before the cut (up to the keyframe distance of the camera earlier, often a few seconds) and keeps the full resolution; sound and picture stay in sync, the act.* metadata carry the real start. See \link{helper_ffmpeg_args_clip} and \link{helper_ffmpeg_keyframe}.}
 
 \item{audioAsMP3}{Logical; If \code{TRUE} audio cuts will be converted to .mp3 files (bit rate \code{act.ffmpeg.audio.bitrate}). If \code{FALSE} (default) the audio format is preserved.}
 

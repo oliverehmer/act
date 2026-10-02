@@ -189,9 +189,14 @@ helper_ffmpeg_args <- function(output,
 #'   options \code{act.ffmpeg.video.max_height} and
 #'   \code{act.ffmpeg.video.max_width}.
 #' @param videoBitrate Character; video bit rate, used when \code{videoCrf}
-#'   is \code{NULL}. Default is the option \code{act.ffmpeg.video.bitrate}.
-#' @param videoCrf Numeric or \code{NULL}; constant rate factor instead of a
-#'   bit rate. Default is the option \code{act.ffmpeg.video.crf}.
+#'   is \code{NULL}: a number with \code{M} (Mbit/s) or \code{k} (kbit/s),
+#'   e.g. \code{"4M"}, \code{"8M"}, \code{"12M"}, \code{"16M"}. The same value
+#'   applies to the software and the hardware encoder. Default is the option
+#'   \code{act.ffmpeg.video.bitrate}.
+#' @param videoCrf Numeric or \code{NULL}; constant rate factor (e.g. 18 or
+#'   23, lower is better) instead of a bit rate. Only the software encoder
+#'   (libx264) knows it: with a value set the clip is always encoded in
+#'   software. Default is the option \code{act.ffmpeg.video.crf}.
 #' @param keyframeInterval Integer; distance of keyframes in frames. Default
 #'   is the option \code{act.ffmpeg.video.keyframe_interval}.
 #' @param audioCodecArgs Character vector; codec arguments of the sound.
@@ -200,10 +205,21 @@ helper_ffmpeg_args <- function(output,
 #' @param videoOffset,videoFps See \link{helper_ffmpeg_args}.
 #' @param audioInput Character or \code{NULL}; file the sound is taken from.
 #'   \code{NULL} takes it from \code{input}.
-#' @param videoCopy Logical; copy the video stream instead of encoding it
-#'   (fast, but the clip starts at the keyframe before \code{startsec} and no
-#'   filter is possible).
+#' @param videoCopy Logical; copy the video stream instead of encoding it.
+#'   Fast, but a copy can only start at a keyframe: the clip starts at the
+#'   keyframe at or before \code{startsec} (see \link{helper_ffmpeg_keyframe};
+#'   cameras often set one every few seconds) and \code{duration} is extended
+#'   by that lead, so the clip still ends at \code{startsec + duration}. The
+#'   sound starts at the same keyframe, picture and sound stay in sync, and
+#'   the picture starts at 0 without an edit list. No filter and no scaling
+#'   are possible.
 #' @param withAudio Logical; \code{FALSE} writes the picture only.
+#' @param videoHardware Logical; encode with the video encoder of the Mac
+#'   (\code{h264_videotoolbox}, several times faster) instead of libx264.
+#'   Without a Mac or with an ffmpeg that lacks this encoder a warning is
+#'   shown once and libx264 is used. Windows cut lists always get libx264
+#'   (\link{helper_cutlist_lines}). Default is the option
+#'   \code{act.ffmpeg.video.hardware}.
 #'
 #' @return Character vector of FFmpeg arguments.
 #'
@@ -236,7 +252,8 @@ helper_ffmpeg_args_clip <- function(output,
                                     videoFps         = NULL,
                                     audioInput       = NULL,
                                     videoCopy        = FALSE,
-                                    withAudio        = TRUE) {
+                                    withAudio        = TRUE,
+                                    videoHardware    = getOption("act.ffmpeg.video.hardware", TRUE)) {
 	if (missing(output) || length(output) != 1 || is.na(output) || !nzchar(output)) {
 		cli::cli_abort("Parameter {.arg output} is missing.")
 	}
@@ -253,6 +270,11 @@ helper_ffmpeg_args_clip <- function(output,
 	duration <- as.numeric(duration)
 	timing   <- .ffmpeg_seek_timing(input, videoOffset, videoFps)
 	raw_line <- identical(getOption("act.media.timeline", "editlist"), "raw")
+	if (isTRUE(videoCopy)) {
+		key <- helper_ffmpeg_keyframe(input, startsec, videoOffset = timing$offset)
+		duration <- duration + (startsec - key)
+		startsec <- key
+	}
 
 	args <- c("-hide_banner", "-loglevel", "error")
 
@@ -324,13 +346,17 @@ helper_ffmpeg_args_clip <- function(output,
 			if (!is.null(af)) args <- c(args, "-af", af)
 		}
 		quality <- if (!is.null(videoCrf)) c("-crf", as.character(videoCrf)) else c("-b:v", as.character(videoBitrate))
-		args <- c(args, "-c:v", "libx264", quality, "-pix_fmt", "yuv420p", "-bf", "0",
+		encoder <- .ffmpeg_video_encoder(videoHardware, videoCrf)
+		args <- c(args, "-c:v", encoder, if (encoder == "h264_videotoolbox") c("-allow_sw", "1"),
+		          quality, "-pix_fmt", "yuv420p", "-bf", "0",
 		          "-g", as.character(as.integer(keyframeInterval)),
 		          if (is.finite(timing$frame_dur)) c("-r", sprintf("%.6g", 1 / timing$frame_dur)))
 	}
 	c(args, if (isTRUE(withAudio)) audioCodecArgs, if (is.finite(audio_rate)) c("-ar", as.character(audio_rate)),
 	  "-t", .ffmpeg_seconds(duration), metadataArgs,
-	  "-use_editlist", "0", "-movflags", "+faststart", "-y", output)
+	  "-use_editlist", "0",
+	  "-movflags", if (isTRUE(videoCopy)) "+faststart+negative_cts_offsets" else "+faststart",
+	  "-y", output)
 }
 
 
@@ -465,6 +491,45 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 	FALSE
 }
 
+#' Find the keyframe a copied clip can start at
+#'
+#' A video stream can only be copied (\code{videoCopy} in
+#' \link{helper_ffmpeg_args_clip}) from a keyframe on. This function returns
+#' the time of the last keyframe at or before \code{startsec}, on the same
+#' timeline as \code{startsec} (the one players and ELAN show, see the option
+#' \code{act.media.timeline}). Only a short stretch before the start is read.
+#'
+#' @param input Character; path of the source video.
+#' @param startsec Numeric; time in seconds.
+#' @param videoOffset Numeric or \code{NULL}; edit list offset of the video
+#'   track, see \link{helper_ffmpeg_args}. \code{NULL} reads it from the file.
+#'
+#' @return Numeric; the keyframe time in seconds, or \code{startsec} when
+#'   the file is not a video or no keyframe was found.
+#'
+#' @seealso \link{helper_ffmpeg_args_clip}
+#'
+#' @export
+helper_ffmpeg_keyframe <- function(input, startsec, videoOffset = NULL) {
+	startsec <- max(0, as.numeric(startsec))
+	if (!length(.ffmpeg_input_flags(input)) || !file.exists(input)) return(startsec)
+	offset <- .ffmpeg_seek_timing(input, videoOffset)$offset
+	raw <- startsec + offset
+	for (back in c(12, 60, 600)) {
+		out <- tryCatch(.metadata_ffprobe_run(c("-v", "error", "-ignore_editlist", "1",
+			"-select_streams", "v:0", "-skip_frame", "nokey",
+			"-read_intervals", paste0(.ffmpeg_seconds(max(0, raw - back)), "%", .ffmpeg_seconds(raw + 0.5)),
+			"-show_entries", "frame=pts_time", "-of", "csv=p=0", input))$out,
+			error = function(e) character(0))
+		kf <- suppressWarnings(as.numeric(out))
+		kf <- kf[is.finite(kf) & kf <= raw + 1e-6]
+		if (length(kf)) return(max(0, max(kf) - offset))
+		if (raw - back <= 0) break
+	}
+	startsec
+}
+
+
 
 # ===== INTERNAL HELPERS =====
 
@@ -524,6 +589,7 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
                              executable = getOption("act.cutlist.ffmpeg", "ffmpeg"),
                              inputVariable = NULL) {
 	os <- match.arg(os)
+	if (os == "win") args <- .ffmpeg_args_software(args)
 	if (is.null(executable) || !nzchar(executable)) executable <- "ffmpeg"
 	q <- .cutlist_quote(args, os)
 	if (!is.null(inputVariable))
@@ -556,6 +622,37 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 }
 
 .FFMPEG_TIMING_CACHE <- new.env(parent = emptyenv())
+
+.ffmpeg_video_encoder <- function(hardware, crf = NULL) {
+	if (!isTRUE(hardware) || !is.null(crf)) return("libx264")
+	if (.ffmpeg_has_videotoolbox()) return("h264_videotoolbox")
+	if (!isTRUE(.FFMPEG_TIMING_CACHE[["hardware_warned"]])) {
+		assign("hardware_warned", TRUE, envir = .FFMPEG_TIMING_CACHE)
+		cli::cli_alert_warning("Option {.code act.ffmpeg.video.hardware} is TRUE, but the Mac video encoder (h264_videotoolbox) is not available here (no Mac or an ffmpeg without it) - clips are encoded with libx264.")
+	}
+	"libx264"
+}
+
+.ffmpeg_has_videotoolbox <- function() {
+	hit <- .FFMPEG_TIMING_CACHE[["videotoolbox"]]
+	if (!is.null(hit)) return(hit)
+	ok <- identical(unname(Sys.info()[["sysname"]]), "Darwin") && tryCatch({
+		out <- suppressWarnings(system2(helper_ffmpeg_path(), c("-hide_banner", "-encoders"),
+		                                stdout = TRUE, stderr = FALSE))
+		any(grepl("h264_videotoolbox", out, fixed = TRUE))
+	}, error = function(e) FALSE)
+	assign("videotoolbox", ok, envir = .FFMPEG_TIMING_CACHE)
+	ok
+}
+
+.ffmpeg_args_software <- function(args) {
+	i <- which(args == "h264_videotoolbox")
+	if (!length(i)) return(args)
+	args[i] <- "libx264"
+	j <- which(args == "-allow_sw")
+	if (length(j)) args <- args[-c(j, j + 1L)]
+	args
+}
 
 .ffmpeg_audio_stream <- function(path) {
 	if (!file.exists(path)) return(list(codec = NA_character_, fmt = NA_character_, bits = NA_real_))

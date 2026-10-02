@@ -27,7 +27,8 @@ helper_ffmpeg_args_clip(
   videoFps = NULL,
   audioInput = NULL,
   videoCopy = FALSE,
-  withAudio = TRUE
+  withAudio = TRUE,
+  videoHardware = getOption("act.ffmpeg.video.hardware", TRUE)
 )
 }
 \arguments{
@@ -65,10 +66,15 @@ options \code{act.ffmpeg.video.max_height} and
 \code{act.ffmpeg.video.max_width}.}
 
 \item{videoBitrate}{Character; video bit rate, used when \code{videoCrf}
-is \code{NULL}. Default is the option \code{act.ffmpeg.video.bitrate}.}
+is \code{NULL}: a number with \code{M} (Mbit/s) or \code{k} (kbit/s),
+e.g. \code{"4M"}, \code{"8M"}, \code{"12M"}, \code{"16M"}. The same value
+applies to the software and the hardware encoder. Default is the option
+\code{act.ffmpeg.video.bitrate}.}
 
-\item{videoCrf}{Numeric or \code{NULL}; constant rate factor instead of a
-bit rate. Default is the option \code{act.ffmpeg.video.crf}.}
+\item{videoCrf}{Numeric or \code{NULL}; constant rate factor (e.g. 18 or
+23, lower is better) instead of a bit rate. Only the software encoder
+(libx264) knows it: with a value set the clip is always encoded in
+software. Default is the option \code{act.ffmpeg.video.crf}.}
 
 \item{keyframeInterval}{Integer; distance of keyframes in frames. Default
 is the option \code{act.ffmpeg.video.keyframe_interval}.}
@@ -83,11 +89,23 @@ arguments, e.g. from \link{helper_metadata_ffmpeg_argv}.}
 \item{audioInput}{Character or \code{NULL}; file the sound is taken from.
 \code{NULL} takes it from \code{input}.}
 
-\item{videoCopy}{Logical; copy the video stream instead of encoding it
-(fast, but the clip starts at the keyframe before \code{startsec} and no
-filter is possible).}
+\item{videoCopy}{Logical; copy the video stream instead of encoding it.
+Fast, but a copy can only start at a keyframe: the clip starts at the
+keyframe at or before \code{startsec} (see \link{helper_ffmpeg_keyframe};
+cameras often set one every few seconds) and \code{duration} is extended
+by that lead, so the clip still ends at \code{startsec + duration}. The
+sound starts at the same keyframe, picture and sound stay in sync, and
+the picture starts at 0 without an edit list. No filter and no scaling
+are possible.}
 
 \item{withAudio}{Logical; \code{FALSE} writes the picture only.}
+
+\item{videoHardware}{Logical; encode with the video encoder of the Mac
+(\code{h264_videotoolbox}, several times faster) instead of libx264.
+Without a Mac or with an ffmpeg that lacks this encoder a warning is
+shown once and libx264 is used. Windows cut lists always get libx264
+(\link{helper_cutlist_lines}). Default is the option
+\code{act.ffmpeg.video.hardware}.}
 }
 \value{
 Character vector of FFmpeg arguments.

@@ -131,12 +131,17 @@
 	act.ffmpeg.video.bitrate = list(
 		value       = "8M",
 		group       = "ffmpeg",
-		description = "Video bit rate of clips (H.264), used when act.ffmpeg.video.crf is NULL."
+		description = "Video bit rate of clips (H.264), used when act.ffmpeg.video.crf is NULL: a number with M (Mbit/s) or k (kbit/s), e.g. '4M', '8M', '12M', '16M'. The same value applies to the software encoder (libx264) and the Mac hardware encoder (act.ffmpeg.video.hardware)."
 	),
 	act.ffmpeg.video.crf = list(
 		value       = NULL,
 		group       = "ffmpeg",
-		description = "Constant rate factor of clips instead of a bit rate (e.g. 18); NULL = use act.ffmpeg.video.bitrate."
+		description = "Constant rate factor of clips instead of a bit rate (e.g. 18 or 23, lower is better); NULL = use act.ffmpeg.video.bitrate. Only the software encoder knows it: with a value set clips are always encoded with libx264."
+	),
+	act.ffmpeg.video.hardware = list(
+		value       = TRUE,
+		group       = "ffmpeg",
+		description = "Encode clips with the video encoder of the Mac (h264_videotoolbox, several times faster than libx264). Without a Mac or with an ffmpeg that lacks it: a warning and libx264. Windows cut lists always use libx264."
 	),
 	act.ffmpeg.video.keyframe_interval = list(
 		value       = 25L,

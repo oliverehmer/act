@@ -52,7 +52,7 @@
 #' @param filterMediaInclude Character string; regular expression to match only some of the media files in \code{corpus@transcripts[[ ]]@media}.
 #' @param filterMediaExclude Character string; regular expression to exclude some of the media files in \code{corpus@transcripts[[ ]]@media}. Empty string (default) excludes none.
 #' @param videoFastPositioning Logical; no longer used. Video cuts, stills and thumbnails always seek exactly (two-stage seek, see \link{helper_ffmpeg_args}). Kept for compatibility.
-#' @param videoCodecCopy Logical; If \code{TRUE} FFMPEG will use the option *codec copy* for videos.
+#' @param videoCodecCopy Logical; If \code{TRUE} the video is copied instead of encoded (fast mode, e.g. for many search hits): a copy can only start at a keyframe, so each video cut starts at the keyframe before the cut (up to the keyframe distance of the camera earlier, often a few seconds) and keeps the full resolution; sound and picture stay in sync, the act.* metadata carry the real start. See \link{helper_ffmpeg_args_clip} and \link{helper_ffmpeg_keyframe}.
 #' @param audioAsMP3 Logical; If \code{TRUE} audio cuts will be converted to .mp3 files (bit rate \code{act.ffmpeg.audio.bitrate}). If \code{FALSE} (default) the audio format is preserved.
 #' @param audioPanning Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.channels_from_column' .
 #' @param audioNormalize Logical; If \code{TRUE} and option \code{act.ffmpeg.audio.loudnorm} is set, a loudnorm filter is appended to the audio filter chain. Default is \code{FALSE}.
@@ -374,9 +374,11 @@ search_cuts_media <- function(x,
 					}
 					fps_for_meta <- fps_cache[[in_paths[j]]]
 				}
+				meta_start <- if (is_video_file && isTRUE(videoCodecCopy))
+					helper_ffmpeg_keyframe(in_paths[j], startsec) else s@results$startsec[res]
 				meta_argv <- helper_metadata_ffmpeg_argv(
 					sourcePath = in_paths[j],
-					startsec   = s@results$startsec[res],
+					startsec   = meta_start,
 					clipID     = filename,
 					fps        = fps_for_meta
 				)
