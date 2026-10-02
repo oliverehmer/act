@@ -1801,6 +1801,7 @@ apply_mondada_line_numbers <- function(plan, result, offset = 0L,
 		isTRUE(result$number_lines[r])
 	}, logical(1))
 	digits <- max(2L, nchar(as.character(sum(numbered))))
+	attr(plan, "number_digits") <- digits
 	digits <- min(digits, max(slot_width, 2L))
 	counter <- 0L
 	numbers <- rep(NA_character_, nrow(plan))
@@ -5083,7 +5084,8 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
                                     fig_tier_regex = "^stills(#|$)",
                                     main_tier_names = NULL,
                                     align_chars = NULL,
-                                    align_modes = NULL) {
+                                    align_modes = NULL,
+                                    number_width_min = 0L) {
 	ann <- t@annotations
 	ann$tierName <- as.character(ann$tierName)
 
@@ -5307,6 +5309,10 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	} else {
 		0
 	}
+	# score mode numbers PRINTED lines, which can outnumber the annotations
+	# the width above is derived from; the caller passes the digit count it
+	# found after a first rendering and the slot is widened before wrapping
+	if (any_line_nr_shown) line_nr_width <- max(line_nr_width, number_width_min)
 	ann$format.line.nr <- ifelse(ann$format.line.nr.show, ann$line,
 	                             strrep(" ", line_nr_width))
 	if (identical(layout_mode, "mondada")) {
@@ -6454,32 +6460,43 @@ helper_layout_render <- function(t,
 		            pairs = .layout_empty_pairs(),
 		            matches = .layout_empty_matches()))
 	}
-	prep <- prepare_annotations_new(t, l, layout_mode = layout_mode,
-	                                fig_replace = figReplace,
-	                                fig_tier_regex = figTierRegex,
-	                                main_tier_names = mainTierNames,
-	                                align_chars = alignChars,
-	                                align_modes = alignModes)
-	result <- align_and_render(prep$engine_ann, prep$engine_width,
-	                           arrow_mode = prep$arrow_mode,
-	                           verbal_align = isTRUE(l@brackets.align),
-	                           layout_mode = layout_mode,
-	                           symbol_merge = isTRUE(l@symbol.merge),
-	                           time_tolerance = timeToleranceGesture,
-	                           time_tolerance_point = timeTolerancePoint,
-	                           min_description = minDescription)
-	plan <- interleave_layer_lines(result, maxSpanBlocks,
-	                               text_width = prep$engine_width,
-	                               embed_overlaps = identical(layout_mode, "mondada"),
-	                               label_mode = label_mode,
-	                               layer_order = layerOrder,
-	                               wrap_marker = wrap_marker)
-	plan <- .apply_resume_markers(plan, result, prep$engine_width)
-	if (identical(layout_mode, "mondada")) {
-		plan <- apply_mondada_line_numbers(plan, result,
-		                                   offset = prep$number_offset,
-		                                   slot_width = prep$number_width)
+	run <- function(number_width_min) {
+		prep <- prepare_annotations_new(t, l, layout_mode = layout_mode,
+		                                fig_replace = figReplace,
+		                                fig_tier_regex = figTierRegex,
+		                                main_tier_names = mainTierNames,
+		                                align_chars = alignChars,
+		                                align_modes = alignModes,
+		                                number_width_min = number_width_min)
+		result <- align_and_render(prep$engine_ann, prep$engine_width,
+		                           arrow_mode = prep$arrow_mode,
+		                           verbal_align = isTRUE(l@brackets.align),
+		                           layout_mode = layout_mode,
+		                           symbol_merge = isTRUE(l@symbol.merge),
+		                           time_tolerance = timeToleranceGesture,
+		                           time_tolerance_point = timeTolerancePoint,
+		                           min_description = minDescription)
+		plan <- interleave_layer_lines(result, maxSpanBlocks,
+		                               text_width = prep$engine_width,
+		                               embed_overlaps = identical(layout_mode, "mondada"),
+		                               label_mode = label_mode,
+		                               layer_order = layerOrder,
+		                               wrap_marker = wrap_marker)
+		plan <- .apply_resume_markers(plan, result, prep$engine_width)
+		if (identical(layout_mode, "mondada")) {
+			plan <- apply_mondada_line_numbers(plan, result,
+			                                   offset = prep$number_offset,
+			                                   slot_width = prep$number_width)
+		}
+		list(prep = prep, result = result, plan = plan)
 	}
+	out <- run(0L)
+	# score mode: the number slot was sized from the annotation count; when
+	# the printed lines need more digits, render again with the wider slot
+	# so the wrapping and every aligned layer line account for it
+	need <- attr(out$plan, "number_digits")
+	if (!is.null(need) && need > out$prep$number_width) out <- run(need)
+	prep <- out$prep; result <- out$result; plan <- out$plan
 	lines <- .layout_assemble_lines(plan, result, layout_mode)
 	list(lines = lines, plan = plan, result = result, transcript = t,
 	     engineWidth = prep$engine_width, layoutMode = layout_mode,
