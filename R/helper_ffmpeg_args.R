@@ -95,16 +95,19 @@ helper_ffmpeg_args <- function(output,
 	if (!is.null(input)) {
 		if (!is.null(startsec)) {
 			target   <- max(0, as.numeric(startsec))
+			window   <- if (is.null(duration)) NULL else as.numeric(duration)
 			if (length(.ffmpeg_input_flags(input))) {
 				timing <- .ffmpeg_seek_timing(input, videoOffset, videoFps)
 				target <- target + timing$offset
 				if (is.finite(timing$frame_dur)) target <- target - timing$frame_dur * 0.99
 				target <- max(0, target)
+				if (!is.null(window) && is.finite(timing$frame_dur) && timing$frame_dur > window)
+					window <- timing$frame_dur * 1.5
 			}
 			pre_sec  <- max(0, target - 1)
 			seek_out <- target - pre_sec
 			args <- c(args, "-ss", .ffmpeg_seconds(pre_sec))
-			if (!is.null(duration)) args <- c(args, "-t", .ffmpeg_seconds(seek_out + as.numeric(duration)))
+			if (!is.null(window)) args <- c(args, "-t", .ffmpeg_seconds(seek_out + window))
 		} else if (!is.null(duration)) {
 			args <- c(args, "-t", .ffmpeg_seconds(as.numeric(duration)))
 		}

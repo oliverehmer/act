@@ -88,9 +88,13 @@ helper_audio_filter_parts <- function(channel   = "stereo",
 			parts <- c(pre, ln)
 			return(list(af = if (length(parts)) paste(parts, collapse = ",") else NULL, graph = NULL))
 		}
-		if (identical(scope, "all") || !active) {
+		if (identical(scope, "all")) {
 			parts <- c(pre, dist, ln)
 			return(list(af = paste(parts, collapse = ","), graph = NULL))
+		}
+		if (!active) {
+			parts <- c(pre, ln)
+			return(list(af = if (length(parts)) paste(parts, collapse = ",") else NULL, graph = NULL))
 		}
 		graph <- sprintf(paste0("[0:a]%sasplit=2[c][d];",
 			"[c]aresample=44100,asetnsamples=n=64,volume='if(%s,0,1)':eval=frame[a0];",

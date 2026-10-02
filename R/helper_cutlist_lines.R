@@ -62,7 +62,8 @@ helper_cutlist_lines <- function(entries,
 		line <- switch(e$type,
 			ffmpeg   = .ffmpeg_cmd_line(a, os, executable = executable, inputVariable = inputVariable),
 			exiftool = .exif_cmd_line(a, os),
-			mkdir    = if (os == "mac") paste("mkdir -p", paste(.cutlist_quote(a, "mac"), collapse = " "))
+			mkdir    = if (!length(a)) character(0)
+			           else if (os == "mac") paste("mkdir -p", paste(.cutlist_quote(a, "mac"), collapse = " "))
 			           else vapply(.cutlist_quote(a, "win"), function(q) sprintf("if not exist %s mkdir %s", q, q), ""),
 			rm       = if (!length(a)) character(0)
 			           else if (os == "mac") paste("rm -f", paste(.cutlist_quote(a, "mac"), collapse = " "))

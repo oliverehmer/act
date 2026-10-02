@@ -344,6 +344,8 @@ search_cuts_media <- function(x,
 					#replace destination file extension with mp3
 					out_suffix <- "mp3"
 				}
+				if (is_audio_file && !tolower(out_suffix) %in% c("wav", "aif", "aiff", "mp3", "m4a")) out_suffix <- "wav"
+				if (is_video_file && !tolower(out_suffix) %in% c("mp4", "mov", "m4v")) out_suffix <- "mp4"
 				
 				#---- . out paths ----
 				out_filePath <- rep("",3)
