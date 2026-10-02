@@ -518,37 +518,38 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 }
 
 .ffmpeg_cmd_line <- function(args, os = c("mac", "win"),
-                             executable = getOption("act.path.ffmpeg", "ffmpeg"),
+                             executable = getOption("act.cutlist.ffmpeg", "ffmpeg"),
                              inputVariable = NULL) {
 	os <- match.arg(os)
-	if (!is.null(inputVariable)) args[args == inputVariable] <- "INFILEPATH"
 	if (is.null(executable) || !nzchar(executable)) executable <- "ffmpeg"
-	simple <- "^[A-Za-z0-9_.:+=,@/-]+$"
-	if (os == "mac") {
-		q <- ifelse(args == "INFILEPATH", '"$PATH_INPUT"',
-			ifelse(stringr::str_detect(args, simple),
-				args, shQuote(args, type = "sh")))
-		paste(c(paste0('"', executable, '"'), q), collapse = " ")
-	} else {
-		a <- ifelse(startsWith(args, "/"), gsub("/", "\\", args, fixed = TRUE), args)
-		a <- gsub("%", "%%", a, fixed = TRUE)
-		q <- ifelse(args == "INFILEPATH", '"%PATH_INPUT%"',
-			ifelse(stringr::str_detect(args, simple),
-				a, paste0('"', gsub('"', '""', a, fixed = TRUE), '"')))
-		paste(c(paste0('"', executable, '"'), q), collapse = " ")
-	}
+	q <- .cutlist_quote(args, os)
+	if (!is.null(inputVariable))
+		q[args == inputVariable] <- if (os == "mac") '"$PATH_INPUT"' else '"%PATH_INPUT%"'
+	paste(c(.cutlist_quote(executable, os), q), collapse = " ")
 }
 
 .exif_cmd_line <- function(argv, os = c("mac", "win")) {
 	os <- match.arg(os)
 	if (length(argv) == 0) return(character(0))
 	if (os == "mac") {
-		paste(c("command -v exiftool >/dev/null 2>&1 && exiftool", shQuote(argv, type = "sh"), "|| :"), collapse = " ")
+		paste(c("command -v exiftool >/dev/null 2>&1 && exiftool", .cutlist_quote(argv, "mac"), "|| :"), collapse = " ")
 	} else {
-		a <- ifelse(startsWith(argv, "/"), gsub("/", "\\", argv, fixed = TRUE), argv)
-		a <- gsub("%", "%%", a, fixed = TRUE)
-		paste(c("where exiftool >nul 2>nul && exiftool", paste0('"', gsub('"', '""', a, fixed = TRUE), '"')), collapse = " ")
+		paste(c("where exiftool >nul 2>nul && exiftool", .cutlist_quote(argv, "win")), collapse = " ")
 	}
+}
+
+.cutlist_win_path <- function(x) {
+	ifelse(startsWith(x, "/"), gsub("/", "\\", x, fixed = TRUE), x)
+}
+
+.cutlist_quote <- function(x, os = c("mac", "win")) {
+	os <- match.arg(os)
+	x <- as.character(x)
+	if (!length(x)) return(character(0))
+	simple <- stringr::str_detect(x, "^[A-Za-z0-9_.:+=,@/-]+$")
+	if (os == "mac") return(ifelse(simple, x, vapply(x, shQuote, character(1), type = "sh", USE.NAMES = FALSE)))
+	a <- gsub("%", "%%", .cutlist_win_path(x), fixed = TRUE)
+	ifelse(simple, a, paste0('"', gsub('"', '""', a, fixed = TRUE), '"'))
 }
 
 .FFMPEG_TIMING_CACHE <- new.env(parent = emptyenv())

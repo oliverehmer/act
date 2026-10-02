@@ -97,27 +97,12 @@
 		group       = "export",
 		description = "Terminal script formats written by helper_cutlist_save(): 'mac' (POSIX sh, also runs on Linux) and/or 'win' (.cmd)."
 	),
+	act.cutlist.ffmpeg = list(
+		value       = "ffmpeg",
+		group       = "export",
+		description = "How the cut lists call ffmpeg (helper_cutlist_lines()). Default 'ffmpeg': found via the PATH of the machine that runs the cut list. Set a full path only when that machine needs one; running ffmpeg from R uses act.path.ffmpeg."
+	),
 
-	act.ffmpeg.command.video = list(
-		value       = 'ffmpeg INPUTARGS OPTIONS -y "OUTFILEPATH" -hide_banner',
-		group       = "ffmpeg",
-		description = "FFmpeg command for video cuts. INPUTARGS is filled by act based on videoFastPositioning."
-	),
-	act.ffmpeg.command.audio = list(
-		value       = 'ffmpeg INPUTARGS -c copy -y "OUTFILEPATH" -hide_banner',
-		group       = "ffmpeg",
-		description = "FFmpeg command for audio cuts (stream copy)."
-	),
-	act.ffmpeg.command.audio.mp3 = list(
-		value       = 'ffmpeg INPUTARGS OPTIONS -y "OUTFILEPATH" -hide_banner',
-		group       = "ffmpeg",
-		description = "FFmpeg command for MP3 audio export."
-	),
-	act.ffmpeg.command.images = list(
-		value       = 'ffmpeg INPUTARGS -frames:v 1 -q:v 2 -update 1 -y "OUTFILEPATH"',
-		group       = "ffmpeg",
-		description = "FFmpeg command for still image extraction. INPUTARGS is filled by act based on videoFastPositioning."
-	),
 	act.ffmpeg.channels_from_column = list(
 		value       = "channels",
 		group       = "ffmpeg",
