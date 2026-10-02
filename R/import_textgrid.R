@@ -4,6 +4,7 @@
 #' 
 #' Imports the contents of a 'Praat' .TextGrid file and returns a transcript object.
 #' The source is either the path to a .TextGrid file or the contents of a .TextGrid file obtained from the \code{@file.content} of an existing transcript object by \code{readLines()}.
+#' The slot \code{@file.content} is only filled when the option \code{act.import.storefileContentInTranscript} is \code{TRUE} (default \code{FALSE}).
 #' If you pass 'fileContent' you need to pass 'transcriptName' as parameter, too.
 #' 
 #' Please note:
@@ -99,7 +100,7 @@ import_textgrid <- function(filePath=NULL,
 		t@load.message   <- "File not recognized as TextGrid."
 		return(t)
 	}
-	if(getOption("act.import.storefileContentInTranscript", default=TRUE)) {
+	if(getOption("act.import.storefileContentInTranscript", default=FALSE)) {
 		t@file.content <- mytg
 	}
 	

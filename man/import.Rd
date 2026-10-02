@@ -24,6 +24,7 @@ The input to this function in the parameter '...' may either be
 (1) the path to an annotation file (Currently 'ELAN' .eaf, 'EXMARaLDA .exb, 'Praat' .TextGrid and 'Subrib title' .srt files),
 (2) the contents of an annotation file obtained from the \code{@file.content} or by reading the contents of the files directly with \code{read.lines()} or
 (3) a \code{rPraat} TextGrid object.
+The slot \code{@file.content} is only filled when the option \code{act.import.storefileContentInTranscript} is \code{TRUE} (default \code{FALSE}).
 
 Only the first input to '...' will be processed
 }

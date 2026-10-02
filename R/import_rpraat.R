@@ -43,7 +43,7 @@ import_rpraat <- function(rpraatTextgrid,
 	t@import.result 		 <- "ok"
 	t@load.message    	     <- ""
 	t@length.sec        	 <- as.double(attr(rpraatTextgrid, "class")["tmax"])
-	if(getOption("act.import.storefileContentInTranscript", default=TRUE)) {
+	if(getOption("act.import.storefileContentInTranscript", default=FALSE)) {
 		t@file.content <- rpraatTextgrid
 	}
 	

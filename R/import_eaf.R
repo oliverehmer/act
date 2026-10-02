@@ -4,6 +4,7 @@
 #'  
 #' Imports the contents of a 'ELAN' .eaf file and returns a transcript object.
 #' The input to this function is either the path to an .eaf file or the contents of a .eaf file obtained from the \code{@file.content} of an existing transcript object by \code{readLines()}.
+#' The slot \code{@file.content} is only filled when the option \code{act.import.storefileContentInTranscript} is \code{TRUE} (default \code{FALSE}).
 #' If you pass 'fileContent' you need to pass 'transcriptName' as parameter, too.
 #' 
 #' Please note:

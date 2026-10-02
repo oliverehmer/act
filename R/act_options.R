@@ -220,9 +220,9 @@
 		description = "Scan subfolders for annotation files"
 	),
 	act.import.storefileContentInTranscript = list(
-		value       = TRUE,
+		value       = FALSE,
 		group       = "import",
-		description = "Store original file content in transcript object"
+		description = "Store original file content in transcript object (slot file.content); off by default because it roughly doubles the memory and cache size of a corpus"
 	),
 
 	act.export.filename.fromColumnName = list(

@@ -50,7 +50,7 @@ import_srt <- function(filePath,
 		#--- check if the file can be opened
 		mysrt <- srt::read_srt(	t@file.path 		)	
 	}
-	if(getOption("act.import.storefileContentInTranscript", default=TRUE)) {
+	if(getOption("act.import.storefileContentInTranscript", default=FALSE)) {
 		if (!is.null(filePath)) {
 			read_result <- helper_read_annotation_file(
 				filePath       = filePath,

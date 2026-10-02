@@ -39,7 +39,7 @@ on the object.
 
 \item{\code{media}}{Data.frame; Table of the media files that correspond to this transcript object. Core columns: \code{path} (absolute file path), \code{source.path} (path of the source recording a clip was cut from), \code{clip.id} (clip identifier), \code{startsec} (start of the file in the original time reference, 0 for full recordings), \code{startsec.source} (where startsec came from: "tag"/"timecode"/"corpus"), \code{length.sec} (file duration), \code{video.width}, \code{video.height}, \code{video.fps}, \code{video.codec}, \code{video.bitrate}, \code{audio.sample.rate}, \code{audio.channels}, \code{audio.codec}, \code{audio.bitrate}, \code{container.format}, \code{file.size} (bytes), \code{kind} ("full" or "clip"), \code{type} ("video" or "audio"). Columns that are not yet read may be \code{NA}. Additional columns may be present.}
 
-\item{\code{normalization.signature}}{Character string; \code{[READ ONLY]} Hash signature of the inputs that produced the current normalization (annotations content + normalization matrix). Used to detect when re-normalization is needed.}
+\item{\code{normalization.signature}}{Character string; \code{[READ ONLY]} Hash signature of the inputs that produced the current normalization (annotations content + search/replace rows of the normalization matrix + layout marker options). Used to detect when re-normalization is needed.}
 
 \item{\code{fulltext.signature}}{Character string; \code{[READ ONLY]} Hash signature of the inputs that produced the current fulltexts (annotations + separators + tier filter). Used to detect when re-creation of the fulltexts is needed.}
 

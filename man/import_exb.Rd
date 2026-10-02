@@ -22,6 +22,7 @@ Advice: In most situations it is more convenient to use \code{act::corpus_new}, 
 \details{
 Imports the contents of a 'EXMARaLDA' .exb file and returns a transcript object.
 The source is either the path to a .exb file or the contents of a .exb file obtained from the \code{@file.content} of an existing transcript object.
+The slot \code{@file.content} is only filled when the option \code{act.import.storefileContentInTranscript} is \code{TRUE} (default \code{FALSE}).
 If you pass 'fileContent' you need to pass 'transcriptName' as parameter, too.
 
 Please note:

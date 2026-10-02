@@ -57,6 +57,10 @@ transcripts_update_normalization <- function(x,
 	#=== create named vector for replacement
 	mymatrix 		<- as.character(act_replacementMatrix$replace)
 	names(mymatrix) <- act_replacementMatrix$search
+	matrix_signature <- digest::digest(list(unname(mymatrix), names(mymatrix),
+		getOption("act.layout.linebreak.char", "\u23ce"),
+		getOption("act.layout.keeptogether.char", "\u203f"),
+		getOption("act.layout.rectangle.char", "\u25ad")), algo = "xxhash64")
 
 	#=== check if the matrix works
 	if (length(mymatrix) > 0) {
@@ -86,10 +90,9 @@ transcripts_update_normalization <- function(x,
 		if (is.null(ann) || nrow(ann) == 0) {
 			content <- character(0)
 		} else {
-			ann <- ann[order(ann$startsec, ann$tierName), ]
-			content <- as.character(ann$content)
+			content <- as.character(ann$content)[order(ann$startsec, ann$tierName)]
 		}
-		digest::digest(list(content, x@normalization.matrix), algo = "xxhash64")
+		digest::digest(list(content, matrix_signature), algo = "xxhash64")
 	}, character(1))
 
 	needs_update <- vapply(seq_along(transcriptNames), function(k) {
