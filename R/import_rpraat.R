@@ -143,9 +143,7 @@ import_rpraat <- function(rpraatTextgrid,
 	
 	
 	t@history <- list( 
-						 list(modification                               = "import_rpraat",
-						 	 systime                                       = Sys.time()
-						 )
+						 c(list(modification = "import_rpraat", systime = Sys.time()), .history_file_info(NULL))
 	)
 	return(t)
 }

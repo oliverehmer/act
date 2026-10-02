@@ -53,6 +53,7 @@ layers_convert_column_to_tier <- function(
 	speakers <- unique(source_rows$tierName)
 
 	# ===== CREATE TIERS =====
+	tiers_before <- as.character(t@tiers$name)
 	for (speaker in speakers) {
 		main_part <- switch(mainTierNameCase,
 			"lower" = tolower(speaker),
@@ -118,6 +119,14 @@ layers_convert_column_to_tier <- function(
 
 	# ===== REMOVE COLUMN =====
 	t@annotations[[columnName]] <- NULL
+
+	t@history[[length(t@history) + 1]] <- list(
+		modification            = "layers_convert_column_to_tier",
+		systime                 = Sys.time(),
+		columnName              = columnName,
+		tiers.added.names       = setdiff(as.character(t@tiers$name), tiers_before),
+		annotations.added.count = nrow(new_annotations)
+	)
 
 	return(t)
 }

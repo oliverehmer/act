@@ -215,9 +215,7 @@ import_textgrid <- function(filePath=NULL,
 	}
 	
 	t@history <- list( 
-						 list(modification                               = "import_textgrid",
-						 	 systime                                       = Sys.time()
-						 )
+						 c(list(modification = "import_textgrid", systime = Sys.time()), .history_file_info(filePath))
 	)
 	return(t)
 }

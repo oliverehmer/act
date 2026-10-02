@@ -62,8 +62,8 @@ transcripts_filter <- function (x,
 	
 	
 	
-	tiersDeleted.count        <- 0
-	tiersDeleted.ids          <- c()
+	tiers.deleted.count        <- 0
+	tiers.deleted.ids          <- c()
 	annotations.deleted.count  <- 0
 	transcripts.modified.ids   <- c()
 	transcripts.deleted.count  <- 0
@@ -90,9 +90,9 @@ transcripts_filter <- function (x,
 		#realized in transcripts_filter_single
 		
 		h <- x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)]]
-		if (h$tiersDeleted.count>0 | h$annotations.deleted.count>0) {
+		if (h$tiers.deleted.count>0 | h$annotations.deleted.count>0) {
 			transcripts.modified.ids    <- c(transcripts.modified.ids, i)
-			tiersDeleted.count         <- tiersDeleted.count        + h$tiersDeleted.count  
+			tiers.deleted.count         <- tiers.deleted.count        + h$tiers.deleted.count  
 			annotations.deleted.count   <- annotations.deleted.count  + h$annotations.deleted.count
 		}
 	} #next transcript
@@ -105,7 +105,7 @@ transcripts_filter <- function (x,
 		transcripts.deleted.ids    = transcripts.deleted.ids,
 		transcripts.modified.count = length(transcripts.deleted.ids),
 		transcripts.modified.ids   = transcripts.modified.ids,
-		tiersDeleted.count        = tiersDeleted.count,
+		tiers.deleted.count        = tiers.deleted.count,
 		annotations.deleted.count  = annotations.deleted.count
 	)
 	return (x)

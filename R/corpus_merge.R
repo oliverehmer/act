@@ -91,7 +91,7 @@ corpus_merge <- function(x,
 			}
 		}
 
-		x@history <- c(x@history, src@history)
+		x@history <- c(x@history, lapply(src@history, function(h) { h$source.corpus <- src@name; h }))
 	}
 
 	x@history[[length(x@history) + 1]] <- list(

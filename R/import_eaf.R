@@ -556,9 +556,7 @@ import_eaf <- function(filePath=NULL,
 	t@tiers <- act::helper_tiers_new_table(tierNames=tiers$tierName)
 	
 	t@history <- list( 
-				   list(modification                               = "import_eaf",
-				   	 systime                                       = Sys.time()
-				   )
+				   c(list(modification = "import_eaf", systime = Sys.time()), .history_file_info(filePath))
 	             )
 	
 	return(t)

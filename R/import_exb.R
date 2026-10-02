@@ -285,9 +285,7 @@ import_exb <- function(filePath=NULL,
 	}
 	
 	t@history <- list(
-						 list(modification                               = "import_exb",
-						 	 systime                                       = Sys.time()
-						 )
+						 c(list(modification = "import_exb", systime = Sys.time()), .history_file_info(filePath))
 	)
 	return(t)
 }

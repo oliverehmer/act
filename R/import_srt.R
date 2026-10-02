@@ -145,9 +145,7 @@ import_srt <- function(filePath,
 	t@length.sec <- max(as.double(ann$startsec)+1, as.double(ann$endsec)+1)
 	
 	t@history <- list( 
-						 list(modification                               = "import_srt",
-						 	 systime                                       = Sys.time()
-						 )
+						 c(list(modification = "import_srt", systime = Sys.time()), .history_file_info(filePath))
 	)
 	return(t)
 }

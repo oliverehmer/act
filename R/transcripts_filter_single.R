@@ -57,12 +57,12 @@ transcripts_filter_single <- function (t,
 	}	
 	
 	#--- tiers
-	tiersDeleted.ids <- c()
+	tiers.deleted.ids <- c()
 	annotations.deleted.count <- 0
 	
 	if (!is.null(filterTierNames)) {
 		if (length(filterTierNames)>0) {
-			tiersDeleted.ids <- setdiff( t@tiers$name, filterTierNames)
+			tiers.deleted.ids <- setdiff( t@tiers$name, filterTierNames)
 			#tier names
 			ids <- which(t@tiers$name %in% filterTierNames)
 			t@tiers <- t@tiers[ids, ]
@@ -136,8 +136,8 @@ transcripts_filter_single <- function (t,
 	t@history[[length(t@history)+1]] <-	list(
 		modification              = "transcripts_filter_single",
 		systime                   = Sys.time(),
-		tiersDeleted.count       = length(tiersDeleted.ids),
-		tiersDeleted.ids         = tiersDeleted.ids,
+		tiers.deleted.count       = length(tiers.deleted.ids),
+		tiers.deleted.ids         = tiers.deleted.ids,
 		annotations.deleted.count = annotations.deleted.count
 	)
 	

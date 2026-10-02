@@ -65,13 +65,13 @@ tiers_sort <- function(x,
 		if(anyChanges) {
 			#HISTORY transcript
 			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list(
-				modification        = "tiers_reorder",
+				modification        = "tiers_sort",
 				systime             = Sys.time(),
 				tiers.orderchanged  = tiers_orderofcopiedtiershaschanged,
-				tiersDeleted.count = length(tiers_deleted),
-				tiersDeleted       = tiers_deleted,
+				tiers.deleted.count = length(tiers_deleted),
+				tiers.deleted.names       = tiers_deleted,
 				tiers.added.count   = length(tiers_added),
-				tiers.added         = tiers_added,
+				tiers.added.names         = tiers_added,
 				tiers.before        = tiers_before$name,
 				tiers.after         = tiers_after$name
 			)

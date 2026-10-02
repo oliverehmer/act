@@ -156,7 +156,7 @@ annotations_replace_copy <- function (x,
 		if (anyChanges) {
 			#HISTORY transcript
 			x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)+1]] <-	list(
-				modification               = "annotations_search_replace_copy",
+				modification               = "annotations_replace_copy",
 				systime                    = Sys.time(),
 				annotations.replaced.count = annotations_replaced_nr,
 				annotations.copied.count   = annotations_copied_nr
@@ -169,7 +169,7 @@ annotations_replace_copy <- function (x,
 	} #next transcript
 	
 	#HISTORY corpus
-	x@history[[length(x@history)+1]] <- list( modification                     = "annotations_search_replace_copy",
+	x@history[[length(x@history)+1]] <- list( modification                     = "annotations_replace_copy",
 											  systime                          = Sys.time(),
 											  pattern                          = pattern,
 											  replacement                      = replacement,
@@ -181,7 +181,7 @@ annotations_replace_copy <- function (x,
 											  annotations.copied.total.count   = annotations_copied_total_nr)
 	if (recodsets_copiederror_destinationTiermissingintranscript_nr>0) {
 		x@history[[length(x@history)+1]] <-  list( 
-			modification                                        = "annotations_search_replace_copy",
+			modification                                        = "annotations_replace_copy",
 			systime                                             = Sys.time(),
 			recodsets.copiederror                               = "ERROR: the destination tier for copying was missing in some transcripts. No data copied.",
 			recodsets.copiederror.tiermissingintranscript.count = recodsets_copiederror_destinationTiermissingintranscript_nr,
