@@ -82,9 +82,10 @@ helper_transcript_patch_make <- function(before, after, tierNames = NULL) {
 #' version before it (undo), \code{"forward"} does the opposite (redo).
 #'
 #' Before anything is changed, the function checks that the transcript is in the
-#' state the patch expects (the rows to be removed exist, the tier and media
-#' tables match). If not, it stops with an error and the transcript is left
-#' untouched.
+#' state the patch expects (the rows to be removed exist, the tier table
+#' matches). If not, it stops with an error and the transcript is left
+#' untouched. Changes of the media table are applied as added and removed
+#' files, so other changes of the media list (e.g. repaired paths) are kept.
 #'
 #' @param x Transcript object.
 #' @param patch List; a patch created by \link{helper_transcript_patch_make}.
@@ -128,7 +129,7 @@ helper_transcript_patch_apply <- function(x, patch, direction = c("backward", "f
 	}
 
 	tiers_new <- .patch_table_switch(x@tiers, patch$tiers, backward, "tier table", c("name", "type"))
-	media_new <- .patch_table_switch(x@media, patch$media, backward, "media table", "path")
+	media_new <- .patch_media_switch(x@media, patch$media, backward)
 
 	x@annotations <- annotations_new
 	x@tiers       <- tiers_new
@@ -147,6 +148,24 @@ helper_transcript_patch_apply <- function(x, patch, direction = c("backward", "f
 		cli::cli_abort("The patch does not fit the transcript: the {label} differs from the expected state.")
 	}
 	to
+}
+
+.patch_media_switch <- function(current, part, backward) {
+	if (is.null(part)) return(current)
+	from <- if (backward) part$after else part$before
+	to   <- if (backward) part$before else part$after
+	if (.patch_tables_equal(current, from, "path")) return(to)
+	paths_drop <- setdiff(as.character(from$path), as.character(to$path))
+	paths_put  <- setdiff(as.character(to$path), as.character(current$path))
+	out <- current[!(as.character(current$path) %in% paths_drop), , drop = FALSE]
+	put <- to[as.character(to$path) %in% paths_put, , drop = FALSE]
+	if (nrow(put)) {
+		for (column in setdiff(names(out), names(put))) put[[column]] <- rep(NA, nrow(put))
+		for (column in setdiff(names(put), names(out))) out[[column]] <- rep(NA, nrow(out))
+		out <- rbind(out, put[, names(out), drop = FALSE])
+	}
+	rownames(out) <- NULL
+	out
 }
 
 .patch_rows_swap <- function(a, drop, put, put_index) {
@@ -188,7 +207,7 @@ helper_transcript_patch_apply <- function(x, patch, direction = c("backward", "f
 
 .patch_tiers_ordered <- function(tiers) {
 	if (is.null(tiers) || !nrow(tiers) || !("position" %in% names(tiers))) return(tiers)
-	tiers[order(tiers$position, seq_len(nrow(tiers))), , drop = FALSE]
+	tiers[order(suppressWarnings(as.numeric(as.character(tiers$position))), seq_len(nrow(tiers))), , drop = FALSE]
 }
 
 .patch_match_rows <- function(drop, rows) {

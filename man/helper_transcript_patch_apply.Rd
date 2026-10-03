@@ -24,9 +24,10 @@ version before it (undo), \code{"forward"} does the opposite (redo).
 }
 \details{
 Before anything is changed, the function checks that the transcript is in the
-state the patch expects (the rows to be removed exist, the tier and media
-tables match). If not, it stops with an error and the transcript is left
-untouched.
+state the patch expects (the rows to be removed exist, the tier table
+matches). If not, it stops with an error and the transcript is left
+untouched. Changes of the media table are applied as added and removed
+files, so other changes of the media list (e.g. repaired paths) are kept.
 }
 \examples{
 library(act)

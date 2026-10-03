@@ -137,7 +137,7 @@ helper_transcripts_compare <- function(x, y, gap = 0, digits = 3) {
 	result <- list()
 	if (nrow(parts) > 1L) for (i in 2:nrow(parts)) {
 		if (isTRUE(parts$startsec[i] - out_end <= gap)) {
-			out_end <- max(out_end, parts$endsec[i])
+			out_end <- max(out_end, parts$endsec[i], na.rm = TRUE)
 			if (!identical(out_kind, parts$change[i])) out_kind <- "changed"
 		} else {
 			result[[length(result) + 1L]] <- c(out_start, out_end)
