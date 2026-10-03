@@ -3,14 +3,14 @@
 #' NOTE: To actually reorder the tiers in a transcript object or a corpus object corpus use \code{act::tiers_sort}.
 #' This function is only a helper function and for people that like experiments.
 #' 
-#' Sort a tier table by a predefined vector of regular expression strings.
+#' Sort a tier table by a predefined vector of tier names. The names are compared exactly (no regular expressions).
 #' Tiers that are missing in the table but are present in the sort vector may be inserted.
-#' Tiers that are present in the table but not in the sort vector may be deleted or inserted. These tiers will be inserted by default at the end of the table. You may also use a element '\\*' in  'sortVector' to define the position where they should be placed..
+#' Tiers that are present in the table but not in the sort vector may be deleted or inserted. These tiers will be inserted by default at the end of the table. You may also use an element "*" in 'sortVector' to define the position where they should be placed (the escaped form, a backslash followed by a star, is accepted as well).
 #' 
 #' @param tierTable Data frame; tiers as specified and necessary in \code{@tiers} of a transcript object.
-#' @param sortVector Vector of character strings; regular expressions to match the tier names. The order within the vector presents the new order of the tiers. Use "\\*" (=two backslashes and a star) to indicate where tiers that are not present in the sort vector but in the transcript should be inserted.
+#' @param sortVector Vector of character strings; exact tier names (no regular expressions). The order within the vector presents the new order of the tiers. Use "*" to indicate where tiers that are not present in the sort vector but in the transcript should be inserted (the escaped form, a backslash followed by a star, is accepted as well).
 #' @param tiersAddMissing Logical; if \code{TRUE} all tiers that are given in 'the 'sortVector' but are missing in 'tierTable' will be added.
-#' @param tiersDelete Logical; if \code{TRUE} tiers that are not matched by the regular expressions in 'sortVector' will be deleted. Otherwise the will be inserted at the end of the table or at the position defined by '"\\*' in  'sortVector.
+#' @param tiersDelete Logical; if \code{TRUE} tiers that are not named in 'sortVector' will be deleted. Otherwise they will be inserted at the end of the table or at the position defined by "*" in 'sortVector'.
 #'
 #' @return Data.frame
 #' 
