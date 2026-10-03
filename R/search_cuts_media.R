@@ -336,7 +336,8 @@ search_cuts_media <- function(x,
 				out_suffix <- in_suffix
 				
 				#media type
-				is_audio_file <- in_suffix %in% options()$act.media.fileformats.audio
+				is_audio_file <- tolower(in_suffix) %in% c(tolower(options()$act.media.fileformats.audio),
+				                                           "m4a", "aac", "flac", "ogg", "opus")
 				is_video_file <- !is_audio_file
 
 				#if it is an audio file and should be converted to mp3
@@ -375,7 +376,7 @@ search_cuts_media <- function(x,
 					fps_for_meta <- fps_cache[[in_paths[j]]]
 				}
 				meta_start <- if (is_video_file && isTRUE(videoCodecCopy))
-					helper_ffmpeg_keyframe(in_paths[j], startsec) else s@results$startsec[res]
+					helper_ffmpeg_keyframe(in_paths[j], startsec) else startsec
 				meta_argv <- helper_metadata_ffmpeg_argv(
 					sourcePath = in_paths[j],
 					startsec   = meta_start,

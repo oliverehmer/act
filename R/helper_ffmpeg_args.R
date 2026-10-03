@@ -521,7 +521,7 @@ helper_ffmpeg_keyframe <- function(input, startsec, videoOffset = NULL) {
 			"-read_intervals", paste0(.ffmpeg_seconds(max(0, raw - back)), "%", .ffmpeg_seconds(raw + 0.5)),
 			"-show_entries", "frame=pts_time", "-of", "csv=p=0", input))$out,
 			error = function(e) character(0))
-		kf <- suppressWarnings(as.numeric(out))
+		kf <- suppressWarnings(as.numeric(sub(",.*$", "", out)))
 		kf <- kf[is.finite(kf) & kf <= raw + 1e-6]
 		if (length(kf)) return(max(0, max(kf) - offset))
 		if (raw - back <= 0) break
