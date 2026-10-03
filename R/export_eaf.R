@@ -126,8 +126,8 @@ export_eaf <- function(t,
 		ann$annotationID <- paste("a",1:nrow(ann),sep="")
 		ann$TIME_SLOT_REF1 <- paste("ts",1:nrow(ann),sep="")
 		ann$TIME_SLOT_REF2 <- paste("ts", (nrow(ann)+1):(nrow(ann)*2),sep="")
-		ann$startsec <- as.integer(ann$startsec*1000)
-		ann$endsec <- as.integer(ann$endsec*1000)
+		ann$startsec <- as.integer(round(ann$startsec*1000))
+		ann$endsec <- as.integer(round(ann$endsec*1000))
 		
 		myEAF <- append(myEAF,         "    <TIME_ORDER>")
 		myEAF <- append(myEAF, sprintf("        <TIME_SLOT TIME_SLOT_ID=\"%s\" TIME_VALUE=\"%s\"/>", ann$TIME_SLOT_REF1, ann$startsec))
