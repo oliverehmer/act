@@ -27,9 +27,12 @@ with \link{helper_transcript_patch_apply}, which makes it suitable for undo and
 redo of arbitrary modifications.
 }
 \details{
-Annotation rows are compared over all their columns. If \code{tierNames} is
-given, only the annotations of these tiers are compared; the annotations of all
-other tiers are expected to be unchanged. Derived slots (the \code{fulltext.*}
+Annotation rows are identified by their content: tier, start, end and text, with
+times rounded to milliseconds. Other columns (identifiers, derived columns) travel
+with the rows but do not decide whether a row changed, so a patch still fits a
+transcript that was saved and read in again. Tiers are compared by name and type,
+media by path. If \code{tierNames} is given, only the annotations of these tiers
+are compared; the annotations of all other tiers are expected to be unchanged. Derived slots (the \code{fulltext.*}
 slots and \code{@history}) are not part of the patch.
 }
 \examples{
@@ -40,14 +43,14 @@ after  <- before
 after@annotations$content[1] <- "changed text"
 after@annotations <- after@annotations[-2, ]
 
-patch <- act::helper_transcript_patch_make(before, after)
+patch <- act::helper_transcript_patch_make(before = before, after = after, tierNames = NULL)
 patch$annotations$removed
 patch$annotations$added
 
-undone <- act::helper_transcript_patch_apply(after, patch, direction = "backward")
+undone <- act::helper_transcript_patch_apply(x = after, patch = patch, direction = "backward")
 identical(undone@annotations$content, before@annotations$content)
 
-redone <- act::helper_transcript_patch_apply(undone, patch, direction = "forward")
+redone <- act::helper_transcript_patch_apply(x = undone, patch = patch, direction = "forward")
 identical(redone@annotations$content, after@annotations$content)
 }
 \seealso{

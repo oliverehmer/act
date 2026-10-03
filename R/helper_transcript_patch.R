@@ -6,9 +6,12 @@
 #' with \link{helper_transcript_patch_apply}, which makes it suitable for undo and
 #' redo of arbitrary modifications.
 #'
-#' Annotation rows are compared over all their columns. If \code{tierNames} is
-#' given, only the annotations of these tiers are compared; the annotations of all
-#' other tiers are expected to be unchanged. Derived slots (the \code{fulltext.*}
+#' Annotation rows are identified by their content: tier, start, end and text, with
+#' times rounded to milliseconds. Other columns (identifiers, derived columns) travel
+#' with the rows but do not decide whether a row changed, so a patch still fits a
+#' transcript that was saved and read in again. Tiers are compared by name and type,
+#' media by path. If \code{tierNames} is given, only the annotations of these tiers
+#' are compared; the annotations of all other tiers are expected to be unchanged. Derived slots (the \code{fulltext.*}
 #' slots and \code{@history}) are not part of the patch.
 #'
 #' @param before Transcript object; the version before the modification.
@@ -43,8 +46,8 @@ helper_transcript_patch_make <- function(before, after, tierNames = NULL) {
 			rows_before <- which(a_before$tierName %in% tierNames)
 			rows_after  <- which(a_after$tierName %in% tierNames)
 		}
-		occ_before <- .patch_occurrence(.patch_row_keys(a_before[rows_before, , drop = FALSE]))
-		occ_after  <- .patch_occurrence(.patch_row_keys(a_after[rows_after, , drop = FALSE]))
+		occ_before <- .patch_occurrence(.patch_annotation_keys(a_before[rows_before, , drop = FALSE]))
+		occ_after  <- .patch_occurrence(.patch_annotation_keys(a_after[rows_after, , drop = FALSE]))
 		removed_index <- rows_before[!(occ_before %in% occ_after)]
 		added_index   <- rows_after[!(occ_after %in% occ_before)]
 		if (length(removed_index) || length(added_index)) {
@@ -57,10 +60,10 @@ helper_transcript_patch_make <- function(before, after, tierNames = NULL) {
 		}
 	}
 
-	if (!.patch_tables_equal(before@tiers, after@tiers)) {
+	if (!.patch_tables_equal(before@tiers, after@tiers, c("name", "type"))) {
 		patch$tiers <- list(before = before@tiers, after = after@tiers)
 	}
-	if (!.patch_tables_equal(before@media, after@media)) {
+	if (!.patch_tables_equal(before@media, after@media, "path")) {
 		patch$media <- list(before = before@media, after = after@media)
 	}
 	if (!isTRUE(all.equal(before@length.sec, after@length.sec))) {
@@ -109,7 +112,7 @@ helper_transcript_patch_apply <- function(x, patch, direction = c("backward", "f
 		if (isTRUE(p$replace)) {
 			from <- if (backward) p$after else p$before
 			to   <- if (backward) p$before else p$after
-			if (!.patch_tables_equal(x@annotations, from)) {
+			if (!identical(sort(.patch_annotation_keys(x@annotations)), sort(.patch_annotation_keys(from)))) {
 				cli::cli_abort("The patch does not fit the transcript: the annotations differ from the expected state.")
 			}
 			annotations_new <- to
@@ -124,8 +127,8 @@ helper_transcript_patch_apply <- function(x, patch, direction = c("backward", "f
 		annotations_new <- x@annotations
 	}
 
-	tiers_new <- .patch_table_switch(x@tiers, patch$tiers, backward, "tier table")
-	media_new <- .patch_table_switch(x@media, patch$media, backward, "media table")
+	tiers_new <- .patch_table_switch(x@tiers, patch$tiers, backward, "tier table", c("name", "type"))
+	media_new <- .patch_table_switch(x@media, patch$media, backward, "media table", "path")
 
 	x@annotations <- annotations_new
 	x@tiers       <- tiers_new
@@ -136,11 +139,11 @@ helper_transcript_patch_apply <- function(x, patch, direction = c("backward", "f
 	x
 }
 
-.patch_table_switch <- function(current, part, backward, label) {
+.patch_table_switch <- function(current, part, backward, label, columns) {
 	if (is.null(part)) return(current)
 	from <- if (backward) part$after else part$before
 	to   <- if (backward) part$before else part$after
-	if (!.patch_tables_equal(current, from)) {
+	if (!.patch_tables_equal(current, from, columns)) {
 		cli::cli_abort("The patch does not fit the transcript: the {label} differs from the expected state.")
 	}
 	to
@@ -148,19 +151,23 @@ helper_transcript_patch_apply <- function(x, patch, direction = c("backward", "f
 
 .patch_rows_swap <- function(a, drop, put, put_index) {
 	if (!is.null(drop) && nrow(drop)) {
-		if (!identical(names(drop), names(a))) {
-			cli::cli_abort("The patch does not fit the transcript: the annotation columns differ.")
-		}
-		hit <- match(.patch_occurrence(.patch_row_keys(drop)),
-					 .patch_occurrence(.patch_row_keys(a)))
+		candidates <- if ("tierName" %in% names(a) && "tierName" %in% names(drop))
+			which(as.character(a$tierName) %in% unique(as.character(drop$tierName))) else seq_len(nrow(a))
+		hit <- match(.patch_occurrence(.patch_annotation_keys(drop)),
+					 .patch_occurrence(.patch_annotation_keys(a[candidates, , drop = FALSE])))
 		if (anyNA(hit)) {
 			cli::cli_abort("The patch does not fit the transcript: {sum(is.na(hit))} annotation{?s} to be removed {?is/are} missing.")
 		}
-		a <- a[-hit, , drop = FALSE]
+		a <- a[-candidates[hit], , drop = FALSE]
 	}
 	if (!is.null(put) && nrow(put)) {
-		if (!identical(names(put), names(a))) {
-			cli::cli_abort("The patch does not fit the transcript: the annotation columns differ.")
+		for (column in setdiff(names(a), names(put))) put[[column]] <- NA
+		put <- put[, names(a), drop = FALSE]
+		if ("annotationID" %in% names(put) && nrow(a) && any(put$annotationID %in% a$annotationID)) {
+			used <- suppressWarnings(max(as.integer(a$annotationID), na.rm = TRUE))
+			if (!is.finite(used)) used <- 0L
+			clash <- put$annotationID %in% a$annotationID
+			put$annotationID[clash] <- as.integer(used) + seq_len(sum(clash))
 		}
 		n_final <- nrow(a) + nrow(put)
 		ord <- order(put_index)
@@ -180,17 +187,25 @@ helper_transcript_patch_apply <- function(x, patch, direction = c("backward", "f
 	a
 }
 
-.patch_tables_equal <- function(a, b) {
+.patch_tables_equal <- function(a, b, columns) {
 	if (is.null(a) || is.null(b)) return(is.null(a) && is.null(b))
-	if (!identical(names(a), names(b)) || nrow(a) != nrow(b)) return(FALSE)
-	identical(.patch_row_keys(a), .patch_row_keys(b))
+	if (nrow(a) != nrow(b)) return(FALSE)
+	columns_a <- intersect(columns, names(a))
+	if (!identical(columns_a, intersect(columns, names(b)))) return(FALSE)
+	identical(.patch_row_keys(a[, columns_a, drop = FALSE]), .patch_row_keys(b[, columns_a, drop = FALSE]))
 }
 
-.patch_row_keys <- function(df) {
+.patch_annotation_keys <- function(df) {
+	if (is.null(df) || !nrow(df)) return(character(0))
+	columns <- intersect(c("tierName", "startsec", "endsec", "content"), names(df))
+	.patch_row_keys(df[, columns, drop = FALSE], digits = 3)
+}
+
+.patch_row_keys <- function(df, digits = NULL) {
 	if (is.null(df) || !nrow(df)) return(character(0))
 	cols <- lapply(df, function(v) {
 		if (is.double(v)) {
-			out <- sprintf("%.17g", v)
+			out <- if (is.null(digits)) sprintf("%.17g", v) else sprintf("%.*f", digits, round(v, digits))
 			out[is.na(v)] <- "NA"
 			out
 		} else {
@@ -204,5 +219,8 @@ helper_transcript_patch_apply <- function(x, patch, direction = c("backward", "f
 
 .patch_occurrence <- function(keys) {
 	if (!length(keys)) return(character(0))
-	paste(keys, stats::ave(seq_along(keys), keys, FUN = seq_along), sep = "\u241e")
+	o <- order(keys, method = "radix")
+	n <- integer(length(keys))
+	n[o] <- sequence(rle(keys[o])$lengths)
+	paste(keys, n, sep = "\u241e")
 }
