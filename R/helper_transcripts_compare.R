@@ -125,7 +125,7 @@ helper_transcripts_compare <- function(x, y, gap = 0, digits = 3) {
 	stats::setNames(lapply(tiers, function(tier) {
 		rows <- .compare_tier_rows(a, tier, digits)
 		if (!nrow(rows)) return(character(0))
-		paste(sprintf("%.*f", digits, rows$startsec), sprintf("%.*f", digits, rows$endsec), rows$content, sep = "␟")
+		paste(sprintf("%.*f", digits, rows$startsec), sprintf("%.*f", digits, rows$endsec), rows$content, sep = "\u241f")
 	}), tiers)
 }
 

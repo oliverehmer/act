@@ -195,14 +195,14 @@ helper_transcript_patch_apply <- function(x, patch, direction = c("backward", "f
 			out
 		} else {
 			out <- as.character(v)
-			out[is.na(v)] <- "␀"
+			out[is.na(v)] <- "\u2400"
 			out
 		}
 	})
-	do.call(paste, c(unname(cols), sep = "␟"))
+	do.call(paste, c(unname(cols), sep = "\u241f"))
 }
 
 .patch_occurrence <- function(keys) {
 	if (!length(keys)) return(character(0))
-	paste(keys, stats::ave(seq_along(keys), keys, FUN = seq_along), sep = "␞")
+	paste(keys, stats::ave(seq_along(keys), keys, FUN = seq_along), sep = "\u241e")
 }
