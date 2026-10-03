@@ -135,6 +135,7 @@ layout_show <- function (object) {
 	), width = w)
 }
 methods::setMethod("show", signature = "layout", definition = layout_show)
+methods::setMethod("dim", signature = "layout", definition = function(x) NULL)
 
 methods::setMethod(
 	"initialize",
