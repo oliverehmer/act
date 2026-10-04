@@ -148,6 +148,11 @@
 		group       = "ffmpeg",
 		description = "Write encoded clips with sound with -avoid_negative_ts disabled, so the picture is not shifted by the AAC encoder delay (about 21 ms) behind the sound. Set to FALSE if PowerPoint has problems with such clips, e.g. when cropping the picture."
 	),
+	act.ffmpeg.video.codec.copy.fail = list(
+		value       = "abort",
+		group       = "ffmpeg",
+		description = "What happens when a video is to be copied instead of encoded (videoCodecCopy) and no keyframe can be found for the start (ffprobe missing or failed, source not readable): 'abort' stops with an error, 'encode' encodes the clip instead and shows a warning."
+	),
 	act.ffmpeg.video.keyframe_interval = list(
 		value       = 25L,
 		group       = "ffmpeg",

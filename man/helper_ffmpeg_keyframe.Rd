@@ -16,10 +16,14 @@ track, see \link{helper_ffmpeg_args}. \code{NULL} reads it from the file.}
 }
 \value{
 Numeric; the keyframe time in seconds, or \code{startsec} when
-the file is not a video or no keyframe was found.
+the file is not a video or no keyframe was found. The attribute
+\code{found} tells the two apart: \code{TRUE} for a keyframe read from
+the file, \code{FALSE} when the lookup failed (not an MP4/MOV file, file
+missing, ffprobe missing, failed or timed out, no keyframe at or before
+\code{startsec}).
 }
 \description{
-A video stream can only be copied (\code{videoCopy} in
+A video stream can only be copied (\code{videoCodecCopy} in
 \link{helper_ffmpeg_args_clip}) from a keyframe on. This function returns
 the time of the last keyframe at or before \code{startsec}, on the same
 timeline as \code{startsec} (the one players and ELAN show, see the option

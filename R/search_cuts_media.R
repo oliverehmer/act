@@ -58,7 +58,8 @@
 #' @param audioNormalize Logical; If \code{TRUE} and option \code{act.ffmpeg.audio.loudnorm} is set, a loudnorm filter is appended to the audio filter chain. Default is \code{FALSE}.
 #' @param outputOS Vector of character Strings; Saves FFMpeg cut list in format for \code{"win"}=windows, \code{"mac"}=apple ox/linux.
 #' @param outputFileName Character String; Name of the cut list.
-#' 
+#' @param videoCodecCopyFail Character; what happens when \code{videoCodecCopy} is \code{TRUE} and no keyframe can be found for a cut (ffprobe missing or failed, source not readable): \code{"abort"} stops with an error, \code{"encode"} encodes this cut instead and shows a warning. Default is \code{"encode"}: a cut list is run later and should not fail as a whole because of one source.
+#'
 #' @return Search object; cut lists will be stored in \code{s@cuts.cutlist.mac} and \code{s@cuts.cutlist.win}.
 #'
 #' @seealso \link{search_cuts_media}, \code{vignette("install_ffmpeg", package = "act")}
@@ -83,7 +84,8 @@ search_cuts_media <- function(x,
 							  audioPanning         = NULL,
 							  audioNormalize       = FALSE,
 							  outputOS             = c("mac", "win"),
-							  outputFileName       = "FFMPEG_cutlist")
+							  outputFileName       = "FFMPEG_cutlist",
+							  videoCodecCopyFail   = "encode")
 {
 	if (1==2) {
 #		x                    <- corpus
@@ -97,6 +99,7 @@ search_cuts_media <- function(x,
 #		filterMediaInclude   <- ""
 #		videoFastPositioning <- TRUE
 #		videoCodecCopy       <- FALSE
+#		videoCodecCopyFail   <- "abort"
 #		audioAsMP3           <- FALSE
 #		audioPanning         <- NULL
 #		audioNormalize       <- FALSE
@@ -132,6 +135,10 @@ search_cuts_media <- function(x,
 		s@cuts.span.aftersec       <- cutSpanAftersec
 	}
 	
+	if (length(videoCodecCopyFail) != 1 || !videoCodecCopyFail %in% c("abort", "encode")) {
+		cli::cli_abort("Parameter {.arg videoCodecCopyFail} must be {.val abort} or {.val encode}.")
+	}
+
 	#stills.values:	check if column exists
 	if (exportStills) {
 		if (!"stills.values" %in% colnames(s@results)) {
@@ -169,6 +176,8 @@ search_cuts_media <- function(x,
 	mac_video <- c()
 
 	fps_cache <- list()
+	media_skipped  <- c()
+	media_encoded  <- c()
 
 	res<-1
 	for (res in 1:nrow(s@results)) 	{
@@ -246,16 +255,30 @@ search_cuts_media <- function(x,
 		for (j in 1:length(in_paths)) {
 			#skip if path is NA
 			if (is.na(in_paths[j])) {next}
-			
-			mac_cutlist <- c(mac_cutlist, paste0("#----  ", basename(in_paths[j])))
-			
+
 			#suffix of input media file
 			in_suffix <- stringr::str_to_lower(tools::file_ext(in_paths[j]))
-	
+
 			if (in_suffix =="") {
 				in_suffix <- "mp4"
 			}
-			
+
+			#media type
+			media_type    <- .media_type_of_ext(in_suffix)
+			is_video_file <- identical(media_type, "video")
+			is_audio_file <- identical(media_type, "audio")
+			if (!is_video_file && !is_audio_file) {
+				if (!in_paths[j] %in% media_skipped) {
+					media_skipped <- c(media_skipped, in_paths[j])
+					skipped_name  <- basename(in_paths[j])
+					cli::cli_warn(c("Media file {.file {skipped_name}} is skipped: the extension {.val {in_suffix}} is neither a video nor an audio format.",
+						"i" = "Add it to the option {.code act.media.fileformats.video} or {.code act.media.fileformats.audio} to cut this file."))
+				}
+				next
+			}
+
+			mac_cutlist <- c(mac_cutlist, paste0("#----  ", basename(in_paths[j])))
+
 			#==== INFILEPATH ====
 			mac_infilepath <- sprintf('PATH_INPUT="%s"', in_paths[j])
 			mac_cutlist <- c(mac_cutlist, mac_infilepath)
@@ -335,10 +358,6 @@ search_cuts_media <- function(x,
 				#get format / suffix of input media file
 				out_suffix <- in_suffix
 				
-				#media type
-				is_audio_file <- !identical(.media_type_of_ext(in_suffix), "video")
-				is_video_file <- !is_audio_file
-
 				#if it is an audio file and should be converted to mp3
 				if (is_audio_file & audioAsMP3) {
 					#replace destination file extension with mp3
@@ -374,8 +393,25 @@ search_cuts_media <- function(x,
 					}
 					fps_for_meta <- fps_cache[[in_paths[j]]]
 				}
-				meta_start <- if (is_video_file && isTRUE(videoCodecCopy))
-					helper_ffmpeg_keyframe(in_paths[j], startsec) else startsec
+				copy_video <- is_video_file && isTRUE(videoCodecCopy)
+				meta_start <- startsec
+				if (copy_video) {
+					keyframe <- helper_ffmpeg_keyframe(in_paths[j], startsec)
+					if (isTRUE(attr(keyframe, "found"))) {
+						meta_start <- as.numeric(keyframe)
+					} else {
+						copy_name <- basename(in_paths[j])
+						if (identical(videoCodecCopyFail, "abort")) {
+							cli::cli_abort(c("No keyframe found for {.file {copy_name}} - the video cannot be copied.",
+								"i" = "Use {.code videoCodecCopy = FALSE} or {.code videoCodecCopyFail = \"encode\"}."))
+						}
+						if (!in_paths[j] %in% media_encoded) {
+							media_encoded <- c(media_encoded, in_paths[j])
+							cli::cli_warn("No keyframe found for {.file {copy_name}} - its cuts are encoded instead of copied.")
+						}
+						copy_video <- FALSE
+					}
+				}
 				meta_argv <- helper_metadata_ffmpeg_argv(
 					sourcePath = in_paths[j],
 					startsec   = meta_start,
@@ -412,7 +448,8 @@ search_cuts_media <- function(x,
 							videoCrf         = getOption("act.ffmpeg.video.crf"),
 							keyframeInterval = getOption("act.ffmpeg.video.keyframe_interval", 25),
 							metadataArgs     = meta_argv,
-							videoCopy        = isTRUE(videoCodecCopy))
+							videoCodecCopy   = copy_video,
+							videoCodecCopyFail = videoCodecCopyFail)
 					}
 				})
 				cmd_lines <- function(os) vapply(cmd_args, function(a)
@@ -442,7 +479,7 @@ search_cuts_media <- function(x,
 			
 			#===== THUMBNAIL  ====
 			#extract thumbs (only if it is a video file)
-			if (exportThumbnail & identical(.media_type_of_ext(in_suffix), "video")) 	{
+			if (exportThumbnail & is_video_file) 	{
 				#check if time is set or default time
 				time <- NA
 				if("thumbnails" %in% colnames(s@results))  {
@@ -515,7 +552,7 @@ search_cuts_media <- function(x,
 			}
 			
 			#===== STILLS ====
-			if (exportStills & identical(.media_type_of_ext(in_suffix), "video")) {
+			if (exportStills & is_video_file) {
 				#values
 				stills.values <- unlist(s@results$stills.values[[res]])
 				if (!length(stills.values)==0) {

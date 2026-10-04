@@ -213,7 +213,7 @@ helper_ffmpeg_args <- function(output,
 #' @param videoOffset,videoFps See \link{helper_ffmpeg_args}.
 #' @param audioInput Character or \code{NULL}; file the sound is taken from.
 #'   \code{NULL} takes it from \code{input}.
-#' @param videoCopy Logical; copy the video stream instead of encoding it.
+#' @param videoCodecCopy Logical; copy the video stream instead of encoding it.
 #'   Fast, but a copy can only start at a keyframe: the clip starts at the
 #'   keyframe at or before \code{startsec} (see \link{helper_ffmpeg_keyframe};
 #'   cameras often set one every few seconds) and \code{duration} is extended
@@ -230,6 +230,12 @@ helper_ffmpeg_args <- function(output,
 #'   shown once and libx264 is used. Windows cut lists always get libx264
 #'   (\link{helper_cutlist_lines}). Default is the option
 #'   \code{act.ffmpeg.video.hardware}.
+#' @param videoCodecCopyFail Character; what happens when
+#'   \code{videoCodecCopy} is \code{TRUE} and no keyframe could be found
+#'   (ffprobe missing or failed, source not readable or not an MP4/MOV file):
+#'   \code{"abort"} stops with an error, \code{"encode"} encodes the clip as
+#'   with \code{videoCodecCopy = FALSE} and shows a warning. Default is the
+#'   option \code{act.ffmpeg.video.codec.copy.fail}.
 #'
 #' @return Character vector of FFmpeg arguments.
 #'
@@ -261,9 +267,10 @@ helper_ffmpeg_args_clip <- function(output,
                                     videoOffset      = NULL,
                                     videoFps         = NULL,
                                     audioInput       = NULL,
-                                    videoCopy        = FALSE,
+                                    videoCodecCopy   = FALSE,
                                     withAudio        = TRUE,
-                                    videoHardware    = getOption("act.ffmpeg.video.hardware", TRUE)) {
+                                    videoHardware    = getOption("act.ffmpeg.video.hardware", TRUE),
+                                    videoCodecCopyFail = getOption("act.ffmpeg.video.codec.copy.fail", "abort")) {
 	if (missing(output) || length(output) != 1 || is.na(output) || !nzchar(output)) {
 		cli::cli_abort("Parameter {.arg output} is missing.")
 	}
@@ -273,22 +280,38 @@ helper_ffmpeg_args_clip <- function(output,
 	if (!is.null(videoFilter) && !is.null(filterComplex)) {
 		cli::cli_abort("Use either {.arg videoFilter} or {.arg filterComplex}, not both.")
 	}
-	if (isTRUE(videoCopy) && (!is.null(videoFilter) || !is.null(filterComplex))) {
-		cli::cli_abort("{.arg videoCopy} cannot be combined with a filter.")
+	if (isTRUE(videoCodecCopy) && (!is.null(videoFilter) || !is.null(filterComplex))) {
+		cli::cli_abort("{.arg videoCodecCopy} cannot be combined with a filter.")
+	}
+	if (length(videoCodecCopyFail) != 1 || !videoCodecCopyFail %in% c("abort", "encode")) {
+		cli::cli_abort("Parameter {.arg videoCodecCopyFail} must be {.val abort} or {.val encode}.")
 	}
 	startsec <- max(0, as.numeric(startsec))
 	duration <- as.numeric(duration)
 	timing   <- helper_media_video_timing_read(input, videoOffset, videoFps)
 	raw_line <- identical(getOption("act.media.timeline", "editlist"), "raw")
-	if (isTRUE(videoCopy)) {
+	if (isTRUE(videoCodecCopy)) {
 		key <- helper_ffmpeg_keyframe(input, startsec, videoOffset = timing$offset)
-		duration <- duration + (startsec - key)
-		startsec <- key
+		# without a keyframe the picture would start at the keyframe ffmpeg
+		# picks itself and the sound at startsec - seconds apart
+		if (!isTRUE(attr(key, "found"))) {
+			input_name <- basename(input)
+			if (identical(videoCodecCopyFail, "abort")) {
+				cli::cli_abort(c("No keyframe found for {.file {input_name}} - the video cannot be copied.",
+					"i" = "Use {.code videoCodecCopy = FALSE} or {.code videoCodecCopyFail = \"encode\"}."))
+			}
+			cli::cli_warn("No keyframe found for {.file {input_name}} - the video is encoded instead of copied.")
+			videoCodecCopy <- FALSE
+		} else {
+			key <- as.numeric(key)
+			duration <- duration + (startsec - key)
+			startsec <- key
+		}
 	}
 
 	args <- c("-hide_banner", "-loglevel", "error")
 
-	if (isTRUE(videoCopy)) {
+	if (isTRUE(videoCodecCopy)) {
 		args <- c(args, "-ss", .ffmpeg_seconds(startsec + timing$offset), "-t", .ffmpeg_seconds(duration),
 		          helper_ffmpeg_input_flags(input), "-i", input)
 		seek_out <- NULL
@@ -331,7 +354,7 @@ helper_ffmpeg_args_clip <- function(output,
 
 	af <- c(audioFilter, lead_af)
 	af <- if (length(af)) paste(af, collapse = ",") else NULL
-	if (isTRUE(videoCopy)) {
+	if (isTRUE(videoCodecCopy)) {
 		args <- c(args, "-map", "0:v:0", if (isTRUE(withAudio)) c("-map", paste0(audio_idx, ":a?")) else "-an", "-c:v", "copy")
 		if (isTRUE(withAudio) && !is.null(af)) args <- c(args, "-af", af)
 	} else {
@@ -372,10 +395,10 @@ helper_ffmpeg_args_clip <- function(output,
 	}
 	c(args, if (isTRUE(withAudio)) audioCodecArgs, if (is.finite(audio_rate)) c("-ar", as.character(audio_rate)),
 	  "-t", .ffmpeg_seconds(duration), metadataArgs,
-	  if (isTRUE(withAudio) && !isTRUE(videoCopy) && isTRUE(getOption("act.ffmpeg.video.exact_timing", TRUE)))
+	  if (isTRUE(withAudio) && !isTRUE(videoCodecCopy) && isTRUE(getOption("act.ffmpeg.video.exact_timing", TRUE)))
 		  c("-avoid_negative_ts", "disabled"),
 	  "-use_editlist", "0",
-	  "-movflags", if (isTRUE(videoCopy)) "+faststart+negative_cts_offsets" else "+faststart",
+	  "-movflags", if (isTRUE(videoCodecCopy)) "+faststart+negative_cts_offsets" else "+faststart",
 	  "-y", output)
 }
 
@@ -517,7 +540,7 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 
 #' Find the keyframe a copied clip can start at
 #'
-#' A video stream can only be copied (\code{videoCopy} in
+#' A video stream can only be copied (\code{videoCodecCopy} in
 #' \link{helper_ffmpeg_args_clip}) from a keyframe on. This function returns
 #' the time of the last keyframe at or before \code{startsec}, on the same
 #' timeline as \code{startsec} (the one players and ELAN show, see the option
@@ -529,14 +552,18 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 #'   track, see \link{helper_ffmpeg_args}. \code{NULL} reads it from the file.
 #'
 #' @return Numeric; the keyframe time in seconds, or \code{startsec} when
-#'   the file is not a video or no keyframe was found.
+#'   the file is not a video or no keyframe was found. The attribute
+#'   \code{found} tells the two apart: \code{TRUE} for a keyframe read from
+#'   the file, \code{FALSE} when the lookup failed (not an MP4/MOV file, file
+#'   missing, ffprobe missing, failed or timed out, no keyframe at or before
+#'   \code{startsec}).
 #'
 #' @seealso \link{helper_ffmpeg_args_clip}
 #'
 #' @export
 helper_ffmpeg_keyframe <- function(input, startsec, videoOffset = NULL) {
 	startsec <- max(0, as.numeric(startsec))
-	if (!length(helper_ffmpeg_input_flags(input)) || !file.exists(input)) return(startsec)
+	if (!length(helper_ffmpeg_input_flags(input)) || !file.exists(input)) return(structure(startsec, found = FALSE))
 	offset <- helper_media_video_timing_read(input, videoOffset)$offset
 	raw <- startsec + offset
 	for (back in c(12, 60, 600)) {
@@ -547,10 +574,10 @@ helper_ffmpeg_keyframe <- function(input, startsec, videoOffset = NULL) {
 			error = function(e) character(0))
 		kf <- suppressWarnings(as.numeric(stringr::str_remove(out, ",.*$")))
 		kf <- kf[is.finite(kf) & kf <= raw + 1e-6]
-		if (length(kf)) return(max(0, max(kf) - offset))
+		if (length(kf)) return(structure(max(0, max(kf) - offset), found = TRUE))
 		if (raw - back <= 0) break
 	}
-	startsec
+	structure(startsec, found = FALSE)
 }
 
 
@@ -721,7 +748,7 @@ helper_media_audio_track_exists <- function(filePath) {
 
 .ffmpeg_audio_stream <- function(path) {
 	if (!file.exists(path)) return(list(codec = NA_character_, fmt = NA_character_, bits = NA_real_))
-	key <- paste("astream", normalizePath(path, mustWork = FALSE), sep = "|")
+	key <- .ffmpeg_cache_key("astream", path)
 	hit <- .FFMPEG_TIMING_CACHE[[key]]
 	if (!is.null(hit)) return(hit)
 	out <- tryCatch(.metadata_ffprobe_run(c("-v", "error", "-select_streams", "a:0",
@@ -731,7 +758,7 @@ helper_media_audio_track_exists <- function(filePath) {
 	bits <- suppressWarnings(as.numeric(val("bits_per_raw_sample")))
 	if (!is.finite(bits)) bits <- suppressWarnings(as.numeric(val("bits_per_sample")))
 	res <- list(codec = val("codec_name"), fmt = val("sample_fmt"), bits = bits)
-	assign(key, res, envir = .FFMPEG_TIMING_CACHE)
+	if (!is.na(res$codec)) assign(key, res, envir = .FFMPEG_TIMING_CACHE)
 	res
 }
 
@@ -752,15 +779,20 @@ helper_media_audio_track_exists <- function(filePath) {
 
 .ffmpeg_audio_rate <- function(path) {
 	if (!file.exists(path)) return(NA_real_)
-	key <- paste("rate", normalizePath(path, mustWork = FALSE), sep = "|")
+	key <- .ffmpeg_cache_key("rate", path)
 	hit <- .FFMPEG_TIMING_CACHE[[key]]
 	if (!is.null(hit)) return(hit)
 	out <- tryCatch(.metadata_ffprobe_run(c("-v", "error", "-select_streams", "a:0",
 		"-show_entries", "stream=sample_rate", "-of", "csv=p=0", path))$out, error = function(e) character(0))
 	rate <- suppressWarnings(as.numeric(out[1]))
 	res <- if (length(rate) == 1 && is.finite(rate) && rate > 0) rate else NA_real_
-	assign(key, res, envir = .FFMPEG_TIMING_CACHE)
+	if (is.finite(res)) assign(key, res, envir = .FFMPEG_TIMING_CACHE)
 	res
+}
+
+.ffmpeg_cache_key <- function(prefix, path) {
+	info <- file.info(path)
+	paste(prefix, normalizePath(path, mustWork = FALSE), info$size, as.numeric(info$mtime), sep = "|")
 }
 
 #' Helper: Timing of a video file
@@ -806,7 +838,9 @@ helper_media_video_timing_read <- function(filePath, videoOffset = NULL, videoFp
 	fps <- tryCatch(.metadata_probe_fps(path), error = function(e) NA_real_)
 	res <- list(offset = if (is.finite(offset)) offset else 0,
 	            frame_dur = if (is.finite(fps) && fps > 0) 1 / fps else NA_real_)
-	assign(key, res, envir = .FFMPEG_TIMING_CACHE)
+	# a failed fps read is not kept: one ffprobe timeout would drop the frame
+	# rate from every later command of the session
+	if (is.finite(res$frame_dur)) assign(key, res, envir = .FFMPEG_TIMING_CACHE)
 	res
 }
 

@@ -26,9 +26,10 @@ helper_ffmpeg_args_clip(
   videoOffset = NULL,
   videoFps = NULL,
   audioInput = NULL,
-  videoCopy = FALSE,
+  videoCodecCopy = FALSE,
   withAudio = TRUE,
-  videoHardware = getOption("act.ffmpeg.video.hardware", TRUE)
+  videoHardware = getOption("act.ffmpeg.video.hardware", TRUE),
+  videoCodecCopyFail = getOption("act.ffmpeg.video.codec.copy.fail", "abort")
 )
 }
 \arguments{
@@ -89,7 +90,7 @@ arguments, e.g. from \link{helper_metadata_ffmpeg_argv}.}
 \item{audioInput}{Character or \code{NULL}; file the sound is taken from.
 \code{NULL} takes it from \code{input}.}
 
-\item{videoCopy}{Logical; copy the video stream instead of encoding it.
+\item{videoCodecCopy}{Logical; copy the video stream instead of encoding it.
 Fast, but a copy can only start at a keyframe: the clip starts at the
 keyframe at or before \code{startsec} (see \link{helper_ffmpeg_keyframe};
 cameras often set one every few seconds) and \code{duration} is extended
@@ -108,6 +109,13 @@ Without a Mac or with an ffmpeg that lacks this encoder a warning is
 shown once and libx264 is used. Windows cut lists always get libx264
 (\link{helper_cutlist_lines}). Default is the option
 \code{act.ffmpeg.video.hardware}.}
+
+\item{videoCodecCopyFail}{Character; what happens when
+\code{videoCodecCopy} is \code{TRUE} and no keyframe could be found
+(ffprobe missing or failed, source not readable or not an MP4/MOV file):
+\code{"abort"} stops with an error, \code{"encode"} encodes the clip as
+with \code{videoCodecCopy = FALSE} and shows a warning. Default is the
+option \code{act.ffmpeg.video.codec.copy.fail}.}
 }
 \value{
 Character vector of FFmpeg arguments.

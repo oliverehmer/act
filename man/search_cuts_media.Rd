@@ -21,7 +21,8 @@ search_cuts_media(
   audioPanning = NULL,
   audioNormalize = FALSE,
   outputOS = c("mac", "win"),
-  outputFileName = "FFMPEG_cutlist"
+  outputFileName = "FFMPEG_cutlist",
+  videoCodecCopyFail = "encode"
 )
 }
 \arguments{
@@ -58,6 +59,8 @@ search_cuts_media(
 \item{outputOS}{Vector of character Strings; Saves FFMpeg cut list in format for \code{"win"}=windows, \code{"mac"}=apple ox/linux.}
 
 \item{outputFileName}{Character String; Name of the cut list.}
+
+\item{videoCodecCopyFail}{Character; what happens when \code{videoCodecCopy} is \code{TRUE} and no keyframe can be found for a cut (ffprobe missing or failed, source not readable): \code{"abort"} stops with an error, \code{"encode"} encodes this cut instead and shows a warning. Default is \code{"encode"}: a cut list is run later and should not fail as a whole because of one source.}
 }
 \value{
 Search object; cut lists will be stored in \code{s@cuts.cutlist.mac} and \code{s@cuts.cutlist.win}.
