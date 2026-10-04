@@ -70,7 +70,7 @@ import_eaf <- function(filePath=NULL,
 		}
 		
 		#=== READ lines via robust encoding detection
-		read_result <- helper_read_annotation_file(
+		read_result <- helper_annotationfile_read(
 			filePath       = filePath,
 			expectedHeader = NULL,
 			fileType       = "eaf",

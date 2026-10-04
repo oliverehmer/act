@@ -31,7 +31,7 @@ annotations_all <- function(x) {
 		}
 	}
 	if (!is.null(temp)) {
-		temp <- helper_order_annotations_columns(temp)
+		temp <- helper_annotations_columns_order(temp)
 	}
 	return(temp)
 }

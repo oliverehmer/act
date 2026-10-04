@@ -72,7 +72,7 @@ import_textgrid <- function(filePath=NULL,
 		}
 
 		#--- read file via robust encoding detection
-		read_result <- helper_read_annotation_file(
+		read_result <- helper_annotationfile_read(
 			filePath       = filePath,
 			expectedHeader = c('File type = "ooTextFile"',
 							   'Object class = "TextGrid"'),

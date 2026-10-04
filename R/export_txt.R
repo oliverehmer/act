@@ -121,8 +121,8 @@ export_txt <- function (t,
 		}
 		if (isTRUE(headerInsertSource)) {
 			standardsource <- paste0("(", t@name, ", ",
-				helper_format_time(min(t@annotations$startsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), "-",
-				helper_format_time(max(t@annotations$endsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), ")")
+				helper_time_format(min(t@annotations$startsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), "-",
+				helper_time_format(max(t@annotations$endsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), ")")
 			header <- paste0(header, standardsource, "\n")
 		}
 		if (nchar(header) > 0) {

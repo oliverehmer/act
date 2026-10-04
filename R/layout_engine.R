@@ -375,7 +375,7 @@ apply_main_break_hints <- function(ann, mm_matches, preliminary,
 		cache <- preliminary[[main_row]]
 		if (is.null(cache) || nrow(cache$positions) == 0) next
 		positions <- cache$positions
-		graphemes <- split_graphemes(ann$text[main_row])
+		graphemes <- helper_text_graphemes_split(ann$text[main_row])
 		breaks <- integer(0)
 		my_matches <- mm_matches[mm_matches$main_row == main_row, , drop = FALSE]
 		for (k in seq_len(nrow(my_matches))) {
@@ -437,7 +437,7 @@ apply_main_break_hints <- function(ann, mm_matches, preliminary,
 # when a word follows it directly (no space) - "|moves ..." opens,
 # "... position|" closes. Only opening symbols need room behind them.
 .description_after_symbol <- function(ann, row, char, occurrence) {
-	graphemes <- split_graphemes(ann$text[row])
+	graphemes <- helper_text_graphemes_split(ann$text[row])
 	index <- .symbol_index_in_text(graphemes, char, occurrence)
 	if (is.na(index) || index >= length(graphemes)) return(0L)
 	following <- graphemes[index + 1L]
@@ -464,7 +464,7 @@ apply_main_break_hints <- function(ann, mm_matches, preliminary,
 		g <- no_fold$char[k]
 		occurrence <- remap_symbol_occurrence(merge_map, r, g,
 		                                      no_fold$occurrence[k])
-		graphemes <- split_graphemes(ann$text[r])
+		graphemes <- helper_text_graphemes_split(ann$text[r])
 		index <- .symbol_index_in_text(graphemes, g, occurrence)
 		if (is.na(index) || index <= 1L) next
 		if (graphemes[index - 1L] == HARD_BREAK_CHAR) next
@@ -651,8 +651,8 @@ concatenate_mondada_rows <- function(ann, anchor_char_set,
 			# the GAT latching "=". A word on either side always keeps the
 			# space ("laterAL;+" + "y busca" -> "laterAL;+ y busca").
 			glue_chars <- c(anchor_char_set, "=")
-			previous_g <- split_graphemes(ann$content[previous])
-			next_g <- split_graphemes(ann$content[i])
+			previous_g <- helper_text_graphemes_split(ann$content[previous])
+			next_g <- helper_text_graphemes_split(ann$content[i])
 			left_glue <- length(previous_g) > 0 &&
 				previous_g[length(previous_g)] %in% glue_chars
 			right_glue <- length(next_g) > 0 && next_g[1] %in% glue_chars
@@ -696,7 +696,7 @@ concatenate_mondada_rows <- function(ann, anchor_char_set,
 			if (!is.null(ann$rect_directives)) {
 				next_directives <- ann$rect_directives[[i]]
 				if (!is.null(next_directives) && nrow(next_directives) > 0) {
-					accumulated_g <- split_graphemes(ann$content[previous])
+					accumulated_g <- helper_text_graphemes_split(ann$content[previous])
 					next_directives$occurrence <- next_directives$occurrence +
 						vapply(next_directives$char,
 						       function(ch) sum(accumulated_g == ch),
@@ -737,10 +737,10 @@ concatenate_mondada_rows <- function(ann, anchor_char_set,
 		if (!isTRUE(ann$is_main[r])) next
 		fragments <- fragment_rows[[r]]
 		frag_g <- lapply(fragments$content, function(x) {
-			if (is.na(x)) character(0) else split_graphemes(x)
+			if (is.na(x)) character(0) else helper_text_graphemes_split(x)
 		})
 		sep_g <- lapply(fragments$sep_before, function(x) {
-			if (is.na(x) || !nzchar(x)) character(0) else split_graphemes(x)
+			if (is.na(x) || !nzchar(x)) character(0) else helper_text_graphemes_split(x)
 		})
 		glyphs <- character(0)
 		owner <- integer(0)
@@ -797,9 +797,9 @@ concatenate_mondada_rows <- function(ann, anchor_char_set,
 		rows_list <- list()
 		occ_counter <- list()
 		for (f in seq_len(nrow(fragments))) {
-			offset <- offset + length(split_graphemes(fragments$sep_before[f]))
+			offset <- offset + length(helper_text_graphemes_split(fragments$sep_before[f]))
 			if (is.na(fragments$content[f])) next
-			graphemes <- split_graphemes(fragments$content[f])
+			graphemes <- helper_text_graphemes_split(fragments$content[f])
 			hits <- which(graphemes %in% time_chars)
 			leading_end <- 0L
 			g_idx <- 1L
@@ -919,7 +919,7 @@ apply_indent_alignment <- function(ann, report, anchor_chars,
 		# width - the format has priority over the alignment of a single
 		# symbol (user rule 2026-08-14, comment K1 on 702).
 		if (is.finite(text_body_width)) {
-			current <- length(split_graphemes(lines_main[main_line]))
+			current <- length(helper_text_graphemes_split(lines_main[main_line]))
 			if (current + n > text_body_width) next
 		}
 		lines_main[main_line] <- shift_line(lines_main[main_line],
@@ -1024,7 +1024,7 @@ apply_indent_alignment <- function(ann, report, anchor_chars,
 		for (line_index in seq_along(lines_row)) {
 			body <- substr(lines_row[line_index], pad + 1L,
 			               nchar(lines_row[line_index]))
-			body_g <- split_graphemes(body)
+			body_g <- helper_text_graphemes_split(body)
 			# a line holding nothing but marks (one or several, e.g. "†♦")
 			if (length(body_g) == 0L || length(body_g) > 3L ||
 			    !all(body_g %in% anchor_chars)) next
@@ -1148,9 +1148,9 @@ apply_indent_alignment <- function(ann, report, anchor_chars,
 
 .overlay_point_line <- function(base, incoming, pad) {
 	width <- max(nchar(base), nchar(incoming))
-	base_g <- c(split_graphemes(base),
+	base_g <- c(helper_text_graphemes_split(base),
 	            rep(" ", width - nchar(base)))
-	in_g <- c(split_graphemes(incoming),
+	in_g <- c(helper_text_graphemes_split(incoming),
 	          rep(" ", width - nchar(incoming)))
 	conflict <- which(base_g != " " & in_g != " " &
 	                  seq_len(width) > pad)
@@ -1778,8 +1778,8 @@ interleave_layer_lines <- function(result, max_span_blocks = Inf,
 
 .overlay_disjoint_lines <- function(base, incoming, pad, anchor_chars) {
 	width <- max(nchar(base), nchar(incoming))
-	base_g <- c(split_graphemes(base), rep(" ", width - nchar(base)))
-	in_g <- c(split_graphemes(incoming), rep(" ", width - nchar(incoming)))
+	base_g <- c(helper_text_graphemes_split(base), rep(" ", width - nchar(base)))
+	in_g <- c(helper_text_graphemes_split(incoming), rep(" ", width - nchar(incoming)))
 	beyond <- seq_len(width) > pad
 	conflict <- base_g != " " & in_g != " " & beyond
 	shared_mark <- conflict & base_g == in_g & base_g %in% anchor_chars
@@ -1857,7 +1857,7 @@ apply_speaker_continuation <- function(ann, i, rendered_lines) {
 	if (is.null(lines) || length(lines) == 0) return(text)
 
 	last_line <- lines[length(lines)]
-	graphemes <- split_graphemes(last_line)
+	graphemes <- helper_text_graphemes_split(last_line)
 	non_space <- which(!stringr::str_detect(graphemes, "^\\s$"))
 	if (length(non_space) == 0) return(text)
 	last_col <- max(non_space)
@@ -1905,7 +1905,22 @@ apply_text_indent <- function(ann, i, rendered_cache, ref_main) {
 # memory in long sessions.
 .GRAPHEME_CACHE <- new.env(parent = emptyenv(), hash = TRUE)
 
-split_graphemes <- function(text) {
+#' Helper: Split a text into graphemes
+#'
+#' Splits a character string into its user-perceived characters (grapheme
+#' clusters): a base letter with combining accents counts as one element. The
+#' layout engine measures and aligns text with this split.
+#'
+#' @param text Character string.
+#'
+#' @return Character vector, one element per grapheme; empty for \code{NA} or
+#'   an empty string.
+#'
+#' @export
+#'
+#' @examples
+#' act::helper_text_graphemes_split("ca\u0301fe")
+helper_text_graphemes_split <- function(text) {
 	if (is.na(text) || nchar(text) == 0) return(character(0))
 	cached <- .GRAPHEME_CACHE[[text]]
 	if (!is.null(cached)) return(cached)
@@ -1919,7 +1934,7 @@ split_graphemes <- function(text) {
 }
 
 tokenize_content <- function(text) {
-	graphemes <- split_graphemes(text)
+	graphemes <- helper_text_graphemes_split(text)
 	if (length(graphemes) == 0) return(list())
 	kind <- ifelse(graphemes == HARD_BREAK_CHAR, "break",
 	        ifelse(stringr::str_detect(graphemes, "^\\s$"), "space", "word"))
@@ -1972,7 +1987,7 @@ tokenize_content <- function(text) {
 # space behind it is dropped: "| |fue", "◊TAC,#" (user rule 2026-08-14).
 .drop_space_after_leading_mark <- function(lines, anchor_chars, prefix_width) {
 	for (k in seq_along(lines)) {
-		graphemes <- split_graphemes(lines[k])
+		graphemes <- helper_text_graphemes_split(lines[k])
 		drop <- integer(0)
 		for (idx in seq_along(graphemes)) {
 			if (!(graphemes[idx] %in% anchor_chars)) next
@@ -2006,7 +2021,7 @@ tokenize_content <- function(text) {
 		# after the in-line reduction.
 		if (stringr::str_detect(body, "^.?=")) next
 		if (is.finite(width) &&
-		    length(split_graphemes(lines[k + 1L])) >= width) next
+		    length(helper_text_graphemes_split(lines[k + 1L])) >= width) next
 		lines[k + 1L] <- paste0(substr(lines[k + 1L], 1L, prefix_width),
 		                        "=", body)
 	}
@@ -2015,7 +2030,7 @@ tokenize_content <- function(text) {
 
 .collapse_latch_in_lines <- function(lines, anchor_chars) {
 	for (k in seq_along(lines)) {
-		graphemes <- split_graphemes(lines[k])
+		graphemes <- helper_text_graphemes_split(lines[k])
 		drop <- integer(0)
 		for (idx in seq_along(graphemes)) {
 			if (graphemes[idx] != "=") next
@@ -2048,12 +2063,12 @@ render_annotation_tokens <- function(text, anchors, width, prefix_first,
                                      rect_directives = NULL) {
 	rect_option <- as.integer(getOption("act.layout.rectangle.max.lines", 2L))
 	tokens <- tokenize_content(text)
-	prefix_first_g <- split_graphemes(prefix_first)
+	prefix_first_g <- helper_text_graphemes_split(prefix_first)
 	if (!is.null(start_col) && start_col > length(prefix_first_g) + 1L) {
 		prefix_first_g <- c(prefix_first_g,
 		                    rep(" ", start_col - 1L - length(prefix_first_g)))
 	}
-	prefix_cont_g  <- split_graphemes(prefix_cont)
+	prefix_cont_g  <- helper_text_graphemes_split(prefix_cont)
 	prefix_len     <- length(prefix_cont_g)
 
 	state <- new.env(parent = emptyenv())
@@ -2234,7 +2249,7 @@ render_annotation_tokens <- function(text, anchors, width, prefix_first,
 				     anchors$target_col[nxt[1]] - prefix_len >=
 				    	min_description)) {
 					close_col <- anchors$target_col[nxt[1]]
-					graphemes_text <- split_graphemes(text)
+					graphemes_text <- helper_text_graphemes_split(text)
 					open_index <- .symbol_index_in_text(graphemes_text,
 						anchors$char[own[1]], anchors$occurrence[own[1]])
 					close_index <- .symbol_index_in_text(graphemes_text,
@@ -2849,7 +2864,7 @@ close_bracket_position <- function(text, open_occurrence, lines) {
 	                                       stringr::fixed("]"))
 	count <- 0L
 	for (line_index in seq_along(lines)) {
-		graphemes <- split_graphemes(lines[line_index])
+		graphemes <- helper_text_graphemes_split(lines[line_index])
 		hits <- which(graphemes == "]")
 		for (h in hits) {
 			count <- count + 1L
@@ -2890,7 +2905,7 @@ extract_anchor_positions <- function(lines, chars) {
 	line_parts <- list()
 	col_parts <- list()
 	for (line_index in seq_along(lines)) {
-		graphemes <- split_graphemes(lines[line_index])
+		graphemes <- helper_text_graphemes_split(lines[line_index])
 		hits <- which(graphemes %in% chars)
 		if (length(hits) == 0) next
 		k <- length(char_parts) + 1L
@@ -2979,7 +2994,7 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 
 	# ---- unpaired outer of a double bracket hugs the anchored inner ----
 	if (length(anchor_rows) > 0) {
-		graphemes <- split_graphemes(ann$content[i])
+		graphemes <- helper_text_graphemes_split(ann$content[i])
 		positions <- which(graphemes == "[")
 		if (length(positions) >= 2 && positions[1] <= 2L &&
 		    positions[2] == positions[1] + 1L) {
@@ -3032,7 +3047,7 @@ compute_anchors <- function(ann, i, rendered_cache, pairs, text_body_width,
 		}
 		leading_block_end <- 0L
 		if (is.null(time_table)) {
-			graphemes_i <- split_graphemes(ann$text[i])
+			graphemes_i <- helper_text_graphemes_split(ann$text[i])
 			g_idx <- 1L
 			while (g_idx <= length(graphemes_i) &&
 			       stringr::str_detect(graphemes_i[g_idx], "^\\s$")) {
@@ -3219,7 +3234,7 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 			                  time = hits$time, index = hits$index,
 			                  trailing = hits$trailing_candidate))
 		}
-		graphemes <- split_graphemes(ann$content[row])
+		graphemes <- helper_text_graphemes_split(ann$content[row])
 		hits <- which(graphemes %in% char_vector)
 		if (length(hits) == 0) return(NULL)
 		occurrence <- stats::ave(seq_along(hits), graphemes[hits],
@@ -3279,7 +3294,7 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 		layer_symbols <- cluster_pass$layer_symbols
 		if (nrow(layer_symbols) == 0) next
 		pins <- cluster_pass$pins[order(cluster_pass$pins$index), , drop = FALSE]
-		graphemes_i <- split_graphemes(ann$content[i])
+		graphemes_i <- helper_text_graphemes_split(ann$content[i])
 		non_space <- which(!stringr::str_detect(graphemes_i, "^\\s$"))
 		lead_index <- if (length(non_space) == 0) NA_integer_ else non_space[1]
 
@@ -3398,7 +3413,7 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 		result$layer_symbols <- ls
 		return(result)
 	}
-	graphemes_layer <- split_graphemes(ann$content[layer_row])
+	graphemes_layer <- helper_text_graphemes_split(ann$content[layer_row])
 	keep_layer <- rep(TRUE, nrow(ls))
 	runs <- list()
 	for (rid in unique(run_id)) {
@@ -3530,7 +3545,7 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 .find_cluster_in_main <- function(ann, main_row, cluster_time, seq_chars,
                                   main_symbols, used_main, handover) {
 	handover_tolerance <- 0.02
-	graphemes <- split_graphemes(ann$content[main_row])
+	graphemes <- helper_text_graphemes_split(ann$content[main_row])
 	ms_row <- main_symbols[main_symbols$row == main_row, , drop = FALSE]
 	if (nrow(ms_row) == 0) return(list())
 	usable <- function(key) {
@@ -3584,7 +3599,7 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 
 .relocate_cluster_brackets <- function(ann, chosen) {
 	main_row <- chosen$row
-	graphemes <- split_graphemes(ann$content[main_row])
+	graphemes <- helper_text_graphemes_split(ann$content[main_row])
 	span_from <- min(chosen$indices)
 	span_to <- max(chosen$indices)
 	span <- span_from:span_to
@@ -3598,9 +3613,9 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 	if (!is.null(fragments) && nrow(fragments) > 0) {
 		offset <- 0L
 		for (f in seq_len(nrow(fragments))) {
-			sep_len <- length(split_graphemes(fragments$sep_before[f]))
+			sep_len <- length(helper_text_graphemes_split(fragments$sep_before[f]))
 			content_len <- if (is.na(fragments$content[f])) 0L else
-				length(split_graphemes(fragments$content[f]))
+				length(helper_text_graphemes_split(fragments$content[f]))
 			from_f <- offset + sep_len + 1L
 			to_f <- offset + sep_len + content_len
 			if (span_from >= from_f && span_to <= to_f) {
@@ -3631,7 +3646,7 @@ compute_mm_symbol_matches <- function(ann, ref_main) {
 	graphemes[span] <- new_span
 	ann$content[main_row] <- paste(graphemes, collapse = "")
 	if (!is.na(fragment_hit) && !is.null(fragments)) {
-		fragment_graphemes <- split_graphemes(fragments$content[fragment_hit])
+		fragment_graphemes <- helper_text_graphemes_split(fragments$content[fragment_hit])
 		fragment_graphemes[fragment_local_from:fragment_local_to] <- new_span
 		fragments$content[fragment_hit] <- paste(fragment_graphemes, collapse = "")
 		ann$fragments[[main_row]] <- fragments
@@ -3739,7 +3754,7 @@ monotone_match <- function(layer_times, main_times, penalty) {
 # for sandwiched symbols (close of current action AND open of the next).
 
 scan_layer_symbols <- function(text, char_vector) {
-	graphemes <- split_graphemes(text)
+	graphemes <- helper_text_graphemes_split(text)
 	is_anchor <- graphemes %in% char_vector
 	occ_counter <- list()
 	rows <- list()
@@ -3870,7 +3885,7 @@ compute_bracket_pairs <- function(ann) {
 				fragment_index = tbl$fragment_index)
 			open_counts[r] <- nrow(tbl)
 		} else {
-			graphemes <- split_graphemes(ann$content[r])
+			graphemes <- helper_text_graphemes_split(ann$content[r])
 			positions <- which(graphemes == "[")
 			open_counts[r] <- length(positions)
 			if (length(positions) == 0) next
@@ -4011,7 +4026,7 @@ apply_bracket_interna_padding <- function(ann, pairs) {
 
 	nested_outer <- function(row, occurrence) {
 		if (occurrence != 1L) return(FALSE)
-		graphemes <- split_graphemes(ann$content[row])
+		graphemes <- helper_text_graphemes_split(ann$content[row])
 		positions <- which(graphemes == "[")
 		length(positions) >= 2L && positions[1] <= 2L &&
 			positions[2] == positions[1] + 1L
@@ -4093,7 +4108,7 @@ apply_double_bracket_flattening <- function(ann, pairs) {
 	if (nrow(pairs) == 0) return(list(ann = ann, pairs = pairs))
 
 	bracket_time <- function(row, occurrence) {
-		graphemes <- split_graphemes(ann$content[row])
+		graphemes <- helper_text_graphemes_split(ann$content[row])
 		positions <- which(graphemes == "[")
 		if (occurrence > length(positions)) return(NA_real_)
 		duration <- max(ann$endsec[row] - ann$startsec[row], 0)
@@ -4105,7 +4120,7 @@ apply_double_bracket_flattening <- function(ann, pairs) {
 		row_pairs <- pairs[pairs$j_row == j, , drop = FALSE]
 		if (!(1L %in% row_pairs$j_occurrence && 2L %in% row_pairs$j_occurrence)) next
 
-		graphemes <- split_graphemes(ann$content[j])
+		graphemes <- helper_text_graphemes_split(ann$content[j])
 		positions <- which(graphemes == "[")
 		if (length(positions) < 2 || positions[1] > 2L ||
 		    positions[2] != positions[1] + 1L) next
@@ -4166,7 +4181,7 @@ apply_symbol_merge <- function(ann, anchor_char_set, mm_matches = NULL,
 	events <- list()
 	for (r in seq_len(nrow(ann))) {
 		if (is.na(ann$content[r])) next
-		graphemes <- split_graphemes(ann$content[r])
+		graphemes <- helper_text_graphemes_split(ann$content[r])
 		if (length(graphemes) == 0) next
 		keep <- rep(TRUE, length(graphemes))
 		occ_original <- list()
@@ -4295,7 +4310,7 @@ apply_symbol_merge <- function(ann, anchor_char_set, mm_matches = NULL,
 		# break inside the word and tear it apart ("l%eVA:Nta" ->
 		# "l%" / "%eVA:Nta"). Only clusters with a word boundary on at
 		# least one side may unfold (user mock-up 207_024, 2026-08-17).
-		graphemes_r <- split_graphemes(ann$text[r])
+		graphemes_r <- helper_text_graphemes_split(ann$text[r])
 		merged_index <- .symbol_index_in_text(graphemes_r, g, merged_occ)
 		if (!is.na(merged_index)) {
 			cluster_chars <- c(anchor_char_set, "=")
@@ -4376,7 +4391,7 @@ collapse_equivalent_layer_gaps <- function(ann, mm_matches, anchor_char_set,
 		char_vector <- strsplit(chars, "")[[1]]
 		my_matches <- mm_matches[mm_matches$layer_row == i, , drop = FALSE]
 		if (nrow(my_matches) < 2) next
-		graphemes <- split_graphemes(ann$content[i])
+		graphemes <- helper_text_graphemes_split(ann$content[i])
 		positions <- symbol_positions_in_text(ann$content[i], char_vector)
 		if (nrow(positions) < 2) next
 		positions <- positions[order(positions$index), , drop = FALSE]
@@ -4474,7 +4489,7 @@ remap_symbol_occurrence <- function(merge_map, row, char, occurrence) {
 		                 table_row$occurrence == occurrence, , drop = FALSE]
 		if (nrow(hit) > 0) return(hit$time[1])
 	}
-	graphemes <- split_graphemes(ann$content[row])
+	graphemes <- helper_text_graphemes_split(ann$content[row])
 	hits <- which(graphemes == char)
 	if (length(hits) < occurrence) return(NA_real_)
 	duration <- max(ann$endsec[row] - ann$startsec[row], 0)
@@ -4492,7 +4507,7 @@ remap_symbol_occurrence <- function(merge_map, row, char, occurrence) {
 }
 
 .symbol_cluster_start <- function(text, char_vector, char, occurrence) {
-	graphemes <- split_graphemes(text)
+	graphemes <- helper_text_graphemes_split(text)
 	seen <- 0L
 	cluster_start <- NA_integer_
 	for (g_idx in seq_along(graphemes)) {
@@ -4527,7 +4542,7 @@ apply_cluster_close_open_reorder <- function(ann, mm_matches, preliminary,
 	if (nrow(mm_matches) == 0) return(ann)
 	for (main_row in unique(mm_matches$main_row)) {
 		if (!isTRUE(ann$is_main[main_row])) next
-		graphemes <- split_graphemes(ann$text[main_row])
+		graphemes <- helper_text_graphemes_split(ann$text[main_row])
 		if (length(graphemes) == 0) next
 		occ_counter <- list()
 		marks <- list()
@@ -4565,7 +4580,7 @@ apply_cluster_close_open_reorder <- function(ann, mm_matches, preliminary,
 				if (nrow(hit) == 0) return(NULL)
 				layer_row <- hit$layer_row[1]
 				layer_occ <- hit$layer_occurrence[1]
-				lay_g <- split_graphemes(ann$content[layer_row])
+				lay_g <- helper_text_graphemes_split(ann$content[layer_row])
 				pos <- which(lay_g == m$char)
 				if (layer_occ > length(pos)) return(NULL)
 				at <- pos[layer_occ]
@@ -4812,7 +4827,7 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 			                    text_body_width - prefix_b - 1L)
 			insert_n <- target_index - b$index[1]
 			if (insert_n <= 0) next
-			graphemes <- split_graphemes(ann$text[main_row])
+			graphemes <- helper_text_graphemes_split(ann$text[main_row])
 			insert_at <- b$index[1] - 1L
 			while (insert_at > 0L &&
 			       graphemes[insert_at] %in% all_anchor_chars) {
@@ -4881,7 +4896,7 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 			# never below a single space, so natural word gaps survive
 			# (user comment K11, 2026-08-15).
 			surplus <- available - needed
-			graphemes <- split_graphemes(ann$text[main_row])
+			graphemes <- helper_text_graphemes_split(ann$text[main_row])
 			span_idx <- seq(a$index[1] + 1L, b$index[1] - 1L)
 			is_fill <- graphemes %in% c(" ", "_")
 			# Fill left of ANOTHER span's closing symbol is load-bearing:
@@ -4965,7 +4980,7 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 		    is.finite(text_body_width) &&
 		    close_col + (needed - available) > text_body_width) next
 
-		graphemes <- split_graphemes(ann$text[main_row])
+		graphemes <- helper_text_graphemes_split(ann$text[main_row])
 		insert_at <- b$index[1] - 1L
 		# Never step back BEYOND the opening symbol: inside a marker
 		# cluster like "|#|#" the space has to go between the two marks,
@@ -5032,7 +5047,7 @@ symbol_positions_in_text <- function(text, char_vector) {
 	key <- paste0(text, "\u0001", paste(char_vector, collapse = ""))
 	cached <- .SYMBOL_POSITIONS_CACHE[[key]]
 	if (!is.null(cached)) return(cached)
-	graphemes <- split_graphemes(text)
+	graphemes <- helper_text_graphemes_split(text)
 	hits <- which(graphemes %in% char_vector)
 	result <- if (length(hits) == 0) {
 		data.frame(char = character(0), occurrence = integer(0),
@@ -5134,7 +5149,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	# ===== PREFIX PARTS =====
 	ann$spacebefore <- stringr::str_pad("", width = l@spacesbefore, side = "left", pad = " ")
 
-	style_default_name <- get_style_base(l, "transcript.default")$docx.template.name
+	style_default_name <- helper_layout_style_base_get(l, "transcript.default")$docx.template.name
 	ann$format.show            <- TRUE
 	ann$format.style           <- style_default_name
 	ann$format.line.nr.show    <- isTRUE(l@line.nr.show)
@@ -5498,7 +5513,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	# comment 206_003 K1, 2026-08-17).
 	for (i in which(!ann$format.is.main & !is.na(ann$format.align.char))) {
 		chars <- strsplit(ann$format.align.char[i], "")[[1]]
-		g <- split_graphemes(ann$content_render[i])
+		g <- helper_text_graphemes_split(ann$content_render[i])
 		if (length(g) >= 3 && g[1] %in% chars && g[2] == " ") {
 			ann$content_render[i] <- paste(g[-2], collapse = "")
 		}
@@ -5583,7 +5598,7 @@ verify_alignment <- function(result, text_body_width,
 		if (!isTRUE(result$wrap[i])) next
 		lines <- result$rendered_lines[[i]]
 		for (line_index in seq_along(lines)) {
-			line_len <- length(split_graphemes(lines[line_index]))
+			line_len <- length(helper_text_graphemes_split(lines[line_index]))
 			if (line_len > text_body_width) {
 				body <- substr(lines[line_index],
 				               nchar(result$prefix_cont[i]) + 1L,
@@ -5625,7 +5640,7 @@ verify_alignment <- function(result, text_body_width,
 find_rendered_col <- function(lines, char, occurrence = 1L) {
 	count <- 0L
 	for (line in lines) {
-		graphemes <- split_graphemes(line)
+		graphemes <- helper_text_graphemes_split(line)
 		hits <- which(graphemes == char)
 		for (h in hits) {
 			count <- count + 1L
@@ -5733,8 +5748,8 @@ build_alignment_report <- function(result, plan, transcript_name,
 				        w$char, w$occurrence, .report_shorten(w$content, 40), w$char,
 				        if (!is.na(w$main_tier)) w$main_tier else "(none)",
 				        .report_shorten(w$main_content, 40),
-				        helper_format_time(w$main_startsec, format = getOption("act.time.format.transcript", "h:mm:ss.s")),
-				        helper_format_time(w$main_endsec, format = getOption("act.time.format.transcript", "h:mm:ss.s")))
+				        helper_time_format(w$main_startsec, format = getOption("act.time.format.transcript", "h:mm:ss.s")),
+				        helper_time_format(w$main_endsec, format = getOption("act.time.format.transcript", "h:mm:ss.s")))
 			},
 			advice = if (is_stills) {
 				paste0("Add a \"", w$char, "\" to the verbal annotation at the moment the ",
@@ -5761,7 +5776,7 @@ build_alignment_report <- function(result, plan, transcript_name,
 		chars <- result$align_chars[i]
 		if (is.na(chars) || nchar(chars) == 0) next
 		mine <- strsplit(chars, "")[[1]]
-		graphemes <- split_graphemes(result$content[i])
+		graphemes <- helper_text_graphemes_split(result$content[i])
 		foreign <- unique(graphemes[graphemes %in% own & !(graphemes %in% mine)])
 		if (length(foreign) == 0) next
 		out[[length(out) + 1]] <- list(
@@ -5791,11 +5806,11 @@ build_alignment_report <- function(result, plan, transcript_name,
 	                             function(x) strsplit(x, "")[[1]])))[1]
 	if (is.na(mark)) return(list())
 	pictures <- sum(vapply(picture_rows, function(r) {
-		length(which(split_graphemes(result$content[r]) == mark))
+		length(which(helper_text_graphemes_split(result$content[r]) == mark))
 	}, integer(1)))
 	main_rows <- which(result$is_main)
 	marks <- sum(vapply(main_rows, function(r) {
-		length(which(split_graphemes(result$content[r]) == mark))
+		length(which(helper_text_graphemes_split(result$content[r]) == mark))
 	}, integer(1)))
 	if (marks <= pictures) return(list())
 	list(list(
@@ -5892,7 +5907,7 @@ build_alignment_report <- function(result, plan, transcript_name,
 	out <- list()
 	for (i in which(result$is_main)) {
 		if (is.na(result$content[i])) next
-		graphemes <- split_graphemes(result$content[i])
+		graphemes <- helper_text_graphemes_split(result$content[i])
 		positions <- which(graphemes == "[")
 		if (length(positions) == 0 || positions[1] > 2L) next
 		matched <- if (!is.null(pairs) && nrow(pairs) > 0) {
@@ -5961,7 +5976,7 @@ build_alignment_report <- function(result, plan, transcript_name,
 		if (!isTRUE(result$wrap[i])) next
 		lines <- result$rendered_lines[[i]]
 		for (line_index in seq_along(lines)) {
-			line_length <- length(split_graphemes(lines[line_index]))
+			line_length <- length(helper_text_graphemes_split(lines[line_index]))
 			if (line_length <= text_body_width) next
 			out[[length(out) + 1]] <- list(
 				id = "B3", title = "Line exceeds the transcript width",
@@ -6108,8 +6123,8 @@ build_alignment_report <- function(result, plan, transcript_name,
 			strrep("-", 78),
 			sprintf("%s | %s - %s | %s",
 			        label,
-			        helper_format_time(first$startsec),
-			        helper_format_time(first$endsec),
+			        helper_time_format(first$startsec),
+			        helper_time_format(first$endsec),
 			        first$tier),
 			strrep("-", 78))
 
@@ -6236,7 +6251,7 @@ build_alignment_report <- function(result, plan, transcript_name,
 }
 
 .strip_rectangle_marks <- function(text, rectangle_char) {
-	graphemes <- split_graphemes(text)
+	graphemes <- helper_text_graphemes_split(text)
 	keep <- rep(TRUE, length(graphemes))
 	marks_index <- integer(0)
 	marks_lines <- integer(0)
@@ -6271,7 +6286,7 @@ build_alignment_report <- function(result, plan, transcript_name,
 
 .resolve_rectangle_marks <- function(text, marks, align_chars, option_cap) {
 	anchor_set <- strsplit(align_chars, "")[[1]]
-	graphemes <- split_graphemes(text)
+	graphemes <- helper_text_graphemes_split(text)
 	is_anchor <- graphemes %in% anchor_set
 	force_cap <- max(2L, as.integer(option_cap))
 	out_char <- character(0)
@@ -6733,14 +6748,14 @@ report_render_warnings <- function(result, transcript_name = "") {
 		cli::cli_verbatim(sprintf("  %s: \"%s\"",
 			first$tier, .shorten_warning_text(first$content, 58)))
 		cli::cli_verbatim(sprintf("  layer time:  %s - %s",
-			helper_format_time(first$startsec),
-			helper_format_time(first$endsec)))
+			helper_time_format(first$startsec),
+			helper_time_format(first$endsec)))
 		if (!is.null(first$main_tier) && !is.na(first$main_tier)) {
 			cli::cli_verbatim(sprintf("  main tier:   %s: \"%s\"  (%s - %s)",
 				first$main_tier,
 				.shorten_warning_text(first$main_content, 45),
-				helper_format_time(first$main_startsec),
-				helper_format_time(first$main_endsec)))
+				helper_time_format(first$main_startsec),
+				helper_time_format(first$main_endsec)))
 		}
 
 		kinds <- vapply(entries, function(w) w$kind, character(1))

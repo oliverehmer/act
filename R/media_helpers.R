@@ -22,10 +22,7 @@ media_build <- function(paths) {
 		return(.emptyMedia)
 	}
 	paths <- unname(paths)
-	ext  <- tolower(tools::file_ext(paths))
-	type <- ifelse(ext %in% tolower(options()$act.media.fileformats.video), "video",
-			ifelse(ext %in% tolower(options()$act.media.fileformats.audio), "audio",
-				   NA_character_))
+	type <- helper_media_type(paths)
 	data.frame(
 		path 			= paths,
 		source.path 	= NA_character_,
@@ -49,6 +46,33 @@ media_build <- function(paths) {
 		kind 			= "full",
 		type 			= type,
 		stringsAsFactors = FALSE)
+}
+
+
+#' Helper: Media type of files
+#'
+#' Tells video from sound files by their extension, using the options
+#' \code{act.media.fileformats.video} and \code{act.media.fileformats.audio}.
+#' These two options are the only list of media formats in act and iclo.
+#'
+#' @param filePaths Vector of character strings; file paths or names.
+#'
+#' @return Vector of character strings: \code{"video"}, \code{"audio"} or
+#'   \code{NA}, one per path.
+#'
+#' @export
+#'
+#' @examples
+#' act::helper_media_type(c("rec.mp4", "rec.WAV", "still.png"))
+helper_media_type <- function(filePaths) {
+	.media_type_of_ext(tools::file_ext(as.character(filePaths)))
+}
+
+.media_type_of_ext <- function(extensions) {
+	ext <- tolower(as.character(extensions))
+	video <- tolower(getOption("act.media.fileformats.video", c("mp4", "mov")))
+	audio <- tolower(getOption("act.media.fileformats.audio", c("wav", "aif", "aiff", "mp3")))
+	ifelse(ext %in% video, "video", ifelse(ext %in% audio, "audio", NA_character_))
 }
 
 

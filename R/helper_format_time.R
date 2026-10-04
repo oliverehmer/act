@@ -14,40 +14,40 @@
 #' library(act)
 #' 
 #' 
-#' helper_format_time(12734.2322345)
-#' helper_format_time(2734.2322345)
-#' helper_format_time(34.2322345)
-#' helper_format_time(0.2322345)
+#' helper_time_format(12734.2322345)
+#' helper_time_format(2734.2322345)
+#' helper_time_format(34.2322345)
+#' helper_time_format(0.2322345)
 #' 
-#' helper_format_time(12734.2322345, addHrsMinSec=TRUE)
-#' helper_format_time(2734.2322345, addHrsMinSec=TRUE)
-#' helper_format_time(34.2322345, addHrsMinSec=TRUE)
-#' helper_format_time(0.2322345, addHrsMinSec=TRUE)
+#' helper_time_format(12734.2322345, addHrsMinSec=TRUE)
+#' helper_time_format(2734.2322345, addHrsMinSec=TRUE)
+#' helper_time_format(34.2322345, addHrsMinSec=TRUE)
+#' helper_time_format(0.2322345, addHrsMinSec=TRUE)
 #' 
-#' helper_format_time(12734.2322345, digits=3)
-#' helper_format_time(2734.2322345, digits=3)
-#' helper_format_time(34.2322345, digits=3)
-#' helper_format_time(0.2322345, digits=3)
+#' helper_time_format(12734.2322345, digits=3)
+#' helper_time_format(2734.2322345, digits=3)
+#' helper_time_format(34.2322345, digits=3)
+#' helper_time_format(0.2322345, digits=3)
 #' 
-#' helper_format_time(12734.2322345, addHrsMinSec=TRUE, digits=3)
-#' helper_format_time(2734.2322345, addHrsMinSec=TRUE, digits=3)
-#' helper_format_time(34.2322345, addHrsMinSec=TRUE, digits=3)
-#' helper_format_time(0.2322345, addHrsMinSec=TRUE, digits=3)
+#' helper_time_format(12734.2322345, addHrsMinSec=TRUE, digits=3)
+#' helper_time_format(2734.2322345, addHrsMinSec=TRUE, digits=3)
+#' helper_time_format(34.2322345, addHrsMinSec=TRUE, digits=3)
+#' helper_time_format(0.2322345, addHrsMinSec=TRUE, digits=3)
 #' 
-#' helper_format_time(12734.2322345, addHrsMinSec=TRUE, addSec=TRUE)
-#' helper_format_time(2734.2322345, addHrsMinSec=TRUE, addSec=TRUE)
-#' helper_format_time(34.2322345, addHrsMinSec=TRUE, addSec=TRUE)
-#' helper_format_time(0.2322345, addHrsMinSec=TRUE, addSec=TRUE)
+#' helper_time_format(12734.2322345, addHrsMinSec=TRUE, addSec=TRUE)
+#' helper_time_format(2734.2322345, addHrsMinSec=TRUE, addSec=TRUE)
+#' helper_time_format(34.2322345, addHrsMinSec=TRUE, addSec=TRUE)
+#' helper_time_format(0.2322345, addHrsMinSec=TRUE, addSec=TRUE)
 #' 
-#' helper_format_time(12734.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
-#' helper_format_time(2734.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
-#' helper_format_time(34.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
-#' helper_format_time(0.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
+#' helper_time_format(12734.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
+#' helper_time_format(2734.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
+#' helper_time_format(34.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
+#' helper_time_format(0.2322345, addHrsMinSec=TRUE, digits=3, addSec=TRUE)
 #' 
-#' helper_format_time(83.45, format="h:mm:ss.ss")
-#' helper_format_time(83.45, format="h:mm:ss:ff", fps=25)
+#' helper_time_format(83.45, format="h:mm:ss.ss")
+#' helper_time_format(83.45, format="h:mm:ss:ff", fps=25)
 #' 
-helper_format_time <- function (t,
+helper_time_format <- function (t,
 								digits=1,
 								addHrsMinSec=FALSE, 
 								addSec=FALSE,
@@ -99,14 +99,25 @@ helper_format_time <- function (t,
 	return(f)
 }
 
-.time_formats <- function() {
+#' Helper: Time formats
+#'
+#' Lists the time formats that \link{helper_time_format} accepts as
+#' \code{format}.
+#'
+#' @return Character vector of format names.
+#'
+#' @export
+#'
+#' @examples
+#' act::helper_time_formats_list()
+helper_time_formats_list <- function() {
 	c("h:mm:ss.s", "h:mm:ss.ss", "h:mm:ss:ff", "mm:ss.ss", "s.s", "s.ss")
 }
 
 .time_format_apply <- function(t, format, fps = 25) {
 	format <- as.character(format)[1]
-	if (!format %in% .time_formats()) {
-		cli::cli_abort("Unknown time {.arg format} {.val {format}}. Use one of {.val {.time_formats()}}.")
+	if (!format %in% helper_time_formats_list()) {
+		cli::cli_abort("Unknown time {.arg format} {.val {format}}. Use one of {.val {helper_time_formats_list()}}.")
 	}
 	t <- as.numeric(t)
 	out <- rep(NA_character_, length(t))

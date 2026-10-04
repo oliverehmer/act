@@ -9,7 +9,7 @@
 #'
 #' @export
 #'
-helper_order_annotations_columns <- function(df) {
+helper_annotations_columns_order <- function(df) {
 	if (is.null(df)) 		{ return(NULL) }
 	if (nrow(df) == 0 && ncol(df) == 0) { return(df) }
 

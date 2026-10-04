@@ -73,7 +73,7 @@ info <- function(...) {
 				myRow <- data.frame(
 					transcriptName      = x@transcripts[[i]]@name,
 					length.sec           = as.double(x@transcripts[[i]]@length.sec),
-					length.formatted     = helper_format_time(x@transcripts[[i]]@length.sec),
+					length.formatted     = helper_time_format(x@transcripts[[i]]@length.sec),
 					tier.count           = as.integer(nrow(x@transcripts[[i]]@tiers)),
 					annotations.count    = nrow(x@transcripts[[i]]@annotations),
 					words.org.count      = words.org.count,
@@ -194,7 +194,7 @@ info <- function(...) {
 		words.norm.count <- lapply(t@annotations$content.norm, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
 		words.norm.count <- sum(unlist(words.norm.count))
 		
-		info <- list(length.formatted  = helper_format_time(t@length.sec),
+		info <- list(length.formatted  = helper_time_format(t@length.sec),
 					 length.sec        = t@length.sec,
 					 words.org.count   = words.org.count,
 					 words.norm.count  = words.norm.count,					 

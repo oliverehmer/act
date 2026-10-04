@@ -313,10 +313,11 @@ media_metadata_read <- function(file, tolerance_sec = 0.05) {
 		return(row)
 	}
 
-	if (ext %in% c("mp4", "mov", "wav", "mp3")) {
+	media_type <- .media_type_of_ext(ext)
+	if (!is.na(media_type)) {
 		row <- .metadata_read_ffprobe(file_path, row)
 		if (identical(row$comment, "ffprobe timeout")) return(row)
-		if (ext %in% c("mp4", "mov") && !is.na(row$video.width)) {
+		if (identical(media_type, "video") && !is.na(row$video.width)) {
 			row$video.editlist.offset <- tryCatch(.mp4_video_editlist_offset(file_path),
 				error = function(e) NA_real_)
 		}

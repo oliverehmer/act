@@ -336,8 +336,7 @@ search_cuts_media <- function(x,
 				out_suffix <- in_suffix
 				
 				#media type
-				is_audio_file <- tolower(in_suffix) %in% c(tolower(options()$act.media.fileformats.audio),
-				                                           "m4a", "aac", "flac", "ogg", "opus")
+				is_audio_file <- identical(.media_type_of_ext(in_suffix), "audio")
 				is_video_file <- !is_audio_file
 
 				#if it is an audio file and should be converted to mp3
@@ -443,7 +442,7 @@ search_cuts_media <- function(x,
 			
 			#===== THUMBNAIL  ====
 			#extract thumbs (only if it is a video file)
-			if (exportThumbnail & (in_suffix %in% options()$act.media.fileformats.video)) 	{
+			if (exportThumbnail & identical(.media_type_of_ext(in_suffix), "video")) 	{
 				#check if time is set or default time
 				time <- NA
 				if("thumbnails" %in% colnames(s@results))  {
@@ -516,7 +515,7 @@ search_cuts_media <- function(x,
 			}
 			
 			#===== STILLS ====
-			if (exportStills & (in_suffix %in% options()$act.media.fileformats.video)) {
+			if (exportStills & identical(.media_type_of_ext(in_suffix), "video")) {
 				#values
 				stills.values <- unlist(s@results$stills.values[[res]])
 				if (!length(stills.values)==0) {
@@ -674,4 +673,3 @@ makeVideoBlock <- function(os, CreatePannedVersionsBlock, in_filePath, out_filen
 	
 	return (block)
 }
-

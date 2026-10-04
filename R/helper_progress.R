@@ -57,7 +57,7 @@ helper_progress_tick <- function() {
 		if (is.list(state)) {
 			state$current <- state$current + 1
 			act.environment$pb_state <- state
-			tail <- .act_progress_eta_tail(state$start, state$current, state$total)
+			tail <- helper_progress_eta_format(state$start, state$current, state$total)
 		} else {
 			tail <- sprintf(" (%7s left)", "?")
 		}
@@ -75,9 +75,20 @@ helper_progress_tick <- function() {
 .ACT_PROGRESS_LABEL_WIDTH <- 28L
 .ACT_PROGRESS_TOTAL_WIDTH <- 80L
 
-# Fixed-width eta tail " (%7s left)" (15 chars total, fits "59m 20s"),
-# computed from elapsed time per finished item.
-.act_progress_eta_tail <- function(start, current, total) {
+#' Helper: Remaining time of a progress bar
+#'
+#' Formats the remaining time of a loop as a fixed-width tail
+#' \code{" (%7s left)"} (15 characters, fits "59m 20s"), estimated from the
+#' elapsed time per finished item. The progress bars of act and iclo use it.
+#'
+#' @param start POSIXct; start time of the loop.
+#' @param current Integer; number of finished items.
+#' @param total Integer; number of all items.
+#'
+#' @return Character string.
+#'
+#' @export
+helper_progress_eta_format <- function(start, current, total) {
 	if (current <= 0 || current >= total) {
 		eta_txt <- "0s"
 	} else {

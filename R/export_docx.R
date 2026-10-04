@@ -106,7 +106,7 @@ export_docx <- function (   t,
 		cli::cli_abort("Length of tier names is to long. Maximum is 25. Check option {.code l@speaker.width}.")
 	}
 
-	templates <- .resolve_docx_templates(l)
+	templates <- helper_layout_docx_templates_resolve(l)
 	template_suffixes <- if (length(templates) <= 1) {
 		""
 	} else {
@@ -138,7 +138,7 @@ export_docx <- function (   t,
 	                        headerInsertSource)
 
 	if (!is.null(result)) {
-		style_default_name <- get_style_base(l, "transcript.default")$docx.template.name
+		style_default_name <- helper_layout_style_base_get(l, "transcript.default")$docx.template.name
 		space_style_row <- get_style_user(l, name = "space")
 		space_style_name <- if (!is.null(space_style_row) &&
 		                        !is.na(space_style_row$docx.template.name)) {
@@ -219,7 +219,7 @@ export_docx <- function (   t,
 	if (!isTRUE(l@header.insert)) return(doc)
 	add_block <- function(doc, value, style_name) {
 		if (is.null(value) || is.na(value)) return(doc)
-		style <- get_style_base(l, style_name)$docx.template.name
+		style <- helper_layout_style_base_get(l, style_name)$docx.template.name
 		for (line in unlist(stringr::str_split(value, "\n"))) {
 			doc <- officer::body_add_par(doc, value = line, style = style)
 		}
@@ -231,16 +231,27 @@ export_docx <- function (   t,
 	doc <- add_block(doc, headerDescription, "header.description")
 	if (isTRUE(headerInsertSource) && nrow(t@annotations) > 0) {
 		source_line <- paste0("(", t@name, ", ",
-			helper_format_time(min(t@annotations$startsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), "-",
-			helper_format_time(max(t@annotations$endsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), ")")
+			helper_time_format(min(t@annotations$startsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), "-",
+			helper_time_format(max(t@annotations$endsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), ")")
 		doc <- officer::body_add_par(doc, value = source_line,
-			style = get_style_base(l, "header.subtitle")$docx.template.name)
+			style = helper_layout_style_base_get(l, "header.subtitle")$docx.template.name)
 	}
 	doc
 }
 
 #==== FUNCTONS ====
-get_style_base <- function(l, actStyleName) {
+#' Helper: Base style of a layout
+#'
+#' Returns the row of the base styles table (\code{l@docx.styles.base}) for an
+#' act style name, e.g. \code{"transcript.default"}.
+#'
+#' @param l Layout object.
+#' @param actStyleName Character string; act style name.
+#'
+#' @return Data frame with one row.
+#'
+#' @export
+helper_layout_style_base_get <- function(l, actStyleName) {
 	id <- which(l@docx.styles.base$act.style.name==actStyleName)
 	if (length(id)==0) {
 		cli::cli_abort("Style {.val {actStyleName}} is not defined in your styles file. Add this style to your base styles.")

@@ -86,7 +86,7 @@ search_run <- function(x, s) {
 		temp$stills.values <- vector("list", nrow(temp))
 
 		#reorder columns: standard, layers, search
-		temp <- helper_order_annotations_columns(temp)
+		temp <- helper_annotations_columns_order(temp)
 	}
 	
 	#---- . set return value

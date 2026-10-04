@@ -267,7 +267,7 @@ search_cuts_printtranscript <- function(x,
 				# Resolve all templates the layout carries (1..N).
 				# Per-result files were written by export_docx with the same suffix scheme,
 				# so each template merges only its own per-result files.
-				templates <- .resolve_docx_templates(l)
+				templates <- helper_layout_docx_templates_resolve(l)
 				template_suffixes <- if (length(templates) <= 1) {
 					""
 				} else {

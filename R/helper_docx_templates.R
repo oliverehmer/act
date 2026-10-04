@@ -1,5 +1,5 @@
 # Internal helpers for resolving and naming docx template paths.
-# Not exported; cross-package access via act:::.resolve_docx_templates.
+# helper_layout_docx_templates_resolve is exported; the naming helpers below are internal.
 
 # Resolves and validates a layout's docx template paths.
 # Returns a named character vector with cleaned, existing paths.
@@ -7,7 +7,18 @@
 # - Falls back to the act-internal default template if nothing remains
 # - Errors if any explicitly set path does not exist
 # - Ensures every entry has a name (uses suffix-from-diff for unnamed entries)
-.resolve_docx_templates <- function(l) {
+#' Helper: Resolve the DOCX templates of a layout
+#'
+#' Cleans and checks the template paths in \code{l@docx.template.path}: empty
+#' entries are dropped, the act default template is used when none remains, a
+#' set path that does not exist is an error, and every entry gets a name.
+#'
+#' @param l Layout object.
+#'
+#' @return Named character vector of existing template paths.
+#'
+#' @export
+helper_layout_docx_templates_resolve <- function(l) {
 	templates <- l@docx.template.path
 	templates <- templates[!is.na(templates) & nzchar(templates)]
 

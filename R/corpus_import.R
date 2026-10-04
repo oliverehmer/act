@@ -135,23 +135,9 @@ corpus_import <- function(x,
 			dup_names <- unique(transcriptNames.info$names.before.unique[duplicated(transcriptNames.info$names.before.unique)])
 			if (duplicate_handling == "warn_keep_newest") {
 				date_pattern <- x@import.names.modify$datePattern
-				use_date <- !is.null(date_pattern) && length(date_pattern) == 1L && nzchar(date_pattern)
 				for (dn in dup_names) {
 					dup_idx <- which(transcriptNames.info$names.before.unique == dn)
-					sort_key <- if (use_date) {
-						.corpus_import_date_key(basename(results$filePath[dup_idx]), date_pattern)
-					} else {
-						rep("", length(dup_idx))
-					}
-					if (any(nzchar(sort_key))) {
-						win <- .which_max_key(sort_key)
-					} else {
-						# no file carries a date in its name - the modification time is the
-						# last resort here (it must never override a date, only stand in
-						# when there is none)
-						file_dates <- file.info(results$filePath[dup_idx])$mtime
-						win <- if (all(is.na(file_dates))) 1L else which.max(file_dates)
-					}
+					win <- helper_file_newest_select(results$filePath[dup_idx], date_pattern)
 					keep_idx <- dup_idx[win]
 					skip_idx <- setdiff(dup_idx, keep_idx)
 					results$status[skip_idx] <- "skipped"
@@ -289,12 +275,28 @@ corpus_import <- function(x,
 }
 
 
-# Build a sortable key from the date (and optional version letter) in a file
-# name, used to pick the newest of several same-named files without relying on
-# the modification time. No date -> empty key (sorts lowest). A plain date sorts
-# before the same date with a version letter (no letter is version "0" < "b").
-.corpus_import_date_key <- function(filenames, date_pattern) {
-	raw <- stringr::str_extract(filenames, date_pattern)
+#' Helper: Sort key from the date in a file name
+#'
+#' Builds a sortable key from the date (and optional version letter) in file
+#' names, e.g. \code{2026-10-04b}. A plain date sorts before the same date with
+#' a version letter (no letter counts as version \code{0}). Files without a
+#' date get an empty key, which sorts lowest.
+#'
+#' @param fileNames Vector of character strings; file names (or paths).
+#' @param datePattern Character string; regular expression matching the date
+#'   (optionally followed by a version letter) in a file name.
+#'
+#' @return Vector of character strings, one key per file name.
+#'
+#' @seealso \link{helper_file_newest_select}
+#'
+#' @export
+#'
+#' @examples
+#' act::helper_file_date_key_make(c("a__2026-10-04.eaf", "a__2026-10-04b.eaf", "a.eaf"),
+#'                                "__\\d{4}-\\d{2}-\\d{2}[a-z]?")
+helper_file_date_key_make <- function(fileNames, datePattern) {
+	raw <- stringr::str_extract(fileNames, datePattern)
 	dv  <- stringr::str_match(raw, "([0-9]{4}-[0-9]{2}-[0-9]{2})([a-z]?)")
 	d   <- dv[, 2]
 	v   <- dv[, 3]
@@ -302,8 +304,27 @@ corpus_import <- function(x,
 	ifelse(is.na(d), "", paste0(d, ifelse(nzchar(v), v, "0")))
 }
 
-
-.which_max_key <- function(keys) {
-	keys[is.na(keys)] <- ""
-	which(keys == max(keys))[1]
+#' Helper: The newest of several files
+#'
+#' Chooses the newest of several files: by the date (and version letter) in
+#' the file name (see \link{helper_file_date_key_make}); when no file carries a
+#' date, by the modification time; when that is unknown too, the first file.
+#'
+#' @param filePaths Vector of character strings; paths of the files.
+#' @param datePattern Character string; regular expression matching the date
+#'   in a file name. \code{NULL} or empty: modification time only.
+#'
+#' @return Integer; index of the newest file (\code{integer(0)} for no files).
+#'
+#' @seealso \link{helper_file_date_key_make}
+#'
+#' @export
+helper_file_newest_select <- function(filePaths, datePattern) {
+	if (length(filePaths) == 0) return(integer(0))
+	use_date <- !is.null(datePattern) && length(datePattern) == 1L && !is.na(datePattern) && nzchar(datePattern)
+	key <- if (use_date) helper_file_date_key_make(basename(filePaths), datePattern) else rep("", length(filePaths))
+	if (any(nzchar(key))) return(which(key == max(key))[1])
+	mt <- file.info(filePaths)$mtime
+	if (all(is.na(mt))) return(1L)
+	which.max(mt)
 }

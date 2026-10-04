@@ -96,8 +96,8 @@ helper_ffmpeg_args <- function(output,
 		if (!is.null(startsec)) {
 			target   <- max(0, as.numeric(startsec))
 			window   <- if (is.null(duration)) NULL else as.numeric(duration)
-			if (length(.ffmpeg_input_flags(input))) {
-				timing <- .ffmpeg_seek_timing(input, videoOffset, videoFps)
+			if (length(helper_ffmpeg_input_flags(input))) {
+				timing <- helper_media_video_timing_read(input, videoOffset, videoFps)
 				target <- target + timing$offset
 				if (is.finite(timing$frame_dur)) target <- target - timing$frame_dur * 0.99
 				target <- max(0, target)
@@ -111,10 +111,10 @@ helper_ffmpeg_args <- function(output,
 		} else if (!is.null(duration)) {
 			args <- c(args, "-t", .ffmpeg_seconds(as.numeric(duration)))
 		}
-		args <- c(args, .ffmpeg_input_flags(input), "-i", input)
+		args <- c(args, helper_ffmpeg_input_flags(input), "-i", input)
 	}
 	for (extra in inputsExtra) {
-		args <- c(args, .ffmpeg_input_flags(extra), "-i", extra)
+		args <- c(args, helper_ffmpeg_input_flags(extra), "-i", extra)
 	}
 
 	trim_vf  <- if (!is.null(seek_out)) sprintf("trim=start=%s", .ffmpeg_seconds(seek_out)) else NULL
@@ -278,7 +278,7 @@ helper_ffmpeg_args_clip <- function(output,
 	}
 	startsec <- max(0, as.numeric(startsec))
 	duration <- as.numeric(duration)
-	timing   <- .ffmpeg_seek_timing(input, videoOffset, videoFps)
+	timing   <- helper_media_video_timing_read(input, videoOffset, videoFps)
 	raw_line <- identical(getOption("act.media.timeline", "editlist"), "raw")
 	if (isTRUE(videoCopy)) {
 		key <- helper_ffmpeg_keyframe(input, startsec, videoOffset = timing$offset)
@@ -290,7 +290,7 @@ helper_ffmpeg_args_clip <- function(output,
 
 	if (isTRUE(videoCopy)) {
 		args <- c(args, "-ss", .ffmpeg_seconds(startsec + timing$offset), "-t", .ffmpeg_seconds(duration),
-		          .ffmpeg_input_flags(input), "-i", input)
+		          helper_ffmpeg_input_flags(input), "-i", input)
 		seek_out <- NULL
 	} else {
 		target <- startsec + timing$offset
@@ -299,14 +299,14 @@ helper_ffmpeg_args_clip <- function(output,
 		pre_sec  <- max(0, target - 1)
 		seek_out <- target - pre_sec
 		args <- c(args, "-ss", .ffmpeg_seconds(pre_sec), "-t", .ffmpeg_seconds(seek_out + duration),
-		          .ffmpeg_input_flags(input), "-i", input)
+		          helper_ffmpeg_input_flags(input), "-i", input)
 	}
 	for (extra in inputsExtra) {
-		args <- c(args, if (length(extra) == 1) c(.ffmpeg_input_flags(extra), "-i", extra) else extra)
+		args <- c(args, if (length(extra) == 1) c(helper_ffmpeg_input_flags(extra), "-i", extra) else extra)
 	}
 	audio_idx <- 1L + length(inputsExtra)
 	audio_src <- audioInput %||% input
-	if (isTRUE(withAudio) && identical(.ffmpeg_has_audio(audio_src), FALSE)) {
+	if (isTRUE(withAudio) && identical(helper_media_audio_track_exists(audio_src), FALSE)) {
 		if (!is.null(filterComplex) && !is.null(audioMap)) {
 			cli::cli_abort(c("{.file {basename(audio_src)}} has no sound track.",
 				"i" = "Build {.arg filterComplex} without the sound part and set {.arg audioMap} to {.code NULL}."))
@@ -319,7 +319,7 @@ helper_ffmpeg_args_clip <- function(output,
 	audio_lead <- if (audio_aac) 1024 / (if (is.finite(audio_rate)) audio_rate else 48000) else 0
 	if (isTRUE(withAudio)) {
 		args <- c(args, "-ss", .ffmpeg_seconds(startsec), "-t", .ffmpeg_seconds(duration + audio_lead),
-		          if (raw_line) .ffmpeg_input_flags(audio_src), "-i", audio_src)
+		          if (raw_line) helper_ffmpeg_input_flags(audio_src), "-i", audio_src)
 	}
 	lead_af <- if (audio_lead > 0)
 		sprintf("atrim=start=%s,asetpts=PTS-STARTPTS", .ffmpeg_seconds(audio_lead)) else NULL
@@ -437,7 +437,7 @@ helper_ffmpeg_args_audio <- function(output,
 	if (!is.null(audioFilter) && !is.null(filterComplex)) {
 		cli::cli_abort("Use either {.arg audioFilter} or {.arg filterComplex}, not both.")
 	}
-	if (identical(.ffmpeg_has_audio(input), FALSE)) {
+	if (identical(helper_media_audio_track_exists(input), FALSE)) {
 		cli::cli_abort("{.file {basename(input)}} has no sound track.")
 	}
 	raw_line <- identical(getOption("act.media.timeline", "editlist"), "raw")
@@ -446,7 +446,7 @@ helper_ffmpeg_args_audio <- function(output,
 
 	args <- c("-hide_banner", "-loglevel", "error",
 	          "-ss", .ffmpeg_seconds(max(0, as.numeric(startsec))), "-t", .ffmpeg_seconds(as.numeric(duration)),
-	          if (raw_line) .ffmpeg_input_flags(input), "-i", input, "-vn")
+	          if (raw_line) helper_ffmpeg_input_flags(input), "-i", input, "-vn")
 	if (!is.null(filterComplex)) {
 		args <- c(args, "-filter_complex", filterComplex, "-map", audioMap)
 	} else {
@@ -536,8 +536,8 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 #' @export
 helper_ffmpeg_keyframe <- function(input, startsec, videoOffset = NULL) {
 	startsec <- max(0, as.numeric(startsec))
-	if (!length(.ffmpeg_input_flags(input)) || !file.exists(input)) return(startsec)
-	offset <- .ffmpeg_seek_timing(input, videoOffset)$offset
+	if (!length(helper_ffmpeg_input_flags(input)) || !file.exists(input)) return(startsec)
+	offset <- helper_media_video_timing_read(input, videoOffset)$offset
 	raw <- startsec + offset
 	for (back in c(12, 60, 600)) {
 		out <- tryCatch(.metadata_ffprobe_run(c("-v", "error", "-ignore_editlist", "1",
@@ -557,9 +557,24 @@ helper_ffmpeg_keyframe <- function(input, startsec, videoOffset = NULL) {
 
 # ===== INTERNAL HELPERS =====
 
-.ffmpeg_input_flags <- function(path) {
-	if (length(path) == 1 && !is.na(path) &&
-	    stringr::str_detect(path, stringr::regex("\\.(mp4|m4a|m4v|mov)$", ignore_case = TRUE))) {
+#' Helper: FFmpeg input flags of a video source
+#'
+#' The demuxer flags that go directly before the \code{-i} of an MP4/MOV source
+#' whose picture is read: \code{-ignore_editlist 1 -avoid_negative_ts make_zero}.
+#' Other files (images, wav, ...) get none - the image demuxer would abort on
+#' them.
+#'
+#' @param filePath Character string; path of the source.
+#'
+#' @return Character vector of FFmpeg arguments (empty for other files).
+#'
+#' @export
+#'
+#' @examples
+#' act::helper_ffmpeg_input_flags("video.mp4")
+helper_ffmpeg_input_flags <- function(filePath) {
+	if (length(filePath) == 1 && !is.na(filePath) &&
+	    stringr::str_detect(filePath, stringr::regex("\\.(mp4|m4a|m4v|mov)$", ignore_case = TRUE))) {
 		c("-ignore_editlist", "1", "-avoid_negative_ts", "make_zero")
 	} else {
 		character(0)
@@ -647,13 +662,23 @@ helper_ffmpeg_keyframe <- function(input, startsec, videoOffset = NULL) {
 
 .FFMPEG_TIMING_CACHE <- new.env(parent = emptyenv())
 
-.ffmpeg_has_audio <- function(path) {
-	if (is.null(path) || !length(path) || is.na(path[1]) || !file.exists(path[1])) return(NA)
-	key <- paste("streams", normalizePath(path[1], mustWork = FALSE), sep = "|")
+#' Helper: Does a media file have a sound track?
+#'
+#' Asks ffprobe for the streams of a file (cached per file).
+#'
+#' @param filePath Character string; path of the media file.
+#'
+#' @return \code{TRUE} or \code{FALSE}; \code{NA} when the file does not
+#'   exist or could not be read.
+#'
+#' @export
+helper_media_audio_track_exists <- function(filePath) {
+	if (is.null(filePath) || !length(filePath) || is.na(filePath[1]) || !file.exists(filePath[1])) return(NA)
+	key <- paste("streams", normalizePath(filePath[1], mustWork = FALSE), sep = "|")
 	hit <- .FFMPEG_TIMING_CACHE[[key]]
 	if (is.null(hit)) {
 		hit <- tryCatch(.metadata_ffprobe_run(c("-v", "error", "-show_entries", "stream=codec_type",
-			"-of", "csv=p=0", path[1]))$out, error = function(e) character(0))
+			"-of", "csv=p=0", filePath[1]))$out, error = function(e) character(0))
 		hit <- trimws(hit[nzchar(trimws(hit))])
 		if (length(hit)) assign(key, hit, envir = .FFMPEG_TIMING_CACHE)
 	}
@@ -736,7 +761,21 @@ helper_ffmpeg_keyframe <- function(input, startsec, videoOffset = NULL) {
 	res
 }
 
-.ffmpeg_seek_timing <- function(input, videoOffset = NULL, videoFps = NULL) {
+#' Helper: Timing of a video file
+#'
+#' Reads the edit list offset of the video track and the frame duration of a
+#' video file (cached per file). Values passed in are used instead of reading
+#' the file. With the option \code{act.media.timeline = "raw"} the offset is 0.
+#'
+#' @param filePath Character string; path of the video file.
+#' @param videoOffset Numeric or \code{NULL}; known edit list offset in seconds.
+#' @param videoFps Numeric or \code{NULL}; known frame rate.
+#'
+#' @return List with \code{offset} (seconds) and \code{frame_dur} (seconds,
+#'   \code{NA} when unknown).
+#'
+#' @export
+helper_media_video_timing_read <- function(filePath, videoOffset = NULL, videoFps = NULL) {
 	timeline <- getOption("act.media.timeline", "editlist")
 	if (!timeline %in% c("editlist", "raw")) {
 		cli::cli_abort("Option {.code act.media.timeline} must be {.val editlist} or {.val raw}, not {.val {timeline}}.")
@@ -744,8 +783,8 @@ helper_ffmpeg_keyframe <- function(input, startsec, videoOffset = NULL) {
 	offset <- suppressWarnings(as.numeric(videoOffset)[1])
 	fps    <- suppressWarnings(as.numeric(videoFps)[1])
 	if ((length(offset) == 0 || !is.finite(offset) || length(fps) == 0 || !is.finite(fps) || fps <= 0) &&
-	    file.exists(input)) {
-		from_file <- .ffmpeg_video_timing(input)
+	    file.exists(filePath)) {
+		from_file <- .ffmpeg_video_timing(filePath)
 		if (length(offset) == 0 || !is.finite(offset)) offset <- from_file$offset
 		if (length(fps) == 0 || !is.finite(fps) || fps <= 0) fps <- 1 / from_file$frame_dur
 	}

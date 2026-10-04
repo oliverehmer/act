@@ -85,7 +85,7 @@ import_exb <- function(filePath=NULL,
 	}
 	if(getOption("act.import.storefileContentInTranscript", default=FALSE)) {
 		if (!is.null(filePath)) {
-			read_result <- helper_read_annotation_file(
+			read_result <- helper_annotationfile_read(
 				filePath       = filePath,
 				expectedHeader = NULL,
 				fileType       = "exb",

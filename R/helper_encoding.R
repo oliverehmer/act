@@ -29,10 +29,10 @@
 #'     not \code{"ok"}.}
 #' }
 #'
-#' @seealso \code{\link{helper_read_annotation_file}}
+#' @seealso \code{\link{helper_annotationfile_read}}
 #'
 #' @export
-helper_detect_file_encoding <- function(filePath) {
+helper_encoding_file_detect <- function(filePath) {
 
 	if (!file.exists(filePath)) {
 		return(list(encoding = NA_character_, confidence = "error",
@@ -142,7 +142,7 @@ helper_detect_file_encoding <- function(filePath) {
 #'   \item{\code{lines}}{Character vector with file contents,
 #'     or \code{NULL} on error.}
 #'   \item{\code{encoding_detected}}{Detected encoding (see
-#'     \code{\link{helper_detect_file_encoding}}).}
+#'     \code{\link{helper_encoding_file_detect}}).}
 #'   \item{\code{encoding_declared}}{Encoding declared in the XML header,
 #'     or \code{NA_character_}.}
 #'   \item{\code{encoding_match}}{Logical; whether declared and detected
@@ -153,18 +153,18 @@ helper_detect_file_encoding <- function(filePath) {
 #'     \code{"; "}.}
 #' }
 #'
-#' @seealso \code{\link{helper_detect_file_encoding}},
-#'   \code{\link{helper_encodings_equivalent}}
+#' @seealso \code{\link{helper_encoding_file_detect}},
+#'   \code{\link{helper_encoding_names_equivalent}}
 #'
 #' @export
-helper_read_annotation_file <- function(filePath,
+helper_annotationfile_read <- function(filePath,
 										 expectedHeader = NULL,
 										 fileType       = NULL,
 										 verbose        = TRUE) {
 
 	messages <- character(0)
 
-	enc_info <- helper_detect_file_encoding(filePath)
+	enc_info <- helper_encoding_file_detect(filePath)
 
 	if (enc_info$confidence == "error" || is.na(enc_info$encoding)) {
 		if (verbose) {
@@ -248,7 +248,7 @@ helper_read_annotation_file <- function(filePath,
 		)
 		if (!is.na(decl_match[1, 2])) {
 			declared_encoding <- decl_match[1, 2]
-			encoding_match    <- helper_encodings_equivalent(enc_info$encoding,
+			encoding_match    <- helper_encoding_names_equivalent(enc_info$encoding,
 															 declared_encoding)
 			if (!isTRUE(encoding_match)) {
 				msg <- sprintf(
@@ -315,10 +315,10 @@ helper_read_annotation_file <- function(filePath,
 #' @return Character string with the canonical family name, or
 #'   \code{NA_character_}.
 #'
-#' @seealso \code{\link{helper_encodings_equivalent}}
+#' @seealso \code{\link{helper_encoding_names_equivalent}}
 #'
 #' @export
-helper_normalize_encoding_name <- function(x) {
+helper_encoding_name_normalize <- function(x) {
 	if (is.null(x) || is.na(x) || !nzchar(x)) return(NA_character_)
 	x <- tolower(x)
 	x <- stringr::str_replace_all(x, "[-_\\s]", "")
@@ -337,7 +337,7 @@ helper_normalize_encoding_name <- function(x) {
 #' Test whether two encoding labels refer to the same family
 #'
 #' Compares two encoding labels after normalization via
-#' \code{\link{helper_normalize_encoding_name}}. Returns \code{NA} when
+#' \code{\link{helper_encoding_name_normalize}}. Returns \code{NA} when
 #' either input is missing or empty.
 #'
 #' @param a Character string; first encoding name.
@@ -345,12 +345,12 @@ helper_normalize_encoding_name <- function(x) {
 #'
 #' @return Logical or \code{NA}.
 #'
-#' @seealso \code{\link{helper_normalize_encoding_name}}
+#' @seealso \code{\link{helper_encoding_name_normalize}}
 #'
 #' @export
-helper_encodings_equivalent <- function(a, b) {
-	na <- helper_normalize_encoding_name(a)
-	nb <- helper_normalize_encoding_name(b)
+helper_encoding_names_equivalent <- function(a, b) {
+	na <- helper_encoding_name_normalize(a)
+	nb <- helper_encoding_name_normalize(b)
 	if (is.na(na) || is.na(nb)) return(NA)
 	identical(na, nb)
 }
