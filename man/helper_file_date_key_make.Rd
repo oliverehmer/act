@@ -10,7 +10,8 @@ helper_file_date_key_make(fileNames, datePattern)
 \item{fileNames}{Vector of character strings; file names (or paths).}
 
 \item{datePattern}{Character string; regular expression matching the date
-(optionally followed by a version letter) in a file name.}
+(optionally followed by a version letter) in a file name. Empty or \code{NULL}:
+every key is empty.}
 }
 \value{
 Vector of character strings, one key per file name.

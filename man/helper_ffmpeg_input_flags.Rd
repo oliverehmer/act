@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper_ffmpeg_args.R
 \name{helper_ffmpeg_input_flags}
 \alias{helper_ffmpeg_input_flags}
-\title{Helper: FFmpeg input flags of a video source}
+\title{Helper: FFmpeg input flags of an MP4/MOV source}
 \usage{
 helper_ffmpeg_input_flags(filePath)
 }
@@ -13,8 +13,8 @@ helper_ffmpeg_input_flags(filePath)
 Character vector of FFmpeg arguments (empty for other files).
 }
 \description{
-The demuxer flags that go directly before the \code{-i} of an MP4/MOV source
-whose picture is read: \code{-ignore_editlist 1 -avoid_negative_ts make_zero}.
+The demuxer flags that go directly before the \code{-i} of a source in an
+MP4/MOV container (mp4, m4a, m4v, mov) whose picture is read: \code{-ignore_editlist 1 -avoid_negative_ts make_zero}.
 Other files (images, wav, ...) get none - the image demuxer would abort on
 them.
 }

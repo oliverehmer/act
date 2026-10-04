@@ -12,7 +12,7 @@
 		candidates <- ann[in_range, , drop = FALSE]
 		exact <- which(candidates$tierName == hit_tier)
 		if (length(exact) >= 1) return(in_range[exact[1]])
-		raw_dist  <- adist(hit_tier, candidates$tierName)[1, ]
+		raw_dist  <- utils::adist(hit_tier, candidates$tierName)[1, ]
 		max_len   <- pmax(nchar(hit_tier), nchar(candidates$tierName))
 		norm_dist <- raw_dist / max_len
 		return(in_range[which.min(norm_dist)])
@@ -26,7 +26,7 @@
 	candidates <- ann[near, , drop = FALSE]
 	exact <- which(candidates$tierName == hit_tier)
 	if (length(exact) >= 1) return(near[exact[1]])
-	raw_dist  <- adist(hit_tier, candidates$tierName)[1, ]
+	raw_dist  <- utils::adist(hit_tier, candidates$tierName)[1, ]
 	max_len   <- pmax(nchar(hit_tier), nchar(candidates$tierName))
 	norm_dist <- raw_dist / max_len
 	return(near[which.min(norm_dist)])

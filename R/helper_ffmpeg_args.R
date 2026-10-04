@@ -307,7 +307,7 @@ helper_ffmpeg_args_clip <- function(output,
 	audio_idx <- 1L + length(inputsExtra)
 	audio_src <- audioInput %||% input
 	if (isTRUE(withAudio) && identical(helper_media_audio_track_exists(audio_src), FALSE)) {
-		if (!is.null(filterComplex) && !is.null(audioMap)) {
+		if (!is.null(filterComplex) && (!is.null(audioMap) || grepl("[0:a]", filterComplex, fixed = TRUE))) {
 			cli::cli_abort(c("{.file {basename(audio_src)}} has no sound track.",
 				"i" = "Build {.arg filterComplex} without the sound part and set {.arg audioMap} to {.code NULL}."))
 		}
@@ -557,10 +557,10 @@ helper_ffmpeg_keyframe <- function(input, startsec, videoOffset = NULL) {
 
 # ===== INTERNAL HELPERS =====
 
-#' Helper: FFmpeg input flags of a video source
+#' Helper: FFmpeg input flags of an MP4/MOV source
 #'
-#' The demuxer flags that go directly before the \code{-i} of an MP4/MOV source
-#' whose picture is read: \code{-ignore_editlist 1 -avoid_negative_ts make_zero}.
+#' The demuxer flags that go directly before the \code{-i} of a source in an
+#' MP4/MOV container (mp4, m4a, m4v, mov) whose picture is read: \code{-ignore_editlist 1 -avoid_negative_ts make_zero}.
 #' Other files (images, wav, ...) get none - the image demuxer would abort on
 #' them.
 #'
@@ -674,12 +674,14 @@ helper_ffmpeg_input_flags <- function(filePath) {
 #' @export
 helper_media_audio_track_exists <- function(filePath) {
 	if (is.null(filePath) || !length(filePath) || is.na(filePath[1]) || !file.exists(filePath[1])) return(NA)
-	key <- paste("streams", normalizePath(filePath[1], mustWork = FALSE), sep = "|")
+	info <- file.info(filePath[1])
+	key <- paste("streams", normalizePath(filePath[1], mustWork = FALSE), info$size, as.numeric(info$mtime), sep = "|")
 	hit <- .FFMPEG_TIMING_CACHE[[key]]
 	if (is.null(hit)) {
 		hit <- tryCatch(.metadata_ffprobe_run(c("-v", "error", "-show_entries", "stream=codec_type",
 			"-of", "csv=p=0", filePath[1]))$out, error = function(e) character(0))
-		hit <- trimws(hit[nzchar(trimws(hit))])
+		hit <- trimws(sub(",.*$", "", hit))
+		hit <- hit[nzchar(hit)]
 		if (length(hit)) assign(key, hit, envir = .FFMPEG_TIMING_CACHE)
 	}
 	if (!length(hit)) return(NA)
@@ -782,8 +784,9 @@ helper_media_video_timing_read <- function(filePath, videoOffset = NULL, videoFp
 	}
 	offset <- suppressWarnings(as.numeric(videoOffset)[1])
 	fps    <- suppressWarnings(as.numeric(videoFps)[1])
+	has_file <- length(filePath) == 1L && !is.na(filePath) && file.exists(filePath)
 	if ((length(offset) == 0 || !is.finite(offset) || length(fps) == 0 || !is.finite(fps) || fps <= 0) &&
-	    file.exists(filePath)) {
+	    has_file) {
 		from_file <- .ffmpeg_video_timing(filePath)
 		if (length(offset) == 0 || !is.finite(offset)) offset <- from_file$offset
 		if (length(fps) == 0 || !is.finite(fps) || fps <= 0) fps <- 1 / from_file$frame_dur

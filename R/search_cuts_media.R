@@ -336,7 +336,7 @@ search_cuts_media <- function(x,
 				out_suffix <- in_suffix
 				
 				#media type
-				is_audio_file <- identical(.media_type_of_ext(in_suffix), "audio")
+				is_audio_file <- !identical(.media_type_of_ext(in_suffix), "video")
 				is_video_file <- !is_audio_file
 
 				#if it is an audio file and should be converted to mp3

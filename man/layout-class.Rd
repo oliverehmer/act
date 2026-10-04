@@ -3,7 +3,14 @@
 \docType{class}
 \name{layout-class}
 \alias{layout-class}
+\alias{dim,layout-method}
 \title{Layout object, defining the layout of print transcripts}
+\usage{
+\S4method{dim}{layout}(x)
+}
+\arguments{
+\item{x}{Layout object; \code{dim()} of a layout is \code{NULL}.}
+}
 \description{
 You can create an new layout object with \code{methods::new("layout")}.
 This will give you a new layout object with the default settings uses by act.

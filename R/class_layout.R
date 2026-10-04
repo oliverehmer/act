@@ -135,6 +135,8 @@ layout_show <- function (object) {
 	), width = w)
 }
 methods::setMethod("show", signature = "layout", definition = layout_show)
+#' @rdname layout-class
+#' @param x Layout object; \code{dim()} of a layout is \code{NULL}.
 methods::setMethod("dim", signature = "layout", definition = function(x) NULL)
 
 methods::setMethod(

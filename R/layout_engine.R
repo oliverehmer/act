@@ -1921,6 +1921,7 @@ apply_text_indent <- function(ann, i, rendered_cache, ref_main) {
 #' @examples
 #' act::helper_text_graphemes_split("ca\u0301fe")
 helper_text_graphemes_split <- function(text) {
+	if (length(text) != 1L) cli::cli_abort("{.arg text} must be a single character string.")
 	if (is.na(text) || nchar(text) == 0) return(character(0))
 	cached <- .GRAPHEME_CACHE[[text]]
 	if (!is.null(cached)) return(cached)

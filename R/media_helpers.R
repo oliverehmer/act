@@ -72,7 +72,10 @@ helper_media_type <- function(filePaths) {
 	ext <- tolower(as.character(extensions))
 	video <- tolower(getOption("act.media.fileformats.video", c("mp4", "mov")))
 	audio <- tolower(getOption("act.media.fileformats.audio", c("wav", "aif", "aiff", "mp3")))
-	ifelse(ext %in% video, "video", ifelse(ext %in% audio, "audio", NA_character_))
+	out <- rep(NA_character_, length(ext))
+	out[ext %in% audio] <- "audio"
+	out[ext %in% video] <- "video"
+	out
 }
 
 

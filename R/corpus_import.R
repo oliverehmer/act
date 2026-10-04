@@ -284,7 +284,8 @@ corpus_import <- function(x,
 #'
 #' @param fileNames Vector of character strings; file names (or paths).
 #' @param datePattern Character string; regular expression matching the date
-#'   (optionally followed by a version letter) in a file name.
+#'   (optionally followed by a version letter) in a file name. Empty or \code{NULL}:
+#'   every key is empty.
 #'
 #' @return Vector of character strings, one key per file name.
 #'
@@ -296,6 +297,8 @@ corpus_import <- function(x,
 #' act::helper_file_date_key_make(c("a__2026-10-04.eaf", "a__2026-10-04b.eaf", "a.eaf"),
 #'                                "__\\d{4}-\\d{2}-\\d{2}[a-z]?")
 helper_file_date_key_make <- function(fileNames, datePattern) {
+	if (is.null(datePattern) || length(datePattern) != 1L || is.na(datePattern) || !nzchar(datePattern))
+		return(rep("", length(fileNames)))
 	raw <- stringr::str_extract(fileNames, datePattern)
 	dv  <- stringr::str_match(raw, "([0-9]{4}-[0-9]{2}-[0-9]{2})([a-z]?)")
 	d   <- dv[, 2]
