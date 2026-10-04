@@ -6393,8 +6393,9 @@ build_alignment_report <- function(result, plan, transcript_name,
 	for (p in seq_len(nrow(plan))) {
 		row_p <- plan$row[p]
 		if (mondada) {
-			if (emitted_any && isTRUE(result$is_main[row_p]) &&
-			    isTRUE(result$number_lines[row_p])) {
+			# a block starts at a main row whether or not it is numbered:
+			# with line numbers off the blocks otherwise ran together
+			if (emitted_any && isTRUE(result$is_main[row_p])) {
 				lines <- c(lines, "")
 			}
 		} else if (emitted_any && isTRUE(result$is_main[row_p]) &&

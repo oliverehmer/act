@@ -151,8 +151,7 @@ export_docx <- function (   t,
 		for (p in seq_len(nrow(plan))) {
 			row_p <- plan$row[p]
 			if (mondada) {
-				if (emitted_any && isTRUE(result$is_main[row_p]) &&
-				    isTRUE(result$number_lines[row_p])) {
+				if (emitted_any && isTRUE(result$is_main[row_p])) {
 					doc <- officer::body_add_par(doc, "", style = space_style_name)
 				}
 			} else if (emitted_any && isTRUE(result$is_main[row_p]) &&
@@ -218,7 +217,10 @@ export_docx <- function (   t,
                              headerInsertSource) {
 	if (!isTRUE(l@header.insert)) return(doc)
 	add_block <- function(doc, value, style_name) {
-		if (is.null(value) || is.na(value)) return(doc)
+		value <- as.character(value)
+		value <- value[!is.na(value)]
+		if (length(value) == 0 || !any(nzchar(value))) return(doc)
+		value <- paste(value, collapse = "\n")
 		style <- helper_layout_style_base_get(l, style_name)$docx.template.name
 		for (line in unlist(stringr::str_split(value, "\n"))) {
 			doc <- officer::body_add_par(doc, value = line, style = style)

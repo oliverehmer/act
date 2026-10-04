@@ -156,7 +156,9 @@ helper_transcript_patch_apply <- function(x, patch, direction = c("backward", "f
 	to   <- if (backward) part$before else part$after
 	if (.patch_tables_equal(current, from, "path")) return(to)
 	paths_drop <- setdiff(as.character(from$path), as.character(to$path))
-	paths_put  <- setdiff(as.character(to$path), as.character(current$path))
+	# only what the step itself added: a path repaired since then must not
+	# come back next to its repaired form
+	paths_put  <- setdiff(setdiff(as.character(to$path), as.character(from$path)), as.character(current$path))
 	out <- current[!(as.character(current$path) %in% paths_drop), , drop = FALSE]
 	put <- to[as.character(to$path) %in% paths_put, , drop = FALSE]
 	if (nrow(put)) {

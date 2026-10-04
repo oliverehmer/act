@@ -44,8 +44,7 @@ TRUE  \tab TRUE  \tab TRUE  \cr
 FALSE \tab NA    \tab FALSE \cr
 FALSE \tab FALSE \tab FALSE \cr
 FALSE \tab TRUE  \tab TRUE  (tier wins) \cr
-}
-The TXT export has no per-tier styles, so the layout slot is the only control point.}
+}}
 
 \item{\code{spacesbefore}}{Integer; number of spaces inserted before line number.}
 

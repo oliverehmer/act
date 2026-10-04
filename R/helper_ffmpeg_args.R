@@ -307,7 +307,7 @@ helper_ffmpeg_args_clip <- function(output,
 	audio_idx <- 1L + length(inputsExtra)
 	audio_src <- audioInput %||% input
 	if (isTRUE(withAudio) && identical(helper_media_audio_track_exists(audio_src), FALSE)) {
-		if (!is.null(filterComplex) && (!is.null(audioMap) || grepl("[0:a]", filterComplex, fixed = TRUE))) {
+		if (!is.null(filterComplex) && (!is.null(audioMap) || stringr::str_detect(filterComplex, stringr::fixed("[0:a]")))) {
 			cli::cli_abort(c("{.file {basename(audio_src)}} has no sound track.",
 				"i" = "Build {.arg filterComplex} without the sound part and set {.arg audioMap} to {.code NULL}."))
 		}
@@ -545,7 +545,7 @@ helper_ffmpeg_keyframe <- function(input, startsec, videoOffset = NULL) {
 			"-read_intervals", paste0(.ffmpeg_seconds(max(0, raw - back)), "%", .ffmpeg_seconds(raw + 0.5)),
 			"-show_entries", "frame=pts_time", "-of", "csv=p=0", input))$out,
 			error = function(e) character(0))
-		kf <- suppressWarnings(as.numeric(sub(",.*$", "", out)))
+		kf <- suppressWarnings(as.numeric(stringr::str_remove(out, ",.*$")))
 		kf <- kf[is.finite(kf) & kf <= raw + 1e-6]
 		if (length(kf)) return(max(0, max(kf) - offset))
 		if (raw - back <= 0) break
@@ -680,7 +680,7 @@ helper_media_audio_track_exists <- function(filePath) {
 	if (is.null(hit)) {
 		hit <- tryCatch(.metadata_ffprobe_run(c("-v", "error", "-show_entries", "stream=codec_type",
 			"-of", "csv=p=0", filePath[1]))$out, error = function(e) character(0))
-		hit <- trimws(sub(",.*$", "", hit))
+		hit <- stringr::str_trim(stringr::str_remove(hit, ",.*$"))
 		hit <- hit[nzchar(hit)]
 		if (length(hit)) assign(key, hit, envir = .FFMPEG_TIMING_CACHE)
 	}

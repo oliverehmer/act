@@ -132,7 +132,7 @@ helper_transcripts_compare <- function(x, y, gap = 0, digits = 3) {
 .compare_join_regions <- function(parts, gap) {
 	parts <- parts[order(parts$startsec, parts$endsec), , drop = FALSE]
 	out_start <- parts$startsec[1]
-	out_end   <- parts$endsec[1]
+	out_end   <- if (is.na(parts$endsec[1])) parts$startsec[1] else parts$endsec[1]
 	out_kind  <- parts$change[1]
 	result <- list()
 	if (nrow(parts) > 1L) for (i in 2:nrow(parts)) {
@@ -143,7 +143,7 @@ helper_transcripts_compare <- function(x, y, gap = 0, digits = 3) {
 			result[[length(result) + 1L]] <- c(out_start, out_end)
 			attr(result[[length(result)]], "change") <- out_kind
 			out_start <- parts$startsec[i]
-			out_end   <- parts$endsec[i]
+			out_end   <- if (is.na(parts$endsec[i])) parts$startsec[i] else parts$endsec[i]
 			out_kind  <- parts$change[i]
 		}
 	}
