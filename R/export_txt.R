@@ -26,6 +26,7 @@
 #' @param figTierRegex Character string; regular expression identifying picture tiers.
 #' @param report Logical; if \code{TRUE} and \code{pathOutput} is set, an alignment report is written next to the output file.
 #' @param pathReport Character string; explicit path for the alignment report.
+#' @param multimodalTierRegex Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.
 #' @param collapse Logical; if \code{FALSE} a vector will be created, each element corresponding to one annotation. if \code{TRUE} a single string will be created, collapsed by linebreaks \\n.
 #' 
 #' @return Character string; transcript as text.
@@ -60,7 +61,8 @@ export_txt <- function (t,
 						figReplace              = TRUE,
 						figTierRegex            = "^stills(#|$)",
 						report                  = FALSE,
-						pathReport              = NULL) {
+						pathReport              = NULL,
+						multimodalTierRegex     = "#mm[0-9]*$") {
 
 	.assert_transcript(t, missing = missing(t))
 	if (missing(l) || is.null(l)) {
@@ -93,7 +95,8 @@ export_txt <- function (t,
 		minDescription        = minDescription,
 		maxSpanBlocks         = maxSpanBlocks,
 		figReplace            = figReplace,
-		figTierRegex          = figTierRegex)
+		figTierRegex          = figTierRegex,
+		multimodalTierRegex   = multimodalTierRegex)
 	t <- rendered$transcript
 
 	if (is.null(rendered$result)) {

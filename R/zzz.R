@@ -15,6 +15,7 @@ act.environment    <- new.env()
 	if (any(toset)) {
 		options(act.options.default[toset])
 	}
+	tryCatch(.act_detect_programs(), error = function(e) NULL)
 
 }
 .onAttach <- function(libname, pkgname) {

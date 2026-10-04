@@ -36,6 +36,8 @@ raw time = time shown by players that honour the edit list + offset;
 0 without edit list)
 \item audio columns: \code{audio.sample.rate}, \code{audio.channels}, \code{audio.codec},
 \code{audio.bitrate}
+\item a file that was read but has no sound track gets \code{audio.codec = "none"}
+and \code{audio.channels = 0}, one without picture track \code{video.codec = "none"}; \code{NA} means not read (or reading failed)
 \item image columns: \code{image.width}, \code{image.height}, \code{bit.depth}
 }
 

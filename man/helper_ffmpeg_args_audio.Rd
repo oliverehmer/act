@@ -51,7 +51,8 @@ plays it (with \code{act.media.timeline = "raw"} it is ignored, as VLC
 does). Without filter, a wav/aif from a source of the same format and an
 mp3 from an mp3 are copied as they are; otherwise a wav/aif is written with
 the bit depth and sample rate of the source, mp3 and m4a are encoded with
-\code{act.ffmpeg.audio.bitrate}.
+\code{act.ffmpeg.audio.bitrate}. A source without sound track is refused
+with an error.
 }
 \examples{
 act::helper_ffmpeg_args_audio(output = "cut.wav", input = "sound.wav",

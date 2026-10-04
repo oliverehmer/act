@@ -15,7 +15,8 @@ helper_layout_symbol_matches(
   figTierRegex = "^stills(#|$)",
   mainTierNames = NULL,
   alignChars = NULL,
-  alignModes = NULL
+  alignModes = NULL,
+  multimodalTierRegex = "#mm[0-9]*$"
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ helper_layout_symbol_matches(
 \item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}. Catch-all multimodal tiers without an entry anchor on the union of all given characters.}
 
 \item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} for spans with open and close, \code{"point"} for single spots). \code{NULL} derives the mode from the styles table of \code{l}; without any source the mode defaults to \code{"bracket"}.}
+
+\item{multimodalTierRegex}{Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.}
 }
 \value{
 List with the engine frame \code{ann} and the data.frame

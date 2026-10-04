@@ -175,6 +175,9 @@ helper_metadata_exif_argv <- function(file, sourcePath, startsec, clipID) {
 #'   0 without edit list)
 #' - audio columns: `audio.sample.rate`, `audio.channels`, `audio.codec`,
 #'   `audio.bitrate`
+#' - a file that was read but has no sound track gets `audio.codec = "none"`
+#'   and `audio.channels = 0`, one without picture track `video.codec =
+#'   "none"`; `NA` means not read (or reading failed)
 #' - image columns: `image.width`, `image.height`, `bit.depth`
 #'
 #' The `comment` column carries consistency notes joined by `; `. Examples:
@@ -435,6 +438,14 @@ media_metadata_read <- function(file, tolerance_sec = 0.05) {
 		if (!is.na(stream_tc) && nzchar(stream_tc) && is.na(row$timecode)) {
 			row$timecode <- stream_tc
 		}
+	}
+	if (length(json$streams)) {
+		types <- vapply(json$streams, function(st) as.character(st$codec_type %||% ""), character(1))
+		if (!"audio" %in% types) {
+			row$audio.codec    <- "none"
+			row$audio.channels <- 0L
+		}
+		if (!"video" %in% types) row$video.codec <- "none"
 	}
 
 	row

@@ -29,7 +29,8 @@ export_txt(
   figReplace = TRUE,
   figTierRegex = "^stills(#|$)",
   report = FALSE,
-  pathReport = NULL
+  pathReport = NULL,
+  multimodalTierRegex = "#mm[0-9]*$"
 )
 
 export_printtranscript(...)
@@ -82,6 +83,8 @@ export_printtranscript(...)
 \item{report}{Logical; if \code{TRUE} and \code{pathOutput} is set, an alignment report is written next to the output file.}
 
 \item{pathReport}{Character string; explicit path for the alignment report.}
+
+\item{multimodalTierRegex}{Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.}
 
 \item{...}{Arguments passed to \code{export_txt()}.}
 }

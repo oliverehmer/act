@@ -98,7 +98,9 @@ sound starts at the same keyframe, picture and sound stay in sync, and
 the picture starts at 0 without an edit list. No filter and no scaling
 are possible.}
 
-\item{withAudio}{Logical; \code{FALSE} writes the picture only.}
+\item{withAudio}{Logical; \code{FALSE} writes the picture only. A source
+without sound track is written without sound as well (a filter graph with
+a sound part is then refused).}
 
 \item{videoHardware}{Logical; encode with the video encoder of the Mac
 (\code{h264_videotoolbox}, several times faster) instead of libx264.
@@ -130,6 +132,14 @@ the source is therefore addressed as \code{[0:a]} as usual - it is
 rewritten to the sound input.
 }
 \details{
+With the option \code{act.ffmpeg.video.exact_timing} (default
+\code{TRUE}) an encoded clip with sound is written with
+\code{-avoid_negative_ts disabled}: the AAC encoder starts the sound at a
+negative time, and without this flag the muxer shifts the picture from the
+second frame on by that amount (about 21 ms) behind the sound. Set the option
+to \code{FALSE} if PowerPoint has problems with such clips, e.g. when
+cropping the picture.
+
 Every clip is written as H.264 with \code{yuv420p} (PowerPoint plays
 nothing else), with \code{-use_editlist 0 -movflags +faststart}, without
 B-frames (\code{-bf 0}): with B-frames the picture of a file without edit

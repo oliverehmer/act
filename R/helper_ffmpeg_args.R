@@ -159,6 +159,14 @@ helper_ffmpeg_args <- function(output,
 #' the source is therefore addressed as \code{[0:a]} as usual - it is
 #' rewritten to the sound input.
 #'
+#' With the option \code{act.ffmpeg.video.exact_timing} (default
+#' \code{TRUE}) an encoded clip with sound is written with
+#' \code{-avoid_negative_ts disabled}: the AAC encoder starts the sound at a
+#' negative time, and without this flag the muxer shifts the picture from the
+#' second frame on by that amount (about 21 ms) behind the sound. Set the option
+#' to \code{FALSE} if PowerPoint has problems with such clips, e.g. when
+#' cropping the picture.
+#'
 #' Every clip is written as H.264 with \code{yuv420p} (PowerPoint plays
 #' nothing else), with \code{-use_editlist 0 -movflags +faststart}, without
 #' B-frames (\code{-bf 0}): with B-frames the picture of a file without edit
@@ -213,7 +221,9 @@ helper_ffmpeg_args <- function(output,
 #'   sound starts at the same keyframe, picture and sound stay in sync, and
 #'   the picture starts at 0 without an edit list. No filter and no scaling
 #'   are possible.
-#' @param withAudio Logical; \code{FALSE} writes the picture only.
+#' @param withAudio Logical; \code{FALSE} writes the picture only. A source
+#'   without sound track is written without sound as well (a filter graph with
+#'   a sound part is then refused).
 #' @param videoHardware Logical; encode with the video encoder of the Mac
 #'   (\code{h264_videotoolbox}, several times faster) instead of libx264.
 #'   Without a Mac or with an ffmpeg that lacks this encoder a warning is
@@ -296,6 +306,14 @@ helper_ffmpeg_args_clip <- function(output,
 	}
 	audio_idx <- 1L + length(inputsExtra)
 	audio_src <- audioInput %||% input
+	if (isTRUE(withAudio) && identical(.ffmpeg_has_audio(audio_src), FALSE)) {
+		if (!is.null(filterComplex) && !is.null(audioMap)) {
+			cli::cli_abort(c("{.file {basename(audio_src)}} has no sound track.",
+				"i" = "Build {.arg filterComplex} without the sound part and set {.arg audioMap} to {.code NULL}."))
+		}
+		withAudio   <- FALSE
+		audioFilter <- NULL
+	}
 	audio_aac  <- isTRUE(withAudio) && any(audioCodecArgs == "aac")
 	audio_rate <- if (audio_aac) .ffmpeg_audio_rate(audio_src) else NA_real_
 	audio_lead <- if (audio_aac) 1024 / (if (is.finite(audio_rate)) audio_rate else 48000) else 0
@@ -314,8 +332,8 @@ helper_ffmpeg_args_clip <- function(output,
 	af <- c(audioFilter, lead_af)
 	af <- if (length(af)) paste(af, collapse = ",") else NULL
 	if (isTRUE(videoCopy)) {
-		args <- c(args, "-map", "0:v:0", "-map", paste0(audio_idx, ":a?"), "-c:v", "copy")
-		if (!is.null(af)) args <- c(args, "-af", af)
+		args <- c(args, "-map", "0:v:0", if (isTRUE(withAudio)) c("-map", paste0(audio_idx, ":a?")) else "-an", "-c:v", "copy")
+		if (isTRUE(withAudio) && !is.null(af)) args <- c(args, "-af", af)
 	} else {
 		if (!is.null(filterComplex)) {
 			fc <- gsub("[0:v]", paste0("[0:v]", trim_vf, ","), filterComplex, fixed = TRUE)
@@ -354,6 +372,8 @@ helper_ffmpeg_args_clip <- function(output,
 	}
 	c(args, if (isTRUE(withAudio)) audioCodecArgs, if (is.finite(audio_rate)) c("-ar", as.character(audio_rate)),
 	  "-t", .ffmpeg_seconds(duration), metadataArgs,
+	  if (isTRUE(withAudio) && !isTRUE(videoCopy) && isTRUE(getOption("act.ffmpeg.video.exact_timing", TRUE)))
+		  c("-avoid_negative_ts", "disabled"),
 	  "-use_editlist", "0",
 	  "-movflags", if (isTRUE(videoCopy)) "+faststart+negative_cts_offsets" else "+faststart",
 	  "-y", output)
@@ -369,7 +389,8 @@ helper_ffmpeg_args_clip <- function(output,
 #' does). Without filter, a wav/aif from a source of the same format and an
 #' mp3 from an mp3 are copied as they are; otherwise a wav/aif is written with
 #' the bit depth and sample rate of the source, mp3 and m4a are encoded with
-#' \code{act.ffmpeg.audio.bitrate}.
+#' \code{act.ffmpeg.audio.bitrate}. A source without sound track is refused
+#' with an error.
 #'
 #' @param output Character; path of the sound file (wav, aif, aiff, mp3 or m4a).
 #' @param input Character; path of the source.
@@ -415,6 +436,9 @@ helper_ffmpeg_args_audio <- function(output,
 	}
 	if (!is.null(audioFilter) && !is.null(filterComplex)) {
 		cli::cli_abort("Use either {.arg audioFilter} or {.arg filterComplex}, not both.")
+	}
+	if (identical(.ffmpeg_has_audio(input), FALSE)) {
+		cli::cli_abort("{.file {basename(input)}} has no sound track.")
 	}
 	raw_line <- identical(getOption("act.media.timeline", "editlist"), "raw")
 	rate     <- .ffmpeg_audio_rate(input)
@@ -622,6 +646,20 @@ helper_ffmpeg_keyframe <- function(input, startsec, videoOffset = NULL) {
 }
 
 .FFMPEG_TIMING_CACHE <- new.env(parent = emptyenv())
+
+.ffmpeg_has_audio <- function(path) {
+	if (is.null(path) || !length(path) || is.na(path[1]) || !file.exists(path[1])) return(NA)
+	key <- paste("streams", normalizePath(path[1], mustWork = FALSE), sep = "|")
+	hit <- .FFMPEG_TIMING_CACHE[[key]]
+	if (is.null(hit)) {
+		hit <- tryCatch(.metadata_ffprobe_run(c("-v", "error", "-show_entries", "stream=codec_type",
+			"-of", "csv=p=0", path[1]))$out, error = function(e) character(0))
+		hit <- trimws(hit[nzchar(trimws(hit))])
+		if (length(hit)) assign(key, hit, envir = .FFMPEG_TIMING_CACHE)
+	}
+	if (!length(hit)) return(NA)
+	"audio" %in% hit
+}
 
 .ffmpeg_video_encoder <- function(hardware, crf = NULL) {
 	if (!isTRUE(hardware) || !is.null(crf)) return("libx264")

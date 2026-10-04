@@ -5085,7 +5085,8 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
                                     main_tier_names = NULL,
                                     align_chars = NULL,
                                     align_modes = NULL,
-                                    number_width_min = 0L) {
+                                    number_width_min = 0L,
+                                    mm_tier_regex = "#mm[0-9]*$") {
 	ann <- t@annotations
 	ann$tierName <- as.character(ann$tierName)
 
@@ -5463,7 +5464,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	derive_rows <- (identical_chr(ann$format.content.indent, "align") |
 			(param_align_active & is.na(ann$format.content.indent))) &
 		is.na(ann$format.align.char) & nzchar(align_char_union) &
-		stringr::str_detect(ann$tierName, "#mm[0-9]*$")
+		stringr::str_detect(ann$tierName, mm_tier_regex)
 	ann$format.align.char[derive_rows] <- align_char_union
 	ann$format.content.indent[derive_rows] <- "align"
 	ann$format.align.mode[derive_rows] <-
@@ -6299,13 +6300,15 @@ build_alignment_report <- function(result, plan, transcript_name,
 .layout_frame <- function(t, l, layout_mode, timeToleranceGesture,
                           figReplace, figTierRegex,
                           mainTierNames = NULL, alignChars = NULL,
-                          alignModes = NULL) {
+                          alignModes = NULL,
+                          multimodalTierRegex = "#mm[0-9]*$") {
 	prep <- prepare_annotations_new(t, l, layout_mode = layout_mode,
 	                                fig_replace = figReplace,
 	                                fig_tier_regex = figTierRegex,
 	                                main_tier_names = mainTierNames,
 	                                align_chars = alignChars,
-	                                align_modes = alignModes)
+	                                align_modes = alignModes,
+	                                mm_tier_regex = multimodalTierRegex)
 	ann <- prep$engine_ann
 	mm_anchor_chars <- unique(unlist(
 		lapply(ann$align_chars[!is.na(ann$align_chars)],
@@ -6415,6 +6418,7 @@ build_alignment_report <- function(result, plan, transcript_name,
 #' @param mainTierNames Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.
 #' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}. Catch-all multimodal tiers without an entry anchor on the union of all given characters.
 #' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} for spans with open and close, \code{"point"} for single spots). \code{NULL} derives the mode from the styles table of \code{l}; without any source the mode defaults to \code{"bracket"}.
+#' @param multimodalTierRegex Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.
 #'
 #' @return List with the rendered \code{lines}, the line \code{plan}, the
 #' engine \code{result} frame (one row per annotation; its column
@@ -6442,7 +6446,8 @@ helper_layout_render <- function(t,
                                  figTierRegex          = "^stills(#|$)",
                                  mainTierNames         = NULL,
                                  alignChars            = NULL,
-                                 alignModes            = NULL) {
+                                 alignModes            = NULL,
+                                 multimodalTierRegex   = "#mm[0-9]*$") {
 	if (is.null(l)) l <- methods::new("layout")
 	layout_mode <- .layout_mode_of(l)
 	label_mode <- getOption("act.layout.label.mode", "mondada")
@@ -6467,7 +6472,8 @@ helper_layout_render <- function(t,
 		                                main_tier_names = mainTierNames,
 		                                align_chars = alignChars,
 		                                align_modes = alignModes,
-		                                number_width_min = number_width_min)
+		                                number_width_min = number_width_min,
+		                                mm_tier_regex = multimodalTierRegex)
 		result <- align_and_render(prep$engine_ann, prep$engine_width,
 		                           arrow_mode = prep$arrow_mode,
 		                           verbal_align = isTRUE(l@brackets.align),
@@ -6544,7 +6550,8 @@ helper_layout_anchors <- function(t,
                                   figTierRegex          = "^stills(#|$)",
                                   mainTierNames         = NULL,
                                   alignChars            = NULL,
-                                  alignModes            = NULL) {
+                                  alignModes            = NULL,
+                                  multimodalTierRegex   = "#mm[0-9]*$") {
 	rendered <- helper_layout_render(t, l,
 		filterTierNames       = filterTierNames,
 		filterSectionStartsec = filterSectionStartsec,
@@ -6558,7 +6565,8 @@ helper_layout_anchors <- function(t,
 		figTierRegex          = figTierRegex,
 		mainTierNames         = mainTierNames,
 		alignChars            = alignChars,
-		alignModes            = alignModes)
+		alignModes            = alignModes,
+		multimodalTierRegex   = multimodalTierRegex)
 	if (!is.null(rendered$result)) {
 		.layout_warn_no_main(rendered$result$is_main)
 	}
@@ -6588,7 +6596,8 @@ helper_layout_bracket_pairs <- function(t,
                                         figTierRegex          = "^stills(#|$)",
                                         mainTierNames         = NULL,
                                         alignChars            = NULL,
-                                        alignModes            = NULL) {
+                                        alignModes            = NULL,
+                                        multimodalTierRegex   = "#mm[0-9]*$") {
 	if (is.null(l)) l <- methods::new("layout")
 	layout_mode <- .layout_mode_of(l)
 	t <- .layout_filter_transcript(t, l, filterTierNames,
@@ -6604,7 +6613,8 @@ helper_layout_bracket_pairs <- function(t,
 	                       figReplace, figTierRegex,
 	                       mainTierNames = mainTierNames,
 	                       alignChars = alignChars,
-	                       alignModes = alignModes)
+	                       alignModes = alignModes,
+	                       multimodalTierRegex = multimodalTierRegex)
 	list(ann = frame$ann, pairs = compute_bracket_pairs(frame$ann))
 }
 
@@ -6631,7 +6641,8 @@ helper_layout_symbol_matches <- function(t,
                                          figTierRegex          = "^stills(#|$)",
                                          mainTierNames         = NULL,
                                          alignChars            = NULL,
-                                         alignModes            = NULL) {
+                                         alignModes            = NULL,
+                                         multimodalTierRegex   = "#mm[0-9]*$") {
 	if (is.null(l)) l <- methods::new("layout")
 	layout_mode <- .layout_mode_of(l)
 	t <- .layout_filter_transcript(t, l, filterTierNames,
@@ -6648,7 +6659,8 @@ helper_layout_symbol_matches <- function(t,
 	                       figReplace, figTierRegex,
 	                       mainTierNames = mainTierNames,
 	                       alignChars = alignChars,
-	                       alignModes = alignModes)
+	                       alignModes = alignModes,
+	                       multimodalTierRegex = multimodalTierRegex)
 	.layout_warn_no_main(frame$ann$is_main)
 	ref_main <- resolve_reference_main(frame$ann)
 	matches <- compute_mm_symbol_matches(frame$ann, ref_main)

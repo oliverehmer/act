@@ -143,6 +143,11 @@
 		group       = "ffmpeg",
 		description = "Encode clips with the video encoder of the Mac (h264_videotoolbox, several times faster than libx264). Without a Mac or with an ffmpeg that lacks it: a warning and libx264. Windows cut lists always use libx264."
 	),
+	act.ffmpeg.video.exact_timing = list(
+		value       = TRUE,
+		group       = "ffmpeg",
+		description = "Write encoded clips with sound with -avoid_negative_ts disabled, so the picture is not shifted by the AAC encoder delay (about 21 ms) behind the sound. Set to FALSE if PowerPoint has problems with such clips, e.g. when cropping the picture."
+	),
 	act.ffmpeg.video.keyframe_interval = list(
 		value       = 25L,
 		group       = "ffmpeg",

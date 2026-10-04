@@ -46,6 +46,7 @@
 #' @param figTierRegex Character string; regular expression identifying picture tiers.
 #' @param report Logical; if \code{TRUE} and \code{pathOutput} is set, an alignment report is written next to the output file.
 #' @param pathReport Character string; explicit path for the alignment report.
+#' @param multimodalTierRegex Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.
 
 #' 
 #' @return Officer doc; transcript as object from library officer.
@@ -78,7 +79,8 @@ export_docx <- function (   t,
 							figReplace                   = TRUE,
 							figTierRegex                 = "^stills(#|$)",
 							report                       = FALSE,
-							pathReport                   = NULL
+							pathReport                   = NULL,
+							multimodalTierRegex          = "#mm[0-9]*$"
 ) {
 	.assert_transcript(t, missing = missing(t))
 	if (missing(l) || is.null(l)) {
@@ -121,7 +123,8 @@ export_docx <- function (   t,
 		minDescription        = minDescription,
 		maxSpanBlocks         = maxSpanBlocks,
 		figReplace            = figReplace,
-		figTierRegex          = figTierRegex)
+		figTierRegex          = figTierRegex,
+		multimodalTierRegex   = multimodalTierRegex)
 	t <- rendered$transcript
 	plan <- rendered$plan
 	result <- rendered$result
