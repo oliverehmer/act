@@ -572,9 +572,13 @@ helper_ffmpeg_keyframe <- function(input, startsec, videoOffset = NULL) {
 			"-read_intervals", paste0(.ffmpeg_seconds(max(0, raw - back)), "%", .ffmpeg_seconds(raw + 0.5)),
 			"-show_entries", "frame=pts_time", "-of", "csv=p=0", input))$out,
 			error = function(e) character(0))
-		kf <- suppressWarnings(as.numeric(stringr::str_remove(out, ",.*$")))
-		kf <- kf[is.finite(kf) & kf <= raw + 1e-6]
+		kf_all <- suppressWarnings(as.numeric(stringr::str_remove(out, ",.*$")))
+		kf_all <- kf_all[is.finite(kf_all)]
+		kf <- kf_all[kf_all <= raw + 1e-6]
 		if (length(kf)) return(structure(max(0, max(kf) - offset), found = TRUE))
+		# the start lies before the first frame of the file (raw timeline, first
+		# frames): a copy from there begins with the first keyframe anyway
+		if (raw - back <= 0 && length(kf_all)) return(structure(startsec, found = TRUE))
 		if (raw - back <= 0) break
 	}
 	structure(startsec, found = FALSE)
