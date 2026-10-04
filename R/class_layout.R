@@ -22,7 +22,6 @@
 #' FALSE \tab FALSE \tab FALSE \cr
 #' FALSE \tab TRUE  \tab TRUE  (tier wins) \cr
 #' }
-#' The TXT export has no per-tier styles, so the layout slot is the only control point.
 #' @slot spacesbefore Integer; number of spaces inserted before line number.
 #' @slot brackets.align Logical; if \code{TRUE} act will try to align brackets [] for parallel speaking (Attention: experimental function; results may not satisfy).
 #' @slot header.insert Logical; if \code{TRUE} a transcript header is inserted.

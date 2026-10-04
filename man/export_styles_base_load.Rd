@@ -22,22 +22,6 @@ Loads the base styles matrix from an XLSX file (sheet \code{base}) or
 a CSV file (semicolon-delimited). The matrix maps act-internal style names
 to DOCX template paragraph style names.
 }
-\examples{
-library(act)
-
-# An example replacement matrix comes with the package.
-path <- system.file("extdata", "normalization", "normalization_matrix.csv", package="act")
-
-# Load the matrix
-mymatrix <- act::matrix_load(path)
-
-# Have a look at the matrix
-colnames(mymatrix)
-mymatrix
-
-#the original path of the matrix is stored in the attributes
-attr(mymatrix, 'path') 
-}
 \seealso{
 \code{vignette("export_docx_styles", package = "act")}
 }

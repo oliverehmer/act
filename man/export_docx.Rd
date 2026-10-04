@@ -109,7 +109,7 @@ The default format templates are
 \item header.preface (formats: s@results$header.description)
 \item header.title (formats: s@results$header.description)
 \item header.subtitle (formats: s@results$header.description)
-\item header.description (formats: s@results$header.description)
+\item header.info (formats: s@results$header.description)
 }
 \itemize{
 \item Transcript body

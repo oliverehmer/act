@@ -18,7 +18,7 @@
 #' - header.preface (formats: s@results$header.description) 
 #' - header.title (formats: s@results$header.description) 
 #' - header.subtitle (formats: s@results$header.description) 
-#' - header.description (formats: s@results$header.description) 
+#' - header.info (formats: s@results$header.description) 
 #' * Transcript body
 #' - transcript.default (formats: any annotation in "t@annotations"
 #' 
@@ -228,7 +228,7 @@ export_docx <- function (   t,
 	doc <- add_block(doc, headerPreface,     "header.preface")
 	doc <- add_block(doc, headerTitle,       "header.title")
 	doc <- add_block(doc, headerSubtitle,    "header.subtitle")
-	doc <- add_block(doc, headerDescription, "header.description")
+	doc <- add_block(doc, headerDescription, "header.info")
 	if (isTRUE(headerInsertSource) && nrow(t@annotations) > 0) {
 		source_line <- paste0("(", t@name, ", ",
 			helper_time_format(min(t@annotations$startsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), "-",
@@ -278,7 +278,7 @@ get_style_user <- function(l, name) {
 		show              = TRUE,
 		match.regex       = NA_character_,
 		docx.template.name = NA_character_,
-		line.nr.show      = TRUE,
+		line.nr.show      = NA,
 		acronym.show      = TRUE,
 		acronym.case      = NA_character_,
 		acronym.search    = NA_character_,

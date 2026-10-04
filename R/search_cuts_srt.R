@@ -5,7 +5,6 @@
 #' 
 #' \emph{Span} \cr
 #' If you want to extend the cut before or after each search result, you can modify \code{@cuts.span.beforesec} and \code{@cuts.span.aftersec} in your search object.
-#' If you want to modify the layout of the print transcripts, create a new layout object with \code{mylayout <- methods::new("layout")}, modify the settings and pass it as argument \code{l}.
 #'
 #' @param x Corpus object.
 #' @param s Search object.

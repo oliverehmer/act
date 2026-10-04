@@ -16,7 +16,6 @@
 #'
 #' @export
 #'
-#' @example inst/examples/matrix_load.R
 #'
 export_styles_base_load <- function(path      = NULL,
                                     path_docx = NA) {
