@@ -50,6 +50,7 @@
 #' @param mainTierNames Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.
 #' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.
 #' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the styles table of \code{l}.
+#' @param symbolStyle Character string; name of a Word character style for the multimodal symbols (the anchor characters of the layer tiers), in verbal lines and in layer lines. \code{NULL} takes the base style \code{transcript.symbols} of the styles file; without it the symbols are written as plain text.
 
 #' 
 #' @return Officer doc; transcript as object from library officer.
@@ -86,7 +87,8 @@ export_docx <- function (   t,
 							multimodalTierRegex          = "#mm[0-9]*$",
 							mainTierNames                = NULL,
 							alignChars                   = NULL,
-							alignModes                   = NULL
+							alignModes                   = NULL,
+							symbolStyle                  = NULL
 ) {
 	.assert_transcript(t, missing = missing(t))
 	if (missing(l) || is.null(l)) {
@@ -142,9 +144,13 @@ export_docx <- function (   t,
 	result <- rendered$result
 	mondada <- identical(rendered$layoutMode, "mondada")
 
+	symbol_chars <- .docx_symbol_chars(result)
+	symbol_style <- .docx_symbol_style_name(l, symbolStyle)
+
 	results <- list()
 	for (template_idx in seq_along(templates)) {
 	doc <- officer::read_docx(path = templates[template_idx])
+	symbol_style_id <- .docx_symbol_style_id(doc, symbol_style, symbol_chars)
 	doc <- .docx_add_header(doc, l, t, headerPreface, headerTitle,
 	                        headerSubtitle, headerDescription,
 	                        headerInsertSource)
@@ -171,8 +177,8 @@ export_docx <- function (   t,
 				doc <- officer::body_add_par(doc, "", style = space_style_name)
 			}
 			if (isTRUE(result$show[row_p])) {
-				doc <- officer::body_add_par(doc, value = plan$line[p],
-				                             style = result$style[row_p])
+				doc <- .docx_add_line(doc, plan$line[p], result$style[row_p],
+				                      symbol_style_id, symbol_chars)
 				if (isTRUE(result$is_main[row_p])) previous_main_row <- row_p
 				emitted_any <- TRUE
 			}
@@ -274,6 +280,59 @@ helper_layout_style_base_get <- function(l, actStyleName) {
 			l@docx.styles.base[id[1],]
 		)
 	}
+}
+
+# ===== MULTIMODAL SYMBOLS AS CHARACTER STYLE =====
+# The symbols are the anchor characters of the layer rows: what the engine
+# aligns is what gets highlighted, so no second symbol list is needed.
+.docx_symbol_chars <- function(result) {
+	if (is.null(result) || is.null(result$align_chars)) return(character(0))
+	chars <- result$align_chars[!is.na(result$align_chars)]
+	unique(unlist(lapply(chars, helper_text_graphemes_split)))
+}
+
+# Explicit parameter first, then the base styles row "transcript.symbols";
+# without either the symbols are written as plain text.
+.docx_symbol_style_name <- function(l, symbolStyle) {
+	if (!is.null(symbolStyle) && length(symbolStyle) == 1 && !is.na(symbolStyle) && nzchar(symbolStyle)) {
+		return(symbolStyle)
+	}
+	base <- l@docx.styles.base
+	if (is.null(base) || nrow(base) == 0) return(NA_character_)
+	hit <- which(base$act.style.name == "transcript.symbols")
+	if (length(hit) == 0) NA_character_ else base$docx.template.name[hit[1]]
+}
+
+.docx_symbol_style_id <- function(doc, symbol_style, symbol_chars) {
+	if (is.na(symbol_style) || length(symbol_chars) == 0) return(NA_character_)
+	styles <- officer::styles_info(doc)
+	hit <- which(styles$style_name == symbol_style & styles$style_type == "character")
+	if (length(hit) == 0) {
+		cli::cli_warn("Character style {.val {symbol_style}} is not in the Word template; the multimodal symbols are not highlighted.")
+		return(NA_character_)
+	}
+	styles$style_id[hit[1]]
+}
+
+# One paragraph per line. With a symbol style the line is written as runs:
+# the text is the same character for character, so the alignment holds.
+.docx_add_line <- function(doc, line, style, symbol_style_id, symbol_chars) {
+	if (is.na(symbol_style_id) || is.na(line)) {
+		return(officer::body_add_par(doc, value = line, style = style))
+	}
+	symbol_class <- paste0("[", paste(stringr::str_escape(symbol_chars), collapse = ""), "]")
+	if (!stringr::str_detect(line, symbol_class)) {
+		return(officer::body_add_par(doc, value = line, style = style))
+	}
+	pieces <- stringr::str_extract_all(line, paste0(symbol_class, "+|[^", stringr::str_sub(symbol_class, 2L), "+"))[[1]]
+	runs <- lapply(pieces, function(piece) {
+		if (stringr::str_detect(piece, paste0("^", symbol_class))) {
+			officer::run_wordtext(piece, style_id = symbol_style_id)
+		} else {
+			officer::ftext(piece)
+		}
+	})
+	officer::body_add_fpar(doc, do.call(officer::fpar, runs), style = style)
 }
 
 get_style_user <- function(l, name) {

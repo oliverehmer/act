@@ -31,7 +31,8 @@ export_docx(
   multimodalTierRegex = "#mm[0-9]*$",
   mainTierNames = NULL,
   alignChars = NULL,
-  alignModes = NULL
+  alignModes = NULL,
+  symbolStyle = NULL
 )
 }
 \arguments{
@@ -88,6 +89,8 @@ export_docx(
 \item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.}
 
 \item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the styles table of \code{l}.}
+
+\item{symbolStyle}{Character string; name of a Word character style for the multimodal symbols (the anchor characters of the layer tiers), in verbal lines and in layer lines. \code{NULL} takes the base style \code{transcript.symbols} of the styles file; without it the symbols are written as plain text.}
 }
 \value{
 Officer doc; transcript as object from library officer.
