@@ -108,6 +108,36 @@ helper_style_docx <- function(style, pathOutput, templatePath = NULL, symbolChar
 	invisible(list(path = pathOutput, created = written$created))
 }
 
+#' Helper: Styles of a style profile with their appearance
+#'
+#' Lists the styles of a profile with the appearance that finally holds for
+#' each: its own values, and for a value it does not set the one of the style
+#' it builds on (transcript lines on the default style, the default and the
+#' header styles on Normal). Character styles only have their own values.
+#'
+#' @param style Style profile; see \code{helper_style_read}.
+#'
+#' @return Data.frame with one row per style: \code{name}, \code{type}, \code{role}, \code{active}, \code{word}, \code{pattern}, \code{applies}, and \code{font}, \code{size}, \code{color}, \code{background}, \code{italic}, \code{bold} (\code{NA} where nothing is set).
+#'
+#' @export
+helper_style_appearance <- function(style) {
+	profile <- .style_read(style)
+	rows <- lapply(profile$styles, function(s) {
+		a <- .style_appearance(profile, s)
+		data.frame(
+			name = s$name, type = s$type, role = s$role, active = isTRUE(s$active), word = s$word,
+			pattern = .style_chr(s$pattern), applies = .style_chr(s$applies),
+			font = .style_chr(a$font, NA_character_),
+			size = .style_num(a$size, NA_real_),
+			color = .style_chr(a$color, NA_character_),
+			background = .style_chr(a$background, NA_character_),
+			italic = if (is.null(a$italic)) NA else isTRUE(a$italic),
+			bold = if (is.null(a$bold)) NA else isTRUE(a$bold),
+			stringsAsFactors = FALSE)
+	})
+	do.call(rbind, rows)
+}
+
 # ===== READ =====
 
 # style: a profile name (file <name>.json in one of the folders), a path to
@@ -369,10 +399,10 @@ helper_style_docx <- function(style, pathOutput, templatePath = NULL, symbolChar
 	out$acronym <- list(
 		suppress = .style_lgl(a$suppress, FALSE),
 		case = .style_chr(a$case), search = .style_chr(a$search),
-		replace = if (is.null(a$replace)) NULL else .style_chr(a$replace),
+		replace = if (length(a$replace) == 0) NULL else .style_chr(a$replace),
 		extract = .style_chr(a$extract),
 		width = .style_num(a$width, 0),
-		ending = if (is.null(a$ending)) NULL else .style_chr(a$ending))
+		ending = if (length(a$ending) == 0) NULL else .style_chr(a$ending))
 	out$indent <- .style_chr(s$indent, "none")
 	out$align.chars <- .style_chr(s$align.chars)
 	out$align.mode <- .style_chr(s$align.mode)
