@@ -30,6 +30,7 @@
 	from_profile <- identical(profile$word$look, "profile")
 	default_word <- .style_by_role(profile, "default")$word
 	created <- character(0)
+	written <- character(0)
 	rules <- list()
 	for (s in profile$styles) {
 		if (identical(s$role, "normal") || !nzchar(s$word)) next
@@ -42,7 +43,10 @@
 			node <- .docx_style_create(xml, s$word, type, based_on, keep_next = !identical(s$role, "space"))
 			created <- c(created, s$word)
 		}
-		if (from_profile || !exists) .docx_style_appearance(node, s, type)
+		# two styles of one Word name: the upper one sets the look, as in the viewer
+		key <- paste(type, s$word)
+		if ((from_profile || !exists) && !key %in% written) .docx_style_appearance(node, s, type)
+		written <- c(written, key)
 		if (type == "character") {
 			pattern <- if (identical(s$applies, "symbols")) .docx_symbol_class(symbol_chars) else s$pattern
 			if (!is.na(pattern) && nzchar(pattern)) {

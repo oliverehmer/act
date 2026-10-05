@@ -5284,6 +5284,11 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		}
 	}
 
+	# a profile that shows no acronyms at all: no tier style can bring them back
+	if (!is.null(.layout_style(l)) && !isTRUE(.layout_style(l)$acronym$show)) {
+		ann$format.acronym.show <- FALSE
+	}
+
 	# Explicit anchor characters win over the styles table, per tier. The
 	# other tiers keep whatever the styles table said.
 	align_from_param <- rep(FALSE, nrow(ann))

@@ -199,6 +199,7 @@ helper_style_appearance <- function(style) {
 .style_read_raw <- function(style, folders) {
 	if (is.list(style)) {
 		raw <- style
+		.style_check_shape(raw)
 		attr(raw, "id") <- NULL
 		return(raw)
 	}
@@ -233,9 +234,30 @@ helper_style_appearance <- function(style) {
 		raw <- raw[["params"]]
 		if (!nzchar(.style_chr(raw[["label"]])) && nzchar(label)) raw[["label"]] <- label
 	}
+	.style_check_shape(raw, path)
 	attr(raw, "id") <- tools::file_path_sans_ext(basename(path))
 	attr(raw, "path") <- path
 	raw
+}
+
+# styles must be a list of styles and the groups must be groups: everything
+# after this relies on it.
+.style_check_shape <- function(raw, where = "the profile") {
+	styles <- raw[["styles"]]
+	if (!is.null(styles) && (!is.list(styles) || !is.null(names(styles)) || !all(vapply(styles, is.list, logical(1))))) {
+		cli::cli_abort("{.field styles} must be a list of styles in {where}.")
+	}
+	for (group in c("acronym", "word", "functions", "advanced")) {
+		if (!is.null(raw[[group]]) && !is.list(raw[[group]])) {
+			cli::cli_abort("{.field {group}} must be a group of settings in {where}.")
+		}
+	}
+	for (style in styles) {
+		if (!is.null(style[["acronym"]]) && !is.list(style[["acronym"]])) {
+			cli::cli_abort("{.field acronym} of a style must be a group of settings in {where}.")
+		}
+	}
+	invisible(TRUE)
 }
 
 # The values a profile has when it says nothing: the standard layout of act.
@@ -333,88 +355,96 @@ helper_style_appearance <- function(style) {
 # Brings every value into its type, so the rest of the code need not test.
 .style_normalize <- function(profile) {
 	d <- .style_defaults()
-	profile$mode <- .style_chr(profile$mode, d$mode)
-	profile$header <- .style_lgl(profile$header, d$header)
-	profile$width <- .style_num(profile$width, d$width)
-	profile$width.limit <- .style_lgl(profile$width.limit, d$width.limit)
-	profile$space.lines <- .style_lgl(profile$space.lines, d$space.lines)
-	profile$line.numbers <- .style_lgl(profile$line.numbers, d$line.numbers)
-	a <- profile$acronym
+	profile$mode <- .style_chr(profile[["mode"]], d$mode)
+	profile$header <- .style_lgl(profile[["header"]], d$header)
+	profile$width <- .style_num(profile[["width"]], d$width)
+	profile$width.limit <- .style_lgl(profile[["width.limit"]], d$width.limit)
+	profile$space.lines <- .style_lgl(profile[["space.lines"]], d$space.lines)
+	profile$line.numbers <- .style_lgl(profile[["line.numbers"]], d$line.numbers)
+	a <- profile[["acronym"]]
 	profile$acronym <- list(
-		show = .style_lgl(a$show, d$acronym$show),
-		suppress.repeated = .style_lgl(a$suppress.repeated, d$acronym$suppress.repeated),
-		case = .style_chr(a$case), search = .style_chr(a$search),
-		replace = .style_chr(a$replace), extract = .style_chr(a$extract),
-		width = .style_num(a$width, 0), ending = .style_chr(a$ending))
-	w <- profile$word
-	profile$word <- list(file = .style_chr(w$file), look = .style_chr(w$look, d$word$look))
-	f <- profile$functions
+		show = .style_lgl(a[["show"]], d$acronym$show),
+		suppress.repeated = .style_lgl(a[["suppress.repeated"]], d$acronym$suppress.repeated),
+		case = .style_chr(a[["case"]]), search = .style_chr(a[["search"]]),
+		replace = .style_chr(a[["replace"]]), extract = .style_chr(a[["extract"]]),
+		width = .style_num(a[["width"]], 0), ending = .style_chr(a[["ending"]]))
+	w <- profile[["word"]]
+	profile$word <- list(file = .style_chr(w[["file"]]), look = .style_chr(w[["look"]], d$word$look))
+	f <- profile[["functions"]]
 	profile$functions <- list(
-		tiers.exclude = .style_chr(f$tiers.exclude), tiers.keep = .style_chr(f$tiers.keep),
-		arrow = .style_lgl(f$arrow, d$functions$arrow),
-		arrow.shape = .style_chr(f$arrow.shape, d$functions$arrow.shape))
-	v <- profile$advanced
+		tiers.exclude = .style_chr(f[["tiers.exclude"]]), tiers.keep = .style_chr(f[["tiers.keep"]]),
+		arrow = .style_lgl(f[["arrow"]], d$functions$arrow),
+		arrow.shape = .style_chr(f[["arrow.shape"]], d$functions$arrow.shape))
+	v <- profile[["advanced"]]
 	profile$advanced <- list(
-		spaces.before = .style_num(v$spaces.before, d$advanced$spaces.before),
-		brackets.align = .style_lgl(v$brackets.align, d$advanced$brackets.align),
-		symbol.merge = .style_lgl(v$symbol.merge, d$advanced$symbol.merge),
-		tolerance.point = .style_num(v$tolerance.point, d$advanced$tolerance.point),
-		tolerance.gesture = .style_num(v$tolerance.gesture, d$advanced$tolerance.gesture),
-		fill = .style_chr(v$fill, d$advanced$fill),
-		block.height = .style_num(v$block.height, d$advanced$block.height),
-		min.description = .style_num(v$min.description, d$advanced$min.description),
-		max.span.blocks = .style_num(v$max.span.blocks, d$advanced$max.span.blocks),
-		fig.replace = .style_lgl(v$fig.replace, d$advanced$fig.replace),
-		fig.tier.regex = .style_chr(v$fig.tier.regex, d$advanced$fig.tier.regex),
-		multimodal.tier.regex = .style_chr(v$multimodal.tier.regex, d$advanced$multimodal.tier.regex))
-	profile$styles <- lapply(profile$styles, .style_normalize_style)
+		spaces.before = .style_num(v[["spaces.before"]], d$advanced$spaces.before),
+		brackets.align = .style_lgl(v[["brackets.align"]], d$advanced$brackets.align),
+		symbol.merge = .style_lgl(v[["symbol.merge"]], d$advanced$symbol.merge),
+		tolerance.point = .style_num(v[["tolerance.point"]], d$advanced$tolerance.point),
+		tolerance.gesture = .style_num(v[["tolerance.gesture"]], d$advanced$tolerance.gesture),
+		fill = .style_chr(v[["fill"]], d$advanced$fill),
+		block.height = .style_num(v[["block.height"]], d$advanced$block.height),
+		min.description = .style_num(v[["min.description"]], d$advanced$min.description),
+		max.span.blocks = .style_num(v[["max.span.blocks"]], d$advanced$max.span.blocks),
+		fig.replace = .style_lgl(v[["fig.replace"]], d$advanced$fig.replace),
+		fig.tier.regex = .style_chr(v[["fig.tier.regex"]], d$advanced$fig.tier.regex),
+		multimodal.tier.regex = .style_chr(v[["multimodal.tier.regex"]], d$advanced$multimodal.tier.regex))
+	profile$styles <- lapply(profile[["styles"]], .style_normalize_style)
 	profile$styles.order <- NULL
 	profile$styles.remove <- NULL
 	profile
 }
 
 .style_normalize_style <- function(s) {
-	role <- .style_chr(s$role)
-	type <- .style_chr(s$type, "tier")
+	role <- .style_chr(s[["role"]])
+	type <- .style_chr(s[["type"]], "tier")
 	out <- list(
-		name = .style_chr(s$name),
+		name = .style_chr(s[["name"]]),
 		type = if (nzchar(role)) "tier" else type,
 		role = role,
-		active = .style_lgl(s$active, TRUE),
-		word = .style_chr(s$word))
+		active = .style_lgl(s[["active"]], TRUE),
+		word = .style_chr(s[["word"]]))
 	for (key in .STYLE_APPEARANCE) {
 		value <- s[[key]]
-		out[key] <- list(if (is.null(value) || length(value) != 1 || is.na(value)) NULL else value)
+		if (is.null(value) || length(value) != 1 || is.na(value)) value <- NULL
+		else if (key == "size") value <- suppressWarnings(as.numeric(value))
+		else if (key %in% c("italic", "bold")) value <- as.logical(value)
+		else value <- as.character(value)
+		out[key] <- list(if (length(value) != 1 || is.na(value)) NULL else value)
 	}
 	if (identical(out$type, "character")) {
-		out$applies <- .style_chr(s$applies, "symbols")
-		out$pattern <- .style_chr(s$pattern)
+		out$applies <- .style_chr(s[["applies"]], "symbols")
+		out$pattern <- .style_chr(s[["pattern"]])
 		return(out)
 	}
-	a <- s$acronym
-	out$pattern <- .style_chr(s$pattern)
-	out$example <- .style_chr(s$example)
-	out$main <- if (is.null(s$main) || length(s$main) != 1 || is.na(s$main)) NA else isTRUE(as.logical(s$main))
-	out$line.numbers.suppress <- .style_lgl(s$line.numbers.suppress, FALSE)
+	a <- s[["acronym"]]
+	out$pattern <- .style_chr(s[["pattern"]])
+	out$example <- .style_chr(s[["example"]])
+	out$main <- if (is.null(s[["main"]]) || length(s[["main"]]) != 1 || is.na(s[["main"]])) NA else isTRUE(as.logical(s[["main"]]))
+	out$line.numbers.suppress <- .style_lgl(s[["line.numbers.suppress"]], FALSE)
 	out$acronym <- list(
-		suppress = .style_lgl(a$suppress, FALSE),
-		case = .style_chr(a$case), search = .style_chr(a$search),
-		replace = if (length(a$replace) == 0) NULL else .style_chr(a$replace),
-		extract = .style_chr(a$extract),
-		width = .style_num(a$width, 0),
-		ending = if (length(a$ending) == 0) NULL else .style_chr(a$ending))
-	out$indent <- .style_chr(s$indent, "none")
-	out$align.chars <- .style_chr(s$align.chars)
-	out$align.mode <- .style_chr(s$align.mode)
+		suppress = .style_lgl(a[["suppress"]], FALSE),
+		case = .style_chr(a[["case"]]), search = .style_chr(a[["search"]]),
+		replace = if (length(a[["replace"]]) == 0) NULL else .style_chr(a[["replace"]]),
+		extract = .style_chr(a[["extract"]]),
+		width = .style_num(a[["width"]], 0),
+		ending = if (length(a[["ending"]]) == 0) NULL else .style_chr(a[["ending"]]))
+	out$indent <- .style_chr(s[["indent"]], "none")
+	out$align.chars <- .style_chr(s[["align.chars"]])
+	out$align.mode <- .style_chr(s[["align.mode"]])
 	out
 }
 
 # ===== CHECK =====
 
-.style_regex_ok <- function(pattern) {
+# extract patterns run in stringr (ICU), the others in base R (PCRE): a
+# pattern must be valid where it is used.
+.style_regex_ok <- function(pattern, icu = FALSE) {
 	if (!nzchar(pattern)) return(TRUE)
-	isTRUE(tryCatch({ grepl(pattern, "", perl = TRUE); TRUE },
-	                error = function(e) FALSE, warning = function(w) FALSE))
+	isTRUE(tryCatch({
+		if (icu) stringr::str_detect("", pattern) else grepl(pattern, "", perl = TRUE)
+		TRUE
+	}, error = function(e) FALSE, warning = function(w) FALSE))
 }
 
 # Returns the problems of a normalized profile as sentences; empty = valid.
@@ -423,9 +453,16 @@ helper_style_appearance <- function(style) {
 	if (!profile$mode %in% c("gat", "mondada")) {
 		p <- c(p, paste0("mode is '", profile$mode, "'; allowed: gat, mondada."))
 	}
-	if (isTRUE(profile$width.limit) && profile$width < 40) {
-		p <- c(p, paste0("width is ", profile$width, "; the minimum is 40."))
+	if (isTRUE(profile$width.limit) && (profile$width < 40 || profile$width > 500)) {
+		p <- c(p, paste0("width is ", profile$width, "; allowed: 40 to 500."))
 	}
+	v <- profile$advanced
+	if (v$spaces.before < 0 || v$spaces.before > 20) p <- c(p, paste0("spaces before is ", v$spaces.before, "; allowed: 0 to 20."))
+	if (v$tolerance.point < 0 || v$tolerance.gesture < 0) p <- c(p, "a time tolerance is negative.")
+	if (v$block.height < 0) p <- c(p, paste0("block height is ", v$block.height, "; the minimum is 0."))
+	if (v$min.description < 0) p <- c(p, paste0("minimum room is ", v$min.description, "; the minimum is 0."))
+	if (v$max.span.blocks < 1) p <- c(p, paste0("span is ", v$max.span.blocks, "; the minimum is 1."))
+	if (nchar(v$fill) != 1) p <- c(p, "the fill character must be exactly one character.")
 	aw <- profile$acronym$width
 	if (aw < 0 || aw > 25) {
 		p <- c(p, paste0("acronym width is ", aw, "; allowed: 1 to 25, or 0 for the full name."))
@@ -437,7 +474,7 @@ helper_style_appearance <- function(style) {
 		p <- c(p, paste0("word look is '", profile$word$look, "'; allowed: file, profile."))
 	}
 	for (key in c("search", "extract")) {
-		if (!.style_regex_ok(profile$acronym[[key]])) {
+		if (!.style_regex_ok(profile$acronym[[key]], icu = key == "extract")) {
 			p <- c(p, paste0("acronym ", key, " is not a valid regular expression: ", profile$acronym[[key]]))
 		}
 	}
@@ -456,6 +493,10 @@ helper_style_appearance <- function(style) {
 	unknown <- setdiff(roles[nzchar(roles)], .STYLE_ROLES)
 	if (length(unknown) > 0) {
 		p <- c(p, paste0("unknown fixed style: ", paste(unknown, collapse = ", "), "."))
+	}
+	doubled_roles <- unique(roles[duplicated(roles) & nzchar(roles)])
+	if (length(doubled_roles) > 0) {
+		p <- c(p, paste0("fixed styles occur twice: ", paste(doubled_roles, collapse = ", "), "."))
 	}
 	missing_roles <- setdiff(.STYLE_ROLES_OBLIGATORY, roles)
 	if (length(missing_roles) > 0) {
@@ -483,7 +524,7 @@ helper_style_appearance <- function(style) {
 			if (!s$applies %in% c("symbols", "pattern")) {
 				p <- c(p, paste0(label, "applies is '", s$applies, "'; allowed: symbols, pattern."))
 			}
-			if (identical(s$applies, "pattern") && (!nzchar(s$pattern) || !.style_regex_ok(s$pattern))) {
+			if (identical(s$applies, "pattern") && (!nzchar(s$pattern) || !.style_regex_ok(s$pattern, icu = TRUE))) {
 				p <- c(p, paste0(label, "the pattern is empty or not a valid regular expression."))
 			}
 			next
@@ -504,7 +545,7 @@ helper_style_appearance <- function(style) {
 			p <- c(p, paste0(label, "acronym width is ", s$acronym$width, "; allowed: 1 to 25, or 0 for the value of the profile."))
 		}
 		for (key in c("search", "extract")) {
-			if (!.style_regex_ok(s$acronym[[key]])) {
+			if (!.style_regex_ok(s$acronym[[key]], icu = key == "extract")) {
 				p <- c(p, paste0(label, "acronym ", key, " is not a valid regular expression: ", s$acronym[[key]]))
 			}
 		}
@@ -678,6 +719,12 @@ helper_style_appearance <- function(style) {
 			space.after = NA_character_,
 			comment = NA_character_,
 			stringsAsFactors = FALSE)
+	}
+	# the space row first: the exports ask for the row that matches "space",
+	# and no tier pattern standing before it may answer in its place
+	if (length(rows) > 0) {
+		is_space_row <- vapply(rows, function(r) identical(r$match.regex, "^space$"), logical(1))
+		rows <- c(rows[is_space_row], rows[!is_space_row])
 	}
 	user <- if (length(rows) > 0) do.call(rbind, rows) else export_styles_user_load()[0, ]
 	l@docx.styles.user <- user
