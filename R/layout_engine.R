@@ -626,6 +626,11 @@ concatenate_mondada_rows <- function(ann, anchor_char_set,
 					nchar(ann$content[i]) <=
 					pause_line_limit - nchar(ann$prefix_first[i])
 				join <- !turn_break && fits
+			} else if (!ann$is_main[i] && .layer_is_plain(ann$align_chars[i], ann$align_mode[i])) {
+				# a translation or gloss stays one row per annotation: it is
+				# printed under the line on which ITS utterance ends, not as
+				# one block below the merged turn (user decision 2026-10-05)
+				join <- FALSE
 			} else if (gap <= seam_i) {
 				join <- TRUE
 			} else if (ann$is_main[i]) {
@@ -1185,11 +1190,37 @@ apply_indent_alignment <- function(ann, report, anchor_chars,
 	sub("\\s+$", "", paste(out, collapse = ""))
 }
 
+# A layer row without anchors of its own: plain text such as a translation.
+.layer_is_plain <- function(align_chars, align_mode) {
+	(is.na(align_chars) || !nzchar(align_chars)) && !identical(align_mode, "point")
+}
+
+# Printed line of a (merged) verbal row on which the fragment ends that is
+# running at `endsec`. The fragments are located in the wrapped lines by
+# their share of the non-space characters: wrapping moves only spaces, and
+# the few characters a symbol fold removes shift the share by less than a word.
+.layout_fragment_end_line <- function(result, main_row, endsec) {
+	main_lines <- result$rendered_lines[[main_row]]
+	n_main <- length(main_lines)
+	fragments <- if (!is.null(result$fragments)) result$fragments[[main_row]] else NULL
+	if (!is.data.frame(fragments) || nrow(fragments) < 2 || n_main < 2) return(n_main)
+	fragment <- max(c(1L, which(fragments$startsec < endsec - 0.01)))
+	if (fragment >= nrow(fragments)) return(n_main)
+	count <- function(x) nchar(stringr::str_remove_all(x, "\\s"))
+	share <- cumsum(count(fragments$content))[fragment] / sum(count(fragments$content))
+	pad <- nchar(result$prefix_cont[main_row])
+	per_line <- count(substr(main_lines, pad + 1L, nchar(main_lines)))
+	if (sum(per_line) == 0 || !is.finite(share)) return(n_main)
+	line <- which(cumsum(per_line) >= share * sum(per_line) - 0.5)
+	if (length(line) == 0) n_main else line[1]
+}
+
 interleave_layer_lines <- function(result, max_span_blocks = Inf,
                                    text_width = Inf, embed_overlaps = FALSE,
                                    label_mode = "mondada",
                                    layer_order = NULL,
-                                   wrap_marker = "mondada") {
+                                   wrap_marker = "mondada",
+                                   layer_at_fragment_end = FALSE) {
 	mm_chars <- unique(unlist(
 		lapply(result$align_chars[!is.na(result$align_chars)],
 		       function(x) strsplit(x, "")[[1]])))
@@ -1288,6 +1319,43 @@ interleave_layer_lines <- function(result, max_span_blocks = Inf,
 		segments[[length(segments) + 1]] <- list(kind = "group", main = i,
 		                                         rows = group_rows)
 		i <- j
+	}
+	# ---- plain text layers (translation, gloss) of a MERGED turn belong to
+	# the turn of their own speaker that holds them in time - row order alone
+	# puts them under another speaker's block as soon as that speaker starts
+	# in between ----
+	plain_row <- vapply(seq_len(n), function(r) {
+		!isTRUE(result$is_main[r]) && is.null(homes[[r]]) &&
+			.layer_is_plain(result$align_chars[r], result$align_mode[r])
+	}, logical(1))
+	if (isTRUE(layer_at_fragment_end) && any(plain_row)) {
+		main_rows <- which(result$is_main %in% TRUE)
+		base_of <- function(r) tolower(sub("#.*$", "", result$tierName[r]))
+		segment_of_main <- vapply(segments, function(seg) {
+			if (identical(seg$kind, "group")) seg$main else NA_integer_
+		}, integer(1))
+		moved_loose <- logical(length(segments))
+		for (s in seq_along(segments)) {
+			seg <- segments[[s]]
+			rows_s <- if (identical(seg$kind, "group")) seg$rows else seg$row
+			for (r in rows_s[plain_row[rows_s]]) {
+				mid <- (result$startsec[r] + result$endsec[r]) / 2
+				owner <- main_rows[vapply(main_rows, base_of, "") == base_of(r) &
+				                   result$startsec[main_rows] - 0.01 <= mid &
+				                   result$endsec[main_rows] + 0.01 >= mid]
+				if (length(owner) != 1) next
+				current <- if (identical(seg$kind, "group")) seg$main else NA_integer_
+				if (identical(owner, current)) next
+				target <- which(segment_of_main == owner)
+				segments[[target]]$rows <- c(segments[[target]]$rows, r)
+				if (identical(seg$kind, "group")) {
+					segments[[s]]$rows <- setdiff(segments[[s]]$rows, r)
+				} else {
+					moved_loose[s] <- TRUE
+				}
+			}
+		}
+		segments <- segments[!moved_loose]
 	}
 	adjacency_main <- rep(NA_integer_, n)
 	for (s in seq_along(segments)) {
@@ -1407,6 +1475,8 @@ interleave_layer_lines <- function(result, max_span_blocks = Inf,
 				nchar(result$align_chars[r]) > 0
 			if (identical(result$align_mode[r], "point")) {
 				rep(n_main, length(lines_r))
+			} else if (isTRUE(layer_at_fragment_end) && plain_row[r]) {
+				rep(.layout_fragment_end_line(result, main_row, result$endsec[r]), length(lines_r))
 			} else {
 				rep(if (has_align) 1L else n_main, length(lines_r))
 			}
@@ -6577,7 +6647,8 @@ helper_layout_render <- function(t,
 		                               embed_overlaps = identical(layout_mode, "mondada"),
 		                               label_mode = label_mode,
 		                               layer_order = layerOrder,
-		                               wrap_marker = wrap_marker)
+		                               wrap_marker = wrap_marker,
+		                               layer_at_fragment_end = identical(layout_mode, "mondada"))
 		plan <- .apply_resume_markers(plan, result, prep$engine_width)
 		if (identical(layout_mode, "mondada")) {
 			plan <- apply_mondada_line_numbers(plan, result,
