@@ -15,7 +15,7 @@
 # What the indent "text" skips at the start of the verbal line: latching,
 # overlap bracket, comment opener, breathing, pauses. The multimodal symbols
 # are added from the anchor characters at render time.
-.STYLE_INDENT_TEXT_SKIP <- c("=", "\\[", "<<[^>]*>\\s*", "°h+\\s*", "h+°\\s*",
+.STYLE_INDENT_TEXT_SKIP <- c("=", "\\[", "<<[^>]*>\\s*", "\u00b0h+\\s*", "h+\u00b0\\s*",
                              "\\([0-9.\\-]*\\)\\s*")
 
 # ===== EXPORTED =====
