@@ -39,7 +39,7 @@
 		exists <- !inherits(node, "xml_missing")
 		if (!exists) {
 			based_on <- if (type == "character") NA_character_ else if (!nzchar(s$role) || identical(s$role, "space")) default_word else "Normal"
-			node <- .docx_style_create(xml, s$word, type, based_on)
+			node <- .docx_style_create(xml, s$word, type, based_on, keep_next = !identical(s$role, "space"))
 			created <- c(created, s$word)
 		}
 		if (from_profile || !exists) .docx_style_appearance(node, s, type)
@@ -70,7 +70,7 @@
 	nodes[[hit[1]]]
 }
 
-.docx_style_create <- function(xml, name, type, based_on) {
+.docx_style_create <- function(xml, name, type, based_on, keep_next = TRUE) {
 	ids <- xml2::xml_attr(xml2::xml_find_all(xml, "/w:styles/w:style"), "styleId")
 	id <- stringr::str_replace_all(name, "[^A-Za-z0-9]", "")
 	if (!nzchar(id)) id <- "style"
@@ -87,8 +87,19 @@
 			based <- sprintf("<w:basedOn w:val=\"%s\"/>", xml2::xml_attr(base_node, "styleId"))
 		}
 	}
+	# A new line style must not take spacing and justification of Normal:
+	# the lines of a transcript stand directly under each other, flush left,
+	# and stay together on a page (a space line is where a page may break).
+	# No spell check on transcript text.
+	spacing <- if (type == "paragraph") {
+		paste0("<w:pPr><w:keepNext w:val=\"", if (isTRUE(keep_next)) "1" else "0", "\"/>",
+		       "<w:spacing w:before=\"0\" w:after=\"0\" w:line=\"240\" w:lineRule=\"auto\"/><w:jc w:val=\"left\"/></w:pPr>",
+		       "<w:rPr><w:noProof/></w:rPr>")
+	} else {
+		""
+	}
 	code <- paste0(sprintf("<w:style xmlns:w=\"%s\" w:type=\"%s\" w:customStyle=\"1\" w:styleId=\"%s\">", .DOCX_W_NS, type, id),
-	               sprintf("<w:name w:val=\"%s\"/>", .docx_xml_escape(name)), based, "<w:qFormat/></w:style>")
+	               sprintf("<w:name w:val=\"%s\"/>", .docx_xml_escape(name)), based, "<w:qFormat/>", spacing, "</w:style>")
 	root <- xml2::xml_find_first(xml, "/w:styles")
 	xml2::xml_add_child(root, xml2::read_xml(code))
 	.docx_style_node(xml, name, type)
@@ -107,7 +118,7 @@
 .docx_style_appearance <- function(node, s, type) {
 	rpr <- .docx_child_ensure(node, "rPr")
 	xml2::xml_remove(xml2::xml_find_all(rpr, "w:rFonts|w:b|w:bCs|w:i|w:iCs|w:color|w:sz|w:szCs|w:shd"))
-	add <- .docx_xml_add
+	add <- function(parent, name, attrs) .docx_xml_add(parent, name, attrs, if (identical(xml2::xml_name(parent), "pPr")) .DOCX_PPR_ORDER else .DOCX_RPR_ORDER)
 	if (!is.null(s$font)) {
 		add(rpr, "rFonts", list(ascii = s$font, hAnsi = s$font, cs = s$font, eastAsia = s$font))
 	}
@@ -131,16 +142,23 @@
 		ppr <- .docx_child_ensure(node, "pPr")
 		xml2::xml_remove(xml2::xml_find_all(ppr, "w:shd"))
 		if (!is.null(shade)) add(ppr, "shd", shade)
-		.docx_children_sort(ppr, .DOCX_PPR_ORDER)
 		if (length(xml2::xml_children(ppr)) == 0) xml2::xml_remove(ppr)
 	}
-	.docx_children_sort(rpr, .DOCX_RPR_ORDER)
 	if (length(xml2::xml_children(rpr)) == 0) xml2::xml_remove(rpr)
 	invisible(node)
 }
 
-.docx_xml_add <- function(parent, name, attrs) {
-	child <- xml2::xml_add_child(parent, paste0("w:", name))
+# Adds a property element at its place: Word rejects a file whose property
+# elements stand in another order than the schema names them.
+.docx_xml_add <- function(parent, name, attrs, order_names) {
+	children <- xml2::xml_children(parent)
+	rank <- match(xml2::xml_name(children), order_names)
+	later <- which(!is.na(rank) & rank > match(name, order_names))
+	child <- if (length(later) == 0) {
+		xml2::xml_add_child(parent, paste0("w:", name))
+	} else {
+		xml2::xml_add_sibling(children[[later[1]]], paste0("w:", name), .where = "before")
+	}
 	for (key in names(attrs)) xml2::xml_set_attr(child, paste0("w:", key), attrs[[key]])
 	invisible(child)
 }
@@ -158,22 +176,6 @@
 	}
 	xml2::xml_add_child(node, paste0("w:", name))
 	xml2::xml_find_first(node, paste0("w:", name))
-}
-
-# Word rejects a file whose property elements stand in another order than
-# the schema names them.
-.docx_children_sort <- function(parent, order_names) {
-	children <- xml2::xml_children(parent)
-	if (length(children) < 2) return(invisible(parent))
-	rank <- match(xml2::xml_name(children), order_names)
-	rank[is.na(rank)] <- length(order_names) + 1
-	if (!is.unsorted(rank)) return(invisible(parent))
-	sorted <- children[order(rank)]
-	for (k in seq_along(sorted)) {
-		xml2::xml_add_child(parent, sorted[[k]])
-		xml2::xml_remove(sorted[[k]])
-	}
-	invisible(parent)
 }
 
 # One paragraph per line; where a character rule matches, the text is

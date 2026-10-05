@@ -83,6 +83,31 @@ helper_style_acronym <- function(style, tierNames, ending = TRUE) {
 	}, character(1), USE.NAMES = FALSE)
 }
 
+#' Helper: Word file of a style profile
+#'
+#' Writes an empty Word file that carries the styles of a style profile:
+#' the file the profile names (or \code{templatePath}, or the template of the
+#' package) with the paragraph and character styles of the profile written
+#' into it. Use it as a template of your own, or to merge transcripts into.
+#'
+#' @param style Style profile; see \code{helper_style_read}.
+#' @param pathOutput Character string; path of the .docx file to write.
+#' @param templatePath Character string; path of the Word file to start from. \code{NULL} takes the file named in the profile.
+#' @param symbolChars Vector of character strings; the multimodal symbols, needed only to return the character rules.
+#'
+#' @return Invisibly a list with the path and the names of the styles that were created (not in the Word file before).
+#'
+#' @export
+helper_style_docx <- function(style, pathOutput, templatePath = NULL, symbolChars = character(0)) {
+	profile <- .style_read(style)
+	l <- .style_layout(profile, templatePath = templatePath)
+	template <- helper_layout_docx_templates_resolve(l)[1]
+	doc <- officer::read_docx(path = template)
+	written <- .docx_profile_styles(doc, profile, symbolChars)
+	print(written$doc, target = pathOutput)
+	invisible(list(path = pathOutput, created = written$created))
+}
+
 # ===== READ =====
 
 # style: a profile name (file <name>.json in one of the folders), a path to
@@ -171,6 +196,12 @@ helper_style_acronym <- function(style, tierNames, ending = TRUE) {
 	}
 	if (!is.list(raw) || is.null(names(raw))) {
 		cli::cli_abort("The style profile file does not hold a profile: {.path {path}}")
+	}
+	# a profile may come wrapped: {"label": ..., "params": {the profile}}
+	if (is.list(raw[["params"]])) {
+		label <- .style_chr(raw[["label"]])
+		raw <- raw[["params"]]
+		if (!nzchar(.style_chr(raw[["label"]])) && nzchar(label)) raw[["label"]] <- label
 	}
 	attr(raw, "id") <- tools::file_path_sans_ext(basename(path))
 	attr(raw, "path") <- path

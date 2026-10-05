@@ -219,6 +219,11 @@
 		group       = "layout",
 		description = "Character in annotation content that forces a manual line break in the alignment engine (corpus convention - do not change mid-project)"
 	),
+	act.style.folders = list(
+		value       = character(0),
+		group       = "layout",
+		description = "Folders that are searched for style profiles (<name>.json) before the profiles shipped with act"
+	),
 	act.import.replaceNewlinesWith = list(
 		value       = " ",
 		group       = "import",
