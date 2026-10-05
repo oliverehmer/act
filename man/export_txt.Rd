@@ -30,7 +30,10 @@ export_txt(
   figTierRegex = "^stills(#|$)",
   report = FALSE,
   pathReport = NULL,
-  multimodalTierRegex = "#mm[0-9]*$"
+  multimodalTierRegex = "#mm[0-9]*$",
+  mainTierNames = NULL,
+  alignChars = NULL,
+  alignModes = NULL
 )
 
 export_printtranscript(...)
@@ -85,6 +88,12 @@ export_printtranscript(...)
 \item{pathReport}{Character string; explicit path for the alignment report.}
 
 \item{multimodalTierRegex}{Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.}
+
+\item{mainTierNames}{Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.}
+
+\item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.}
+
+\item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the styles table of \code{l}.}
 
 \item{...}{Arguments passed to \code{export_txt()}.}
 }
