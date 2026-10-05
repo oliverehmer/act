@@ -51,6 +51,7 @@
 #' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.
 #' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the styles table of \code{l}.
 #' @param symbolStyle Character string; name of a Word character style for the multimodal symbols (the anchor characters of the layer tiers), in verbal lines and in layer lines. \code{NULL} takes the base style \code{transcript.symbols} of the styles file; without it the symbols are written as plain text.
+#' @param style Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}, and the render parameters that are not given in the call come from the profile.
 
 #' 
 #' @return Officer doc; transcript as object from library officer.
@@ -88,12 +89,24 @@ export_docx <- function (   t,
 							mainTierNames                = NULL,
 							alignChars                   = NULL,
 							alignModes                   = NULL,
-							symbolStyle                  = NULL
+							symbolStyle                  = NULL,
+							style                        = NULL
 ) {
 	.assert_transcript(t, missing = missing(t))
-	if (missing(l) || is.null(l)) {
+	if (!is.null(style)) l <- helper_style_layout(style)
+	if (is.null(l)) {
 		l <- methods::new("layout")
 		l@docx.template.path <- ""
+	}
+	profile <- .layout_style(l)
+	if (!is.null(profile)) {
+		if (missing(timeTolerancePoint))   timeTolerancePoint   <- profile$advanced$tolerance.point
+		if (missing(timeToleranceGesture)) timeToleranceGesture <- profile$advanced$tolerance.gesture
+		if (missing(minDescription))       minDescription       <- profile$advanced$min.description
+		if (missing(maxSpanBlocks))        maxSpanBlocks        <- profile$advanced$max.span.blocks
+		if (missing(figReplace))           figReplace           <- profile$advanced$fig.replace
+		if (missing(figTierRegex))         figTierRegex         <- profile$advanced$fig.tier.regex
+		if (missing(multimodalTierRegex))  multimodalTierRegex  <- profile$advanced$multimodal.tier.regex
 	}
 	if (!requireNamespace("officer", quietly = TRUE)) {
 		cli::cli_abort("Please install the {.pkg officer} package.")
@@ -150,7 +163,17 @@ export_docx <- function (   t,
 	results <- list()
 	for (template_idx in seq_along(templates)) {
 	doc <- officer::read_docx(path = templates[template_idx])
-	symbol_style_id <- .docx_symbol_style_id(doc, symbol_style, symbol_chars)
+	character_rules <- NULL
+	if (is.null(profile)) {
+		symbol_style_id <- .docx_symbol_style_id(doc, symbol_style, symbol_chars)
+	} else {
+		from_profile <- .docx_profile_styles(doc, profile, symbol_chars)
+		doc <- from_profile$doc
+		character_rules <- from_profile$rules
+		if (length(from_profile$created) > 0 && identical(profile$word$look, "file")) {
+			cli::cli_alert_info("Styles missing in the Word file, created from the profile: {.val {from_profile$created}}")
+		}
+	}
 	doc <- .docx_add_header(doc, l, t, headerPreface, headerTitle,
 	                        headerSubtitle, headerDescription,
 	                        headerInsertSource)
@@ -166,19 +189,23 @@ export_docx <- function (   t,
 		}
 		previous_main_row <- NA_integer_
 		emitted_any <- FALSE
+		space_lines <- is.null(profile) || isTRUE(profile$space.lines)
 		for (p in seq_len(nrow(plan))) {
 			row_p <- plan$row[p]
 			if (mondada) {
-				if (emitted_any && isTRUE(result$is_main[row_p])) {
+				if (space_lines && emitted_any && isTRUE(result$is_main[row_p])) {
 					doc <- officer::body_add_par(doc, "", style = space_style_name)
 				}
-			} else if (emitted_any && isTRUE(result$is_main[row_p]) &&
+			} else if (space_lines && emitted_any && isTRUE(result$is_main[row_p]) &&
 			           !identical(row_p, previous_main_row)) {
 				doc <- officer::body_add_par(doc, "", style = space_style_name)
 			}
 			if (isTRUE(result$show[row_p])) {
-				doc <- .docx_add_line(doc, plan$line[p], result$style[row_p],
-				                      symbol_style_id, symbol_chars)
+				doc <- if (is.null(character_rules)) {
+					.docx_add_line(doc, plan$line[p], result$style[row_p], symbol_style_id, symbol_chars)
+				} else {
+					.docx_add_line_rules(doc, plan$line[p], result$style[row_p], character_rules)
+				}
 				if (isTRUE(result$is_main[row_p])) previous_main_row <- row_p
 				emitted_any <- TRUE
 			}

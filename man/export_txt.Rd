@@ -33,7 +33,8 @@ export_txt(
   multimodalTierRegex = "#mm[0-9]*$",
   mainTierNames = NULL,
   alignChars = NULL,
-  alignModes = NULL
+  alignModes = NULL,
+  style = NULL
 )
 
 export_printtranscript(...)
@@ -94,6 +95,8 @@ export_printtranscript(...)
 \item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.}
 
 \item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the styles table of \code{l}.}
+
+\item{style}{Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}, and the render parameters that are not given in the call come from the profile.}
 
 \item{...}{Arguments passed to \code{export_txt()}.}
 }

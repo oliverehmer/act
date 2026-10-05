@@ -23,7 +23,8 @@ helper_layout_render(
   multimodalTierRegex = "#mm[0-9]*$",
   insertArrowStartsec = NA_real_,
   insertArrowEndsec = NA_real_,
-  insertArrowTierName = NA_character_
+  insertArrowTierName = NA_character_,
+  style = NULL
 )
 }
 \arguments{
@@ -64,6 +65,8 @@ helper_layout_render(
 \item{insertArrowEndsec}{Numeric; end time (seconds) of the annotation to mark.}
 
 \item{insertArrowTierName}{Character string; tier name of the annotation to mark.}
+
+\item{style}{Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}, and the render parameters that are not given in the call come from the profile.}
 }
 \value{
 List with the rendered \code{lines}, the line \code{plan}, the

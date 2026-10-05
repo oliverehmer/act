@@ -30,6 +30,7 @@
 #' @param mainTierNames Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.
 #' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.
 #' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the styles table of \code{l}.
+#' @param style Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}, and the render parameters that are not given in the call come from the profile.
 #' @param collapse Logical; if \code{FALSE} a vector will be created, each element corresponding to one annotation. if \code{TRUE} a single string will be created, collapsed by linebreaks \\n.
 #' 
 #' @return Character string; transcript as text.
@@ -68,12 +69,24 @@ export_txt <- function (t,
 						multimodalTierRegex     = "#mm[0-9]*$",
 						mainTierNames           = NULL,
 						alignChars              = NULL,
-						alignModes              = NULL) {
+						alignModes              = NULL,
+						style                   = NULL) {
 
 	.assert_transcript(t, missing = missing(t))
-	if (missing(l) || is.null(l)) {
+	if (!is.null(style)) l <- helper_style_layout(style)
+	if (is.null(l)) {
 		l <- methods::new("layout")
 		l@docx.template.path <- ""
+	}
+	profile <- .layout_style(l)
+	if (!is.null(profile)) {
+		if (missing(timeTolerancePoint))   timeTolerancePoint   <- profile$advanced$tolerance.point
+		if (missing(timeToleranceGesture)) timeToleranceGesture <- profile$advanced$tolerance.gesture
+		if (missing(minDescription))       minDescription       <- profile$advanced$min.description
+		if (missing(maxSpanBlocks))        maxSpanBlocks        <- profile$advanced$max.span.blocks
+		if (missing(figReplace))           figReplace           <- profile$advanced$fig.replace
+		if (missing(figTierRegex))         figTierRegex         <- profile$advanced$fig.tier.regex
+		if (missing(multimodalTierRegex))  multimodalTierRegex  <- profile$advanced$multimodal.tier.regex
 	}
 	if (!is.null(pathOutput)) {
 		if (!dir.exists(dirname(pathOutput))) {

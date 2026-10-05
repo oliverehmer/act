@@ -5245,6 +5245,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	ann$format.acronym.case    <- NA_character_
 	ann$format.acronym.search  <- NA_character_
 	ann$format.acronym.replace <- NA_character_
+	ann$format.acronym.extract <- NA_character_
 	ann$format.acronym.width   <- 0L
 	ann$format.acronym.ending  <- NA_character_
 	ann$format.space.after     <- NA_character_
@@ -5266,6 +5267,8 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		if (!is.na(format_tier$acronym.case))       ann$format.acronym.case[rows]    <- format_tier$acronym.case
 		if (!is.na(format_tier$acronym.search))     ann$format.acronym.search[rows]  <- format_tier$acronym.search
 		if (!is.na(format_tier$acronym.replace))    ann$format.acronym.replace[rows] <- format_tier$acronym.replace
+		if (!is.null(format_tier$acronym.extract) &&
+		    !is.na(format_tier$acronym.extract))    ann$format.acronym.extract[rows] <- format_tier$acronym.extract
 		if (!is.na(format_tier$acronym.width))      ann$format.acronym.width[rows]   <- format_tier$acronym.width
 		if (!is.na(format_tier$acronym.ending))     ann$format.acronym.ending[rows]  <- format_tier$acronym.ending
 		if (!is.na(format_tier$space.after))        ann$format.space.after[rows]     <- format_tier$space.after
@@ -5362,7 +5365,12 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		included_speakers_pos[which(trppauses_pos)] <- FALSE
 	}
 
+	profile <- .layout_style(l)
 	for (i in which(included_speakers_pos)) {
+		if (!is.null(profile)) {
+			ann$speaker[i] <- .layout_profile_acronym(profile, ann, i)
+			next
+		}
 		speaker_text <- ann$speaker[i]
 		acronym_case <- ann$format.acronym.case[i]
 		if (!is.na(acronym_case)) {
@@ -5588,6 +5596,14 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	ann$format.filler.inside[na_filler & align_from_param] <- "-"
 	ann$format.filler.inside[is.na(ann$format.filler.inside)] <- " "
 
+	# profiles carry no skip pattern of their own: what the indent "text"
+	# jumps over is fixed, plus whatever symbols this transcript anchors on
+	if (!is.null(profile)) {
+		text_rows <- identical_chr(ann$format.content.indent, "text") & is.na(ann$format.indent.skip)
+		ann$format.indent.skip[text_rows] <- .layout_indent_text_skip(align_char_union)
+	}
+
+	block_height <- if (is.null(profile)) getOption("act.layout.rectangle.max.lines", 2L) else profile$advanced$block.height
 	ann$rect_directives <- rep(list(NULL), nrow(ann))
 	for (i in seq_len(nrow(ann))) {
 		marks <- ann$rect_marks[[i]]
@@ -5596,7 +5612,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		if (is.na(align_chars_i) || !nzchar(align_chars_i)) next
 		ann$rect_directives[[i]] <- .resolve_rectangle_marks(
 			ann$content_render[i], marks, align_chars_i,
-			getOption("act.layout.rectangle.max.lines", 2L))
+			block_height)
 	}
 
 	# A space directly after the leading annotation symbol is dropped in
@@ -5651,6 +5667,33 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 
 identical_chr <- function(x, value) {
 	!is.na(x) & x == value
+}
+
+# Acronym of annotation row i when the layout comes from a style profile:
+# the values of the tier style, and where it leaves one open, the profile.
+.layout_profile_acronym <- function(profile, ann, i) {
+	a <- profile$acronym
+	case <- switch(as.character(ann$format.acronym.case[i]),
+	               tolower = "lower", toupper = "upper", capitalize = "capitalize", a$case)
+	own_search <- !is.na(ann$format.acronym.search[i])
+	width <- ann$format.acronym.width[i]
+	.style_acronym_text(
+		ann$speaker[i],
+		case    = case,
+		search  = if (own_search) ann$format.acronym.search[i] else a$search,
+		replace = if (own_search) { if (is.na(ann$format.acronym.replace[i])) "" else ann$format.acronym.replace[i] } else a$replace,
+		extract = if (is.na(ann$format.acronym.extract[i])) a$extract else ann$format.acronym.extract[i],
+		width   = if (is.na(width) || width == 0) a$width else width,
+		ending  = if (is.na(ann$format.acronym.ending[i])) a$ending else ann$format.acronym.ending[i])
+}
+
+.layout_indent_text_skip <- function(align_chars) {
+	parts <- .STYLE_INDENT_TEXT_SKIP
+	chars <- strsplit(align_chars, "")[[1]]
+	if (length(chars) > 0) {
+		parts <- c(parts, paste0("[", paste(stringr::str_escape(chars), collapse = ""), "]"))
+	}
+	paste0("^(", paste(parts, collapse = "|"), ")*")
 }
 
 # ======================================================================
@@ -6519,7 +6562,7 @@ build_alignment_report <- function(result, plan, transcript_name,
 	plan
 }
 
-.layout_assemble_lines <- function(plan, result, layout_mode) {
+.layout_assemble_lines <- function(plan, result, layout_mode, space_lines = TRUE) {
 	mondada <- identical(layout_mode, "mondada")
 	lines <- character(0)
 	previous_main_row <- NA_integer_
@@ -6529,10 +6572,10 @@ build_alignment_report <- function(result, plan, transcript_name,
 		if (mondada) {
 			# a block starts at a main row whether or not it is numbered:
 			# with line numbers off the blocks otherwise ran together
-			if (emitted_any && isTRUE(result$is_main[row_p])) {
+			if (space_lines && emitted_any && isTRUE(result$is_main[row_p])) {
 				lines <- c(lines, "")
 			}
-		} else if (emitted_any && isTRUE(result$is_main[row_p]) &&
+		} else if (space_lines && emitted_any && isTRUE(result$is_main[row_p]) &&
 		           !identical(row_p, previous_main_row)) {
 			lines <- c(lines, "")
 		}
@@ -6573,6 +6616,7 @@ build_alignment_report <- function(result, plan, transcript_name,
 #' @param insertArrowStartsec Numeric; start time (seconds) of an annotation to mark with the arrow of the layout (slot \code{arrow.shape}), e.g. a search hit. All lines get room for the arrow before the line number, so the marked line stays in its column. \code{NA}: no arrow.
 #' @param insertArrowEndsec Numeric; end time (seconds) of the annotation to mark.
 #' @param insertArrowTierName Character string; tier name of the annotation to mark.
+#' @param style Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}, and the render parameters that are not given in the call come from the profile.
 #'
 #' @return List with the rendered \code{lines}, the line \code{plan}, the
 #' engine \code{result} frame (one row per annotation; its column
@@ -6604,8 +6648,20 @@ helper_layout_render <- function(t,
                                  multimodalTierRegex   = "#mm[0-9]*$",
                                  insertArrowStartsec   = NA_real_,
                                  insertArrowEndsec     = NA_real_,
-                                 insertArrowTierName   = NA_character_) {
+                                 insertArrowTierName   = NA_character_,
+                                 style                 = NULL) {
+	if (!is.null(style)) l <- helper_style_layout(style)
 	if (is.null(l)) l <- methods::new("layout")
+	profile <- .layout_style(l)
+	if (!is.null(profile)) {
+		if (missing(timeTolerancePoint))   timeTolerancePoint   <- profile$advanced$tolerance.point
+		if (missing(timeToleranceGesture)) timeToleranceGesture <- profile$advanced$tolerance.gesture
+		if (missing(minDescription))       minDescription       <- profile$advanced$min.description
+		if (missing(maxSpanBlocks))        maxSpanBlocks        <- profile$advanced$max.span.blocks
+		if (missing(figReplace))           figReplace           <- profile$advanced$fig.replace
+		if (missing(figTierRegex))         figTierRegex         <- profile$advanced$fig.tier.regex
+		if (missing(multimodalTierRegex))  multimodalTierRegex  <- profile$advanced$multimodal.tier.regex
+	}
 	layout_mode <- .layout_mode_of(l)
 	label_mode <- getOption("act.layout.label.mode", "mondada")
 	if (!identical(label_mode, "always")) label_mode <- "mondada"
@@ -6666,7 +6722,8 @@ helper_layout_render <- function(t,
 	need <- attr(out$plan, "number_digits")
 	if (!is.null(need) && need > out$prep$number_width) out <- run(need)
 	prep <- out$prep; result <- out$result; plan <- out$plan
-	lines <- .layout_assemble_lines(plan, result, layout_mode)
+	lines <- .layout_assemble_lines(plan, result, layout_mode,
+	                                space_lines = is.null(profile) || isTRUE(profile$space.lines))
 	list(lines = lines, plan = plan, result = result, transcript = t,
 	     engineWidth = prep$engine_width, layoutMode = layout_mode,
 	     anchors = .layout_collect_anchors(result),

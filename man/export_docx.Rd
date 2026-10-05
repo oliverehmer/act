@@ -32,7 +32,8 @@ export_docx(
   mainTierNames = NULL,
   alignChars = NULL,
   alignModes = NULL,
-  symbolStyle = NULL
+  symbolStyle = NULL,
+  style = NULL
 )
 }
 \arguments{
@@ -91,6 +92,8 @@ export_docx(
 \item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the styles table of \code{l}.}
 
 \item{symbolStyle}{Character string; name of a Word character style for the multimodal symbols (the anchor characters of the layer tiers), in verbal lines and in layer lines. \code{NULL} takes the base style \code{transcript.symbols} of the styles file; without it the symbols are written as plain text.}
+
+\item{style}{Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}, and the render parameters that are not given in the call come from the profile.}
 }
 \value{
 Officer doc; transcript as object from library officer.

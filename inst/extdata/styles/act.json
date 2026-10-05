@@ -1,0 +1,54 @@
+{
+  "label": "act",
+  "mode": "gat",
+  "header": true,
+  "width": 65,
+  "width.limit": true,
+  "space.lines": true,
+  "line.numbers": true,
+  "acronym": {
+    "show": true,
+    "suppress.repeated": true,
+    "case": "",
+    "search": "",
+    "replace": "",
+    "extract": "",
+    "width": 3,
+    "ending": ":  "
+  },
+  "word": {
+    "file": "",
+    "look": "file"
+  },
+  "functions": {
+    "tiers.exclude": "",
+    "tiers.keep": "",
+    "arrow": true,
+    "arrow.shape": "->"
+  },
+  "advanced": {
+    "spaces.before": 3,
+    "brackets.align": true,
+    "symbol.merge": true,
+    "tolerance.point": 0.2,
+    "tolerance.gesture": 0.5,
+    "fill": "-",
+    "block.height": 2,
+    "min.description": 10,
+    "max.span.blocks": 3,
+    "fig.replace": true,
+    "fig.tier.regex": "^stills(#|$)",
+    "multimodal.tier.regex": "#mm[0-9]*$"
+  },
+  "styles": [
+    {"name": "Normal", "role": "normal", "word": "Normal"},
+    {"name": "Transcript default", "role": "default", "word": "transcript_default", "font": "Courier New", "size": 10},
+    {"name": "Header preface", "role": "header.preface", "word": "transcript_header_preface"},
+    {"name": "Header title", "role": "header.title", "word": "transcript_header_title", "bold": true},
+    {"name": "Header subtitle", "role": "header.subtitle", "word": "transcript_header_subtitle"},
+    {"name": "Header info", "role": "header.info", "word": "transcript_header_info"},
+    {"name": "Translation", "type": "tier", "pattern": "#trans", "example": "A#trans", "main": false, "word": "transcript_translation",
+     "line.numbers.suppress": true, "acronym": {"suppress": true}, "indent": "content", "italic": true},
+    {"name": "Space", "role": "space", "word": "transcript_space", "size": 4}
+  ]
+}
