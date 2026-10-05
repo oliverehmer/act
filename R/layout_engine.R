@@ -5168,6 +5168,9 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	ann$format.show            <- TRUE
 	ann$format.style           <- style_default_name
 	ann$format.line.nr.show    <- isTRUE(l@line.nr.show)
+	# known main tiers: layer rows take no number of their own unless a
+	# style row asks for it (without a styles table they counted 01, 03, 04)
+	if (!is.null(main_tier_names)) ann$format.line.nr.show[!ann$format.is.main] <- FALSE
 	ann$format.acronym.show    <- TRUE
 	ann$format.acronym.case    <- NA_character_
 	ann$format.acronym.search  <- NA_character_
