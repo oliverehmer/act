@@ -47,7 +47,7 @@ export_docx(
 
 \item{filterSectionEndsec}{Double; end of selection in seconds.}
 
-\item{insertArrowStartsec}{Numeric; start time (seconds) of the hit annotation for arrow placement. Currently without effect: the alignment engine does not support hit arrows yet. Used with \code{insertArrowEndsec} and \code{insertArrowTierName} to locate the annotation by time and tier. If \code{NA}, no arrow is placed.}
+\item{insertArrowStartsec}{Numeric; start time (seconds) of the hit annotation for arrow placement. The annotation is marked with the arrow of the layout (slot \code{arrow.shape}); all lines get room for it before the line number. Used with \code{insertArrowEndsec} and \code{insertArrowTierName} to locate the annotation by time and tier. If \code{NA}, no arrow is placed.}
 
 \item{insertArrowEndsec}{Numeric; end time (seconds) of the hit annotation for arrow placement.}
 

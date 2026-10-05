@@ -9,7 +9,7 @@
 #' @param filterTierNames Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.
 #' @param filterSectionStartsec Double; start of selection in seconds.
 #' @param filterSectionEndsec Double; end of selection in seconds.
-#' @param insertArrowStartsec Numeric; start time (seconds) of the hit annotation for arrow placement. Currently without effect: the alignment engine does not support hit arrows yet. Used with \code{insertArrowEndsec} and \code{insertArrowTierName} to locate the annotation by time and tier. If \code{NA}, no arrow is placed.
+#' @param insertArrowStartsec Numeric; start time (seconds) of the hit annotation for arrow placement. The annotation is marked with the arrow of the layout (slot \code{arrow.shape}); all lines get room for it before the line number. Used with \code{insertArrowEndsec} and \code{insertArrowTierName} to locate the annotation by time and tier. If \code{NA}, no arrow is placed.
 #' @param insertArrowEndsec Numeric; end time (seconds) of the hit annotation for arrow placement.
 #' @param insertArrowTierName Character string; tier name of the hit annotation for arrow placement.
 #' @param headerPreface Character string; text used as preface before title.
@@ -105,7 +105,10 @@ export_txt <- function (t,
 		mainTierNames         = mainTierNames,
 		alignChars            = alignChars,
 		alignModes            = alignModes,
-		multimodalTierRegex   = multimodalTierRegex)
+		multimodalTierRegex   = multimodalTierRegex,
+		insertArrowStartsec   = insertArrowStartsec,
+		insertArrowEndsec     = insertArrowEndsec,
+		insertArrowTierName   = insertArrowTierName)
 	t <- rendered$transcript
 
 	if (is.null(rendered$result)) {

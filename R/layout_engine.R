@@ -5102,7 +5102,10 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
                                     align_chars = NULL,
                                     align_modes = NULL,
                                     number_width_min = 0L,
-                                    mm_tier_regex = "#mm[0-9]*$") {
+                                    mm_tier_regex = "#mm[0-9]*$",
+                                    arrow_startsec = NA_real_,
+                                    arrow_endsec = NA_real_,
+                                    arrow_tier = NA_character_) {
 	ann <- t@annotations
 	ann$tierName <- as.character(ann$tierName)
 
@@ -5148,7 +5151,17 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	ann <- ann[order(ann$startsec, tier_order), ]
 
 	# ===== PREFIX PARTS =====
-	ann$spacebefore <- stringr::str_pad("", width = l@spacesbefore, side = "left", pad = " ")
+	space_width <- l@spacesbefore
+	# ===== HIT ARROW =====
+	# EVERY line gets room for the arrow, so the hit line stays in its
+	# column also when the layout reserves no spaces before the number.
+	# The arrow itself is written into the finished plan (.layout_arrow_apply):
+	# only there is known which printed line holds the hit once turns are merged
+	arrow_wanted <- length(arrow_startsec) == 1 && length(arrow_endsec) == 1 &&
+		!is.na(arrow_startsec) && !is.na(arrow_endsec) &&
+		length(l@arrow.shape) == 1 && !is.na(l@arrow.shape) && nzchar(l@arrow.shape)
+	if (arrow_wanted) space_width <- max(space_width, nchar(l@arrow.shape) + 1L)
+	ann$spacebefore <- strrep(" ", space_width)
 
 	style_default_name <- helper_layout_style_base_get(l, "transcript.default")$docx.template.name
 	ann$format.show            <- TRUE
@@ -5552,7 +5565,9 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		engine_ann    = engine_ann,
 		engine_width  = engine_width,
 		arrow_mode    = arrow_mode,
-		number_offset = l@spacesbefore,
+		number_offset = space_width,
+		arrow_field   = if (arrow_wanted) stringr::str_pad(l@arrow.shape, width = space_width,
+		                                                   side = "right", pad = " ") else NULL,
 		number_width  = max(2L, line_nr_width)
 	)
 }
@@ -6385,6 +6400,48 @@ build_alignment_report <- function(result, plan, transcript_name,
 	plan
 }
 
+# Writes the hit arrow into the room reserved before the line number. The
+# line is the first printed line of the verbal row that holds the hit; in a
+# merged turn it is the line on which the hit's own annotation begins.
+.layout_arrow_apply <- function(plan, result, arrow_field, hit_startsec, hit_endsec, hit_tier) {
+	if (is.null(arrow_field) || is.null(plan) || nrow(plan) == 0) return(plan)
+	rows <- data.frame(startsec = result$startsec, endsec = result$endsec,
+	                   tierName = as.character(result$tierName), stringsAsFactors = FALSE)
+	row <- .arrow_find_row(rows, hit_startsec, hit_endsec,
+	                       if (length(hit_tier) == 1 && !is.na(hit_tier)) hit_tier else "")
+	if (length(row) != 1 || is.na(row)) return(plan)
+	if (!isTRUE(result$is_main[row])) {
+		main_before <- which(result$is_main[seq_len(row)])
+		if (length(main_before) == 0) return(plan)
+		row <- max(main_before)
+	}
+	positions <- which(plan$row == row & vapply(plan$row, function(r) isTRUE(result$show[r]), logical(1)))
+	if (length(positions) == 0) return(plan)
+	target <- positions[1]
+	fragments <- if (!is.null(result$fragments)) result$fragments[[row]] else NULL
+	if (is.data.frame(fragments) && nrow(fragments) > 1) {
+		hit_mid <- (hit_startsec + hit_endsec) / 2
+		fragment <- which(fragments$startsec - 0.01 <= hit_mid & fragments$endsec + 0.01 >= hit_mid)
+		if (length(fragment) > 0 && fragment[1] > 1) {
+			# the same word may occur earlier in the turn: count its occurrences
+			# in the fragments before and take the next one in the printed lines
+			word <- stringr::str_extract(stringr::str_trim(fragments$content[fragment[1]]), "^\\S+")
+			if (!is.na(word)) {
+				before <- sum(stringr::str_count(fragments$content[seq_len(fragment[1] - 1L)],
+				                                 stringr::fixed(word)))
+				per_line <- stringr::str_count(plan$line[positions], stringr::fixed(word))
+				hit_line <- which(cumsum(per_line) > before)
+				if (length(hit_line) > 0) target <- positions[hit_line[1]]
+			}
+		}
+	}
+	width <- nchar(arrow_field)
+	if (stringr::str_detect(substr(plan$line[target], 1L, width), "^ *$")) {
+		plan$line[target] <- paste0(arrow_field, substr(plan$line[target], width + 1L, nchar(plan$line[target])))
+	}
+	plan
+}
+
 .layout_assemble_lines <- function(plan, result, layout_mode) {
 	mondada <- identical(layout_mode, "mondada")
 	lines <- character(0)
@@ -6436,6 +6493,9 @@ build_alignment_report <- function(result, plan, transcript_name,
 #' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}. Catch-all multimodal tiers without an entry anchor on the union of all given characters.
 #' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} for spans with open and close, \code{"point"} for single spots). \code{NULL} derives the mode from the styles table of \code{l}; without any source the mode defaults to \code{"bracket"}.
 #' @param multimodalTierRegex Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.
+#' @param insertArrowStartsec Numeric; start time (seconds) of an annotation to mark with the arrow of the layout (slot \code{arrow.shape}), e.g. a search hit. All lines get room for the arrow before the line number, so the marked line stays in its column. \code{NA}: no arrow.
+#' @param insertArrowEndsec Numeric; end time (seconds) of the annotation to mark.
+#' @param insertArrowTierName Character string; tier name of the annotation to mark.
 #'
 #' @return List with the rendered \code{lines}, the line \code{plan}, the
 #' engine \code{result} frame (one row per annotation; its column
@@ -6464,7 +6524,10 @@ helper_layout_render <- function(t,
                                  mainTierNames         = NULL,
                                  alignChars            = NULL,
                                  alignModes            = NULL,
-                                 multimodalTierRegex   = "#mm[0-9]*$") {
+                                 multimodalTierRegex   = "#mm[0-9]*$",
+                                 insertArrowStartsec   = NA_real_,
+                                 insertArrowEndsec     = NA_real_,
+                                 insertArrowTierName   = NA_character_) {
 	if (is.null(l)) l <- methods::new("layout")
 	layout_mode <- .layout_mode_of(l)
 	label_mode <- getOption("act.layout.label.mode", "mondada")
@@ -6490,7 +6553,10 @@ helper_layout_render <- function(t,
 		                                align_chars = alignChars,
 		                                align_modes = alignModes,
 		                                number_width_min = number_width_min,
-		                                mm_tier_regex = multimodalTierRegex)
+		                                mm_tier_regex = multimodalTierRegex,
+		                                arrow_startsec = insertArrowStartsec,
+		                                arrow_endsec = insertArrowEndsec,
+		                                arrow_tier = insertArrowTierName)
 		result <- align_and_render(prep$engine_ann, prep$engine_width,
 		                           arrow_mode = prep$arrow_mode,
 		                           verbal_align = isTRUE(l@brackets.align),
@@ -6511,6 +6577,8 @@ helper_layout_render <- function(t,
 			                                   offset = prep$number_offset,
 			                                   slot_width = prep$number_width)
 		}
+		plan <- .layout_arrow_apply(plan, result, prep$arrow_field, insertArrowStartsec,
+		                            insertArrowEndsec, insertArrowTierName)
 		list(prep = prep, result = result, plan = plan)
 	}
 	out <- run(0L)

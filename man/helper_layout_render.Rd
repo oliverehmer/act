@@ -20,7 +20,10 @@ helper_layout_render(
   mainTierNames = NULL,
   alignChars = NULL,
   alignModes = NULL,
-  multimodalTierRegex = "#mm[0-9]*$"
+  multimodalTierRegex = "#mm[0-9]*$",
+  insertArrowStartsec = NA_real_,
+  insertArrowEndsec = NA_real_,
+  insertArrowTierName = NA_character_
 )
 }
 \arguments{
@@ -55,6 +58,12 @@ helper_layout_render(
 \item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} for spans with open and close, \code{"point"} for single spots). \code{NULL} derives the mode from the styles table of \code{l}; without any source the mode defaults to \code{"bracket"}.}
 
 \item{multimodalTierRegex}{Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.}
+
+\item{insertArrowStartsec}{Numeric; start time (seconds) of an annotation to mark with the arrow of the layout (slot \code{arrow.shape}), e.g. a search hit. All lines get room for the arrow before the line number, so the marked line stays in its column. \code{NA}: no arrow.}
+
+\item{insertArrowEndsec}{Numeric; end time (seconds) of the annotation to mark.}
+
+\item{insertArrowTierName}{Character string; tier name of the annotation to mark.}
 }
 \value{
 List with the rendered \code{lines}, the line \code{plan}, the
