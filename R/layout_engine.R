@@ -1790,8 +1790,8 @@ interleave_layer_lines <- function(result, max_span_blocks = Inf,
 
 # Numbers the printed verbal lines of the interleaved plan. Runs on the
 # PLAN so the numbers follow the visual order (overlap followers are
-# embedded mid-turn) and so the digit count comes from the FINAL number of
-# printed lines - three digits only from 100 lines up (user comment K16,
+# embedded mid-turn) and so the slot width comes from the FINAL number of
+# printed lines - a third column only from 100 lines up (user comment K16,
 # 2026-08-15). Also resolves the "->l.@row.k@" placeholders left by the
 # span-reference rule, now that the numbers exist.
 apply_mondada_line_numbers <- function(plan, result, offset = 0L,
@@ -1800,14 +1800,15 @@ apply_mondada_line_numbers <- function(plan, result, offset = 0L,
 	numbered <- vapply(plan$row, function(r) {
 		isTRUE(result$number_lines[r])
 	}, logical(1))
-	digits <- max(2L, nchar(as.character(sum(numbered))))
-	attr(plan, "number_digits") <- digits
-	digits <- min(digits, max(slot_width, 2L))
+	# the slot grows with the highest number, the numbers themselves keep two
+	# digits and are filled with spaces BEHIND them ("99 ", "100"; user
+	# decision 2026-10-05, replaces the three-digit rule K16)
+	attr(plan, "number_digits") <- max(2L, nchar(as.character(sum(numbered))))
 	counter <- 0L
 	numbers <- rep(NA_character_, nrow(plan))
 	for (p in which(numbered)) {
 		counter <- counter + 1L
-		number <- formatC(counter, width = digits, flag = "0")
+		number <- formatC(counter, width = 2L, flag = "0")
 		numbers[p] <- number
 		field <- stringr::str_pad(number, slot_width, side = "right")
 		line <- plan$line[p]
@@ -5343,7 +5344,10 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	# the width above is derived from; the caller passes the digit count it
 	# found after a first rendering and the slot is widened before wrapping
 	if (any_line_nr_shown) line_nr_width <- max(line_nr_width, number_width_min)
-	ann$format.line.nr <- ifelse(ann$format.line.nr.show, ann$line,
+	# shorter numbers are filled with spaces BEHIND them, so the speaker
+	# column stays straight from line 100 on (user decision 2026-10-05)
+	ann$format.line.nr <- ifelse(ann$format.line.nr.show,
+	                             stringr::str_pad(ann$line, width = line_nr_width, side = "right", pad = " "),
 	                             strrep(" ", line_nr_width))
 	if (identical(layout_mode, "mondada")) {
 		# Score mode numbers per PRINTED verbal line (apply_score_line_numbers
@@ -5441,7 +5445,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 			main_candidates <- which(ann$format.is.main[seq_len(i)])
 			if (length(main_candidates) == 0) next
 			main_idx <- max(main_candidates)
-			main_line_width <- nchar(ann$line[main_idx])
+			main_line_width <- if (nzchar(ann$line[main_idx])) nchar(ann$format.line.nr[main_idx]) else 0L
 			if (main_line_width <= 0 || main_line_width == nchar(ann$format.line.nr[i])) next
 			ann$format.line.nr[i] <- strrep(" ", main_line_width)
 			ann$format.prefix[i]  <- paste0(ann$spacebefore[i], ann$format.line.nr[i],
