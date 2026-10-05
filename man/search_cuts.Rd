@@ -10,7 +10,8 @@ search_cuts(
   cutSpanBeforesec = NULL,
   cutSpanAftersec = NULL,
   l = NULL,
-  folderOutput = NULL
+  folderOutput = NULL,
+  style = NULL
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ search_cuts(
 \item{l}{Layout object.}
 
 \item{folderOutput}{Character string; if parameter is not set, the print transcripts will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.txt' format.}
+
+\item{style}{Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}.}
 }
 \value{
 Search object;

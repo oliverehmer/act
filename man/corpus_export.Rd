@@ -12,7 +12,8 @@ corpus_export(
   formats = c("docx", "eaf", "exb", "edl", "srt", "textgrid", "txt"),
   createMediaLinks = TRUE,
   createFolderOutput = TRUE,
-  l = NULL
+  l = NULL,
+  style = NULL
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ corpus_export(
 \item{createFolderOutput}{Logical; if \code{TRUE} the output folder will be created recursively in case that it does not exist.}
 
 \item{l}{Layout object. layout of print transcripts (affects only 'txt' and 'docx' files).}
+
+\item{style}{Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}.}
 }
 \description{
 Exports all (or some) transcript objects in a corpus object to different annotation file formats.

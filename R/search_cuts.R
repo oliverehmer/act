@@ -15,6 +15,7 @@
 #' @param cutSpanAftersec Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param l Layout object.
 #' @param folderOutput Character string; if parameter is not set, the print transcripts will only be inserted in \code{s@results}; if the path to a existing folder is given transcripts will be saved in '.txt' format.
+#' @param style Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}.
 
 #'
 #' @return Search object; 
@@ -27,7 +28,9 @@ search_cuts <- function(x,
 						cutSpanBeforesec = NULL,
 						cutSpanAftersec  = NULL,
 						l                = NULL, 
-						folderOutput     = NULL) {
+						folderOutput     = NULL,
+						style            = NULL) {
+	if (!is.null(style)) l <- helper_style_layout(style)
 	#x <- corpus
 	#s <- mysearch
 	

@@ -12,6 +12,7 @@
 #' @param createMediaLinks Logical; if \code{TRUE} media links will be created (affects only 'eaf' and 'exb' files).
 #' @param createFolderOutput Logical; if \code{TRUE} the output folder will be created recursively in case that it does not exist.
 #' @param l Layout object. layout of print transcripts (affects only 'txt' and 'docx' files).
+#' @param style Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}.
 #'
 #' 
 #' @export
@@ -28,7 +29,9 @@ corpus_export <-  function(x,
 						   formats=c("docx", "eaf","exb", "edl", "srt", "textgrid", "txt"), 
 						   createMediaLinks=TRUE,
 						   createFolderOutput=TRUE,
-						   l=NULL) {
+						   l=NULL,
+						   style=NULL) {
+	if (!is.null(style)) l <- helper_style_layout(style)
 	
 	if (1==2) {
 		

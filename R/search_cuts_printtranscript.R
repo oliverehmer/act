@@ -15,6 +15,7 @@
 #' @param cutSpanBeforesec Double; Start the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param cutSpanAftersec Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param folderOutput Character string; path to an existing folder for file export. If \code{NULL} (default), no files will be written to disk; the print transcripts are inserted only into \code{s@results}. If set, .txt and/or .docx files will be written depending on \code{exportTxt} and \code{exportDocx}.
+#' @param style Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}.
 #'
 #' @return Search object; 
 #' 
@@ -30,7 +31,8 @@ search_cuts_printtranscript <- function(x,
 										headerInsertSource = TRUE,
 										cutSpanBeforesec   = 0,
 										cutSpanAftersec    = 0,
-										folderOutput       = NULL ) {
+										folderOutput       = NULL,
+										style              = NULL ) {
 	if (1==2) {
 		x <- examplecorpus
 		s <- mysearch
@@ -46,6 +48,7 @@ search_cuts_printtranscript <- function(x,
 	.assert_search(s, missing = missing(s))
 	if (is.null(s@results$transcriptName)) 		{ cli::cli_abort("Data frame s@results does not contain column {.arg transcriptName}") 	}
 	
+	if (!is.null(style)) l <- helper_style_layout(style)
 	if (is.null(l)) 	{
 		l <- methods::new("layout")
 	}	
