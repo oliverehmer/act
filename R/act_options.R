@@ -1,5 +1,5 @@
 .act_defaults <- list(
-	act.excamplecorpusURL = list(
+	act.examplecorpusURL = list(
 		value       = "https://github.com/oliverehmer/act_examplecorpus/archive/refs/heads/main.zip",
 		group       = "program",
 		description = "URL for downloading example corpus"
