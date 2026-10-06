@@ -4,7 +4,8 @@
 # (field docx.template.path). Returns a named character vector with cleaned,
 # existing paths.
 # - Drops NA / empty entries
-# - Falls back to the act-internal default template if nothing remains
+# - Falls back to the Word file of the option act.style.template, then to the
+#   act-internal default template, if nothing remains
 # - Errors if any explicitly set path does not exist
 # - Ensures every entry has a name (uses suffix-from-diff for unnamed entries)
 .layout_docx_templates_resolve <- function(l) {
@@ -12,6 +13,14 @@
 	templates <- templates[!is.na(templates) & nzchar(templates)]
 
 	if (length(templates) == 0) {
+		fallback <- getOption("act.style.template", "")
+		fallback <- fallback[!is.na(fallback) & nzchar(fallback)]
+		if (length(fallback) > 0 && file.exists(fallback[1])) {
+			return(c(default = fallback[1]))
+		}
+		if (length(fallback) > 0) {
+			cli::cli_warn("Word file of the option {.field act.style.template} not found: {.path {fallback[1]}} - the template of act is used.")
+		}
 		default <- system.file("extdata", "docx", "template_transcript.docx", package = "act")
 		if (!file.exists(default)) {
 			cli::cli_abort("Unable to find {.arg template_transcript.docx}. Please reinstall {.pkg act}.")

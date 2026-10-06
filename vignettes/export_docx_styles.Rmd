@@ -78,8 +78,9 @@ more special pattern is asked first. `styles.order` gives the order explicitly,
 (regular expression; the match is the sigle), `width` (characters) and
 `ending` (text after the sigle, e.g. `":  "`).
 
-**`word`** - `file`: the Word template (`.docx`); empty takes the template of
-the package. `look`: `"file"` takes the look of the styles from the Word file
+**`word`** - `file`: the Word template (`.docx`); empty takes the file of the
+option `act.style.template`, and if that is empty too the template of the
+package. `look`: `"file"` takes the look of the styles from the Word file
 and creates only styles that are missing there; `"profile"` writes the look of
 the profile into every style.
 

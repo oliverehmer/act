@@ -229,6 +229,11 @@
 		group       = "tier",
 		description = "Tier name pattern of the picture (stills) tiers: in print transcripts their content is replaced by figure numbers when the transcript profile says so (advanced$fig.replace)"
 	),
+	act.style.template = list(
+		value       = "",
+		group       = "layout",
+		description = "Word file (.docx/.dotx) for print transcripts whose profile names none; empty: the template shipped with act"
+	),
 	act.style.folders = list(
 		value       = character(0),
 		group       = "layout",
