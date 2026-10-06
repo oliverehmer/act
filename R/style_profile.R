@@ -414,6 +414,10 @@ helper_style_appearance <- function(style) {
 		else value <- as.character(value)
 		out[key] <- list(if (length(value) != 1 || is.na(value)) NULL else value)
 	}
+	# line and character styles take font and size from Transcript default:
+	# a layer line is aligned to its main line character by character, which
+	# holds only with one font and one size
+	if (!nzchar(role)) out[c("font", "size")] <- list(NULL)
 	if (identical(out$type, "character")) {
 		out$applies <- .style_chr(s[["applies"]], "symbols")
 		out$pattern <- .style_chr(s[["pattern"]])
