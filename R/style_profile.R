@@ -166,6 +166,7 @@ helper_style_appearance <- function(style) {
 	own_label <- .style_chr(raw[["label"]])
 	profile$label <- if (nzchar(own_label)) own_label else if (is.null(profile$id)) "style" else profile$id
 	profile <- .style_normalize(profile)
+	profile$file.override <- .style_file_override(c(rev(parents), list(raw)))
 	problems <- .style_problems(profile)
 	if (length(problems) > 0) {
 		# the problems quote patterns of the user: braces must not be read as cli markup
@@ -175,6 +176,25 @@ helper_style_appearance <- function(style) {
 	}
 	class(profile) <- "act_style"
 	profile
+}
+
+# Look "file" holds for the profile that states it. Profiles that build on
+# it and state appearance values of a style want exactly these values, also
+# where the Word file has the style: style name -> keys.
+.style_file_override <- function(links) {
+	declared <- which(vapply(links, function(x) !is.null(x[["word"]][["look"]]), logical(1)))
+	if (length(declared) == 0) return(list())
+	last <- max(declared)
+	if (!identical(.style_chr(links[[last]][["word"]][["look"]]), "file")) return(list())
+	out <- list()
+	for (link in links[seq_along(links) > last]) {
+		for (style in link[["styles"]]) {
+			name <- .style_chr(style$name)
+			keys <- intersect(names(style), .STYLE_APPEARANCE)
+			if (nzchar(name) && length(keys) > 0) out[[name]] <- union(out[[name]], keys)
+		}
+	}
+	out
 }
 
 .style_folders <- function() {

@@ -21,7 +21,9 @@
 # Brings the styles of a profile into the document.
 # look "profile": every style of the profile is written (created or its
 # appearance replaced). look "file": the Word file rules; only styles it
-# does not have are created from the profile.
+# does not have are created from the profile, and the values that profiles
+# building on the look-"file" profile state (file.override) replace those
+# of the Word file.
 # Returns the document, the names of the created styles and the character
 # rules (pattern + style id) for the lines.
 .docx_profile_styles <- function(doc, profile, symbol_chars = character(0)) {
@@ -48,7 +50,11 @@
 		}
 		# two styles of one Word name: the upper one sets the look, as in the viewer
 		key <- paste(type, s$word)
-		if ((from_profile || !exists) && !key %in% written) .docx_style_appearance(node, s, type)
+		override <- profile$file.override[[s$name]]
+		if (!key %in% written) {
+			if (from_profile || !exists) .docx_style_appearance(node, s, type)
+			else if (length(override) > 0) .docx_style_appearance(node, s, type, keys = override)
+		}
 		written <- c(written, key)
 		if (type == "character") {
 			pattern <- if (identical(s$applies, "symbols")) .docx_symbol_class(symbol_chars) else s$pattern
@@ -121,10 +127,13 @@
 
 # Sets font, size, color, background, italic and bold of a style node to
 # what the style itself states. A value the style does not state is taken
-# out, so Word takes it from the style this one is based on.
-.docx_style_appearance <- function(node, s, type) {
+# out, so Word takes it from the style this one is based on. With keys only
+# these values are touched; the others stay as the Word file has them.
+.docx_style_appearance <- function(node, s, type, keys = .STYLE_APPEARANCE) {
+	s <- s[!names(s) %in% setdiff(.STYLE_APPEARANCE, keys)]
+	tags <- c(font = "w:rFonts", bold = "w:b|w:bCs", italic = "w:i|w:iCs", color = "w:color", size = "w:sz|w:szCs", background = "w:shd")
 	rpr <- .docx_child_ensure(node, "rPr")
-	xml2::xml_remove(xml2::xml_find_all(rpr, "w:rFonts|w:b|w:bCs|w:i|w:iCs|w:color|w:sz|w:szCs|w:shd"))
+	xml2::xml_remove(xml2::xml_find_all(rpr, paste(tags[keys], collapse = "|")))
 	add <- function(parent, name, attrs) .docx_xml_add(parent, name, attrs, if (identical(xml2::xml_name(parent), "pPr")) .DOCX_PPR_ORDER else .DOCX_RPR_ORDER)
 	if (!is.null(s$font)) {
 		add(rpr, "rFonts", list(ascii = s$font, hAnsi = s$font, cs = s$font, eastAsia = s$font))
@@ -147,7 +156,7 @@
 		if (!is.null(shade)) add(rpr, "shd", shade)
 	} else {
 		ppr <- .docx_child_ensure(node, "pPr")
-		xml2::xml_remove(xml2::xml_find_all(ppr, "w:shd"))
+		if ("background" %in% keys) xml2::xml_remove(xml2::xml_find_all(ppr, "w:shd"))
 		if (!is.null(shade)) add(ppr, "shd", shade)
 		if (length(xml2::xml_children(ppr)) == 0) xml2::xml_remove(ppr)
 	}
