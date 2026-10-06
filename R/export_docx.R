@@ -285,21 +285,6 @@ get_style_user <- function(l, name) {
 	))
 }
 
-export_docx_make_label <- function(transcript_name, headerTitle, startSec, endSec) {
-	parts <- c()
-	if (!is.null(headerTitle) && !is.na(headerTitle)) {
-		parts <- c(parts, headerTitle)
-	}
-	if (!is.null(startSec) && !is.null(endSec)) {
-		parts <- c(parts, paste0("[", round(startSec, 1), "s-", round(endSec, 1), "s]"))
-	}
-	if (length(parts) > 0) {
-		paste0(paste(parts, collapse = " "), " / ", transcript_name)
-	} else {
-		transcript_name
-	}
-}
-
 # ---- shared prerender: prepare the aligned annotation frame -------------
 # Produces the styled + bracket/layer-aligned annotations (fixed
 # transcript.width) shared by export_docx() and the transcript viewer.

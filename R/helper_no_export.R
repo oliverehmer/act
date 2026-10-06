@@ -192,20 +192,6 @@
 	x
 }
 
-.drop_empty_wrapped_lines <- function(turn, turn_initial, row_exdent) {
-	if (length(turn) <= 1L) return(turn)
-	prefix_lens <- ifelse(seq_along(turn) == 1L, nchar(turn_initial), row_exdent)
-	content_only <- substring(turn, prefix_lens + 1L)
-	is_empty <- stringr::str_detect(content_only, "^\\s*$")
-	if (!any(is_empty) || all(is_empty)) return(turn)
-	if (is_empty[1]) {
-		first_non_empty <- which(!is_empty)[1]
-		rest <- substring(turn[first_non_empty], row_exdent + 1L)
-		turn[first_non_empty] <- paste0(turn_initial, rest)
-	}
-	turn[!is_empty]
-}
-
 .is_empty_content <- function(content) {
 	!is.na(content) & !nzchar(stringr::str_trim(content))
 }
