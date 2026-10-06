@@ -5821,7 +5821,7 @@ build_alignment_report <- function(result, plan, transcript_name,
 	out <- list()
 	for (w in warnings) {
 		if (!identical(w$kind, "unmatched_symbol")) next
-		is_stills <- stringr::str_detect(w$tier, "^stills")
+		is_stills <- stringr::str_detect(w$tier, getOption("act.tier.stills.name.regex", "^stills(#|$)"))
 		out[[length(out) + 1]] <- list(
 			id = if (is_stills) "A2" else "A1",
 			title = if (is_stills) {
