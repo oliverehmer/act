@@ -285,8 +285,7 @@ helper_style_appearance <- function(style) {
 		                symbol.merge = TRUE, tolerance.point = 0.2,
 		                tolerance.gesture = 0.5, fill = "-", block.height = 2,
 		                min.description = 10, max.span.blocks = 3,
-		                fig.replace = TRUE, fig.tier.regex = "^stills(#|$)",
-		                multimodal.tier.regex = "#mm[0-9]*$"),
+		                fig.replace = TRUE),
 		styles = list()
 	)
 }
@@ -392,9 +391,7 @@ helper_style_appearance <- function(style) {
 		block.height = .style_num(v[["block.height"]], d$advanced$block.height),
 		min.description = .style_num(v[["min.description"]], d$advanced$min.description),
 		max.span.blocks = .style_num(v[["max.span.blocks"]], d$advanced$max.span.blocks),
-		fig.replace = .style_lgl(v[["fig.replace"]], d$advanced$fig.replace),
-		fig.tier.regex = .style_chr(v[["fig.tier.regex"]], d$advanced$fig.tier.regex),
-		multimodal.tier.regex = .style_chr(v[["multimodal.tier.regex"]], d$advanced$multimodal.tier.regex))
+		fig.replace = .style_lgl(v[["fig.replace"]], d$advanced$fig.replace))
 	profile$styles <- lapply(profile[["styles"]], .style_normalize_style)
 	profile$styles.order <- NULL
 	profile$styles.remove <- NULL

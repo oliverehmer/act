@@ -101,8 +101,11 @@ tiers stay although they match the exclude pattern), `arrow` and `arrow.shape`
 | `min.description` | `10` | Minimum room (characters) for a description before the verbal line breaks early. |
 | `max.span.blocks` | `3` | Blocks a description may span before it is cut with a resume arrow. |
 | `fig.replace` | `true` | Replace the content of picture tiers by a number mark. |
-| `fig.tier.regex` | `"^stills(#|$)"` | Picture tiers. |
-| `multimodal.tier.regex` | `"#mm[0-9]*$"` | Catch-all multimodal tiers; they align on the symbols of all other multimodal tiers. |
+
+Which tiers are picture tiers and which are the catch-all multimodal tiers
+(they align on the symbols of all other multimodal tiers) is not part of the
+profile: the options `act.tier.stills.name.regex` and
+`act.tier.multimodal.name.regex` hold these tier name patterns.
 
 # Styles
 

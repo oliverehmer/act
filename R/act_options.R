@@ -219,6 +219,16 @@
 		group       = "layout",
 		description = "Character in annotation content that forces a manual line break in the alignment engine (corpus convention - do not change mid-project)"
 	),
+	act.tier.multimodal.name.regex = list(
+		value       = "#mm[0-9]*$",
+		group       = "tier",
+		description = "Tier name pattern of the bare (catch-all) multimodal layer tiers, e.g. 'nora01#mm' (not 'nora01#mm-body'): in print transcripts such tiers without symbols of their own align on the union of the symbols of the other multimodal tiers"
+	),
+	act.tier.stills.name.regex = list(
+		value       = "^stills(#|$)",
+		group       = "tier",
+		description = "Tier name pattern of the picture (stills) tiers: in print transcripts their content is replaced by figure numbers when the transcript profile says so (advanced$fig.replace)"
+	),
 	act.style.folders = list(
 		value       = character(0),
 		group       = "layout",
@@ -319,7 +329,11 @@ act.options.default <- lapply(.act_defaults, function(x) x$value)
 #'
 #' **Parsing:** Separators, word counting, and pause identification patterns.
 #'
-#' @param group Character string; optional name of an option group to show. One of \code{"program"}, \code{"path"}, \code{"media"}, \code{"ffmpeg"}, \code{"import"}, \code{"export"}, \code{"parsing"}. If \code{NULL} (the default), all options are shown.
+#' **Layout:** Settings of the alignment engine for print transcripts.
+#'
+#' **Tier:** Tier name patterns (stills tiers, catch-all multimodal tiers).
+#'
+#' @param group Character string; optional name of an option group to show. One of \code{"program"}, \code{"path"}, \code{"media"}, \code{"ffmpeg"}, \code{"import"}, \code{"export"}, \code{"parsing"}, \code{"layout"}, \code{"tier"}. If \code{NULL} (the default), all options are shown.
 #'
 #' @return Nothing.
 #' @export
@@ -338,7 +352,9 @@ options_show <- function (group = NULL) {
 		ffmpeg      = "ffmpeg",
 		import      = "import",
 		export      = "export",
-		parsing     = "parsing"
+		parsing     = "parsing",
+		layout      = "layout",
+		tier        = "tier"
 	)
 
 	if (!is.null(group) && !group %in% names(groups)) {

@@ -5168,12 +5168,12 @@ detect_bracket_filler_new <- function(bracket_content, default_filler,
 
 prepare_annotations_new <- function(t, l, layout_mode = "gat",
                                     fig_replace = TRUE,
-                                    fig_tier_regex = "^stills(#|$)",
+                                    fig_tier_regex = getOption("act.tier.stills.name.regex", "^stills(#|$)"),
                                     main_tier_names = NULL,
                                     align_chars = NULL,
                                     align_modes = NULL,
                                     number_width_min = 0L,
-                                    mm_tier_regex = "#mm[0-9]*$",
+                                    mm_tier_regex = getOption("act.tier.multimodal.name.regex", "#mm[0-9]*$"),
                                     arrow_startsec = NA_real_,
                                     arrow_endsec = NA_real_,
                                     arrow_tier = NA_character_) {
@@ -6413,11 +6413,11 @@ build_alignment_report <- function(result, plan, transcript_name,
 	timeToleranceGesture <- advanced$tolerance.gesture
 	prep <- prepare_annotations_new(t, l, layout_mode = layout_mode,
 	                                fig_replace = advanced$fig.replace,
-	                                fig_tier_regex = advanced$fig.tier.regex,
+	                                fig_tier_regex = getOption("act.tier.stills.name.regex", "^stills(#|$)"),
 	                                main_tier_names = mainTierNames,
 	                                align_chars = alignChars,
 	                                align_modes = alignModes,
-	                                mm_tier_regex = advanced$multimodal.tier.regex)
+	                                mm_tier_regex = getOption("act.tier.multimodal.name.regex", "#mm[0-9]*$"))
 	ann <- prep$engine_ann
 	mm_anchor_chars <- unique(unlist(
 		lapply(ann$align_chars[!is.na(ann$align_chars)],
@@ -6640,12 +6640,12 @@ helper_layout_render <- function(t,
 	run <- function(number_width_min) {
 		prep <- prepare_annotations_new(t, l, layout_mode = layout_mode,
 		                                fig_replace = advanced$fig.replace,
-		                                fig_tier_regex = advanced$fig.tier.regex,
+		                                fig_tier_regex = getOption("act.tier.stills.name.regex", "^stills(#|$)"),
 		                                main_tier_names = mainTierNames,
 		                                align_chars = alignChars,
 		                                align_modes = alignModes,
 		                                number_width_min = number_width_min,
-		                                mm_tier_regex = advanced$multimodal.tier.regex,
+		                                mm_tier_regex = getOption("act.tier.multimodal.name.regex", "#mm[0-9]*$"),
 		                                arrow_startsec = insertArrowStartsec,
 		                                arrow_endsec = insertArrowEndsec,
 		                                arrow_tier = insertArrowTierName)

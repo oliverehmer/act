@@ -36,9 +36,7 @@
     "block.height": 2,
     "min.description": 10,
     "max.span.blocks": 3,
-    "fig.replace": true,
-    "fig.tier.regex": "^stills(#|$)",
-    "multimodal.tier.regex": "#mm[0-9]*$"
+    "fig.replace": true
   },
   "styles": [
     {"name": "Normal", "role": "normal", "word": "Normal"},

@@ -7,7 +7,7 @@
 options_show(group = NULL)
 }
 \arguments{
-\item{group}{Character string; optional name of an option group to show. One of \code{"program"}, \code{"path"}, \code{"media"}, \code{"ffmpeg"}, \code{"import"}, \code{"export"}, \code{"parsing"}. If \code{NULL} (the default), all options are shown.}
+\item{group}{Character string; optional name of an option group to show. One of \code{"program"}, \code{"path"}, \code{"media"}, \code{"ffmpeg"}, \code{"import"}, \code{"export"}, \code{"parsing"}, \code{"layout"}, \code{"tier"}. If \code{NULL} (the default), all options are shown.}
 }
 \value{
 Nothing.
@@ -40,6 +40,10 @@ selection settings (priority, maximum number, audio fallback).
 \strong{Export:} Settings for file naming and folder structure.
 
 \strong{Parsing:} Separators, word counting, and pause identification patterns.
+
+\strong{Layout:} Settings of the alignment engine for print transcripts.
+
+\strong{Tier:} Tier name patterns (stills tiers, catch-all multimodal tiers).
 }
 \examples{
 library(act)
