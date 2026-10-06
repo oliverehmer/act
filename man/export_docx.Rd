@@ -6,7 +6,6 @@
 \usage{
 export_docx(
   t,
-  l = NULL,
   pathOutput = NULL,
   filterTierNames = NULL,
   filterSectionStartsec = NULL,
@@ -19,27 +18,17 @@ export_docx(
   headerSubtitle = NULL,
   headerDescription = NULL,
   headerInsertSource = TRUE,
-  timeTolerancePoint = 0.2,
-  timeToleranceGesture = 0.5,
   layerOrder = NULL,
-  minDescription = 10L,
-  maxSpanBlocks = 3L,
-  figReplace = TRUE,
-  figTierRegex = "^stills(#|$)",
   report = FALSE,
   pathReport = NULL,
-  multimodalTierRegex = "#mm[0-9]*$",
   mainTierNames = NULL,
   alignChars = NULL,
   alignModes = NULL,
-  symbolStyle = NULL,
   style = NULL
 )
 }
 \arguments{
 \item{t}{Transcript object.}
-
-\item{l}{Layout object.}
 
 \item{pathOutput}{Character string; path where to save the transcript.}
 
@@ -49,7 +38,7 @@ export_docx(
 
 \item{filterSectionEndsec}{Double; end of selection in seconds.}
 
-\item{insertArrowStartsec}{Numeric; start time (seconds) of the hit annotation for arrow placement. The annotation is marked with the arrow of the layout (slot \code{arrow.shape}); all lines get room for it before the line number. Used with \code{insertArrowEndsec} and \code{insertArrowTierName} to locate the annotation by time and tier. If \code{NA}, no arrow is placed.}
+\item{insertArrowStartsec}{Numeric; start time (seconds) of the hit annotation for arrow placement. The annotation is marked with the arrow of the profile; all lines get room for it before the line number. Used with \code{insertArrowEndsec} and \code{insertArrowTierName} to locate the annotation by time and tier. If \code{NA}, no arrow is placed.}
 
 \item{insertArrowEndsec}{Numeric; end time (seconds) of the hit annotation for arrow placement.}
 
@@ -65,73 +54,35 @@ export_docx(
 
 \item{headerInsertSource}{Logical; if \code{TRUE} standard information about the source and location of the sequence will be inserted after the heading.}
 
-\item{timeTolerancePoint}{Numeric; up to this distance in seconds two point marks (stills) count as the same moment.}
-
-\item{timeToleranceGesture}{Numeric; up to this distance in seconds two span marks (gestures) count as the same moment.}
-
 \item{layerOrder}{Vector of character strings; order of the multimodal layers within a block. \code{NULL} keeps the tier order of the annotation file.}
-
-\item{minDescription}{Integer; minimum room in characters a description needs before the verbal line breaks early.}
-
-\item{maxSpanBlocks}{Integer; maximum number of blocks a description may span before it is cut with a resume arrow.}
-
-\item{figReplace}{Logical; if \code{TRUE} the content of picture tiers is replaced by a number mark.}
-
-\item{figTierRegex}{Character string; regular expression identifying picture tiers.}
 
 \item{report}{Logical; if \code{TRUE} and \code{pathOutput} is set, an alignment report is written next to the output file.}
 
 \item{pathReport}{Character string; explicit path for the alignment report.}
 
-\item{multimodalTierRegex}{Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.}
+\item{mainTierNames}{Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the tier styles of the profile; without any tier style every tier counts as a main tier.}
 
-\item{mainTierNames}{Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.}
+\item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the tier styles of the profile.}
 
-\item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.}
+\item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the tier styles of the profile.}
 
-\item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the styles table of \code{l}.}
-
-\item{symbolStyle}{Character string; name of a Word character style for the multimodal symbols (the anchor characters of the layer tiers), in verbal lines and in layer lines. \code{NULL} takes the base style \code{transcript.symbols} of the styles file; without it the symbols are written as plain text.}
-
-\item{style}{Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}, and the render parameters that are not given in the call come from the profile.}
+\item{style}{Transcript profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. \code{NULL} uses the profile \code{"act"}.}
 }
 \value{
 Officer doc; transcript as object from library officer.
 }
 \description{
-LAYOUT
-If you want to modify the layout of the print transcripts, create a new layout object with \code{mylayout <- methods::new("layout")}, modify the settings and pass it as argument \code{l}.
-Using the layout object you may
-\itemize{
-\item Adjust with, abbreviation of speakers, etc.
-\item set filters to include/exclude tiers matching regular expressions.
-\item assign template files for .docx formatting using format templates
-}
+Writes a print transcript as a Word file. Everything about its look comes
+from a transcript profile (parameter \code{style}): mode (gat or score),
+width, line numbers, speaker acronyms, tier and character styles, the Word
+template and the advanced engine settings. Profiles are JSON files; the
+ones shipped with act are listed by \code{helper_style_list()}, and
+\code{helper_style_read()} reads one for inspection or modification.
 }
 \details{
-FORMATING
-\itemize{
-\item adjust the the defaults format templates in the default .docx template.
-\item define further templates and add them to a styles matrix.
-The paths to both files need to be set in your l layout object. Please check the slots l@docx.template.path and l@docx.styles.base.
-You can see the structure of the default styles matrix in each new layout object in l@docx.styles.base. Use l@docx.styles.base <- act::export_styles_base_load(...) to assign a custom styles matrix.
-The default format templates are
-}
-\itemize{
-\item Header:
-}
-\itemize{
-\item header.preface (formats: s@results$header.description)
-\item header.title (formats: s@results$header.description)
-\item header.subtitle (formats: s@results$header.description)
-\item header.info (formats: s@results$header.description)
-}
-\itemize{
-\item Transcript body
-}
-\itemize{
-\item transcript.default (formats: any annotation in "t@annotations"
-}
+The Word styles of the profile are looked up in the template of the
+profile (\code{word$file}); with \code{word$look = "profile"} styles
+missing there are created from the profile.
 }
 \examples{
 library(act)

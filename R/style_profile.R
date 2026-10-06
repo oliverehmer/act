@@ -1,8 +1,8 @@
 # Style profiles: one JSON file holds the whole output format of a print
 # transcript (line structure, acronyms, tier styles, character styles, Word
-# appearance). A profile is read, checked and turned into a layout object
-# that carries the profile as attribute "style"; the alignment engine and
-# the exports read the extra values from there.
+# appearance). A profile is read, checked and turned into a resolved layout
+# (a plain list, see .style_layout) that carries the profile as attribute
+# "style"; the alignment engine and the exports read the extra values from there.
 
 .STYLE_ROLES <- c("normal", "default", "header.preface", "header.title",
                   "header.subtitle", "header.info", "space")
@@ -47,22 +47,6 @@ helper_style_list <- function() {
 	.style_list()
 }
 
-#' Helper: Layout object of a style profile
-#'
-#' Turns a style profile into the layout object that the export functions
-#' take as \code{l}. The profile rides along, so everything a layout object
-#' cannot express (e.g. space lines, acronym rules) still takes effect.
-#'
-#' @param style Style profile; see \code{helper_style_read}.
-#' @param templatePath Character string; path of the Word file the document is created from. \code{NULL} takes the file named in the profile; without any file the template of the package is used.
-#'
-#' @return Layout object.
-#'
-#' @export
-helper_style_layout <- function(style, templatePath = NULL) {
-	.style_layout(style, templatePath = templatePath)
-}
-
 #' Helper: Acronyms of tiers by a style profile
 #'
 #' Builds the acronym of each tier name the way the print transcript does:
@@ -101,7 +85,7 @@ helper_style_acronym <- function(style, tierNames, ending = TRUE) {
 helper_style_docx <- function(style, pathOutput, templatePath = NULL, symbolChars = character(0)) {
 	profile <- .style_read(style)
 	l <- .style_layout(profile, templatePath = templatePath)
-	template <- helper_layout_docx_templates_resolve(l)[1]
+	template <- .layout_docx_templates_resolve(l)[1]
 	doc <- officer::read_docx(path = template)
 	written <- .docx_profile_styles(doc, profile, symbolChars)
 	print(written$doc, target = pathOutput)
@@ -682,28 +666,29 @@ helper_style_appearance <- function(style) {
 
 .style_na <- function(x) if (is.null(x) || !nzchar(x)) NA_character_ else x
 
-# Builds the layout object the engine and the exports work with. The
-# profile rides along as attribute "style".
-.style_layout <- function(profile, templatePath = NULL) {
-	profile <- .style_read(profile)
-	l <- methods::new("layout")
-	l@name <- profile$label
-	l@filter.tier.includeRegEx <- profile$functions$tiers.keep
-	l@filter.tier.excludeRegEx <- profile$functions$tiers.exclude
-	l@transcript.width <- if (isTRUE(profile$width.limit)) profile$width else -1
-	l@speaker.regex <- .style_na(profile$acronym$extract)
-	l@speaker.width <- if (profile$acronym$width > 0) profile$acronym$width else -1
-	l@speaker.ending <- profile$acronym$ending
-	l@speaker.repeat <- !isTRUE(profile$acronym$suppress.repeated)
-	l@line.nr.show <- isTRUE(profile$line.numbers)
-	l@spacesbefore <- profile$advanced$spaces.before
-	l@layout.mode <- profile$mode
-	l@symbol.merge <- isTRUE(profile$advanced$symbol.merge)
-	l@brackets.align <- isTRUE(profile$advanced$brackets.align)
-	l@header.insert <- isTRUE(profile$header)
-	l@arrow.insert <- isTRUE(profile$functions$arrow)
-	l@arrow.shape <- profile$functions$arrow.shape
-	l@docx.template.path <- if (is.null(templatePath)) profile$word$file else templatePath
+# The resolved layout the engine works with: a plain list whose fields are
+# the former slots of the layout class, built from a profile (default: the
+# act base profile). The profile rides along as attribute "style".
+.style_layout <- function(profile = NULL, templatePath = NULL) {
+	profile <- .style_read(if (is.null(profile)) "act" else profile)
+	l <- list()
+	l[["name"]] <- profile$label
+	l[["filter.tier.includeRegEx"]] <- profile$functions$tiers.keep
+	l[["filter.tier.excludeRegEx"]] <- profile$functions$tiers.exclude
+	l[["transcript.width"]] <- if (isTRUE(profile$width.limit)) profile$width else -1
+	l[["speaker.regex"]] <- .style_na(profile$acronym$extract)
+	l[["speaker.width"]] <- if (profile$acronym$width > 0) profile$acronym$width else -1
+	l[["speaker.ending"]] <- profile$acronym$ending
+	l[["speaker.repeat"]] <- !isTRUE(profile$acronym$suppress.repeated)
+	l[["line.nr.show"]] <- isTRUE(profile$line.numbers)
+	l[["spacesbefore"]] <- profile$advanced$spaces.before
+	l[["layout.mode"]] <- profile$mode
+	l[["symbol.merge"]] <- isTRUE(profile$advanced$symbol.merge)
+	l[["brackets.align"]] <- isTRUE(profile$advanced$brackets.align)
+	l[["header.insert"]] <- isTRUE(profile$header)
+	l[["arrow.insert"]] <- isTRUE(profile$functions$arrow)
+	l[["arrow.shape"]] <- profile$functions$arrow.shape
+	l[["docx.template.path"]] <- if (is.null(templatePath)) profile$word$file else templatePath
 
 	base_roles <- c("header.preface", "header.title", "header.subtitle", "header.info", "default")
 	base <- data.frame(
@@ -717,7 +702,7 @@ helper_style_appearance <- function(style) {
 			break
 		}
 	}
-	l@docx.styles.base <- base
+	l[["docx.styles.base"]] <- base
 
 	rows <- list()
 	for (s in profile$styles) {
@@ -756,13 +741,13 @@ helper_style_appearance <- function(style) {
 		is_space_row <- vapply(rows, function(r) identical(r$match.regex, "^space$"), logical(1))
 		rows <- c(rows[is_space_row], rows[!is_space_row])
 	}
-	user <- if (length(rows) > 0) do.call(rbind, rows) else export_styles_user_load()[0, ]
-	l@docx.styles.user <- user
+	user <- if (length(rows) > 0) do.call(rbind, rows) else .style_user_table_empty()
+	l[["docx.styles.user"]] <- user
 	attr(l, "style") <- profile
 	l
 }
 
-# The profile a layout object was built from, or NULL for a plain layout.
+# The profile a resolved layout was built from.
 .layout_style <- function(l) {
 	style <- attr(l, "style")
 	if (inherits(style, "act_style")) style else NULL
@@ -775,75 +760,15 @@ helper_style_appearance <- function(style) {
 	getOption("act.time.format.transcript", "h:mm:ss.s")
 }
 
-# ===== LAYOUT OBJECT -> PROFILE =====
-
-# Describes a plain layout object as a profile (a list as it would stand in
-# a profile file). What a profile cannot say is left out: rows that are not
-# shown, rows that do not wrap, own skip patterns of the indent "text".
-.style_from_layout <- function(l, label = l@name) {
-	na_chr <- function(x) if (length(x) != 1 || is.na(x)) "" else as.character(x)
-	width_limited <- length(l@transcript.width) == 1 && !is.na(l@transcript.width) && l@transcript.width != -1
-	acronym_width <- if (length(l@speaker.width) != 1 || is.na(l@speaker.width) || l@speaker.width < 0) 0 else l@speaker.width
-	base <- l@docx.styles.base
-	base_name <- function(act_name, fallback) {
-		hit <- which(base$act.style.name == act_name)
-		if (length(hit) == 0 || is.na(base$docx.template.name[hit[1]])) fallback else base$docx.template.name[hit[1]]
-	}
-	styles <- list(
-		list(name = "Normal", role = "normal", word = "Normal"),
-		list(name = "Transcript default", role = "default", word = base_name("transcript.default", "transcript_default")),
-		list(name = "Header preface", role = "header.preface", word = base_name("header.preface", "transcript_header_preface")),
-		list(name = "Header title", role = "header.title", word = base_name("header.title", "transcript_header_title")),
-		list(name = "Header subtitle", role = "header.subtitle", word = base_name("header.subtitle", "transcript_header_subtitle")),
-		list(name = "Header info", role = "header.info", word = base_name("header.info", "transcript_header_info")))
-	user <- l@docx.styles.user
-	fill <- "-"
-	names_used <- vapply(styles, function(s) s$name, character(1))
-	for (i in seq_len(nrow(user))) {
-		row <- user[i, ]
-		if (is.na(row$match.regex)) next
-		if (identical(row$match.regex, "^space$")) {
-			styles[[length(styles) + 1]] <- list(name = "Space", role = "space", word = na_chr(row$docx.template.name))
-			next
-		}
-		if (identical(row$show, FALSE) || identical(row$content.wrap, FALSE)) next
-		name <- na_chr(row$name)
-		if (!nzchar(name) || name %in% names_used) name <- paste0(if (nzchar(name)) name else "Style", " ", i)
-		names_used <- c(names_used, name)
-		acronym <- list(suppress = identical(row$acronym.show, FALSE),
-		                case = switch(na_chr(row$acronym.case), tolower = "lower", toupper = "upper", capitalize = "capitalize", ""),
-		                search = na_chr(row$acronym.search),
-		                width = if (is.na(row$acronym.width)) 0 else row$acronym.width)
-		if (nzchar(acronym$search)) acronym$replace <- na_chr(row$acronym.replace)
-		if (!is.na(row$acronym.ending)) acronym$ending <- row$acronym.ending
-		filler <- na_chr(row$content.indent.align.filler.inside)
-		if (identical(na_chr(row$content.indent.align.mode), "bracket") && nzchar(filler)) fill <- filler
-		style <- list(name = name, type = "tier", pattern = row$match.regex,
-		              word = na_chr(row$docx.template.name),
-		              line.numbers.suppress = identical(row$line.nr.show, FALSE),
-		              acronym = acronym,
-		              indent = if (is.na(row$content.indent)) "none" else row$content.indent,
-		              align.chars = na_chr(row$content.indent.align.char),
-		              align.mode = na_chr(row$content.indent.align.mode))
-		if (!is.null(row$is.main.tier) && !is.na(row$is.main.tier)) style$main <- isTRUE(row$is.main.tier)
-		styles[[length(styles) + 1]] <- style
-	}
-	list(
-		label = label,
-		mode = if (identical(l@layout.mode, "mondada")) "mondada" else "gat",
-		header = isTRUE(l@header.insert),
-		width = if (width_limited) l@transcript.width else 65,
-		width.limit = width_limited,
-		space.lines = TRUE,
-		line.numbers = isTRUE(l@line.nr.show),
-		acronym = list(show = TRUE, suppress.repeated = !isTRUE(l@speaker.repeat), case = "",
-		               search = "", replace = "", extract = na_chr(l@speaker.regex),
-		               width = acronym_width, ending = na_chr(l@speaker.ending)),
-		word = list(file = "", look = "file"),
-		functions = list(tiers.exclude = na_chr(l@filter.tier.excludeRegEx),
-		                 tiers.keep = na_chr(l@filter.tier.includeRegEx),
-		                 arrow = isTRUE(l@arrow.insert), arrow.shape = na_chr(l@arrow.shape)),
-		advanced = list(spaces.before = l@spacesbefore, brackets.align = isTRUE(l@brackets.align),
-		                symbol.merge = isTRUE(l@symbol.merge), fill = fill),
-		styles = styles)
+# The tier rule table without rows, with the columns the engine reads.
+.style_user_table_empty <- function() {
+	data.frame(name = character(0), is.main.tier = logical(0), show = logical(0),
+	           match.regex = character(0), docx.template.name = character(0),
+	           line.nr.show = logical(0), acronym.show = logical(0), acronym.case = character(0),
+	           acronym.search = character(0), acronym.replace = character(0), acronym.extract = character(0),
+	           acronym.width = numeric(0), acronym.ending = character(0), content.indent = character(0),
+	           content.indent.text.skip = character(0), content.indent.align.char = character(0),
+	           content.indent.align.filler.inside = character(0), content.indent.align.mode = character(0),
+	           content.indent.align.arrow = character(0), content.wrap = logical(0),
+	           space.after = character(0), comment = character(0), stringsAsFactors = FALSE)
 }

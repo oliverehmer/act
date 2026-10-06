@@ -6,27 +6,18 @@
 \usage{
 helper_layout_anchors(
   t,
-  l = NULL,
   filterTierNames = NULL,
   filterSectionStartsec = NULL,
   filterSectionEndsec = NULL,
-  timeTolerancePoint = 0.2,
-  timeToleranceGesture = 0.5,
   layerOrder = NULL,
-  minDescription = 10L,
-  maxSpanBlocks = 3L,
-  figReplace = TRUE,
-  figTierRegex = "^stills(#|$)",
   mainTierNames = NULL,
   alignChars = NULL,
   alignModes = NULL,
-  multimodalTierRegex = "#mm[0-9]*$"
+  style = NULL
 )
 }
 \arguments{
 \item{t}{Transcript object.}
-
-\item{l}{Layout object; if \code{NULL} a default layout is used.}
 
 \item{filterTierNames}{Vector of character strings; names of the tiers to include.}
 
@@ -34,27 +25,15 @@ helper_layout_anchors(
 
 \item{filterSectionEndsec}{Numeric; end of a section in seconds.}
 
-\item{timeTolerancePoint}{Numeric; up to this distance in seconds two point marks (stills) count as the same moment.}
-
-\item{timeToleranceGesture}{Numeric; up to this distance in seconds two span marks (gestures) count as the same moment.}
-
 \item{layerOrder}{Vector of character strings; order of the multimodal layers within a block. \code{NULL} keeps the tier order of the annotation file.}
 
-\item{minDescription}{Integer; minimum room in characters a description needs before the verbal line breaks early.}
+\item{mainTierNames}{Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the tier styles of the profile; without any tier style every tier counts as a main tier.}
 
-\item{maxSpanBlocks}{Integer; maximum number of blocks a description may span before it is cut with a resume arrow.}
+\item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the tier styles of the profile. Catch-all multimodal tiers without an entry anchor on the union of all given characters.}
 
-\item{figReplace}{Logical; if \code{TRUE} the content of picture tiers is replaced by a number mark.}
+\item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} for spans with open and close, \code{"point"} for single spots). \code{NULL} derives the mode from the tier styles of the profile; without any source the mode defaults to \code{"bracket"}.}
 
-\item{figTierRegex}{Character string; regular expression identifying picture tiers.}
-
-\item{mainTierNames}{Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.}
-
-\item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}. Catch-all multimodal tiers without an entry anchor on the union of all given characters.}
-
-\item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} for spans with open and close, \code{"point"} for single spots). \code{NULL} derives the mode from the styles table of \code{l}; without any source the mode defaults to \code{"bracket"}.}
-
-\item{multimodalTierRegex}{Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.}
+\item{style}{Transcript profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. \code{NULL} uses the profile \code{"act"}.}
 }
 \value{
 Data.frame with one row per anchored symbol (columns include

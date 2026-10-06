@@ -21,7 +21,7 @@ helper_tiers_filter_create(
 Vector of character strings; names of tiers
 }
 \description{
-Creates a tier name filter based on a vector of character strings and the values 'filterTierIncludeRegEx' and 'filterTierExcludeRegEx' in a layout object. First, tiers matching 'filterTierExcludeRegEx' are removed. Then, tiers matching 'filterTierIncludeRegEx' are added back from the original tier list, ensuring they are always included regardless of the exclude filter. The original tier order is preserved.
+Creates a tier name filter based on a vector of character strings and the values 'filterTierIncludeRegEx' and 'filterTierExcludeRegEx' (in a transcript profile: \code{functions$tiers.keep} and \code{functions$tiers.exclude}). First, tiers matching 'filterTierExcludeRegEx' are removed. Then, tiers matching 'filterTierIncludeRegEx' are added back from the original tier list, ensuring they are always included regardless of the exclude filter. The original tier order is preserved.
 }
 \examples{
 library(act)

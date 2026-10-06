@@ -4,18 +4,17 @@
 #' The transcripts will be inserted into the column defined in \code{s@cuts.column.printtranscript}.
 #' All transcripts will be stored in \code{s@cuts.printtranscripts}.
 #'
-#' If you want to modify the layout of the print transcripts, create a new layout object with \code{mylayout <- methods::new("layout")}, modify the settings and pass it as argument \code{l}.
+#' The layout of the print transcripts comes from a transcript profile (parameter \code{style}); see \link{export_docx}.
 #'
 #' @param x Corpus object.
 #' @param s Search object.
-#' @param l Layout object.
 #' @param exportTxt Logical; If \code{TRUE} and \code{folderOutput} is set, .txt transcripts will be written to disk. The print transcripts are always inserted into the column \code{s@cuts.column.printtranscript} of \code{s@results}, independent of this parameter.
 #' @param exportDocx Logical; If \code{TRUE} and \code{folderOutput} is set, .docx transcripts will be written to disk.
 #' @param headerInsertSource Logical; if \code{TRUE} standard information about the source and location of the sequence will be inserted after the heading.
 #' @param cutSpanBeforesec Double; Start the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param cutSpanAftersec Double; End the cut some seconds before the hit to include some context; the default NULL will take the value as set in @cuts.span.beforesec of the search object.
 #' @param folderOutput Character string; path to an existing folder for file export. If \code{NULL} (default), no files will be written to disk; the print transcripts are inserted only into \code{s@results}. If set, .txt and/or .docx files will be written depending on \code{exportTxt} and \code{exportDocx}.
-#' @param style Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}.
+#' @param style Transcript profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. \code{NULL} uses the profile \code{"act"}.
 #'
 #' @return Search object; 
 #' 
@@ -25,7 +24,6 @@
 #' 
 search_cuts_printtranscript <- function(x, 
 										s,
-										l                  = NULL, 
 										exportTxt          = TRUE,
 										exportDocx         = TRUE,
 										headerInsertSource = TRUE,
@@ -36,7 +34,6 @@ search_cuts_printtranscript <- function(x,
 	if (1==2) {
 		x <- examplecorpus
 		s <- mysearch
-		l<-NULL
 		exportTxt <- TRUE
 		exportDocx <- TRUE
 		cutSpanBeforesec<-0
@@ -48,10 +45,8 @@ search_cuts_printtranscript <- function(x,
 	.assert_search(s, missing = missing(s))
 	if (is.null(s@results$transcriptName)) 		{ cli::cli_abort("Data frame s@results does not contain column {.arg transcriptName}") 	}
 	
-	if (!is.null(style)) l <- helper_style_layout(style)
-	if (is.null(l)) 	{
-		l <- methods::new("layout")
-	}	
+	style <- .style_read(if (is.null(style)) "act" else style)
+	l <- .style_layout(style)
 	
 	if (is.null(cutSpanBeforesec)) 	{
 		cutSpanBeforesec <- 0
@@ -153,7 +148,7 @@ search_cuts_printtranscript <- function(x,
 			endSec 		<- min(s@results$endsec[i] + s@cuts.span.aftersec, t@length.sec)
 			
 			#==== ARROW ====
-			if (!l@arrow.insert) {
+			if (!l[["arrow.insert"]]) {
 				arrowStartsec  <- NA_real_
 				arrowEndsec    <- NA_real_
 				arrowTierName  <- NA_character_
@@ -168,7 +163,7 @@ search_cuts_printtranscript <- function(x,
 			headerTitle 		<- NULL
 			headerSubtitle	 	<- NULL
 			headerDescription 	<- NULL
-			if (l@header.insert==TRUE) {
+			if (l[["header.insert"]]==TRUE) {
 				if ("header.preface" %in% colnames(s@results)) {
 					headerPreface <- as.character(s@results$header.preface[i])
 				}
@@ -196,7 +191,7 @@ search_cuts_printtranscript <- function(x,
 			}
 
 			trans.txt <- act::export_txt(   t = x@transcripts[[ s@results$transcriptName[i] ]],
-											l = l,
+											style = style,
 											pathOutput				  = path.file,
 											filterSectionStartsec     = startSec,
 											filterSectionEndsec       = endSec,
@@ -234,7 +229,7 @@ search_cuts_printtranscript <- function(x,
 				
 				#export
 				trans.doxc<- act::export_docx(  t = x@transcripts[[ s@results$transcriptName[i] ]],
-												l = l,
+												style = style,
 												pathOutput				  = path.file,
 												filterSectionStartsec     = startSec,
 												filterSectionEndsec       = endSec,
@@ -270,7 +265,7 @@ search_cuts_printtranscript <- function(x,
 				# Resolve all templates the layout carries (1..N).
 				# Per-result files were written by export_docx with the same suffix scheme,
 				# so each template merges only its own per-result files.
-				templates <- helper_layout_docx_templates_resolve(l)
+				templates <- .layout_docx_templates_resolve(l)
 				template_suffixes <- if (length(templates) <= 1) {
 					""
 				} else {

@@ -1,7 +1,7 @@
 Package: act
 Type: Package
 Title: Aligned Corpus Toolkit
-Version: 3.2.21
+Version: 3.3.0
 Date: 2026-08-04
 Authors@R: person("Oliver", "Ehmer", email = "oliver.ehmer@uos.de", role = c("aut", "cre"))
 Maintainer: Oliver Ehmer <oliver.ehmer@uos.de>
@@ -10,7 +10,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: TRUE
 Depends: R (>= 4.2.0)
-Imports: cli, digest, exifr, fs, dplyr, jsonlite, methods, processx, srt, stringr, stringi, tools, textutils, utils, progress, XML, xml2, officer, openxlsx, openxlsx2, readr, glue
+Imports: cli, digest, exifr, fs, dplyr, jsonlite, methods, processx, srt, stringr, stringi, tools, textutils, utils, progress, XML, xml2, officer, openxlsx, openxlsx2, glue
 Suggests: knitr, rmarkdown, rstudioapi
 SystemRequirements: FFmpeg
 VignetteBuilder: knitr

@@ -6,7 +6,7 @@
 #' @md
 #' 
 #' @section Vignettes:
-#' - \code{vignette("export_docx_styles", package = "act")} -- DOCX export style matrix reference
+#' - \code{vignette("export_docx_styles", package = "act")} -- transcript profiles (format of the print transcripts)
 #' - \code{vignette("install_ffmpeg", package = "act")} -- Install FFmpeg
 #' - \code{vignette("install_sendpraat", package = "act")} -- Install sendpraat
 #'

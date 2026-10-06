@@ -7,7 +7,6 @@
 \usage{
 export_txt(
   t,
-  l = NULL,
   pathOutput = NULL,
   filterTierNames = NULL,
   filterSectionStartsec = NULL,
@@ -21,16 +20,9 @@ export_txt(
   headerDescription = NULL,
   headerInsertSource = TRUE,
   collapse = TRUE,
-  timeTolerancePoint = 0.2,
-  timeToleranceGesture = 0.5,
   layerOrder = NULL,
-  minDescription = 10L,
-  maxSpanBlocks = 3L,
-  figReplace = TRUE,
-  figTierRegex = "^stills(#|$)",
   report = FALSE,
   pathReport = NULL,
-  multimodalTierRegex = "#mm[0-9]*$",
   mainTierNames = NULL,
   alignChars = NULL,
   alignModes = NULL,
@@ -42,8 +34,6 @@ export_printtranscript(...)
 \arguments{
 \item{t}{Transcript object.}
 
-\item{l}{Layout object.}
-
 \item{pathOutput}{Character string; path where to save the transcript.}
 
 \item{filterTierNames}{Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.}
@@ -52,7 +42,7 @@ export_printtranscript(...)
 
 \item{filterSectionEndsec}{Double; end of selection in seconds.}
 
-\item{insertArrowStartsec}{Numeric; start time (seconds) of the hit annotation for arrow placement. The annotation is marked with the arrow of the layout (slot \code{arrow.shape}); all lines get room for it before the line number. Used with \code{insertArrowEndsec} and \code{insertArrowTierName} to locate the annotation by time and tier. If \code{NA}, no arrow is placed.}
+\item{insertArrowStartsec}{Numeric; start time (seconds) of the hit annotation for arrow placement. The annotation is marked with the arrow of the profile; all lines get room for it before the line number. Used with \code{insertArrowEndsec} and \code{insertArrowTierName} to locate the annotation by time and tier. If \code{NA}, no arrow is placed.}
 
 \item{insertArrowEndsec}{Numeric; end time (seconds) of the hit annotation for arrow placement.}
 
@@ -70,33 +60,19 @@ export_printtranscript(...)
 
 \item{collapse}{Logical; if \code{FALSE} a vector will be created, each element corresponding to one annotation. if \code{TRUE} a single string will be created, collapsed by linebreaks \\n.}
 
-\item{timeTolerancePoint}{Numeric; up to this distance in seconds two point marks (stills) count as the same moment.}
-
-\item{timeToleranceGesture}{Numeric; up to this distance in seconds two span marks (gestures) count as the same moment.}
-
 \item{layerOrder}{Vector of character strings; order of the multimodal layers within a block. \code{NULL} keeps the tier order of the annotation file.}
-
-\item{minDescription}{Integer; minimum room in characters a description needs before the verbal line breaks early.}
-
-\item{maxSpanBlocks}{Integer; maximum number of blocks a description may span before it is cut with a resume arrow.}
-
-\item{figReplace}{Logical; if \code{TRUE} the content of picture tiers is replaced by a number mark.}
-
-\item{figTierRegex}{Character string; regular expression identifying picture tiers.}
 
 \item{report}{Logical; if \code{TRUE} and \code{pathOutput} is set, an alignment report is written next to the output file.}
 
 \item{pathReport}{Character string; explicit path for the alignment report.}
 
-\item{multimodalTierRegex}{Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.}
+\item{mainTierNames}{Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the tier styles of the profile; without any tier style every tier counts as a main tier.}
 
-\item{mainTierNames}{Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.}
+\item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the tier styles of the profile.}
 
-\item{alignChars}{Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.}
+\item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the tier styles of the profile.}
 
-\item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the styles table of \code{l}.}
-
-\item{style}{Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}, and the render parameters that are not given in the call come from the profile.}
+\item{style}{Transcript profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. \code{NULL} uses the profile \code{"act"}.}
 
 \item{...}{Arguments passed to \code{export_txt()}.}
 }
@@ -104,8 +80,8 @@ export_printtranscript(...)
 Character string; transcript as text.
 }
 \description{
-If you want to modify the layout of the print transcripts, create a new layout object with \code{mylayout <- methods::new("layout")}, modify the settings and pass it as argument \code{l}.
-In the layout object you may also set additional filters to include/exclude tiers matching regular expressions.
+Writes a print transcript as plain text. Its layout comes from a transcript
+profile (parameter \code{style}); see \link{export_docx}.
 }
 \examples{
 library(act)

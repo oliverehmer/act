@@ -5187,7 +5187,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	# main tier, minus the rows a style row explicitly marks FALSE - inert
 	# and correct for purely verbal corpora (user decision 2026-08-18,
 	# PLAN_alignment_main_tier).
-	styles_user <- l@docx.styles.user
+	styles_user <- l[["docx.styles.user"]]
 	styles_have_main <- !is.null(styles_user) && nrow(styles_user) > 0 &&
 		!is.null(styles_user$is.main.tier) &&
 		any(styles_user$is.main.tier %in% TRUE)
@@ -5222,7 +5222,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	ann <- ann[order(ann$startsec, tier_order), ]
 
 	# ===== PREFIX PARTS =====
-	space_width <- l@spacesbefore
+	space_width <- l[["spacesbefore"]]
 	# ===== HIT ARROW =====
 	# EVERY line gets room for the arrow, so the hit line stays in its
 	# column also when the layout reserves no spaces before the number.
@@ -5230,14 +5230,14 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	# only there is known which printed line holds the hit once turns are merged
 	arrow_wanted <- length(arrow_startsec) == 1 && length(arrow_endsec) == 1 &&
 		!is.na(arrow_startsec) && !is.na(arrow_endsec) &&
-		length(l@arrow.shape) == 1 && !is.na(l@arrow.shape) && nzchar(l@arrow.shape)
-	if (arrow_wanted) space_width <- max(space_width, nchar(l@arrow.shape) + 1L)
+		length(l[["arrow.shape"]]) == 1 && !is.na(l[["arrow.shape"]]) && nzchar(l[["arrow.shape"]])
+	if (arrow_wanted) space_width <- max(space_width, nchar(l[["arrow.shape"]]) + 1L)
 	ann$spacebefore <- strrep(" ", space_width)
 
-	style_default_name <- helper_layout_style_base_get(l, "transcript.default")$docx.template.name
+	style_default_name <- .layout_style_base_get(l, "transcript.default")$docx.template.name
 	ann$format.show            <- TRUE
 	ann$format.style           <- style_default_name
-	ann$format.line.nr.show    <- isTRUE(l@line.nr.show)
+	ann$format.line.nr.show    <- isTRUE(l[["line.nr.show"]])
 	# known main tiers: layer rows take no number of their own unless a
 	# style row asks for it (without a styles table they counted 01, 03, 04)
 	if (!is.null(main_tier_names)) ann$format.line.nr.show[!ann$format.is.main] <- FALSE
@@ -5327,14 +5327,6 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	}
 
 	# ===== SPEAKER ACRONYMS =====
-	tier_names <- as.character(unique(ann$tierName))
-	text_body_width_speaker_default <- max(nchar(tier_names))
-	if (!is.na(l@speaker.width)) {
-		if (l@speaker.width != -1) {
-			text_body_width_speaker_default <- l@speaker.width
-		}
-	}
-
 	ann$speaker <- ann$tierName
 	trppauses_pos <- stringr::str_detect(ann$content, options()$act.pauseIdentifierGATRegEx)
 	trppauses_pos[is.na(trppauses_pos)] <- FALSE
@@ -5360,7 +5352,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		ann$speaker_base[i] <- current_main_speaker
 	}
 	sameSpeaker_pos <- tolower(ann_prev_main_speaker) == tolower(ann$speaker_base) & is_main_tier
-	if (isTRUE(l@speaker.repeat)) {
+	if (isTRUE(l[["speaker.repeat"]])) {
 		sameSpeaker_pos <- rep(FALSE, length(sameSpeaker_pos))
 	}
 	ann$speaker[sameSpeaker_pos] <- ""
@@ -5372,47 +5364,10 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 
 	profile <- .layout_style(l)
 	for (i in which(included_speakers_pos)) {
-		if (!is.null(profile)) {
-			ann$speaker[i] <- .layout_profile_acronym(profile, ann, i)
-			next
-		}
-		speaker_text <- ann$speaker[i]
-		acronym_case <- ann$format.acronym.case[i]
-		if (!is.na(acronym_case)) {
-			speaker_text <- switch(acronym_case,
-				"toupper"    = toupper(speaker_text),
-				"tolower"    = tolower(speaker_text),
-				"capitalize" = paste0(toupper(substr(speaker_text, 1, 1)),
-				                      tolower(substr(speaker_text, 2, nchar(speaker_text)))),
-				speaker_text
-			)
-		}
-		acronym_search  <- ann$format.acronym.search[i]
-		acronym_replace <- ann$format.acronym.replace[i]
-		if (!is.na(acronym_search)) {
-			speaker_text <- sub(acronym_search,
-			                    ifelse(is.na(acronym_replace), "", acronym_replace),
-			                    speaker_text)
-		} else if (!is.na(l@speaker.regex)) {
-			extracted <- stringr::str_extract(speaker_text, l@speaker.regex)
-			if (!is.na(extracted)) speaker_text <- extracted
-		}
-		acronym_width <- ann$format.acronym.width[i]
-		if (is.na(acronym_width) || acronym_width == 0) {
-			acronym_width <- text_body_width_speaker_default
-		}
-		if (acronym_width > 0) {
-			speaker_text <- substr(speaker_text, 1, acronym_width)
-		}
-		acronym_ending <- ann$format.acronym.ending[i]
-		if (is.na(acronym_ending)) {
-			acronym_ending <- l@speaker.ending
-		}
-		speaker_text <- paste0(speaker_text, acronym_ending)
-		ann$speaker[i] <- speaker_text
+		ann$speaker[i] <- .layout_profile_acronym(profile, ann, i)
 	}
 
-	text_body_width_speaker <- nchar(l@speaker.ending)
+	text_body_width_speaker <- nchar(l[["speaker.ending"]])
 	if (any(included_speakers_pos)) {
 		text_body_width_speaker <- max(nchar(ann$speaker[included_speakers_pos]))
 	}
@@ -5564,10 +5519,10 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	# transcript.width is the TOTAL width of the printed transcript: the
 	# prefix column (line number + sigle) lies INSIDE it, the wrap edge and
 	# the page edge are the same value (user decision 2026-08-17).
-	engine_width <- if (is.na(l@transcript.width) || l@transcript.width == -1) {
+	engine_width <- if (is.na(l[["transcript.width"]]) || l[["transcript.width"]] == -1) {
 		Inf
 	} else {
-		max(20L, l@transcript.width)
+		max(20L, l[["transcript.width"]])
 	}
 
 	# Catch-all multimodal tiers (#mm, #mm1, #mm2, ...) carry symbols of
@@ -5603,12 +5558,10 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 
 	# profiles carry no skip pattern of their own: what the indent "text"
 	# jumps over is fixed, plus whatever symbols this transcript anchors on
-	if (!is.null(profile)) {
-		text_rows <- identical_chr(ann$format.content.indent, "text") & is.na(ann$format.indent.skip)
-		ann$format.indent.skip[text_rows] <- .layout_indent_text_skip(align_char_union)
-	}
+	text_rows <- identical_chr(ann$format.content.indent, "text") & is.na(ann$format.indent.skip)
+	ann$format.indent.skip[text_rows] <- .layout_indent_text_skip(align_char_union)
 
-	block_height <- if (is.null(profile)) getOption("act.layout.rectangle.max.lines", 2L) else profile$advanced$block.height
+	block_height <- profile$advanced$block.height
 	ann$rect_directives <- rep(list(NULL), nrow(ann))
 	for (i in seq_len(nrow(ann))) {
 		marks <- ann$rect_marks[[i]]
@@ -5664,7 +5617,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		engine_width  = engine_width,
 		arrow_mode    = arrow_mode,
 		number_offset = space_width,
-		arrow_field   = if (arrow_wanted) stringr::str_pad(l@arrow.shape, width = space_width,
+		arrow_field   = if (arrow_wanted) stringr::str_pad(l[["arrow.shape"]], width = space_width,
 		                                                   side = "right", pad = " ") else NULL,
 		number_width  = max(2L, line_nr_width)
 	)
@@ -6371,8 +6324,8 @@ build_alignment_report <- function(result, plan, transcript_name,
 	}
 	filterTierNames <- helper_tiers_filter_create(
 		tierNames              = filterTierNames,
-		filterTierIncludeRegEx = l@filter.tier.includeRegEx,
-		filterTierExcludeRegEx = l@filter.tier.excludeRegEx)
+		filterTierIncludeRegEx = l[["filter.tier.includeRegEx"]],
+		filterTierExcludeRegEx = l[["filter.tier.excludeRegEx"]])
 	t <- transcripts_filter_single(t,
 		filterTierNames       = filterTierNames,
 		filterSectionStartsec = filterSectionStartsec,
@@ -6388,7 +6341,7 @@ build_alignment_report <- function(result, plan, transcript_name,
 }
 
 .layout_mode_of <- function(l) {
-	if (identical(l@layout.mode, "mondada")) "mondada" else "gat"
+	if (identical(l[["layout.mode"]], "mondada")) "mondada" else "gat"
 }
 
 .strip_rectangle_marks <- function(text, rectangle_char) {
@@ -6453,18 +6406,18 @@ build_alignment_report <- function(result, plan, transcript_name,
 	                       fromLast = TRUE), , drop = FALSE]
 }
 
-.layout_frame <- function(t, l, layout_mode, timeToleranceGesture,
-                          figReplace, figTierRegex,
+.layout_frame <- function(t, l, layout_mode,
                           mainTierNames = NULL, alignChars = NULL,
-                          alignModes = NULL,
-                          multimodalTierRegex = "#mm[0-9]*$") {
+                          alignModes = NULL) {
+	advanced <- .layout_style(l)$advanced
+	timeToleranceGesture <- advanced$tolerance.gesture
 	prep <- prepare_annotations_new(t, l, layout_mode = layout_mode,
-	                                fig_replace = figReplace,
-	                                fig_tier_regex = figTierRegex,
+	                                fig_replace = advanced$fig.replace,
+	                                fig_tier_regex = advanced$fig.tier.regex,
 	                                main_tier_names = mainTierNames,
 	                                align_chars = alignChars,
 	                                align_modes = alignModes,
-	                                mm_tier_regex = multimodalTierRegex)
+	                                mm_tier_regex = advanced$multimodal.tier.regex)
 	ann <- prep$engine_ann
 	mm_anchor_chars <- unique(unlist(
 		lapply(ann$align_chars[!is.na(ann$align_chars)],
@@ -6597,31 +6550,24 @@ build_alignment_report <- function(result, plan, transcript_name,
 #' Render a transcript with the alignment engine
 #'
 #' Renders a single transcript into aligned print-transcript lines using the
-#' wrap-aware alignment engine. The rendering mode comes from the slot
-#' \code{layout.mode} of the layout object (\code{"gat"}: one line per
-#' annotation; \code{"mondada"}: score layout), the folding of adjacent
-#' identical marks from the slot \code{symbol.merge}.
+#' wrap-aware alignment engine. Layout, styles and the advanced engine
+#' settings (time tolerances, minimum description room, span limit, picture
+#' tiers, catch-all multimodal tiers) come from the transcript profile
+#' \code{style}; its \code{mode} decides between \code{"gat"} (one line per
+#' annotation) and \code{"mondada"} (score layout).
 #'
 #' @param t Transcript object.
-#' @param l Layout object; if \code{NULL} a default layout is used.
 #' @param filterTierNames Vector of character strings; names of the tiers to include.
 #' @param filterSectionStartsec Numeric; start of a section in seconds.
 #' @param filterSectionEndsec Numeric; end of a section in seconds.
-#' @param timeTolerancePoint Numeric; up to this distance in seconds two point marks (stills) count as the same moment.
-#' @param timeToleranceGesture Numeric; up to this distance in seconds two span marks (gestures) count as the same moment.
 #' @param layerOrder Vector of character strings; order of the multimodal layers within a block. \code{NULL} keeps the tier order of the annotation file.
-#' @param minDescription Integer; minimum room in characters a description needs before the verbal line breaks early.
-#' @param maxSpanBlocks Integer; maximum number of blocks a description may span before it is cut with a resume arrow.
-#' @param figReplace Logical; if \code{TRUE} the content of picture tiers is replaced by a number mark.
-#' @param figTierRegex Character string; regular expression identifying picture tiers.
-#' @param mainTierNames Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.
-#' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}. Catch-all multimodal tiers without an entry anchor on the union of all given characters.
-#' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} for spans with open and close, \code{"point"} for single spots). \code{NULL} derives the mode from the styles table of \code{l}; without any source the mode defaults to \code{"bracket"}.
-#' @param multimodalTierRegex Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.
-#' @param insertArrowStartsec Numeric; start time (seconds) of an annotation to mark with the arrow of the layout (slot \code{arrow.shape}), e.g. a search hit. All lines get room for the arrow before the line number, so the marked line stays in its column. \code{NA}: no arrow.
+#' @param mainTierNames Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the tier styles of the profile; without any tier style every tier counts as a main tier.
+#' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the tier styles of the profile. Catch-all multimodal tiers without an entry anchor on the union of all given characters.
+#' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} for spans with open and close, \code{"point"} for single spots). \code{NULL} derives the mode from the tier styles of the profile; without any source the mode defaults to \code{"bracket"}.
+#' @param insertArrowStartsec Numeric; start time (seconds) of an annotation to mark with the arrow of the profile, e.g. a search hit. All lines get room for the arrow before the line number, so the marked line stays in its column. \code{NA}: no arrow.
 #' @param insertArrowEndsec Numeric; end time (seconds) of the annotation to mark.
 #' @param insertArrowTierName Character string; tier name of the annotation to mark.
-#' @param style Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}, and the render parameters that are not given in the call come from the profile.
+#' @param style Transcript profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. \code{NULL} uses the profile \code{"act"}.
 #'
 #' @return List with the rendered \code{lines}, the line \code{plan}, the
 #' engine \code{result} frame (one row per annotation; its column
@@ -6636,37 +6582,45 @@ build_alignment_report <- function(result, plan, transcript_name,
 #'
 #' @export
 helper_layout_render <- function(t,
-                                 l                     = NULL,
                                  filterTierNames       = NULL,
                                  filterSectionStartsec = NULL,
                                  filterSectionEndsec   = NULL,
-                                 timeTolerancePoint    = 0.2,
-                                 timeToleranceGesture  = 0.5,
                                  layerOrder            = NULL,
-                                 minDescription        = 10L,
-                                 maxSpanBlocks         = 3L,
-                                 figReplace            = TRUE,
-                                 figTierRegex          = "^stills(#|$)",
                                  mainTierNames         = NULL,
                                  alignChars            = NULL,
                                  alignModes            = NULL,
-                                 multimodalTierRegex   = "#mm[0-9]*$",
                                  insertArrowStartsec   = NA_real_,
                                  insertArrowEndsec     = NA_real_,
                                  insertArrowTierName   = NA_character_,
                                  style                 = NULL) {
-	if (!is.null(style)) l <- helper_style_layout(style)
-	if (is.null(l)) l <- methods::new("layout")
+	.layout_render(t, .style_layout(style),
+		filterTierNames       = filterTierNames,
+		filterSectionStartsec = filterSectionStartsec,
+		filterSectionEndsec   = filterSectionEndsec,
+		layerOrder            = layerOrder,
+		mainTierNames         = mainTierNames,
+		alignChars            = alignChars,
+		alignModes            = alignModes,
+		insertArrowStartsec   = insertArrowStartsec,
+		insertArrowEndsec     = insertArrowEndsec,
+		insertArrowTierName   = insertArrowTierName)
+}
+
+# Works on a resolved layout (see .style_layout), so export_docx and
+# export_txt render with the layout they already validated and resolved.
+.layout_render <- function(t, l,
+                           filterTierNames       = NULL,
+                           filterSectionStartsec = NULL,
+                           filterSectionEndsec   = NULL,
+                           layerOrder            = NULL,
+                           mainTierNames         = NULL,
+                           alignChars            = NULL,
+                           alignModes            = NULL,
+                           insertArrowStartsec   = NA_real_,
+                           insertArrowEndsec     = NA_real_,
+                           insertArrowTierName   = NA_character_) {
 	profile <- .layout_style(l)
-	if (!is.null(profile)) {
-		if (missing(timeTolerancePoint))   timeTolerancePoint   <- profile$advanced$tolerance.point
-		if (missing(timeToleranceGesture)) timeToleranceGesture <- profile$advanced$tolerance.gesture
-		if (missing(minDescription))       minDescription       <- profile$advanced$min.description
-		if (missing(maxSpanBlocks))        maxSpanBlocks        <- profile$advanced$max.span.blocks
-		if (missing(figReplace))           figReplace           <- profile$advanced$fig.replace
-		if (missing(figTierRegex))         figTierRegex         <- profile$advanced$fig.tier.regex
-		if (missing(multimodalTierRegex))  multimodalTierRegex  <- profile$advanced$multimodal.tier.regex
-	}
+	advanced <- profile$advanced
 	layout_mode <- .layout_mode_of(l)
 	label_mode <- getOption("act.layout.label.mode", "mondada")
 	if (!identical(label_mode, "always")) label_mode <- "mondada"
@@ -6685,25 +6639,25 @@ helper_layout_render <- function(t,
 	}
 	run <- function(number_width_min) {
 		prep <- prepare_annotations_new(t, l, layout_mode = layout_mode,
-		                                fig_replace = figReplace,
-		                                fig_tier_regex = figTierRegex,
+		                                fig_replace = advanced$fig.replace,
+		                                fig_tier_regex = advanced$fig.tier.regex,
 		                                main_tier_names = mainTierNames,
 		                                align_chars = alignChars,
 		                                align_modes = alignModes,
 		                                number_width_min = number_width_min,
-		                                mm_tier_regex = multimodalTierRegex,
+		                                mm_tier_regex = advanced$multimodal.tier.regex,
 		                                arrow_startsec = insertArrowStartsec,
 		                                arrow_endsec = insertArrowEndsec,
 		                                arrow_tier = insertArrowTierName)
 		result <- align_and_render(prep$engine_ann, prep$engine_width,
 		                           arrow_mode = prep$arrow_mode,
-		                           verbal_align = isTRUE(l@brackets.align),
+		                           verbal_align = isTRUE(l[["brackets.align"]]),
 		                           layout_mode = layout_mode,
-		                           symbol_merge = isTRUE(l@symbol.merge),
-		                           time_tolerance = timeToleranceGesture,
-		                           time_tolerance_point = timeTolerancePoint,
-		                           min_description = minDescription)
-		plan <- interleave_layer_lines(result, maxSpanBlocks,
+		                           symbol_merge = isTRUE(l[["symbol.merge"]]),
+		                           time_tolerance = advanced$tolerance.gesture,
+		                           time_tolerance_point = advanced$tolerance.point,
+		                           min_description = advanced$min.description)
+		plan <- interleave_layer_lines(result, advanced$max.span.blocks,
 		                               text_width = prep$engine_width,
 		                               embed_overlaps = identical(layout_mode, "mondada"),
 		                               label_mode = label_mode,
@@ -6728,7 +6682,7 @@ helper_layout_render <- function(t,
 	if (!is.null(need) && need > out$prep$number_width) out <- run(need)
 	prep <- out$prep; result <- out$result; plan <- out$plan
 	lines <- .layout_assemble_lines(plan, result, layout_mode,
-	                                space_lines = is.null(profile) || isTRUE(profile$space.lines))
+	                                space_lines = isTRUE(profile$space.lines))
 	list(lines = lines, plan = plan, result = result, transcript = t,
 	     engineWidth = prep$engine_width, layoutMode = layout_mode,
 	     anchors = .layout_collect_anchors(result),
@@ -6762,36 +6716,23 @@ helper_layout_render <- function(t,
 #'
 #' @export
 helper_layout_anchors <- function(t,
-                                  l                     = NULL,
                                   filterTierNames       = NULL,
                                   filterSectionStartsec = NULL,
                                   filterSectionEndsec   = NULL,
-                                  timeTolerancePoint    = 0.2,
-                                  timeToleranceGesture  = 0.5,
                                   layerOrder            = NULL,
-                                  minDescription        = 10L,
-                                  maxSpanBlocks         = 3L,
-                                  figReplace            = TRUE,
-                                  figTierRegex          = "^stills(#|$)",
                                   mainTierNames         = NULL,
                                   alignChars            = NULL,
                                   alignModes            = NULL,
-                                  multimodalTierRegex   = "#mm[0-9]*$") {
-	rendered <- helper_layout_render(t, l,
+                                  style                 = NULL) {
+	rendered <- helper_layout_render(t,
 		filterTierNames       = filterTierNames,
 		filterSectionStartsec = filterSectionStartsec,
 		filterSectionEndsec   = filterSectionEndsec,
-		timeTolerancePoint    = timeTolerancePoint,
-		timeToleranceGesture  = timeToleranceGesture,
 		layerOrder            = layerOrder,
-		minDescription        = minDescription,
-		maxSpanBlocks         = maxSpanBlocks,
-		figReplace            = figReplace,
-		figTierRegex          = figTierRegex,
 		mainTierNames         = mainTierNames,
 		alignChars            = alignChars,
 		alignModes            = alignModes,
-		multimodalTierRegex   = multimodalTierRegex)
+		style                 = style)
 	if (!is.null(rendered$result)) {
 		.layout_warn_no_main(rendered$result$is_main)
 	}
@@ -6812,18 +6753,14 @@ helper_layout_anchors <- function(t,
 #'
 #' @export
 helper_layout_bracket_pairs <- function(t,
-                                        l                     = NULL,
                                         filterTierNames       = NULL,
                                         filterSectionStartsec = NULL,
                                         filterSectionEndsec   = NULL,
-                                        timeToleranceGesture  = 0.5,
-                                        figReplace            = TRUE,
-                                        figTierRegex          = "^stills(#|$)",
                                         mainTierNames         = NULL,
                                         alignChars            = NULL,
                                         alignModes            = NULL,
-                                        multimodalTierRegex   = "#mm[0-9]*$") {
-	if (is.null(l)) l <- methods::new("layout")
+                                        style                 = NULL) {
+	l <- .style_layout(style)
 	layout_mode <- .layout_mode_of(l)
 	t <- .layout_filter_transcript(t, l, filterTierNames,
 	                               filterSectionStartsec, filterSectionEndsec)
@@ -6834,12 +6771,10 @@ helper_layout_bracket_pairs <- function(t,
 		                               j_row = integer(0),
 		                               j_occurrence = integer(0))))
 	}
-	frame <- .layout_frame(t, l, layout_mode, timeToleranceGesture,
-	                       figReplace, figTierRegex,
+	frame <- .layout_frame(t, l, layout_mode,
 	                       mainTierNames = mainTierNames,
 	                       alignChars = alignChars,
-	                       alignModes = alignModes,
-	                       multimodalTierRegex = multimodalTierRegex)
+	                       alignModes = alignModes)
 	list(ann = frame$ann, pairs = compute_bracket_pairs(frame$ann))
 }
 
@@ -6857,18 +6792,14 @@ helper_layout_bracket_pairs <- function(t,
 #'
 #' @export
 helper_layout_symbol_matches <- function(t,
-                                         l                     = NULL,
                                          filterTierNames       = NULL,
                                          filterSectionStartsec = NULL,
                                          filterSectionEndsec   = NULL,
-                                         timeToleranceGesture  = 0.5,
-                                         figReplace            = TRUE,
-                                         figTierRegex          = "^stills(#|$)",
                                          mainTierNames         = NULL,
                                          alignChars            = NULL,
                                          alignModes            = NULL,
-                                         multimodalTierRegex   = "#mm[0-9]*$") {
-	if (is.null(l)) l <- methods::new("layout")
+                                         style                 = NULL) {
+	l <- .style_layout(style)
 	layout_mode <- .layout_mode_of(l)
 	t <- .layout_filter_transcript(t, l, filterTierNames,
 	                               filterSectionStartsec, filterSectionEndsec)
@@ -6880,12 +6811,10 @@ helper_layout_symbol_matches <- function(t,
 		                                 main_row = integer(0),
 		                                 main_occurrence = integer(0))))
 	}
-	frame <- .layout_frame(t, l, layout_mode, timeToleranceGesture,
-	                       figReplace, figTierRegex,
+	frame <- .layout_frame(t, l, layout_mode,
 	                       mainTierNames = mainTierNames,
 	                       alignChars = alignChars,
-	                       alignModes = alignModes,
-	                       multimodalTierRegex = multimodalTierRegex)
+	                       alignModes = alignModes)
 	.layout_warn_no_main(frame$ann$is_main)
 	ref_main <- resolve_reference_main(frame$ann)
 	matches <- compute_mm_symbol_matches(frame$ann, ref_main)

@@ -1,35 +1,22 @@
 #' Export print transcript in .docx format
-#' 
-#' LAYOUT
-#' If you want to modify the layout of the print transcripts, create a new layout object with \code{mylayout <- methods::new("layout")}, modify the settings and pass it as argument \code{l}.
-#' Using the layout object you may
-#' - Adjust with, abbreviation of speakers, etc.
-#' - set filters to include/exclude tiers matching regular expressions.
-#' - assign template files for .docx formatting using format templates
 #'
-#' FORMATING
-# To format the transcript you can 
-#' - adjust the the defaults format templates in the default .docx template.
-#' - define further templates and add them to a styles matrix.
-#' The paths to both files need to be set in your l layout object. Please check the slots l@docx.template.path and l@docx.styles.base.
-#' You can see the structure of the default styles matrix in each new layout object in l@docx.styles.base. Use l@docx.styles.base <- act::export_styles_base_load(...) to assign a custom styles matrix.
-#' The default format templates are
-#' * Header: 
-#' - header.preface (formats: s@results$header.description) 
-#' - header.title (formats: s@results$header.description) 
-#' - header.subtitle (formats: s@results$header.description) 
-#' - header.info (formats: s@results$header.description) 
-#' * Transcript body
-#' - transcript.default (formats: any annotation in "t@annotations"
-#' 
+#' Writes a print transcript as a Word file. Everything about its look comes
+#' from a transcript profile (parameter \code{style}): mode (gat or score),
+#' width, line numbers, speaker acronyms, tier and character styles, the Word
+#' template and the advanced engine settings. Profiles are JSON files; the
+#' ones shipped with act are listed by \code{helper_style_list()}, and
+#' \code{helper_style_read()} reads one for inspection or modification.
+#'
+#' The Word styles of the profile are looked up in the template of the
+#' profile (\code{word$file}); with \code{word$look = "profile"} styles
+#' missing there are created from the profile.
 #'
 #' @param t Transcript object.
-#' @param l Layout object.
 #' @param pathOutput Character string; path where to save the transcript.
 #' @param filterTierNames Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.
 #' @param filterSectionStartsec Double; start of selection in seconds.
 #' @param filterSectionEndsec Double; end of selection in seconds.
-#' @param insertArrowStartsec Numeric; start time (seconds) of the hit annotation for arrow placement. The annotation is marked with the arrow of the layout (slot \code{arrow.shape}); all lines get room for it before the line number. Used with \code{insertArrowEndsec} and \code{insertArrowTierName} to locate the annotation by time and tier. If \code{NA}, no arrow is placed.
+#' @param insertArrowStartsec Numeric; start time (seconds) of the hit annotation for arrow placement. The annotation is marked with the arrow of the profile; all lines get room for it before the line number. Used with \code{insertArrowEndsec} and \code{insertArrowTierName} to locate the annotation by time and tier. If \code{NA}, no arrow is placed.
 #' @param insertArrowEndsec Numeric; end time (seconds) of the hit annotation for arrow placement.
 #' @param insertArrowTierName Character string; tier name of the hit annotation for arrow placement.
 #' @param headerPreface Character string; text used as preface before title.
@@ -37,33 +24,23 @@
 #' @param headerSubtitle Character string; text  used as sub title.
 #' @param headerDescription Character string; text used as description after sub title.
 #' @param headerInsertSource Logical; if \code{TRUE} standard information about the source and location of the sequence will be inserted after the heading.
-#' @param timeTolerancePoint Numeric; up to this distance in seconds two point marks (stills) count as the same moment.
-#' @param timeToleranceGesture Numeric; up to this distance in seconds two span marks (gestures) count as the same moment.
 #' @param layerOrder Vector of character strings; order of the multimodal layers within a block. \code{NULL} keeps the tier order of the annotation file.
-#' @param minDescription Integer; minimum room in characters a description needs before the verbal line breaks early.
-#' @param maxSpanBlocks Integer; maximum number of blocks a description may span before it is cut with a resume arrow.
-#' @param figReplace Logical; if \code{TRUE} the content of picture tiers is replaced by a number mark.
-#' @param figTierRegex Character string; regular expression identifying picture tiers.
 #' @param report Logical; if \code{TRUE} and \code{pathOutput} is set, an alignment report is written next to the output file.
 #' @param pathReport Character string; explicit path for the alignment report.
-#' @param multimodalTierRegex Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.
-#' @param mainTierNames Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.
-#' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.
-#' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the styles table of \code{l}.
-#' @param symbolStyle Character string; name of a Word character style for the multimodal symbols (the anchor characters of the layer tiers), in verbal lines and in layer lines. \code{NULL} takes the base style \code{transcript.symbols} of the styles file; without it the symbols are written as plain text.
-#' @param style Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}, and the render parameters that are not given in the call come from the profile.
-
-#' 
+#' @param mainTierNames Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the tier styles of the profile; without any tier style every tier counts as a main tier.
+#' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the tier styles of the profile.
+#' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the tier styles of the profile.
+#' @param style Transcript profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. \code{NULL} uses the profile \code{"act"}.
+#'
 #' @return Officer doc; transcript as object from library officer.
-#' 
+#'
 #' @seealso \link{corpus_export}, \link{export_eaf}, \link{export_exb}, \link{export_rpraat}, \link{export_srt}, \link{export_textgrid}, \code{vignette("export_docx_styles", package = "act")}
-#' 
+#'
 #' @export
 #'
 #' @example inst/examples/export_docx.R
 #'
 export_docx <- function (   t,
-							l                            = NULL,
 							pathOutput                   = NULL,
 							filterTierNames              = NULL,
 							filterSectionStartsec        = NULL,
@@ -76,38 +53,17 @@ export_docx <- function (   t,
 							headerSubtitle               = NULL,
 							headerDescription            = NULL,
 							headerInsertSource           = TRUE,
-							timeTolerancePoint           = 0.2,
-							timeToleranceGesture         = 0.5,
 							layerOrder                   = NULL,
-							minDescription               = 10L,
-							maxSpanBlocks                = 3L,
-							figReplace                   = TRUE,
-							figTierRegex                 = "^stills(#|$)",
 							report                       = FALSE,
 							pathReport                   = NULL,
-							multimodalTierRegex          = "#mm[0-9]*$",
 							mainTierNames                = NULL,
 							alignChars                   = NULL,
 							alignModes                   = NULL,
-							symbolStyle                  = NULL,
 							style                        = NULL
 ) {
 	.assert_transcript(t, missing = missing(t))
-	if (!is.null(style)) l <- helper_style_layout(style)
-	if (is.null(l)) {
-		l <- methods::new("layout")
-		l@docx.template.path <- ""
-	}
+	l <- .style_layout(style)
 	profile <- .layout_style(l)
-	if (!is.null(profile)) {
-		if (missing(timeTolerancePoint))   timeTolerancePoint   <- profile$advanced$tolerance.point
-		if (missing(timeToleranceGesture)) timeToleranceGesture <- profile$advanced$tolerance.gesture
-		if (missing(minDescription))       minDescription       <- profile$advanced$min.description
-		if (missing(maxSpanBlocks))        maxSpanBlocks        <- profile$advanced$max.span.blocks
-		if (missing(figReplace))           figReplace           <- profile$advanced$fig.replace
-		if (missing(figTierRegex))         figTierRegex         <- profile$advanced$fig.tier.regex
-		if (missing(multimodalTierRegex))  multimodalTierRegex  <- profile$advanced$multimodal.tier.regex
-	}
 	if (!requireNamespace("officer", quietly = TRUE)) {
 		cli::cli_abort("Please install the {.pkg officer} package.")
 	}
@@ -116,39 +72,32 @@ export_docx <- function (   t,
 			cli::cli_abort("Output folder does not exist. Modify parameter {.arg pathOutput}.")
 		}
 	}
-	if (is.na(l@transcript.width) || l@transcript.width == -1) {
-	} else if (l@transcript.width < 40) {
-		cli::cli_abort("The width of the transcript is to low. Minimum is 40. Check option {.code l@transcript.width}")
+	if (is.na(l[["transcript.width"]]) || l[["transcript.width"]] == -1) {
+	} else if (l[["transcript.width"]] < 40) {
+		cli::cli_abort("The width of the transcript is to low. Minimum is 40. Check {.field width} of the profile.")
 	}
-	if (is.na(l@speaker.width) || l@speaker.width == -1) {
-	} else if (l@speaker.width == 0 || l@speaker.width < -1) {
-		cli::cli_abort("Length of tier names is to short. Minimum is 1. Check option {.code l@speaker.width}.")
-	} else if (l@speaker.width > 25) {
-		cli::cli_abort("Length of tier names is to long. Maximum is 25. Check option {.code l@speaker.width}.")
+	if (is.na(l[["speaker.width"]]) || l[["speaker.width"]] == -1) {
+	} else if (l[["speaker.width"]] == 0 || l[["speaker.width"]] < -1) {
+		cli::cli_abort("Length of tier names is to short. Minimum is 1. Check {.field acronym$width} of the profile.")
+	} else if (l[["speaker.width"]] > 25) {
+		cli::cli_abort("Length of tier names is to long. Maximum is 25. Check {.field acronym$width} of the profile.")
 	}
 
-	templates <- helper_layout_docx_templates_resolve(l)
+	templates <- .layout_docx_templates_resolve(l)
 	template_suffixes <- if (length(templates) <= 1) {
 		""
 	} else {
 		paste0("__", names(templates))
 	}
 
-	rendered <- helper_layout_render(t, l,
+	rendered <- .layout_render(t, l,
 		filterTierNames       = filterTierNames,
 		filterSectionStartsec = filterSectionStartsec,
 		filterSectionEndsec   = filterSectionEndsec,
-		timeTolerancePoint    = timeTolerancePoint,
-		timeToleranceGesture  = timeToleranceGesture,
 		layerOrder            = layerOrder,
-		minDescription        = minDescription,
-		maxSpanBlocks         = maxSpanBlocks,
-		figReplace            = figReplace,
-		figTierRegex          = figTierRegex,
 		mainTierNames         = mainTierNames,
 		alignChars            = alignChars,
 		alignModes            = alignModes,
-		multimodalTierRegex   = multimodalTierRegex,
 		insertArrowStartsec   = insertArrowStartsec,
 		insertArrowEndsec     = insertArrowEndsec,
 		insertArrowTierName   = insertArrowTierName)
@@ -158,28 +107,22 @@ export_docx <- function (   t,
 	mondada <- identical(rendered$layoutMode, "mondada")
 
 	symbol_chars <- .docx_symbol_chars(result)
-	symbol_style <- .docx_symbol_style_name(l, symbolStyle)
 
 	results <- list()
 	for (template_idx in seq_along(templates)) {
 	doc <- officer::read_docx(path = templates[template_idx])
-	character_rules <- NULL
-	if (is.null(profile)) {
-		symbol_style_id <- .docx_symbol_style_id(doc, symbol_style, symbol_chars)
-	} else {
-		from_profile <- .docx_profile_styles(doc, profile, symbol_chars)
-		doc <- from_profile$doc
-		character_rules <- from_profile$rules
-		if (length(from_profile$created) > 0 && identical(profile$word$look, "file")) {
-			cli::cli_alert_info("Styles missing in the Word file, created from the profile: {.val {from_profile$created}}")
-		}
+	from_profile <- .docx_profile_styles(doc, profile, symbol_chars)
+	doc <- from_profile$doc
+	character_rules <- from_profile$rules
+	if (length(from_profile$created) > 0 && identical(profile$word$look, "file")) {
+		cli::cli_alert_info("Styles missing in the Word file, created from the profile: {.val {from_profile$created}}")
 	}
 	doc <- .docx_add_header(doc, l, t, headerPreface, headerTitle,
 	                        headerSubtitle, headerDescription,
 	                        headerInsertSource)
 
 	if (!is.null(result)) {
-		style_default_name <- helper_layout_style_base_get(l, "transcript.default")$docx.template.name
+		style_default_name <- .layout_style_base_get(l, "transcript.default")$docx.template.name
 		space_style_row <- get_style_user(l, name = "space")
 		space_style_name <- if (!is.null(space_style_row) &&
 		                        !is.na(space_style_row$docx.template.name)) {
@@ -189,7 +132,7 @@ export_docx <- function (   t,
 		}
 		previous_main_row <- NA_integer_
 		emitted_any <- FALSE
-		space_lines <- is.null(profile) || isTRUE(profile$space.lines)
+		space_lines <- isTRUE(profile$space.lines)
 		layer_look <- .docx_layer_look(profile, result)
 		line_in_row <- stats::ave(seq_len(nrow(plan)), plan$row, FUN = seq_along)
 		for (p in seq_len(nrow(plan))) {
@@ -203,12 +146,8 @@ export_docx <- function (   t,
 				doc <- officer::body_add_par(doc, "", style = space_style_name)
 			}
 			if (isTRUE(result$show[row_p])) {
-				doc <- if (is.null(character_rules)) {
-					.docx_add_line(doc, plan$line[p], result$style[row_p], symbol_style_id, symbol_chars)
-				} else {
-					.docx_add_line_rules(doc, plan$line[p], result$style[row_p], character_rules,
-					                     owners = .docx_symbol_owners(layer_look, rendered$anchors, row_p, line_in_row[p]))
-				}
+				doc <- .docx_add_line_rules(doc, plan$line[p], result$style[row_p], character_rules,
+				                            owners = .docx_symbol_owners(layer_look, rendered$anchors, row_p, line_in_row[p]))
 				if (isTRUE(result$is_main[row_p])) previous_main_row <- row_p
 				emitted_any <- TRUE
 			}
@@ -247,7 +186,7 @@ export_docx <- function (   t,
 			result, plan, transcript_name = t@name,
 			layout_mode = rendered$layoutMode,
 			text_body_width = rendered$engineWidth,
-			time_tolerance = timeToleranceGesture)
+			time_tolerance = profile$advanced$tolerance.gesture)
 		con <- file(pathReport, open = "w", encoding = "UTF-8")
 		writeLines(report_lines, con = con)
 		close(con)
@@ -263,13 +202,13 @@ export_docx <- function (   t,
 .docx_add_header <- function(doc, l, t, headerPreface, headerTitle,
                              headerSubtitle, headerDescription,
                              headerInsertSource) {
-	if (!isTRUE(l@header.insert)) return(doc)
+	if (!isTRUE(l[["header.insert"]])) return(doc)
 	add_block <- function(doc, value, style_name) {
 		value <- as.character(value)
 		value <- value[!is.na(value)]
 		if (length(value) == 0 || !any(nzchar(value))) return(doc)
 		value <- paste(value, collapse = "\n")
-		style <- helper_layout_style_base_get(l, style_name)$docx.template.name
+		style <- .layout_style_base_get(l, style_name)$docx.template.name
 		for (line in unlist(stringr::str_split(value, "\n"))) {
 			doc <- officer::body_add_par(doc, value = line, style = style)
 		}
@@ -284,30 +223,20 @@ export_docx <- function (   t,
 			helper_time_format(min(t@annotations$startsec), format = .layout_time_format(l)), "-",
 			helper_time_format(max(t@annotations$endsec), format = .layout_time_format(l)), ")")
 		doc <- officer::body_add_par(doc, value = source_line,
-			style = helper_layout_style_base_get(l, "header.subtitle")$docx.template.name)
+			style = .layout_style_base_get(l, "header.subtitle")$docx.template.name)
 	}
 	doc
 }
 
 #==== FUNCTONS ====
-#' Helper: Base style of a layout
-#'
-#' Returns the row of the base styles table (\code{l@docx.styles.base}) for an
-#' act style name, e.g. \code{"transcript.default"}.
-#'
-#' @param l Layout object.
-#' @param actStyleName Character string; act style name.
-#'
-#' @return Data frame with one row.
-#'
-#' @export
-helper_layout_style_base_get <- function(l, actStyleName) {
-	id <- which(l@docx.styles.base$act.style.name==actStyleName)
+# Row of the base styles table for an act style name, e.g. "transcript.default".
+.layout_style_base_get <- function(l, actStyleName) {
+	id <- which(l[["docx.styles.base"]]$act.style.name==actStyleName)
 	if (length(id)==0) {
 		cli::cli_abort("Style {.val {actStyleName}} is not defined in your styles file. Add this style to your base styles.")
 	} else {
 		return (
-			l@docx.styles.base[id[1],]
+			l[["docx.styles.base"]][id[1],]
 		)
 	}
 }
@@ -321,52 +250,8 @@ helper_layout_style_base_get <- function(l, actStyleName) {
 	unique(unlist(lapply(chars, helper_text_graphemes_split)))
 }
 
-# Explicit parameter first, then the base styles row "transcript.symbols";
-# without either the symbols are written as plain text.
-.docx_symbol_style_name <- function(l, symbolStyle) {
-	if (!is.null(symbolStyle) && length(symbolStyle) == 1 && !is.na(symbolStyle) && nzchar(symbolStyle)) {
-		return(symbolStyle)
-	}
-	base <- l@docx.styles.base
-	if (is.null(base) || nrow(base) == 0) return(NA_character_)
-	hit <- which(base$act.style.name == "transcript.symbols")
-	if (length(hit) == 0) NA_character_ else base$docx.template.name[hit[1]]
-}
-
-.docx_symbol_style_id <- function(doc, symbol_style, symbol_chars) {
-	if (is.na(symbol_style) || length(symbol_chars) == 0) return(NA_character_)
-	styles <- officer::styles_info(doc)
-	hit <- which(styles$style_name == symbol_style & styles$style_type == "character")
-	if (length(hit) == 0) {
-		cli::cli_warn("Character style {.val {symbol_style}} is not in the Word template; the multimodal symbols are not highlighted.")
-		return(NA_character_)
-	}
-	styles$style_id[hit[1]]
-}
-
-# One paragraph per line. With a symbol style the line is written as runs:
-# the text is the same character for character, so the alignment holds.
-.docx_add_line <- function(doc, line, style, symbol_style_id, symbol_chars) {
-	if (is.na(symbol_style_id) || is.na(line)) {
-		return(officer::body_add_par(doc, value = line, style = style))
-	}
-	symbol_class <- paste0("[", paste(stringr::str_escape(symbol_chars), collapse = ""), "]")
-	if (!stringr::str_detect(line, symbol_class)) {
-		return(officer::body_add_par(doc, value = line, style = style))
-	}
-	pieces <- stringr::str_extract_all(line, paste0(symbol_class, "+|[^", stringr::str_sub(symbol_class, 2L), "+"))[[1]]
-	runs <- lapply(pieces, function(piece) {
-		if (stringr::str_detect(piece, paste0("^", symbol_class))) {
-			officer::run_wordtext(piece, style_id = symbol_style_id)
-		} else {
-			officer::ftext(piece)
-		}
-	})
-	officer::body_add_fpar(doc, do.call(officer::fpar, runs), style = style)
-}
-
 get_style_user <- function(l, name) {
-	user_df <- l@docx.styles.user
+	user_df <- l[["docx.styles.user"]]
 
 	if (nrow(user_df) > 0 && "match.regex" %in% names(user_df)) {
 		match_rows <- which(!is.na(user_df$match.regex))

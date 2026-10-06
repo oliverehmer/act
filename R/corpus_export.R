@@ -11,8 +11,7 @@
 #' @param formats Vector with one or more character strings; output formats, accepted values: 'eaf', 'exb', and 'textgrid', 'srt' and 'edl', 'docx' and 'txt'. If left unspecified, all supported formats will be exported.
 #' @param createMediaLinks Logical; if \code{TRUE} media links will be created (affects only 'eaf' and 'exb' files).
 #' @param createFolderOutput Logical; if \code{TRUE} the output folder will be created recursively in case that it does not exist.
-#' @param l Layout object. layout of print transcripts (affects only 'txt' and 'docx' files).
-#' @param style Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}.
+#' @param style Transcript profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. Affects only 'txt' and 'docx' files; \code{NULL} uses the profile \code{"act"}.
 #'
 #' 
 #' @export
@@ -29,9 +28,8 @@ corpus_export <-  function(x,
 						   formats=c("docx", "eaf","exb", "edl", "srt", "textgrid", "txt"), 
 						   createMediaLinks=TRUE,
 						   createFolderOutput=TRUE,
-						   l=NULL,
 						   style=NULL) {
-	if (!is.null(style)) l <- helper_style_layout(style)
+	if (any(c("docx", "txt") %in% formats)) style <- .style_read(if (is.null(style)) "act" else style)
 	
 	if (1==2) {
 		
@@ -44,7 +42,6 @@ corpus_export <-  function(x,
 		#folderOutput<-"/Users/oliverehmer/Desktop/export/"
 		#filterTierNames<-NULL
 		#createMediaLinks <- FALSE
-		#l<- layout_spa_icas
 	}
 	
 	
@@ -96,12 +93,12 @@ corpus_export <-  function(x,
 		
 		if ( "docx" %in% stringr::str_to_lower(formats) ) {
 			pathOutput <- file.path(folderOutput, paste(x@transcripts[[i]]@name, "docx", sep="."))
-			export_docx(t=x@transcripts[[i]], l=l, pathOutput=pathOutput, filterTierNames=filterTierNames )
+			export_docx(t=x@transcripts[[i]], style=style, pathOutput=pathOutput, filterTierNames=filterTierNames )
 		}
 		
 		if ( "txt" %in% stringr::str_to_lower(formats) ) {
 			pathOutput <- file.path(folderOutput, paste(x@transcripts[[i]]@name, "txt", sep="."))
-			export_txt(t=x@transcripts[[i]], l=l, pathOutput=pathOutput, filterTierNames=filterTierNames )
+			export_txt(t=x@transcripts[[i]], style=style, pathOutput=pathOutput, filterTierNames=filterTierNames )
 		}
 		
 		if ( "edl" %in% stringr::str_to_lower(formats)) {

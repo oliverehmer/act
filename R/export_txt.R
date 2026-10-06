@@ -1,15 +1,14 @@
 #' Export print transcript in .txt format
 #' 
-#' If you want to modify the layout of the print transcripts, create a new layout object with \code{mylayout <- methods::new("layout")}, modify the settings and pass it as argument \code{l}.
-#' In the layout object you may also set additional filters to include/exclude tiers matching regular expressions.
+#' Writes a print transcript as plain text. Its layout comes from a transcript
+#' profile (parameter \code{style}); see \link{export_docx}.
 #'
 #' @param t Transcript object.
-#' @param l Layout object.
 #' @param pathOutput Character string; path where to save the transcript.
 #' @param filterTierNames Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.
 #' @param filterSectionStartsec Double; start of selection in seconds.
 #' @param filterSectionEndsec Double; end of selection in seconds.
-#' @param insertArrowStartsec Numeric; start time (seconds) of the hit annotation for arrow placement. The annotation is marked with the arrow of the layout (slot \code{arrow.shape}); all lines get room for it before the line number. Used with \code{insertArrowEndsec} and \code{insertArrowTierName} to locate the annotation by time and tier. If \code{NA}, no arrow is placed.
+#' @param insertArrowStartsec Numeric; start time (seconds) of the hit annotation for arrow placement. The annotation is marked with the arrow of the profile; all lines get room for it before the line number. Used with \code{insertArrowEndsec} and \code{insertArrowTierName} to locate the annotation by time and tier. If \code{NA}, no arrow is placed.
 #' @param insertArrowEndsec Numeric; end time (seconds) of the hit annotation for arrow placement.
 #' @param insertArrowTierName Character string; tier name of the hit annotation for arrow placement.
 #' @param headerPreface Character string; text used as preface before title.
@@ -17,20 +16,13 @@
 #' @param headerSubtitle Character string; text  used as sub title.
 #' @param headerDescription Character string; text used as description after sub title.
 #' @param headerInsertSource Logical; if \code{TRUE} standard information about the source and location of the sequence will be inserted after the heading.
-#' @param timeTolerancePoint Numeric; up to this distance in seconds two point marks (stills) count as the same moment.
-#' @param timeToleranceGesture Numeric; up to this distance in seconds two span marks (gestures) count as the same moment.
 #' @param layerOrder Vector of character strings; order of the multimodal layers within a block. \code{NULL} keeps the tier order of the annotation file.
-#' @param minDescription Integer; minimum room in characters a description needs before the verbal line breaks early.
-#' @param maxSpanBlocks Integer; maximum number of blocks a description may span before it is cut with a resume arrow.
-#' @param figReplace Logical; if \code{TRUE} the content of picture tiers is replaced by a number mark.
-#' @param figTierRegex Character string; regular expression identifying picture tiers.
 #' @param report Logical; if \code{TRUE} and \code{pathOutput} is set, an alignment report is written next to the output file.
 #' @param pathReport Character string; explicit path for the alignment report.
-#' @param multimodalTierRegex Character string; regular expression identifying the bare (catch-all) multimodal layer tiers, e.g. \code{nora01#mm} but not \code{nora01#mm-body}. Their rows without align characters of their own align on the union of the align characters of the other multimodal styles.
-#' @param mainTierNames Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the styles table of \code{l}; without any styles table every tier counts as a main tier.
-#' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the styles table of \code{l}.
-#' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the styles table of \code{l}.
-#' @param style Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}, and the render parameters that are not given in the call come from the profile.
+#' @param mainTierNames Vector of character strings; exact names of the tiers to treat as main tiers. \code{NULL} derives the main flag from the tier styles of the profile; without any tier style every tier counts as a main tier.
+#' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the tier styles of the profile.
+#' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the tier styles of the profile.
+#' @param style Transcript profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. \code{NULL} uses the profile \code{"act"}.
 #' @param collapse Logical; if \code{FALSE} a vector will be created, each element corresponding to one annotation. if \code{TRUE} a single string will be created, collapsed by linebreaks \\n.
 #' 
 #' @return Character string; transcript as text.
@@ -43,7 +35,6 @@
 #'  
 #'
 export_txt <- function (t,
-						l                       = NULL,
 						pathOutput              = NULL,
 						filterTierNames         = NULL,
 						filterSectionStartsec   = NULL,
@@ -57,68 +48,40 @@ export_txt <- function (t,
 						headerDescription       = NULL,
 						headerInsertSource      = TRUE,
 						collapse                = TRUE,
-						timeTolerancePoint      = 0.2,
-						timeToleranceGesture    = 0.5,
 						layerOrder              = NULL,
-						minDescription          = 10L,
-						maxSpanBlocks           = 3L,
-						figReplace              = TRUE,
-						figTierRegex            = "^stills(#|$)",
 						report                  = FALSE,
 						pathReport              = NULL,
-						multimodalTierRegex     = "#mm[0-9]*$",
 						mainTierNames           = NULL,
 						alignChars              = NULL,
 						alignModes              = NULL,
 						style                   = NULL) {
 
 	.assert_transcript(t, missing = missing(t))
-	if (!is.null(style)) l <- helper_style_layout(style)
-	if (is.null(l)) {
-		l <- methods::new("layout")
-		l@docx.template.path <- ""
-	}
-	profile <- .layout_style(l)
-	if (!is.null(profile)) {
-		if (missing(timeTolerancePoint))   timeTolerancePoint   <- profile$advanced$tolerance.point
-		if (missing(timeToleranceGesture)) timeToleranceGesture <- profile$advanced$tolerance.gesture
-		if (missing(minDescription))       minDescription       <- profile$advanced$min.description
-		if (missing(maxSpanBlocks))        maxSpanBlocks        <- profile$advanced$max.span.blocks
-		if (missing(figReplace))           figReplace           <- profile$advanced$fig.replace
-		if (missing(figTierRegex))         figTierRegex         <- profile$advanced$fig.tier.regex
-		if (missing(multimodalTierRegex))  multimodalTierRegex  <- profile$advanced$multimodal.tier.regex
-	}
+	l <- .style_layout(style)
 	if (!is.null(pathOutput)) {
 		if (!dir.exists(dirname(pathOutput))) {
 			cli::cli_abort("Output folder does not exist. Modify parameter {.arg pathOutput}.")
 		}
 	}
-	if (is.na(l@transcript.width) || l@transcript.width == -1) {
-	} else if (l@transcript.width < 40) {
-		cli::cli_abort("The width of the transcript is to low. Minimum is 40. Check option {.code l@transcript.width}")
+	if (is.na(l[["transcript.width"]]) || l[["transcript.width"]] == -1) {
+	} else if (l[["transcript.width"]] < 40) {
+		cli::cli_abort("The width of the transcript is to low. Minimum is 40. Check {.field width} of the profile.")
 	}
-	if (is.na(l@speaker.width) || l@speaker.width == -1) {
-	} else if (l@speaker.width == 0 || l@speaker.width < -1) {
-		cli::cli_abort("Length of tier names is to short. Minimum is 1. Check option {.code l@speaker.width}.")
-	} else if (l@speaker.width > 25) {
-		cli::cli_abort("Length of tier names is to long. Maximum is 25. Check option {.code l@speaker.width}.")
+	if (is.na(l[["speaker.width"]]) || l[["speaker.width"]] == -1) {
+	} else if (l[["speaker.width"]] == 0 || l[["speaker.width"]] < -1) {
+		cli::cli_abort("Length of tier names is to short. Minimum is 1. Check {.field acronym$width} of the profile.")
+	} else if (l[["speaker.width"]] > 25) {
+		cli::cli_abort("Length of tier names is to long. Maximum is 25. Check {.field acronym$width} of the profile.")
 	}
 
-	rendered <- helper_layout_render(t, l,
+	rendered <- .layout_render(t, l,
 		filterTierNames       = filterTierNames,
 		filterSectionStartsec = filterSectionStartsec,
 		filterSectionEndsec   = filterSectionEndsec,
-		timeTolerancePoint    = timeTolerancePoint,
-		timeToleranceGesture  = timeToleranceGesture,
 		layerOrder            = layerOrder,
-		minDescription        = minDescription,
-		maxSpanBlocks         = maxSpanBlocks,
-		figReplace            = figReplace,
-		figTierRegex          = figTierRegex,
 		mainTierNames         = mainTierNames,
 		alignChars            = alignChars,
 		alignModes            = alignModes,
-		multimodalTierRegex   = multimodalTierRegex,
 		insertArrowStartsec   = insertArrowStartsec,
 		insertArrowEndsec     = insertArrowEndsec,
 		insertArrowTierName   = insertArrowTierName)
@@ -131,7 +94,7 @@ export_txt <- function (t,
 	output <- rendered$lines
 	time_format <- .layout_time_format(l)
 
-	if (isTRUE(l@header.insert)) {
+	if (isTRUE(l[["header.insert"]])) {
 		header <- ''
 		if (!is.null(headerPreface) && !is.na(headerPreface)) {
 			header <- paste0(header, headerPreface, "\n")
@@ -164,7 +127,7 @@ export_txt <- function (t,
 			rendered$result, rendered$plan, transcript_name = t@name,
 			layout_mode = rendered$layoutMode,
 			text_body_width = rendered$engineWidth,
-			time_tolerance = timeToleranceGesture)
+			time_tolerance = .layout_style(l)$advanced$tolerance.gesture)
 		con <- file(pathReport, open = "w", encoding = "UTF-8")
 		writeLines(report_lines, con = con)
 		close(con)

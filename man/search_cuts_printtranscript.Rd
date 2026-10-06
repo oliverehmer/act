@@ -7,7 +7,6 @@
 search_cuts_printtranscript(
   x,
   s,
-  l = NULL,
   exportTxt = TRUE,
   exportDocx = TRUE,
   headerInsertSource = TRUE,
@@ -22,8 +21,6 @@ search_cuts_printtranscript(
 
 \item{s}{Search object.}
 
-\item{l}{Layout object.}
-
 \item{exportTxt}{Logical; If \code{TRUE} and \code{folderOutput} is set, .txt transcripts will be written to disk. The print transcripts are always inserted into the column \code{s@cuts.column.printtranscript} of \code{s@results}, independent of this parameter.}
 
 \item{exportDocx}{Logical; If \code{TRUE} and \code{folderOutput} is set, .docx transcripts will be written to disk.}
@@ -36,7 +33,7 @@ search_cuts_printtranscript(
 
 \item{folderOutput}{Character string; path to an existing folder for file export. If \code{NULL} (default), no files will be written to disk; the print transcripts are inserted only into \code{s@results}. If set, .txt and/or .docx files will be written depending on \code{exportTxt} and \code{exportDocx}.}
 
-\item{style}{Style profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. If set, it replaces \code{l}.}
+\item{style}{Transcript profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. \code{NULL} uses the profile \code{"act"}.}
 }
 \value{
 Search object;
@@ -47,7 +44,7 @@ The transcripts will be inserted into the column defined in \code{s@cuts.column.
 All transcripts will be stored in \code{s@cuts.printtranscripts}.
 }
 \details{
-If you want to modify the layout of the print transcripts, create a new layout object with \code{mylayout <- methods::new("layout")}, modify the settings and pass it as argument \code{l}.
+The layout of the print transcripts comes from a transcript profile (parameter \code{style}); see \link{export_docx}.
 }
 \examples{
 library(act)
