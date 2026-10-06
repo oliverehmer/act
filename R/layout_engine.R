@@ -5160,7 +5160,7 @@ detect_bracket_filler_new <- function(bracket_content, default_filler,
 # ==== source module: prepare_annotations.R ====
 
 # ===== ANNOTATION PREPARATION (ported from act:::.docx_prerender_prep) =====
-# Builds the engine's ann frame from an act::transcript + act::layout.
+# Builds the engine's ann frame from an act::transcript and a resolved layout (.style_layout).
 # Deliberately OMITS from the legacy prep: legacy .align_brackets() /
 # .align_layers() calls, the leading-space cleanup (both replaced by the
 # engine) and the translation indent (moved into the engine, computed

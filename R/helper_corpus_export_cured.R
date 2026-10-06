@@ -70,7 +70,7 @@ helper_corpus_export_cured <- function(x,
 		formats               = formats,
 		createMediaLinks      = FALSE,
 		createFolderOutput    = FALSE,
-		l                     = NULL
+		style                 = NULL
 	)
 
 	invisible(cured.names)
