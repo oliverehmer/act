@@ -40,7 +40,10 @@
 		exists <- !inherits(node, "xml_missing")
 		if (!exists) {
 			based_on <- if (type == "character") NA_character_ else if (!nzchar(s$role) || identical(s$role, "space")) default_word else "Normal"
-			node <- .docx_style_create(xml, s$word, type, based_on, keep_next = !identical(s$role, "space"))
+			# the subtitle stands apart from the transcript below it: 6 pt (120 twips)
+			# after, as in the Word templates of the old system
+			node <- .docx_style_create(xml, s$word, type, based_on, keep_next = !identical(s$role, "space"),
+			                           space_after = if (identical(s$role, "header.subtitle")) 120 else 0)
 			created <- c(created, s$word)
 		}
 		# two styles of one Word name: the upper one sets the look, as in the viewer
@@ -74,7 +77,7 @@
 	nodes[[hit[1]]]
 }
 
-.docx_style_create <- function(xml, name, type, based_on, keep_next = TRUE) {
+.docx_style_create <- function(xml, name, type, based_on, keep_next = TRUE, space_after = 0) {
 	ids <- xml2::xml_attr(xml2::xml_find_all(xml, "/w:styles/w:style"), "styleId")
 	id <- stringr::str_replace_all(name, "[^A-Za-z0-9]", "")
 	if (!nzchar(id)) id <- "style"
@@ -97,7 +100,7 @@
 	# No spell check on transcript text.
 	spacing <- if (type == "paragraph") {
 		paste0("<w:pPr><w:keepNext w:val=\"", if (isTRUE(keep_next)) "1" else "0", "\"/>",
-		       "<w:spacing w:before=\"0\" w:after=\"0\" w:line=\"240\" w:lineRule=\"auto\"/><w:jc w:val=\"left\"/></w:pPr>",
+		       "<w:spacing w:before=\"0\" w:after=\"", space_after, "\" w:line=\"240\" w:lineRule=\"auto\"/><w:jc w:val=\"left\"/></w:pPr>",
 		       "<w:rPr><w:noProof/></w:rPr>")
 	} else {
 		""
