@@ -129,6 +129,7 @@ export_txt <- function (t,
 	}
 
 	output <- rendered$lines
+	time_format <- .layout_time_format(l)
 
 	if (isTRUE(l@header.insert)) {
 		header <- ''
@@ -146,8 +147,8 @@ export_txt <- function (t,
 		}
 		if (isTRUE(headerInsertSource)) {
 			standardsource <- paste0("(", t@name, ", ",
-				helper_time_format(min(t@annotations$startsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), "-",
-				helper_time_format(max(t@annotations$endsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), ")")
+				helper_time_format(min(t@annotations$startsec), format = time_format), "-",
+				helper_time_format(max(t@annotations$endsec), format = time_format), ")")
 			header <- paste0(header, standardsource, "\n")
 		}
 		if (nchar(header) > 0) {

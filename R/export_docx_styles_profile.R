@@ -185,8 +185,8 @@
 # One paragraph per line; where a character rule matches, the text is
 # written as a run with that character style. The text is the same
 # character for character, so the alignment holds. An earlier rule wins.
-.docx_add_line_rules <- function(doc, line, style, rules) {
-	if (length(rules) == 0 || is.na(line) || !nzchar(line)) {
+.docx_add_line_rules <- function(doc, line, style, rules, owners = NULL) {
+	if ((length(rules) == 0 && is.null(owners)) || is.na(line) || !nzchar(line)) {
 		return(officer::body_add_par(doc, value = line, style = style))
 	}
 	chars <- helper_text_graphemes_split(line)
@@ -201,14 +201,78 @@
 			owner[starts >= found[k, "start"] & ends <= found[k, "end"]] <- rule$style_id
 		}
 	}
-	if (all(is.na(owner))) {
+	# the layer line a symbol belongs to (positions count graphemes)
+	layer <- rep(NA_character_, length(chars))
+	if (!is.null(owners)) {
+		ok <- owners$pos >= 1 & owners$pos <= length(chars)
+		layer[owners$pos[ok]] <- owners$tier[ok]
+	}
+	if (all(is.na(owner)) && all(is.na(layer))) {
 		return(officer::body_add_par(doc, value = line, style = style))
 	}
-	key <- ifelse(is.na(owner), "", owner)
+	key <- paste(ifelse(is.na(owner), "", owner), ifelse(is.na(layer), "", layer))
 	group <- cumsum(c(TRUE, key[-1] != key[-length(key)]))
+	look_of <- attr(owners, "look")
 	runs <- lapply(split(seq_along(chars), group), function(idx) {
 		piece <- paste(chars[idx], collapse = "")
-		if (is.na(owner[idx[1]])) officer::ftext(piece) else officer::run_wordtext(piece, style_id = owner[idx[1]])
+		i <- idx[1]
+		if (is.na(owner[i]) && is.na(layer[i])) return(officer::ftext(piece))
+		if (is.na(layer[i])) return(officer::run_wordtext(piece, style_id = owner[i]))
+		.docx_run_symbol(piece, owner[i], look_of[[layer[i]]])
 	})
 	officer::body_add_fpar(doc, do.call(officer::fpar, unname(runs)), style = style)
+}
+
+# ===== SYMBOLS IN THE LOOK OF THEIR LAYER LINE =====
+# A profile whose character style for the multimodal symbols says "from the
+# layer line" colours each symbol of a verbal line like the layer line it
+# belongs to (the engine's anchors say which). Returns NULL when the profile
+# does not ask for it, else the look (color, bold, italic) per layer tier.
+.docx_layer_look <- function(profile, result) {
+	if (is.null(profile) || is.null(result)) return(NULL)
+	wanted <- FALSE
+	for (s in profile$styles) {
+		if (identical(s$type, "character") && isTRUE(s$active) && identical(s$applies, "symbols") && isTRUE(s$from.layer)) wanted <- TRUE
+	}
+	if (!wanted) return(NULL)
+	tiers <- unique(as.character(result$tierName[!result$is_main]))
+	look <- lapply(tiers, function(tier) {
+		a <- .style_appearance(profile, .style_tier(profile, tier))
+		list(color = a$color, bold = a$bold, italic = a$italic)
+	})
+	stats::setNames(look, tiers)
+}
+
+# For printed line k of row row_p: the symbols a layer line anchors there,
+# as character positions (1-based in the line) with the look of that layer.
+.docx_symbol_owners <- function(layer_look, anchors, row_p, k) {
+	if (is.null(layer_look) || is.null(anchors) || nrow(anchors) == 0) return(NULL)
+	hit <- which(anchors$source_row == row_p & anchors$target_line == k & anchors$status == "placed" &
+	             anchors$tierName %in% names(layer_look))
+	if (length(hit) == 0) return(NULL)
+	out <- data.frame(pos = anchors$prefix_width[hit] + anchors$target_col[hit],
+	                  tier = as.character(anchors$tierName[hit]), stringsAsFactors = FALSE)
+	attr(out, "look") <- layer_look
+	out
+}
+
+# A run that carries a character style AND direct formatting (the look of
+# the layer line); officer's own run types have one or the other.
+.docx_run_symbol <- function(text, style_id, look) {
+	# class "run": officer writes a chunk of another class as its text
+	structure(list(text = text, style_id = style_id, look = look), class = c("act_run_symbol", "run"))
+}
+
+#' @exportS3Method officer::to_wml
+to_wml.act_run_symbol <- function(x, add_ns = FALSE, ...) {
+	props <- character(0)
+	if (!is.na(x$style_id)) props <- c(props, sprintf("<w:rStyle w:val=\"%s\"/>", x$style_id))
+	look <- x$look
+	if (!is.null(look)) {
+		if (!is.null(look$bold))   props <- c(props, sprintf("<w:b w:val=\"%s\"/>", if (isTRUE(look$bold)) "1" else "0"))
+		if (!is.null(look$italic)) props <- c(props, sprintf("<w:i w:val=\"%s\"/>", if (isTRUE(look$italic)) "1" else "0"))
+		if (!is.null(look$color))  props <- c(props, sprintf("<w:color w:val=\"%s\"/>", toupper(sub("^#", "", look$color))))
+	}
+	paste0("<w:r>", if (length(props)) paste0("<w:rPr>", paste(props, collapse = ""), "</w:rPr>") else "",
+	       "<w:t xml:space=\"preserve\">", .docx_xml_escape(x$text), "</w:t></w:r>")
 }

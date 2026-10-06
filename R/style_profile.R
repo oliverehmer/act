@@ -126,7 +126,7 @@ helper_style_appearance <- function(style) {
 		a <- .style_appearance(profile, s)
 		data.frame(
 			name = s$name, type = s$type, role = s$role, active = isTRUE(s$active), word = s$word,
-			pattern = .style_chr(s$pattern), applies = .style_chr(s$applies),
+			pattern = .style_chr(s$pattern), applies = .style_chr(s$applies), from.layer = isTRUE(s$from.layer),
 			font = .style_chr(a$font, NA_character_),
 			size = .style_num(a$size, NA_real_),
 			color = .style_chr(a$color, NA_character_),
@@ -270,6 +270,7 @@ helper_style_appearance <- function(style) {
 		width.limit = TRUE,
 		space.lines = TRUE,
 		line.numbers = TRUE,
+		time.format = "",
 		acronym = list(show = TRUE, suppress.repeated = TRUE, case = "",
 		               search = "", replace = "", extract = "", width = 3,
 		               ending = ":  "),
@@ -361,6 +362,7 @@ helper_style_appearance <- function(style) {
 	profile$width.limit <- .style_lgl(profile[["width.limit"]], d$width.limit)
 	profile$space.lines <- .style_lgl(profile[["space.lines"]], d$space.lines)
 	profile$line.numbers <- .style_lgl(profile[["line.numbers"]], d$line.numbers)
+	profile$time.format <- .style_chr(profile[["time.format"]])
 	a <- profile[["acronym"]]
 	profile$acronym <- list(
 		show = .style_lgl(a[["show"]], d$acronym$show),
@@ -415,6 +417,7 @@ helper_style_appearance <- function(style) {
 	if (identical(out$type, "character")) {
 		out$applies <- .style_chr(s[["applies"]], "symbols")
 		out$pattern <- .style_chr(s[["pattern"]])
+		out$from.layer <- .style_lgl(s[["from.layer"]], FALSE)
 		return(out)
 	}
 	a <- s[["acronym"]]
@@ -469,6 +472,9 @@ helper_style_appearance <- function(style) {
 	}
 	if (!profile$acronym$case %in% .STYLE_CASES) {
 		p <- c(p, paste0("acronym case is '", profile$acronym$case, "'; allowed: lower, upper, capitalize or empty."))
+	}
+	if (nzchar(profile$time.format) && !profile$time.format %in% helper_time_formats_list()) {
+		p <- c(p, paste0("time format is '", profile$time.format, "'; allowed: ", paste(helper_time_formats_list(), collapse = ", "), " or empty."))
 	}
 	if (!profile$word$look %in% c("file", "profile")) {
 		p <- c(p, paste0("word look is '", profile$word$look, "'; allowed: file, profile."))
@@ -736,6 +742,13 @@ helper_style_appearance <- function(style) {
 .layout_style <- function(l) {
 	style <- attr(l, "style")
 	if (inherits(style, "act_style")) style else NULL
+}
+
+# Time format of the transcript header: the profile's, else the act option.
+.layout_time_format <- function(l) {
+	profile <- .layout_style(l)
+	if (!is.null(profile) && nzchar(profile$time.format)) return(profile$time.format)
+	getOption("act.time.format.transcript", "h:mm:ss.s")
 }
 
 # ===== LAYOUT OBJECT -> PROFILE =====

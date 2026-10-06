@@ -190,6 +190,8 @@ export_docx <- function (   t,
 		previous_main_row <- NA_integer_
 		emitted_any <- FALSE
 		space_lines <- is.null(profile) || isTRUE(profile$space.lines)
+		layer_look <- .docx_layer_look(profile, result)
+		line_in_row <- stats::ave(seq_len(nrow(plan)), plan$row, FUN = seq_along)
 		for (p in seq_len(nrow(plan))) {
 			row_p <- plan$row[p]
 			if (mondada) {
@@ -204,7 +206,8 @@ export_docx <- function (   t,
 				doc <- if (is.null(character_rules)) {
 					.docx_add_line(doc, plan$line[p], result$style[row_p], symbol_style_id, symbol_chars)
 				} else {
-					.docx_add_line_rules(doc, plan$line[p], result$style[row_p], character_rules)
+					.docx_add_line_rules(doc, plan$line[p], result$style[row_p], character_rules,
+					                     owners = .docx_symbol_owners(layer_look, rendered$anchors, row_p, line_in_row[p]))
 				}
 				if (isTRUE(result$is_main[row_p])) previous_main_row <- row_p
 				emitted_any <- TRUE
@@ -278,8 +281,8 @@ export_docx <- function (   t,
 	doc <- add_block(doc, headerDescription, "header.info")
 	if (isTRUE(headerInsertSource) && nrow(t@annotations) > 0) {
 		source_line <- paste0("(", t@name, ", ",
-			helper_time_format(min(t@annotations$startsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), "-",
-			helper_time_format(max(t@annotations$endsec), format = getOption("act.time.format.transcript", "h:mm:ss.s")), ")")
+			helper_time_format(min(t@annotations$startsec), format = .layout_time_format(l)), "-",
+			helper_time_format(max(t@annotations$endsec), format = .layout_time_format(l)), ")")
 		doc <- officer::body_add_par(doc, value = source_line,
 			style = helper_layout_style_base_get(l, "header.subtitle")$docx.template.name)
 	}
