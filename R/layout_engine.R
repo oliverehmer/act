@@ -5197,7 +5197,8 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		ann$format.is.main <- !styles_have_main
 		if (!is.null(styles_user) && nrow(styles_user) > 0) {
 			ann$format.style.matched <- FALSE
-			for (row_idx in seq_len(nrow(styles_user))) {
+			# asked from the bottom: the last matching row wins, as in get_style_user()
+			for (row_idx in rev(seq_len(nrow(styles_user)))) {
 				style_row <- styles_user[row_idx, ]
 				matched <- rep(FALSE, nrow(ann))
 				if (!is.na(style_row$match.regex)) {

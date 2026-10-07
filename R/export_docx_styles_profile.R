@@ -32,9 +32,13 @@
 	from_profile <- identical(profile$word$look, "profile")
 	default_word <- .style_by_role(profile, "default")$word
 	created <- character(0)
-	written <- character(0)
 	rules <- list()
-	for (s in profile$styles) {
+	# two styles of one Word name: the lower one sets the look, as in the viewer
+	used <- vapply(profile$styles, function(s) !identical(s$role, "normal") && nzchar(s$word) && (nzchar(s$role) || isTRUE(s$active)), logical(1))
+	keys_all <- vapply(profile$styles, function(s) paste(if (identical(s$type, "character")) "character" else "paragraph", s$word), character(1))
+	look_last <- used & !duplicated(ifelse(used, keys_all, paste0("\001", seq_along(keys_all))), fromLast = TRUE)
+	for (i in seq_along(profile$styles)) {
+		s <- profile$styles[[i]]
 		if (identical(s$role, "normal") || !nzchar(s$word)) next
 		if (!nzchar(s$role) && !isTRUE(s$active)) next
 		type <- if (identical(s$type, "character")) "character" else "paragraph"
@@ -48,14 +52,11 @@
 			                           space_after = if (identical(s$role, "header.subtitle")) 120 else 0)
 			created <- c(created, s$word)
 		}
-		# two styles of one Word name: the upper one sets the look, as in the viewer
-		key <- paste(type, s$word)
 		override <- profile$file.override[[s$name]]
-		if (!key %in% written) {
-			if (from_profile || !exists) .docx_style_appearance(node, s, type)
+		if (look_last[i]) {
+			if (from_profile || !exists || s$word %in% created) .docx_style_appearance(node, s, type)
 			else if (length(override) > 0) .docx_style_appearance(node, s, type, keys = override)
 		}
-		written <- c(written, key)
 		if (type == "character") {
 			pattern <- if (identical(s$applies, "symbols")) .docx_symbol_class(symbol_chars) else s$pattern
 			if (!is.na(pattern) && nzchar(pattern)) {
@@ -196,7 +197,7 @@
 
 # One paragraph per line; where a character rule matches, the text is
 # written as a run with that character style. The text is the same
-# character for character, so the alignment holds. An earlier rule wins.
+# character for character, so the alignment holds. A later rule wins.
 .docx_add_line_rules <- function(doc, line, style, rules, owners = NULL) {
 	if ((length(rules) == 0 && is.null(owners)) || is.na(line) || !nzchar(line)) {
 		return(officer::body_add_par(doc, value = line, style = style))
@@ -205,7 +206,7 @@
 	owner <- rep(NA_character_, length(chars))
 	ends <- cumsum(nchar(chars))
 	starts <- ends - nchar(chars) + 1
-	for (rule in rev(rules)) {
+	for (rule in rules) {
 		found <- tryCatch(stringr::str_locate_all(line, rule$pattern)[[1]], error = function(e) NULL)
 		if (is.null(found) || nrow(found) == 0) next
 		for (k in seq_len(nrow(found))) {

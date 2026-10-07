@@ -255,7 +255,8 @@ get_style_user <- function(l, name) {
 
 	if (nrow(user_df) > 0 && "match.regex" %in% names(user_df)) {
 		match_rows <- which(!is.na(user_df$match.regex))
-		for (idx in match_rows) {
+		# the last matching row wins: general styles above, special ones below
+		for (idx in rev(match_rows)) {
 			if (stringr::str_detect(name, user_df$match.regex[idx])) {
 				return(user_df[idx, , drop = FALSE])
 			}

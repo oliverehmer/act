@@ -53,8 +53,8 @@ their name.
 }
 ```
 
-New tier styles of the child stand before the tier styles of the parent, so a
-more special pattern is asked first. `styles.order` gives the order explicitly,
+New styles of the child stand after the styles of the parent, so the more
+special pattern of the child wins. `styles.order` gives the order explicitly,
 `styles.remove` drops styles of the parent by name.
 
 # Top-level values
@@ -120,7 +120,8 @@ of `normal`, `default` (every transcript line), `header.preface`,
 between blocks). Only these styles take `font` and `size`.
 
 **Tier styles** (`"type": "tier"`) format the lines of the tiers whose name
-matches `pattern`; the first matching style wins. They take font and size
+matches `pattern`; when several match, the lowest one in the list wins
+(general styles above, special ones below). They take font and size
 from the style `default`, because a layer line is aligned to its main line
 character by character.
 
@@ -140,6 +141,7 @@ character by character.
 `applies` is `"symbols"` (the multimodal symbols of the layer tiers) or
 `"pattern"` (the matches of `pattern`). With `from.layer` the symbols take
 color, bold and italic of the layer line they belong to.
+When two character styles match the same characters, the lower one wins.
 
 ```json
 {

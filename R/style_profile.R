@@ -292,8 +292,8 @@ helper_style_appearance <- function(style) {
 
 # child over parent: single values replace, the named groups are merged key
 # by key, styles are merged by their name; new styles of the child stand
-# before the tier styles of the parent (the more special pattern must be
-# asked first), unless the child gives the order itself.
+# after the styles of the parent (the lower style wins, and the child is the
+# more special one), unless the child gives the order itself.
 .style_merge <- function(parent, child) {
 	out <- parent
 	groups <- c("acronym", "word", "functions", "advanced")
@@ -330,7 +330,7 @@ helper_style_appearance <- function(style) {
 	if (length(remove) > 0) {
 		parent_styles <- parent_styles[!parent_names %in% remove]
 	}
-	styles <- c(new_styles, parent_styles)
+	styles <- c(parent_styles, new_styles)
 	order_wanted <- unlist(child[["styles.order"]])
 	if (length(order_wanted) > 0) {
 		names_now <- vapply(styles, function(s) .style_chr(s$name), character(1))
@@ -593,10 +593,11 @@ helper_style_appearance <- function(style) {
 	NULL
 }
 
-# The tier style of a tier: the first active tier style whose pattern
-# matches; without a match the fixed style "default".
+# The tier style of a tier: the LAST active tier style whose pattern
+# matches (general styles stand above, the special ones below them win);
+# without a match the fixed style "default".
 .style_tier <- function(profile, tierName) {
-	for (s in profile$styles) {
+	for (s in rev(profile$styles)) {
 		if (!identical(s$type, "tier") || nzchar(s$role) || !isTRUE(s$active)) next
 		if (grepl(s$pattern, tierName, perl = TRUE)) return(s)
 	}
@@ -711,7 +712,7 @@ helper_style_appearance <- function(style) {
 		act.style.name = c("header.preface", "header.title", "header.subtitle", "header.info", "transcript.default"),
 		docx.template.name = vapply(base_roles, function(r) .style_by_role(profile, r)$word, character(1)),
 		stringsAsFactors = FALSE, row.names = NULL)
-	for (s in profile$styles) {
+	for (s in rev(profile$styles)) {
 		if (identical(s$type, "character") && isTRUE(s$active) && identical(s$applies, "symbols")) {
 			base <- rbind(base, data.frame(act.style.name = "transcript.symbols",
 			                               docx.template.name = s$word, stringsAsFactors = FALSE))
@@ -751,11 +752,11 @@ helper_style_appearance <- function(style) {
 			comment = NA_character_,
 			stringsAsFactors = FALSE)
 	}
-	# the space row first: the exports ask for the row that matches "space",
-	# and no tier pattern standing before it may answer in its place
+	# the space row last: the exports ask for the row that matches "space",
+	# the last matching row wins, and no tier pattern may answer in its place
 	if (length(rows) > 0) {
 		is_space_row <- vapply(rows, function(r) identical(r$match.regex, "^space$"), logical(1))
-		rows <- c(rows[is_space_row], rows[!is_space_row])
+		rows <- c(rows[!is_space_row], rows[is_space_row])
 	}
 	user <- if (length(rows) > 0) do.call(rbind, rows) else .style_user_table_empty()
 	l[["docx.styles.user"]] <- user
