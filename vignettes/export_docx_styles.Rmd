@@ -127,6 +127,7 @@ character by character.
 | Key | Meaning |
 |---|---|
 | `pattern` | Regular expression on the tier name. |
+| `tiers` | Instead of `pattern`: the name of a tier type of the option `act.tier.types` (a named vector type = pattern, e.g. set by `iclo::config()`); the pattern then comes from there. An unknown type stops with a message. A profile that builds on another one and gives its own `pattern` for such a style drops the inherited type. |
 | `active` | `false` switches the style off. |
 | `main` | The tier is a main (verbal) tier. |
 | `line.numbers.suppress` | No line number. |

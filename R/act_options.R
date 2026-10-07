@@ -229,6 +229,11 @@
 		group       = "tier",
 		description = "Tier name pattern of the picture (stills) tiers: in print transcripts their content is replaced by figure numbers when the transcript profile says so (advanced$fig.replace)"
 	),
+	act.tier.types = list(
+		value       = character(0),
+		group       = "tier",
+		description = "Tier types a transcript profile can refer to instead of a pattern (named vector: type = pattern), e.g. c(cut = \"(?i)^(cut.*)(#.*)?$\"); empty: profiles with such references cannot be read"
+	),
 	act.style.template = list(
 		value       = "",
 		group       = "layout",

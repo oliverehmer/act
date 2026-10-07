@@ -110,7 +110,7 @@ helper_style_appearance <- function(style) {
 		a <- .style_appearance(profile, s)
 		data.frame(
 			name = s$name, type = s$type, role = s$role, active = isTRUE(s$active), word = s$word,
-			pattern = .style_chr(s$pattern), applies = .style_chr(s$applies), from.layer = isTRUE(s$from.layer),
+			pattern = .style_chr(s$pattern), tiers = .style_chr(s$tiers), applies = .style_chr(s$applies), from.layer = isTRUE(s$from.layer),
 			font = .style_chr(a$font, NA_character_),
 			size = .style_num(a$size, NA_real_),
 			color = .style_chr(a$color, NA_character_),
@@ -317,6 +317,8 @@ helper_style_appearance <- function(style) {
 		} else {
 			merged <- parent_styles[[hit]]
 			for (key in setdiff(names(style), "acronym")) merged[key] <- list(style[[key]])
+			# a child that gives its own pattern means it: the tier type it inherits no longer applies
+			if ("pattern" %in% names(style) && !"tiers" %in% names(style)) merged["tiers"] <- list(NULL)
 			if (is.list(style$acronym)) {
 				if (!is.list(merged$acronym)) merged$acronym <- list()
 				for (key in names(style$acronym)) merged$acronym[key] <- list(style$acronym[[key]])
@@ -426,7 +428,8 @@ helper_style_appearance <- function(style) {
 		return(out)
 	}
 	a <- s[["acronym"]]
-	out$pattern <- .style_chr(s[["pattern"]])
+	out$tiers <- .style_chr(s[["tiers"]])
+	out$pattern <- .style_tier_pattern(out$name, out$tiers, .style_chr(s[["pattern"]]))
 	out$example <- .style_chr(s[["example"]])
 	out$main <- if (is.null(s[["main"]]) || length(s[["main"]]) != 1 || is.na(s[["main"]])) NA else isTRUE(as.logical(s[["main"]]))
 	out$line.numbers.suppress <- .style_lgl(s[["line.numbers.suppress"]], FALSE)
@@ -441,6 +444,22 @@ helper_style_appearance <- function(style) {
 	out$align.chars <- .style_chr(s[["align.chars"]])
 	out$align.mode <- .style_chr(s[["align.mode"]])
 	out
+}
+
+# The pattern of a tier style: its own, or - when it names a tier type - the
+# one of option act.tier.types (set by the package that defines the types).
+# A type without a pattern stops: a style without pattern would match no tier
+# or every tier, and the transcript would be wrong without anybody noticing.
+.style_tier_pattern <- function(style_name, tiers, own) {
+	if (!nzchar(tiers)) return(own)
+	types <- getOption("act.tier.types", character(0))
+	pattern <- if (tiers %in% names(types)) unname(types[[tiers]]) else NA_character_
+	if (length(pattern) != 1 || is.na(pattern) || !nzchar(pattern)) {
+		cli::cli_abort(c(
+			"Style {.val {style_name}} refers to the tier type {.val {tiers}}, which is not defined.",
+			"i" = "Set the option {.field act.tier.types} (a named vector type = pattern), e.g. with {.code iclo::config()}."))
+	}
+	pattern
 }
 
 # ===== CHECK =====
