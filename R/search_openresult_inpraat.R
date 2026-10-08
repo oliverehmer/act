@@ -47,114 +47,30 @@ search_openresult_inpraat  <- function(x,
 	if (missing(resultid)) {cli::cli_abort("Number of the search result {.arg resultid} is missing.") 	}
 	
 	
-	#--- check for sendpraat
-	if (is.null(options()$act.path.sendpraat)) {
-		cli::cli_abort("Path to sendpraat is not set. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
-	} else {
-		if (file.exists(options()$act.path.sendpraat)==FALSE)	{
-			cli::cli_abort("Sendpraat not found. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
-		}
-	}
-	
 	#--- get  corresponding transcript
 	t <- x@transcripts[[s@results[resultid, ]$transcriptName]]
 	if (is.null(t))	{
 		cli::cli_abort("Transcript not found in corpus object'.")
 	}
 	
-	#--- get path of textgrid
+	#--- TextGrid: the original, or a temporary copy written by the helper
 	path_textgrid <- .get_textgrid_for_transcript(t)
-	name_textgrid <- tools::file_path_sans_ext(basename(path_textgrid))
-	#replace blanks by underscores, as praat does
-	name_textgrid	<- stringr::str_replace_all(string = t@name, pattern=" ", replacement="_")
-	
-	#---get path of sound
-	path_longsound <- media_path_to_existing_file(t, filterMediaFile="(?i).*\\.(wav|mp3|aif|aiff)")
-	if (is.null(path_longsound))	{
-		name_longsound <-""
-		path_longsound <-""
+	is_copy <- is.na(t@file.path) || !identical(normalizePath(path_textgrid, mustWork = FALSE),
+	                                            normalizePath(t@file.path, mustWork = FALSE))
+
+	#--- sound: the first existing media file that matches filterMediaFile
+	path_longsound <- media_path_to_existing_file(t, filterMediaFile = filterMediaFile)
+	if (is.null(path_longsound)) {
+		path_longsound <- ""
 		cli::cli_warn("No media file(s) found.")
-	} else {
-		name_longsound <- path_longsound
-		if (nchar(path_longsound)>=0) {
-			name_longsound      <- sub("[.][^.]*$", "", basename(path_longsound))
-		}
-		#replace blanks by underscores, as praat does
-		name_longsound  <- stringr::str_replace_all(string = name_longsound, pattern=" ", replacement="_")
 	}
-	
-	#--- get path to praat script
-	praatScriptPath	<-	file.path(system.file("extdata", "praat", package="act"), "OpenSelectionInPraat.praat")
-	
-	#read script
-	tx <- readLines(con= praatScriptPath, n=-1, warn=FALSE, encoding="UTF-8")
 
-	#set values of variables
-	tx  <- stringi::stri_replace_all_fixed(str = tx, pattern = "PATHTEXTGRID",  replacement = path_textgrid)
-	tx  <- stringi::stri_replace_all_fixed(str = tx, pattern = "PATHLONGSOUND", replacement = path_longsound)
-	tx  <- stringi::stri_replace_all_fixed(str = tx, pattern = "SELSTARTSEC",   replacement = as.character(s@results[resultid, ]$startsec))
-	tx  <- stringi::stri_replace_all_fixed(str = tx, pattern = "SELENDSEC",     replacement = as.character(s@results[resultid, ]$endsec))
-	tx  <- stringi::stri_replace_all_fixed(str = tx, pattern = "PLAYSELECTION",     replacement = if(play) {as.character(1)} else {as.character(0)})
-	tx  <- stringi::stri_replace_all_fixed(str = tx, pattern = "close",     replacement = if (close) {as.character(1)} else {as.character(0)})
-
-	#write temporary script
-	#tempScriptPath <- file.path(tempdir(), "temp.praat")
-	tempScriptPath <- tempfile(pattern = "openresult", tmpdir = tempdir(), fileext = ".praat")
-	tempScriptCon <- file(tempScriptPath, open="wb")
-	writeLines(enc2utf8(tx), con=tempScriptCon, sep="\n", useBytes=TRUE)
-	close(tempScriptCon)
-	tempScriptPath <- normalizePath(tempScriptPath, winslash="/", mustWork=FALSE)
-	
-	#wait until temporary script exists
-	for (i in 1:10) {
-		if(file.exists(tempScriptPath)) {
-			break	
-		}
-		Sys.sleep(0.02)
-	}
-	
-	if(file.exists(tempScriptPath)) {
-		
-		#but produce a delay
-		Sys.sleep(delay)
-		
-		#run script via sendpraat 
-		cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\"\"", shQuote(options()$act.path.sendpraat), tempScriptPath)
-		rslt <- system(cmd, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
-		
-		# if execution of sendpraat resulted in an error, try to start praat
-		#if intern =FALSE the values will be
-		#success rslt=0
-		#fail    rslt=1
-		if (rslt!=0){
-			if (is.null(options()$act.path.praat)) {
-				cli::cli_abort("Praat is not running. And the path to the your Praat executable is not set. Please start Praat first or indicate its location with 'options(act.path.praat = ...)'.")
-			} else {
-				if (file.exists(options()$act.path.praat)==FALSE)	{
-					cli::cli_abort("Praat is not running. Please start Praat first. To start Praat automatically indicate its location 'options(act.path.praat = ...)'.")
-				}
-			}
-		
-			#start praat
-			if (.detect_os()=="macos") {
-				#start praat WITH waiting
-				cmd2 <- sprintf("open %s", shQuote(options()$act.path.praat))
-				rslt <- system(cmd2, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
-			} else {
-				#start praat WITHOUT waiting for it to finish
-				cmd2 <- sprintf("%s", shQuote(options()$act.path.praat))
-				rslt <- system(cmd2, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=FALSE)
-			}
-			
-			#but produce a delay
-			Sys.sleep(delay)
-			
-			#run script via sendpraat 
-			cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\"\"", shQuote(options()$act.path.sendpraat), tempScriptPath)
-			rslt <- system(cmd, intern=FALSE, ignore.stderr = TRUE, ignore.stdout=TRUE, wait=TRUE)
-			
-		}
-		#delete temporary script
-		file.remove(tempScriptPath)
-	}
+	invisible(.praat_open_selection(pathTextGrid  = path_textgrid,
+	                      pathLongSound = path_longsound,
+	                      startSec      = s@results[resultid, ]$startsec,
+	                      endSec        = s@results[resultid, ]$endsec,
+	                      play          = play,
+	                      close         = close,
+	                      reload        = is_copy,
+	                      delay         = delay))
 }

@@ -3,6 +3,7 @@ pathLongSound$ = "PATHLONGSOUND"
 selStartSec = SELSTARTSEC
 selEndSec = SELENDSEC
 playSelection = PLAYSELECTION
+reloadTextGrid = RELOADTEXTGRID
 close = close
 
 #--- get name of textgrid
@@ -21,6 +22,19 @@ if pathLongSound$<>""
 	if pointPos>1
 		nameLongSound$ = left$(nameLongSound$, pointPos-1)
 	endif
+endif
+
+#--- a temporary copy changes between two calls: drop the older object of
+#--- the same name (removing it ends its editor), so the file is read again
+if reloadTextGrid==1
+	repeat
+		selectObject ( )
+		nocheck nowarn selectObject: "TextGrid " + nameTextGrid$
+		numberOfOld = numberOfSelected ()
+		if numberOfOld>0
+			Remove
+		endif
+	until numberOfOld=0
 endif
 
 #--- try to select textgrid, otherwise open file from path

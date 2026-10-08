@@ -83,3 +83,66 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	p <- getOption(if (app == "elan") "act.path.elan" else "act.path.praat", default = "")
 	!is.null(p) && length(p) == 1 && !is.na(p) && nzchar(p) && file.exists(p)
 }
+
+
+# ===== PRAAT: OPEN A TEXTGRID WITH ITS SOUND AND A SELECTION =====
+# Shared by transcripts_openin_praat() and search_openresult_inpraat(): writes
+# the Praat script with the values filled in and runs it through sendpraat;
+# starts Praat when it does not answer yet.
+#   reload  TRUE removes a TextGrid object of the same name before reading the
+#           file: a temporary copy changes between two calls, and Praat would
+#           otherwise keep showing the old object. Never for an original file -
+#           the open object may hold edits not yet saved in Praat.
+.praat_open_selection <- function(pathTextGrid, pathLongSound, startSec, endSec,
+								  play = FALSE, close = FALSE, reload = FALSE, delay = 0.5) {
+	sendpraat <- getOption("act.path.sendpraat")
+	if (is.null(sendpraat) || !nzchar(sendpraat)) {
+		cli::cli_abort("Path to sendpraat is not set. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
+	}
+	if (!file.exists(sendpraat)) {
+		cli::cli_abort("Sendpraat not found. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
+	}
+	if (is.null(pathLongSound)) pathLongSound <- ""
+	pathTextGrid <- normalizePath(pathTextGrid, winslash = "/", mustWork = FALSE)
+	if (nzchar(pathLongSound)) pathLongSound <- normalizePath(pathLongSound, winslash = "/", mustWork = FALSE)
+
+	praatScriptPath <- file.path(system.file("extdata", "praat", package = "act"), "OpenSelectionInPraat.praat")
+	tx <- readLines(con = praatScriptPath, n = -1, warn = FALSE, encoding = "UTF-8")
+	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "PATHTEXTGRID",   replacement = pathTextGrid)
+	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "PATHLONGSOUND",  replacement = pathLongSound)
+	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "SELSTARTSEC",    replacement = as.character(startSec))
+	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "SELENDSEC",      replacement = as.character(endSec))
+	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "PLAYSELECTION",  replacement = if (isTRUE(play)) "1" else "0")
+	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "RELOADTEXTGRID", replacement = if (isTRUE(reload)) "1" else "0")
+	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "close",          replacement = if (isTRUE(close)) "1" else "0")
+
+	tempScriptPath <- tempfile(pattern = "openselection", tmpdir = tempdir(), fileext = ".praat")
+	tempScriptCon <- file(tempScriptPath, open = "wb")
+	writeLines(enc2utf8(tx), con = tempScriptCon, sep = "\n", useBytes = TRUE)
+	close(tempScriptCon)
+	tempScriptPath <- normalizePath(tempScriptPath, winslash = "/", mustWork = FALSE)
+	on.exit(unlink(tempScriptPath), add = TRUE)
+
+	Sys.sleep(delay)
+	cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\"\"", shQuote(sendpraat), tempScriptPath)
+	rslt <- system(cmd, intern = FALSE, ignore.stderr = TRUE, ignore.stdout = TRUE, wait = TRUE)
+
+	# sendpraat fails while Praat is not running: start it, then send again
+	if (rslt != 0) {
+		praat <- getOption("act.path.praat")
+		if (is.null(praat) || !nzchar(praat)) {
+			cli::cli_abort("Praat is not running. And the path to the your Praat executable is not set. Please start Praat first or indicate its location with 'options(act.path.praat = ...)'.")
+		}
+		if (!file.exists(praat)) {
+			cli::cli_abort("Praat is not running. Please start Praat first. To start Praat automatically indicate its location 'options(act.path.praat = ...)'.")
+		}
+		if (.detect_os() == "macos") {
+			system(sprintf("open %s", shQuote(praat)), intern = FALSE, ignore.stderr = TRUE, ignore.stdout = TRUE, wait = TRUE)
+		} else {
+			system(shQuote(praat), intern = FALSE, ignore.stderr = TRUE, ignore.stdout = TRUE, wait = FALSE)
+		}
+		Sys.sleep(delay)
+		rslt <- system(cmd, intern = FALSE, ignore.stderr = TRUE, ignore.stdout = TRUE, wait = TRUE)
+	}
+	invisible(rslt == 0)
+}
