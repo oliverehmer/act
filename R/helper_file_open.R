@@ -95,12 +95,11 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 #           the open object may hold edits not yet saved in Praat.
 .praat_open_selection <- function(pathTextGrid, pathLongSound, startSec, endSec,
 								  play = FALSE, close = FALSE, reload = FALSE, delay = 0.5) {
+	praat     <- .praat_binary(getOption("act.path.praat"))
 	sendpraat <- getOption("act.path.sendpraat")
-	if (is.null(sendpraat) || !nzchar(sendpraat)) {
-		cli::cli_abort("Path to sendpraat is not set. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
-	}
-	if (!file.exists(sendpraat)) {
-		cli::cli_abort("Sendpraat not found. Please indicate the location of sendpraat in 'options(act.path.sendpraat = ...)'.")
+	if (is.null(sendpraat) || !nzchar(sendpraat) || !file.exists(sendpraat)) sendpraat <- ""
+	if (praat == "" && sendpraat == "") {
+		cli::cli_abort("Neither Praat nor sendpraat found. Please indicate the location of Praat in 'options(act.path.praat = ...)'.")
 	}
 	if (is.null(pathLongSound)) pathLongSound <- ""
 	pathTextGrid <- normalizePath(pathTextGrid, winslash = "/", mustWork = FALSE)
@@ -114,35 +113,32 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "SELENDSEC",      replacement = as.character(endSec))
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "PLAYSELECTION",  replacement = if (isTRUE(play)) "1" else "0")
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "RELOADTEXTGRID", replacement = if (isTRUE(reload)) "1" else "0")
-	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "close",          replacement = if (isTRUE(close)) "1" else "0")
+	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "CLOSEEDITOR",    replacement = if (isTRUE(close)) "1" else "0")
 
 	tempScriptPath <- tempfile(pattern = "openselection", tmpdir = tempdir(), fileext = ".praat")
 	tempScriptCon <- file(tempScriptPath, open = "wb")
 	writeLines(enc2utf8(tx), con = tempScriptCon, sep = "\n", useBytes = TRUE)
 	close(tempScriptCon)
 	tempScriptPath <- normalizePath(tempScriptPath, winslash = "/", mustWork = FALSE)
-	on.exit(unlink(tempScriptPath), add = TRUE)
 
+	# Praat 7 runs a script sent by sendpraat only when a later message arrives
+	# (measured 08.10.2026 with Praat 7.0.02); its own --send runs it at once.
+	# No waiting: without a running Praat, --send becomes the Praat that stays
+	# open. The script stays until tempdir() is cleaned, as Praat reads it later.
 	Sys.sleep(delay)
+	if (praat != "") {
+		system2(praat, c("--send", shQuote(tempScriptPath)), stdout = FALSE, stderr = FALSE, wait = FALSE)
+		return(invisible(TRUE))
+	}
 	cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\"\"", shQuote(sendpraat), tempScriptPath)
 	rslt <- system(cmd, intern = FALSE, ignore.stderr = TRUE, ignore.stdout = TRUE, wait = TRUE)
-
-	# sendpraat fails while Praat is not running: start it, then send again
-	if (rslt != 0) {
-		praat <- getOption("act.path.praat")
-		if (is.null(praat) || !nzchar(praat)) {
-			cli::cli_abort("Praat is not running. And the path to the your Praat executable is not set. Please start Praat first or indicate its location with 'options(act.path.praat = ...)'.")
-		}
-		if (!file.exists(praat)) {
-			cli::cli_abort("Praat is not running. Please start Praat first. To start Praat automatically indicate its location 'options(act.path.praat = ...)'.")
-		}
-		if (.detect_os() == "macos") {
-			system(sprintf("open %s", shQuote(praat)), intern = FALSE, ignore.stderr = TRUE, ignore.stdout = TRUE, wait = TRUE)
-		} else {
-			system(shQuote(praat), intern = FALSE, ignore.stderr = TRUE, ignore.stdout = TRUE, wait = FALSE)
-		}
-		Sys.sleep(delay)
-		rslt <- system(cmd, intern = FALSE, ignore.stderr = TRUE, ignore.stdout = TRUE, wait = TRUE)
-	}
 	invisible(rslt == 0)
+}
+
+# The Praat executable: on macOS the binary inside Praat.app, "" if not found.
+.praat_binary <- function(path) {
+	if (is.null(path) || !nzchar(path)) return("")
+	if (stringr::str_detect(path, "(?i)\\.app/?$")) path <- file.path(sub("/$", "", path), "Contents", "MacOS", "Praat")
+	if (!file.exists(path) || dir.exists(path)) return("")
+	path
 }

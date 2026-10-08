@@ -1,11 +1,13 @@
 #' Open a search result in 'Praat'
 #'
-#' The function remote controls 'Praat' by using 'sendpraat' and a 'Praat' script. 
+#' The function remote controls 'Praat' with a 'Praat' script. 
 #' It opens a search result in the 'Praat' TextGrid Editor.
 #' 
-#' To make this function work you need to do two things first:
-#' - Install 'sendpraat' on your computer. To do so  follow the  instructions in the vignette 'installation-sendpraat'. Show the vignette with \code{vignette("installation-sendpraat")}.
-#' - Set the path to the 'sendpraat' executable correctly by using 'options(act.path.sendpraat = ...)'.
+#' 'Praat' receives the script through its own command line option \code{--send}
+#' (from 'Praat' 6.1 on): set the path to 'Praat' with 'options(act.path.praat = ...)'.
+#' If 'Praat' is not running, it is started. Only if the path to 'Praat' is not set,
+#' 'sendpraat' is used ('options(act.path.sendpraat = ...)', see \code{vignette("installation-sendpraat")}).
+#' 'Praat' 7 runs a 'sendpraat' message late, so the path to 'Praat' is the better choice.
 #' 
 #' @param x Corpus object.
 #' @param s Search object. 
@@ -23,8 +25,8 @@
 #'
 #' mysearch <- act::search_new(x=examplecorpus, pattern = "pero")
 #' 
-#' # You can only use this functions if you have installed and 
-#' # located the 'sendpraat' executable properly in the package options.
+#' # You can only use this functions if you have installed 'Praat'
+#' # and located it properly in the package options.
 #' \dontrun{
 #' act::search_openresult_inpraat(x=examplecorpus, s=mysearch, resultid=1, TRUE, TRUE)
 #' }

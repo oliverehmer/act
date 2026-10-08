@@ -30,15 +30,15 @@ transcripts_openin_praat(
 
 \item{filterMediaFile}{Vector of character strings; each element is a regular expression. They are checked one after the other; the first existing media file that matches is opened as sound. The default order is uncompressed audio > compressed audio.}
 
-\item{delay}{Double; time in seconds before the selection is opened in 'Praat'. Increase it if 'Praat' opens but the selection does not.}
+\item{delay}{Double; time in seconds to wait before the script is handed to 'Praat'.}
 }
 \value{
-Logical; \code{TRUE} if 'sendpraat' reached 'Praat' (invisibly).
+Logical; \code{TRUE} if the script was handed to 'Praat' (invisibly).
 }
 \description{
 The function opens a transcript in the 'Praat' TextGrid editor together with
-its sound and selects a time range. 'Praat' is remote controlled with
-'sendpraat' and a 'Praat' script.
+its sound and selects a time range. 'Praat' is remote controlled with a
+'Praat' script.
 }
 \details{
 It can open the original .TextGrid file (if the transcript was read from one
@@ -47,17 +47,17 @@ function replaces an object of the same name that is already open in 'Praat',
 so the editor always shows the current transcript. An original file is never
 replaced in 'Praat': the open object may hold edits that are not saved yet.
 
-To make this function work you need to do two things first:
-\itemize{
-\item Install 'sendpraat' on your computer. To do so follow the instructions in the vignette 'installation-sendpraat'. Show the vignette with \code{vignette("installation-sendpraat")}.
-\item Set the path to the 'sendpraat' executable correctly by using 'options(act.path.sendpraat = ...)'. If 'Praat' is not running, it is started from 'options(act.path.praat = ...)'.
-}
+'Praat' receives the script through its own command line option \code{--send}
+(from 'Praat' 6.1 on): set the path to 'Praat' with 'options(act.path.praat = ...)'.
+If 'Praat' is not running, it is started. Only if the path to 'Praat' is not set,
+'sendpraat' is used ('options(act.path.sendpraat = ...)', see \code{vignette("installation-sendpraat")}).
+'Praat' 7 runs a 'sendpraat' message late, so the path to 'Praat' is the better choice.
 }
 \examples{
 library(act)
 
-# You can only use this function if you have installed 'Praat' and 'sendpraat'
-# and located the 'sendpraat' executable properly in the package options.
+# You can only use this function if you have installed 'Praat'
+# and located it properly in the package options.
 \dontrun{
 act::transcripts_openin_praat(t = examplecorpus@transcripts[[1]], startSec = 1, endSec = 3)
 }

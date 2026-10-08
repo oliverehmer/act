@@ -4,7 +4,8 @@ selStartSec = SELSTARTSEC
 selEndSec = SELENDSEC
 playSelection = PLAYSELECTION
 reloadTextGrid = RELOADTEXTGRID
-close = close
+closeEditor = CLOSEEDITOR
+nameLongSound$ = ""
 
 #--- get name of textgrid
 @split: pathTextGrid$, "/"
@@ -87,7 +88,7 @@ nowarn Zoom: selStartSec-0.5, selEndSec+0.5
 
 if playSelection==1
 	Play: selStartSec, selEndSec
-	if close==1
+	if closeEditor==1
 		endeditor
 	endif
 endif

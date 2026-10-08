@@ -1,8 +1,8 @@
 #' Open transcript in 'Praat'
 #'
 #' The function opens a transcript in the 'Praat' TextGrid editor together with
-#' its sound and selects a time range. 'Praat' is remote controlled with
-#' 'sendpraat' and a 'Praat' script.
+#' its sound and selects a time range. 'Praat' is remote controlled with a
+#' 'Praat' script.
 #'
 #' It can open the original .TextGrid file (if the transcript was read from one
 #' and it still exists) or write a .TextGrid file. A TextGrid written by this
@@ -10,9 +10,11 @@
 #' so the editor always shows the current transcript. An original file is never
 #' replaced in 'Praat': the open object may hold edits that are not saved yet.
 #'
-#' To make this function work you need to do two things first:
-#' - Install 'sendpraat' on your computer. To do so follow the instructions in the vignette 'installation-sendpraat'. Show the vignette with \code{vignette("installation-sendpraat")}.
-#' - Set the path to the 'sendpraat' executable correctly by using 'options(act.path.sendpraat = ...)'. If 'Praat' is not running, it is started from 'options(act.path.praat = ...)'.
+#' 'Praat' receives the script through its own command line option \code{--send}
+#' (from 'Praat' 6.1 on): set the path to 'Praat' with 'options(act.path.praat = ...)'.
+#' If 'Praat' is not running, it is started. Only if the path to 'Praat' is not set,
+#' 'sendpraat' is used ('options(act.path.sendpraat = ...)', see \code{vignette("installation-sendpraat")}).
+#' 'Praat' 7 runs a 'sendpraat' message late, so the path to 'Praat' is the better choice.
 #'
 #' @param t Transcript object.
 #' @param openOriginal Logical; if \code{TRUE} the original .TextGrid file is opened if the transcript was read from one and it still exists. Otherwise a .TextGrid file is written.
@@ -21,9 +23,9 @@
 #' @param endSec Double, optional; end of the selection in 'Praat'. If \code{NULL} the selection ends at the end of the transcript.
 #' @param play Logical; if \code{TRUE} the selection is played.
 #' @param filterMediaFile Vector of character strings; each element is a regular expression. They are checked one after the other; the first existing media file that matches is opened as sound. The default order is uncompressed audio > compressed audio.
-#' @param delay Double; time in seconds before the selection is opened in 'Praat'. Increase it if 'Praat' opens but the selection does not.
+#' @param delay Double; time in seconds to wait before the script is handed to 'Praat'.
 #'
-#' @return Logical; \code{TRUE} if 'sendpraat' reached 'Praat' (invisibly).
+#' @return Logical; \code{TRUE} if the script was handed to 'Praat' (invisibly).
 #' @seealso \link{transcripts_openin_elan}, \link{search_openresult_inpraat}
 #'
 #' @export
@@ -31,8 +33,8 @@
 #' @examples
 #' library(act)
 #'
-#' # You can only use this function if you have installed 'Praat' and 'sendpraat'
-#' # and located the 'sendpraat' executable properly in the package options.
+#' # You can only use this function if you have installed 'Praat'
+#' # and located it properly in the package options.
 #' \dontrun{
 #' act::transcripts_openin_praat(t = examplecorpus@transcripts[[1]], startSec = 1, endSec = 3)
 #' }
