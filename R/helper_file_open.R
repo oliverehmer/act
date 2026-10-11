@@ -153,13 +153,16 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	Sys.sleep(delay)
 	.praat_send_wait()
 	if (praat != "") {
+		app <- if (.detect_os() == "macos") .praat_app_bundle(praat) else ""
 		running <- .praat_running()
+		# macOS: a Praat that --send starts as a child of R stays behind the
+		# current window and dies with R; launched through open -a it comes to
+		# the front and --send then reaches it (measured 11.10.2026: editor 4-5 s
+		# after open -a). A running Praat stays behind after --send as well;
+		# open -a brings it to the front within 3 s.
+		if (!running && nzchar(app)) running <- .praat_launch(app)
 		system2(praat, c("--send", shQuote(tempScriptPath)), stdout = FALSE, stderr = FALSE, wait = FALSE)
-		# --send leaves a running Praat behind the current window; open -a brings
-		# it to the front (measured 11.10.2026: frontmost after 3 s). A Praat that
-		# --send starts itself comes to the front on its own and must not get a
-		# second launch request while it starts.
-		if (running && .detect_os() == "macos") .praat_activate(praat)
+		if (running && nzchar(app)) .praat_activate(app)
 		return(invisible(TRUE))
 	}
 	cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\"\"", shQuote(sendpraat), tempScriptPath)
@@ -189,9 +192,25 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	identical(res, 0L)
 }
 
-# bring Praat to the front (macOS); praat is the binary or the .app bundle
-.praat_activate <- function(praat) {
+# the .app bundle of the Praat binary (macOS), "" when there is none
+.praat_app_bundle <- function(praat) {
 	app <- stringr::str_replace(praat, "/Contents/MacOS/Praat$", "")
+	if (stringr::str_detect(app, "(?i)\\.app$") && dir.exists(app)) app else ""
+}
+
+# start Praat through Launch Services and wait until its process is there plus
+# a moment to take messages; TRUE when it runs
+.praat_launch <- function(app) {
+	system2("open", c("-a", shQuote(app)), stdout = FALSE, stderr = FALSE, wait = TRUE)
+	for (i in seq_len(40)) {
+		if (.praat_running()) { Sys.sleep(2); return(TRUE) }
+		Sys.sleep(0.25)
+	}
+	FALSE
+}
+
+# bring a running Praat to the front (macOS)
+.praat_activate <- function(app) {
 	system2("open", c("-a", shQuote(app)), stdout = FALSE, stderr = FALSE, wait = FALSE)
 	invisible(NULL)
 }
