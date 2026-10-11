@@ -443,6 +443,9 @@ helper_style_appearance <- function(style) {
 	out$indent <- .style_chr(s[["indent"]], "none")
 	out$align.chars <- .style_chr(s[["align.chars"]])
 	out$align.mode <- .style_chr(s[["align.mode"]])
+	# score mode: a plain layer (translation) joins the parts of a turn
+	out$join <- .style_lgl(s[["join"]], FALSE)
+	out$join.separator <- .style_chr(s[["join.separator"]])
 	out
 }
 
@@ -747,6 +750,8 @@ helper_style_appearance <- function(style) {
 			content.indent.align.filler.inside = if (align && !identical(s$align.mode, "point")) substr(profile$advanced$fill, 1, 1) else " ",
 			content.indent.align.mode = if (is_space) NA_character_ else .style_na(s$align.mode),
 			content.indent.align.arrow = NA_character_,
+			content.join = if (is_space) FALSE else isTRUE(s$join),
+			content.join.separator = if (is_space) NA_character_ else .style_na(s$join.separator),
 			content.wrap = !is_space,
 			space.after = NA_character_,
 			comment = NA_character_,
@@ -786,6 +791,7 @@ helper_style_appearance <- function(style) {
 	           acronym.width = numeric(0), acronym.ending = character(0), content.indent = character(0),
 	           content.indent.text.skip = character(0), content.indent.align.char = character(0),
 	           content.indent.align.filler.inside = character(0), content.indent.align.mode = character(0),
-	           content.indent.align.arrow = character(0), content.wrap = logical(0),
+	           content.indent.align.arrow = character(0), content.join = logical(0),
+	           content.join.separator = character(0), content.wrap = logical(0),
 	           space.after = character(0), comment = character(0), stringsAsFactors = FALSE)
 }

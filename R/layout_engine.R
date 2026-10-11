@@ -174,6 +174,7 @@ align_and_render <- function(ann, text_body_width, arrow_mode = "stem",
 
 	rendered_cache <- vector("list", nrow(ann))
 	rendered_lines <- vector("list", nrow(ann))
+	plain_targets  <- vector("list", nrow(ann))
 	anchor_specs   <- vector("list", nrow(ann))
 	lead_lines     <- vector("list", nrow(ann))
 	report_list    <- list()
@@ -213,20 +214,39 @@ align_and_render <- function(ann, text_body_width, arrow_mode = "stem",
 		lead_allowed <- !isTRUE(ann$is_main[i]) && !is.na(ref_main[i]) &&
 			(ann$startsec[i] < ann$startsec[ref_main[i]] - 0.02 ||
 			 stringr::str_detect(stringr::str_trim(ann$content[i]), "^>>"))
-		result <- render_annotation_tokens(
-			text          = ann$text[i],
-			anchors       = anchor_info$anchors,
-			width         = width_i,
-			prefix_first  = ann$prefix_first[i],
-			prefix_cont   = ann$prefix_cont[i],
-			arrow_mode    = arrow_mode,
-			pair_mode     = identical(ann$align_mode[i], "bracket"),
-			lead_allowed  = lead_allowed,
-			min_description = min_description,
-			rect_directives = .remap_rect_directives(
-				if (is.null(ann$rect_directives)) NULL else ann$rect_directives[[i]],
-				merge_map, i)
-		)
+		pieces <- .plain_join_pieces(ann, i, ref_main, rendered_cache)
+		if (!is.null(pieces)) {
+			# one piece per printed line of the turn, each wrapped on its own
+			parts <- lapply(seq_along(pieces$texts), function(g) render_annotation_tokens(
+				text          = pieces$texts[g],
+				anchors       = anchor_info$anchors,
+				width         = width_i,
+				prefix_first  = if (g == 1L) ann$prefix_first[i] else ann$prefix_cont[i],
+				prefix_cont   = ann$prefix_cont[i],
+				arrow_mode    = arrow_mode,
+				pair_mode     = FALSE,
+				lead_allowed  = g == 1L && lead_allowed,
+				min_description = min_description))
+			result <- parts[[1]]
+			result$lines <- unlist(lapply(parts, `[[`, "lines"))
+			plain_targets[[i]] <<- rep(pieces$lines,
+			                           vapply(parts, function(p) length(p$lines), integer(1)))
+		} else {
+			result <- render_annotation_tokens(
+				text          = ann$text[i],
+				anchors       = anchor_info$anchors,
+				width         = width_i,
+				prefix_first  = ann$prefix_first[i],
+				prefix_cont   = ann$prefix_cont[i],
+				arrow_mode    = arrow_mode,
+				pair_mode     = identical(ann$align_mode[i], "bracket"),
+				lead_allowed  = lead_allowed,
+				min_description = min_description,
+				rect_directives = .remap_rect_directives(
+					if (is.null(ann$rect_directives)) NULL else ann$rect_directives[[i]],
+					merge_map, i)
+			)
+		}
 		if (isTRUE(ann$is_main[i])) {
 			result$lines <- .collapse_latch_in_lines(result$lines,
 			                                         all_anchor_chars)
@@ -277,6 +297,7 @@ align_and_render <- function(ann, text_body_width, arrow_mode = "stem",
 	for (i in process_order[!ann$is_main[process_order]]) render_row(i)
 
 	ann$rendered_lines <- rendered_lines
+	ann$plain_line_targets <- plain_targets
 	ann$anchor_specs <- anchor_specs
 	ann$lead_lines <- lead_lines
 	report_so_far <- if (length(report_list) > 0) {
@@ -627,10 +648,16 @@ concatenate_mondada_rows <- function(ann, anchor_char_set,
 					pause_line_limit - nchar(ann$prefix_first[i])
 				join <- !turn_break && fits
 			} else if (!ann$is_main[i] && .layer_is_plain(ann$align_chars[i], ann$align_mode[i])) {
-				# a translation or gloss stays one row per annotation: it is
-				# printed under the line on which ITS utterance ends, not as
-				# one block below the merged turn (user decision 2026-10-05)
-				join <- FALSE
+				# a translation or gloss stays one row per annotation, printed
+				# under the line on which ITS utterance ends (user decision
+				# 2026-10-05), unless its style says join (2026-10-11): then
+				# it joins within the turn of its own speaker - a main row
+				# of ANOTHER speaker starting in the gap ends the joined row
+				base_of <- function(x) tolower(sub("#.*$", "", x))
+				join <- isTRUE(ann$join[i]) &&
+					!any(ann$is_main & base_of(ann$tierName) != base_of(tier) &
+					     ann$startsec > ann$endsec[previous] &
+					     ann$startsec < ann$startsec[i])
 			} else if (gap <= seam_i) {
 				join <- TRUE
 			} else if (ann$is_main[i]) {
@@ -672,6 +699,15 @@ concatenate_mondada_rows <- function(ann, anchor_char_set,
 			layer_gap_join <- !ann$is_main[i] && gap > layer_seam
 			separator <- if (((left_glue && right_glue) || pause_glue) &&
 			                 !layer_gap_join) "" else " "
+			# a joined plain layer separates its parts with the separator of
+			# its style (", "); none after a part that already ends in punctuation
+			if (!ann$is_main[i] && .layer_is_plain(ann$align_chars[i], ann$align_mode[i])) {
+				sep_text <- if (is.null(ann$join_separator)) NA_character_ else ann$join_separator[i]
+				if (is.na(sep_text)) sep_text <- ""
+				ends_punct <- length(previous_g) > 0 &&
+					grepl("^[.,;:!?]$", previous_g[length(previous_g)])
+				separator <- paste0(if (ends_punct) "" else sep_text, " ")
+			}
 			# Two latch marks meeting head-on are ONE latch, so the text
 			# carries a single "=". Should the line break exactly there,
 			# .duplicate_latch_at_break() writes the second one back - GAT
@@ -1200,19 +1236,50 @@ apply_indent_alignment <- function(ann, report, anchor_chars,
 # their share of the non-space characters: wrapping moves only spaces, and
 # the few characters a symbol fold removes shift the share by less than a word.
 .layout_fragment_end_line <- function(result, main_row, endsec) {
-	main_lines <- result$rendered_lines[[main_row]]
+	.layout_fragment_end_line_in(result$rendered_lines[[main_row]],
+	                             if (!is.null(result$fragments)) result$fragments[[main_row]] else NULL,
+	                             nchar(result$prefix_cont[main_row]), endsec)
+}
+
+.layout_fragment_end_line_in <- function(main_lines, fragments, pad, endsec) {
 	n_main <- length(main_lines)
-	fragments <- if (!is.null(result$fragments)) result$fragments[[main_row]] else NULL
 	if (!is.data.frame(fragments) || nrow(fragments) < 2 || n_main < 2) return(n_main)
 	fragment <- max(c(1L, which(fragments$startsec < endsec - 0.01)))
 	if (fragment >= nrow(fragments)) return(n_main)
 	count <- function(x) nchar(stringr::str_remove_all(x, "\\s"))
 	share <- cumsum(count(fragments$content))[fragment] / sum(count(fragments$content))
-	pad <- nchar(result$prefix_cont[main_row])
 	per_line <- count(substr(main_lines, pad + 1L, nchar(main_lines)))
 	if (sum(per_line) == 0 || !is.finite(share)) return(n_main)
 	line <- which(cumsum(per_line) >= share * sum(per_line) - 0.5)
 	if (length(line) == 0) n_main else line[1]
+}
+
+# A joined plain layer row (translation with style join) is printed in
+# pieces: the parts whose utterances end on the same printed line of the
+# merged turn form one piece under that line (user decision 2026-10-11).
+# NULL when the row is not such a row or all parts end on one line.
+.plain_join_pieces <- function(ann, i, ref_main, rendered_cache) {
+	if (isTRUE(ann$is_main[i]) || !isTRUE(ann$join[i]) || is.null(ann$fragments)) return(NULL)
+	if (!.layer_is_plain(ann$align_chars[i], ann$align_mode[i])) return(NULL)
+	fragments <- ann$fragments[[i]]
+	main_row <- ref_main[i]
+	if (!is.data.frame(fragments) || nrow(fragments) < 2 || is.na(main_row)) return(NULL)
+	cache <- rendered_cache[[main_row]]
+	if (is.null(cache) || length(cache$lines) < 2) return(NULL)
+	line_of <- vapply(fragments$endsec, function(endsec) {
+		as.integer(.layout_fragment_end_line_in(cache$lines, ann$fragments[[main_row]],
+		                                        nchar(ann$prefix_cont[main_row]), endsec))
+	}, integer(1))
+	if (length(unique(line_of)) < 2) return(NULL)
+	group <- cumsum(c(TRUE, line_of[-1] != line_of[-length(line_of)]))
+	# the text indent (indent "text") stands in front of every piece
+	lead <- if (is.na(ann$text[i])) "" else sub("^( *).*$", "\\1", ann$text[i])
+	texts <- vapply(split(seq_len(nrow(fragments)), group), function(idx) {
+		sep <- fragments$sep_before[idx]
+		sep[1] <- ""
+		paste0(lead, paste0(sep, fragments$content[idx], collapse = ""))
+	}, character(1))
+	list(texts = unname(texts), lines = line_of[!duplicated(group)])
 }
 
 interleave_layer_lines <- function(result, max_span_blocks = Inf,
@@ -1476,7 +1543,9 @@ interleave_layer_lines <- function(result, max_span_blocks = Inf,
 			if (identical(result$align_mode[r], "point")) {
 				rep(n_main, length(lines_r))
 			} else if (isTRUE(layer_at_fragment_end) && plain_row[r]) {
-				rep(.layout_fragment_end_line(result, main_row, result$endsec[r]), length(lines_r))
+				targets <- if (is.null(result$plain_line_targets)) NULL else result$plain_line_targets[[r]]
+				if (length(targets) == length(lines_r)) pmin(as.integer(targets), n_main)
+				else rep(.layout_fragment_end_line(result, main_row, result$endsec[r]), length(lines_r))
 			} else {
 				rep(if (has_align) 1L else n_main, length(lines_r))
 			}
@@ -5257,6 +5326,8 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	ann$format.content.indent  <- NA_character_
 	ann$format.indent.skip     <- NA_character_
 	ann$format.align.arrow     <- NA_character_
+	ann$format.join            <- FALSE
+	ann$format.join.separator  <- NA_character_
 
 	for (tier_name in unique(ann$tierName)) {
 		format_tier <- get_style_user(l, name = tier_name)
@@ -5283,6 +5354,9 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		    !is.na(format_tier$content.indent.align.arrow)) {
 			ann$format.align.arrow[rows] <- format_tier$content.indent.align.arrow
 		}
+		if (isTRUE(format_tier$content.join)) ann$format.join[rows] <- TRUE
+		if (!is.null(format_tier$content.join.separator) && !is.na(format_tier$content.join.separator))
+			ann$format.join.separator[rows] <- format_tier$content.join.separator
 	}
 
 	# a profile that shows no acronyms at all: no tier style can bring them back
@@ -5603,6 +5677,8 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 		filler_inside = ann$format.filler.inside,
 		indent_mode   = ann$format.content.indent,
 		indent_skip   = ann$format.indent.skip,
+		join          = ann$format.join,
+		join_separator = ann$format.join.separator,
 		show          = ann$format.show,
 		space_after   = ann$format.insert.space.after,
 		style         = ann$format.style,

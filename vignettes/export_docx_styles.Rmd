@@ -136,6 +136,8 @@ character by character.
 | `indent` | `"none"`, `"content"` (under the first character of the text), `"text"` (as `content`, skipping latching, brackets, pauses and the multimodal symbols), `"align"` (on the symbols of the main line). |
 | `align.chars` | Symbols the layer aligns on (with `indent = "align"`). |
 | `align.mode` | `"bracket"` (spans with open and close) or `"point"` (single spots). |
+| `join` | Score mode (`mode = "mondada"`) only, for a layer without `align.chars` (translation, gloss): `true` prints the annotations of one turn that end on the same printed line as one text under that line, instead of one line each. |
+| `join.separator` | With `join`: put between the parts (e.g. `","` gives `"one, two"`); empty means only a space. No separator after a part that already ends in punctuation. |
 
 **Character styles** (`"type": "character"`) format parts of a line.
 `applies` is `"symbols"` (the multimodal symbols of the layer tiers) or

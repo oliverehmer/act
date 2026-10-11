@@ -280,6 +280,8 @@ get_style_user <- function(l, name) {
 		content.indent.align.filler.inside = NA_character_,
 		content.indent.align.mode       = NA_character_,
 		content.wrap      = TRUE,
+		content.join      = FALSE,
+		content.join.separator = NA_character_,
 		space.after       = NA_character_,
 		comment           = NA_character_,
 		stringsAsFactors  = FALSE
