@@ -151,6 +151,7 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	# No waiting: without a running Praat, --send becomes the Praat that stays
 	# open. The script is never deleted, as Praat reads it later.
 	Sys.sleep(delay)
+	.praat_send_wait()
 	if (praat != "") {
 		running <- .praat_running()
 		system2(praat, c("--send", shQuote(tempScriptPath)), stdout = FALSE, stderr = FALSE, wait = FALSE)
@@ -164,6 +165,21 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\"\"", shQuote(sendpraat), tempScriptPath)
 	rslt <- system(cmd, intern = FALSE, ignore.stderr = TRUE, ignore.stdout = TRUE, wait = TRUE)
 	invisible(rslt == 0)
+}
+
+# Two messages within a second crash Praat 7 while it still reads the first
+# TextGrid and sound (measured 11.10.2026, 0.7 s apart, no crash report): one
+# R session keeps this gap between its sends and waits for the remainder.
+.PRAAT_SEND_GAP_SEC <- 3
+.PRAAT_SEND_STATE <- new.env(parent = emptyenv())
+.praat_send_wait <- function() {
+	last <- .PRAAT_SEND_STATE$last
+	if (!is.null(last)) {
+		wait <- .PRAAT_SEND_GAP_SEC - as.numeric(difftime(Sys.time(), last, units = "secs"))
+		if (wait > 0) Sys.sleep(wait)
+	}
+	.PRAAT_SEND_STATE$last <- Sys.time()
+	invisible(NULL)
 }
 
 # Is a Praat process running? (not on Windows: no activation step there)
