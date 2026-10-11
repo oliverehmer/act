@@ -1,7 +1,7 @@
 Package: act
 Type: Package
 Title: Aligned Corpus Toolkit
-Version: 3.3.7
+Version: 3.3.8
 Date: 2026-08-04
 Authors@R: person("Oliver", "Ehmer", email = "oliver.ehmer@uos.de", role = c("aut", "cre"))
 Maintainer: Oliver Ehmer <oliver.ehmer@uos.de>
@@ -18,4 +18,4 @@ Roxygen: list(markdown = TRUE)
 URL: http://www.oliverehmer.de, https://github.com/oliverehmer/act
 NeedsCompilation: no
 Author: Oliver Ehmer [aut, cre]
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1

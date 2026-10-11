@@ -14,7 +14,8 @@ Returns the path to the ffprobe executable. ffprobe is installed together
 with FFmpeg and lives in the same directory. The cascade is:
 \enumerate{
 \item \code{ffprobe} next to the FFmpeg executable resolved by \link{helper_ffmpeg_path}.
-\item \code{Sys.which("ffprobe")}, if ffprobe is found in the PATH of the R session.
+\item The first executable that runs: \code{Sys.which("ffprobe")}, then the known installation locations (\code{/opt/homebrew/bin}, \code{/usr/local/bin}, \code{/usr/bin}).
+\item The first of these executables that exists, even if it does not run.
 \item The literal \code{"ffprobe"} as last resort (resolution is left to the shell).
 }
 }
@@ -23,5 +24,5 @@ act::helper_ffprobe_path()
 
 }
 \seealso{
-\link{helper_ffmpeg_path}
+\link{helper_ffmpeg_path}, \link{helper_ffmpeg_check}
 }

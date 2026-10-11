@@ -724,7 +724,12 @@ helper_media_audio_track_exists <- function(filePath) {
 	if (.ffmpeg_has_videotoolbox()) return("h264_videotoolbox")
 	if (!isTRUE(.FFMPEG_TIMING_CACHE[["hardware_warned"]])) {
 		assign("hardware_warned", TRUE, envir = .FFMPEG_TIMING_CACHE)
-		cli::cli_alert_warning("Option {.code act.ffmpeg.video.hardware} is TRUE, but the Mac video encoder (h264_videotoolbox) is not available here (no Mac or an ffmpeg without it) - clips are encoded with libx264.")
+		check <- helper_ffmpeg_check("ffmpeg")
+		if (!isTRUE(check) && identical(unname(Sys.info()[["sysname"]]), "Darwin")) {
+			cli::cli_alert_warning("FFmpeg cannot run here ({.path {attr(check, 'path')}}: {attr(check, 'reason')}), so the Mac video encoder cannot be checked - clips are encoded with libx264.")
+		} else {
+			cli::cli_alert_warning("Option {.code act.ffmpeg.video.hardware} is TRUE, but the Mac video encoder (h264_videotoolbox) is not available here (no Mac or an ffmpeg without it) - clips are encoded with libx264.")
+		}
 	}
 	"libx264"
 }
