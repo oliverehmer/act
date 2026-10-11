@@ -9,13 +9,16 @@ reloadTextGrid = RELOADTEXTGRID
 closeEditor = CLOSEEDITOR
 nameLongSound$ = ""
 
-#--- get name of textgrid
+#--- get name of textgrid; Praat names an object after the file but turns
+#--- spaces and dots into underscores (measured with Praat 7.0.02)
 @split: pathTextGrid$, "/"
 nameTextGrid$ = split.array$[split.length]
 pointPos = rindex(nameTextGrid$,".")
 if pointPos>1
 	nameTextGrid$ = left$(nameTextGrid$, pointPos-1)
 endif
+nameTextGrid$ = replace$(nameTextGrid$, " ", "_", 0)
+nameTextGrid$ = replace$(nameTextGrid$, ".", "_", 0)
 
 if pathLongSound$<>""
 	#--- get name of sound
@@ -25,6 +28,8 @@ if pathLongSound$<>""
 	if pointPos>1
 		nameLongSound$ = left$(nameLongSound$, pointPos-1)
 	endif
+	nameLongSound$ = replace$(nameLongSound$, " ", "_", 0)
+	nameLongSound$ = replace$(nameLongSound$, ".", "_", 0)
 endif
 
 #--- a temporary copy changes between two calls: drop the older object of

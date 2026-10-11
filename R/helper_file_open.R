@@ -147,12 +147,32 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	# open. The script stays until tempdir() is cleaned, as Praat reads it later.
 	Sys.sleep(delay)
 	if (praat != "") {
+		running <- .praat_running()
 		system2(praat, c("--send", shQuote(tempScriptPath)), stdout = FALSE, stderr = FALSE, wait = FALSE)
+		# --send leaves a running Praat behind the current window; open -a brings
+		# it to the front (measured 11.10.2026: frontmost after 3 s). A Praat that
+		# --send starts itself comes to the front on its own and must not get a
+		# second launch request while it starts.
+		if (running && .detect_os() == "macos") .praat_activate(praat)
 		return(invisible(TRUE))
 	}
 	cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\"\"", shQuote(sendpraat), tempScriptPath)
 	rslt <- system(cmd, intern = FALSE, ignore.stderr = TRUE, ignore.stdout = TRUE, wait = TRUE)
 	invisible(rslt == 0)
+}
+
+# Is a Praat process running? (not on Windows: no activation step there)
+.praat_running <- function() {
+	if (.Platform$OS.type == "windows") return(FALSE)
+	res <- tryCatch(system2("pgrep", c("-x", "Praat"), stdout = FALSE, stderr = FALSE), error = function(e) 1L)
+	identical(res, 0L)
+}
+
+# bring Praat to the front (macOS); praat is the binary or the .app bundle
+.praat_activate <- function(praat) {
+	app <- stringr::str_replace(praat, "/Contents/MacOS/Praat$", "")
+	system2("open", c("-a", shQuote(app)), stdout = FALSE, stderr = FALSE, wait = FALSE)
+	invisible(NULL)
 }
 
 # The Praat executable: on macOS the binary inside Praat.app, "" if not found.
