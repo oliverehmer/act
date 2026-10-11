@@ -74,5 +74,6 @@ search_openresult_inpraat  <- function(x,
 	                      play          = play,
 	                      close         = close,
 	                      reload        = is_copy,
-	                      delay         = delay))
+	                      delay         = delay,
+	                      lengthSec     = t@length.sec))
 }

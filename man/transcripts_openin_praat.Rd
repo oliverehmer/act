@@ -12,7 +12,9 @@ transcripts_openin_praat(
   endSec = NULL,
   play = FALSE,
   filterMediaFile = c("(?i).*\\\\.(aiff|aif|wav)$", "(?i).*\\\\.mp3$"),
-  delay = 0.5
+  delay = 0.5,
+  zoomStartSec = NULL,
+  zoomEndSec = NULL
 )
 }
 \arguments{
@@ -22,7 +24,7 @@ transcripts_openin_praat(
 
 \item{filePathOut}{Character string, optional. Where the .TextGrid file is written if the original is not used. If \code{NULL} a temporary file is created.}
 
-\item{startSec}{Double, optional; start of the selection in 'Praat'. If \code{NULL} the selection starts at 0.}
+\item{startSec}{Double, optional; start of the selection in 'Praat'. If \code{NULL} the selection starts at 0. If \code{startSec} equals \code{endSec}, only the cursor is set (no selection).}
 
 \item{endSec}{Double, optional; end of the selection in 'Praat'. If \code{NULL} the selection ends at the end of the transcript.}
 
@@ -31,6 +33,10 @@ transcripts_openin_praat(
 \item{filterMediaFile}{Vector of character strings; each element is a regular expression. They are checked one after the other; the first existing media file that matches is opened as sound. The default order is uncompressed audio > compressed audio.}
 
 \item{delay}{Double; time in seconds to wait before the script is handed to 'Praat'.}
+
+\item{zoomStartSec}{Double, optional; start of the range shown in the editor. If \code{NULL} (or \code{zoomEndSec} is \code{NULL}) the editor shows the selection with 0.5 s on either side (2.5 s around a cursor without selection).}
+
+\item{zoomEndSec}{Double, optional; end of the range shown in the editor.}
 }
 \value{
 Logical; \code{TRUE} if the script was handed to 'Praat' (invisibly).

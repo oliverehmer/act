@@ -94,7 +94,8 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 #           otherwise keep showing the old object. Never for an original file -
 #           the open object may hold edits not yet saved in Praat.
 .praat_open_selection <- function(pathTextGrid, pathLongSound, startSec, endSec,
-								  play = FALSE, close = FALSE, reload = FALSE, delay = 0.5) {
+								  play = FALSE, close = FALSE, reload = FALSE, delay = 0.5,
+								  zoomStartSec = NULL, zoomEndSec = NULL, lengthSec = NA) {
 	praat     <- .praat_binary(getOption("act.path.praat"))
 	sendpraat <- getOption("act.path.sendpraat")
 	if (is.null(sendpraat) || !nzchar(sendpraat) || !file.exists(sendpraat)) sendpraat <- ""
@@ -105,12 +106,31 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	pathTextGrid <- normalizePath(pathTextGrid, winslash = "/", mustWork = FALSE)
 	if (nzchar(pathLongSound)) pathLongSound <- normalizePath(pathLongSound, winslash = "/", mustWork = FALSE)
 
+	# a selection or zoom outside the TextGrid ends in an error window in Praat,
+	# and Praat drops every later message until it is closed
+	lim <- function(x) {
+		x <- max(x, 0)
+		if (length(lengthSec) == 1 && is.finite(lengthSec) && lengthSec > 0) x <- min(x, lengthSec)
+		x
+	}
+	startSec <- lim(startSec)
+	endSec   <- lim(max(endSec, startSec))
+	if (is.null(zoomStartSec) || is.null(zoomEndSec) || !is.finite(zoomStartSec) || !is.finite(zoomEndSec)) {
+		pad <- if (endSec > startSec) 0.5 else 2.5
+		zoomStartSec <- startSec - pad
+		zoomEndSec   <- endSec + pad
+	}
+	zoomStartSec <- lim(zoomStartSec)
+	zoomEndSec   <- lim(zoomEndSec)
+
 	praatScriptPath <- file.path(system.file("extdata", "praat", package = "act"), "OpenSelectionInPraat.praat")
 	tx <- readLines(con = praatScriptPath, n = -1, warn = FALSE, encoding = "UTF-8")
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "PATHTEXTGRID",   replacement = pathTextGrid)
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "PATHLONGSOUND",  replacement = pathLongSound)
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "SELSTARTSEC",    replacement = as.character(startSec))
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "SELENDSEC",      replacement = as.character(endSec))
+	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "ZOOMSTARTSEC",   replacement = as.character(zoomStartSec))
+	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "ZOOMENDSEC",     replacement = as.character(zoomEndSec))
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "PLAYSELECTION",  replacement = if (isTRUE(play)) "1" else "0")
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "RELOADTEXTGRID", replacement = if (isTRUE(reload)) "1" else "0")
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "CLOSEEDITOR",    replacement = if (isTRUE(close)) "1" else "0")

@@ -2,6 +2,8 @@ pathTextGrid$ ="PATHTEXTGRID"
 pathLongSound$ = "PATHLONGSOUND"
 selStartSec = SELSTARTSEC
 selEndSec = SELENDSEC
+zoomStartSec = ZOOMSTARTSEC
+zoomEndSec = ZOOMENDSEC
 playSelection = PLAYSELECTION
 reloadTextGrid = RELOADTEXTGRID
 closeEditor = CLOSEEDITOR
@@ -82,11 +84,19 @@ if test==undefined
 endif
 
 
-nowarn editor: "TextGrid " + nameTextGrid$
-nowarn Select: selStartSec, selEndSec
-nowarn Zoom: selStartSec-0.5, selEndSec+0.5
+#--- every step may fail without an error window: while one is open, Praat
+#--- drops all messages that follow
+nocheck nowarn editor: "TextGrid " + nameTextGrid$
+if selEndSec>selStartSec
+	nocheck nowarn Select: selStartSec, selEndSec
+else
+	nocheck nowarn Move cursor to: selStartSec
+endif
+if zoomEndSec>zoomStartSec
+	nocheck nowarn Zoom: zoomStartSec, zoomEndSec
+endif
 
-if playSelection==1
+if playSelection==1 and selEndSec>selStartSec
 	Play: selStartSec, selEndSec
 	if closeEditor==1
 		endeditor
