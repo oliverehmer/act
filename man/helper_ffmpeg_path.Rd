@@ -13,7 +13,7 @@ Character string; path to the FFmpeg executable or \code{"ffmpeg"}.
 Returns the path to the FFmpeg executable using the following cascade:
 \enumerate{
 \item Option \code{act.path.ffmpeg}, if it is set to a concrete path (any value other than the default \code{"ffmpeg"}). This path is returned as it is, without a test.
-\item The first executable that runs, checked in this order: \code{Sys.which("ffmpeg")} (the PATH of the R session), then the known installation locations (\code{/opt/homebrew/bin}, \code{/usr/local/bin}, \code{/usr/bin}).
+\item The first executable that runs, checked in this order: \code{Sys.which("ffmpeg")} (the PATH of the R session), then the known installation locations (\code{/opt/homebrew/bin}, \code{/opt/homebrew/opt/ffmpeg-full/bin}, \code{/usr/local/bin}, \code{/usr/bin}).
 \item The first of these executables that exists, even if it does not run (\link{helper_ffmpeg_check} then reports why).
 \item The literal \code{"ffmpeg"} as last resort (resolution is left to the shell).
 }

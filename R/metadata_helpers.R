@@ -600,7 +600,24 @@ helper_metadata_probe_fps <- function(file_path) {
 }
 
 .metadata_ffprobe_run <- function(args, timeout = getOption("act.media.ffprobe.timeout", 10)) {
-	.metadata_process_run(helper_ffprobe_path(), args, timeout)
+	# ffprobe 9 also prints the streams of stream groups (a file with a timecode
+	# track has one) when stream entries are asked for in csv: a blank line and
+	# the same values again, without a reliable marker, so out[1] was "" for the
+	# sound of every clip act wrote. The json output keeps "streams" apart; it
+	# is turned back into the csv lines the callers expect.
+	plain <- which(args == "csv=p=0")
+	entries <- args[which(args == "-show_entries") + 1L]
+	if (length(plain) != 1 || !any(stringr::str_detect(entries, "(^|:)stream="))) {
+		return(.metadata_process_run(helper_ffprobe_path(), args, timeout))
+	}
+	args[plain] <- "json"
+	res <- .metadata_process_run(helper_ffprobe_path(), args, timeout)
+	streams <- tryCatch(jsonlite::fromJSON(paste(res$out, collapse = "\n"), simplifyVector = FALSE)$streams,
+		error = function(e) NULL)
+	res$out <- vapply(streams %||% list(), function(stream)
+		paste(vapply(stream, function(value) paste(unlist(value), collapse = ","), character(1)), collapse = ","),
+		character(1))
+	res
 }
 
 .metadata_process_run <- function(command, args = character(0),

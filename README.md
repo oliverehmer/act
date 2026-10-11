@@ -59,6 +59,31 @@ Load the package:
 library(act)
 ```
 
+## FFmpeg (audio/video cuts, stills, burnt-in subtitles and timecode)
+Cuts, stills and burnt-in text need [FFmpeg](https://ffmpeg.org/) together with `ffprobe`. act finds them in the PATH or in the usual installation folders; a different location can be set with the option `act.path.ffmpeg`.
+
+FFmpeg must include the filters `ass` (subtitles, built with libass) and `drawtext` (timecode, built with freetype). Without them clips and stills without text still work, but every export with subtitles or a timecode fails.
+
+### Mac (Homebrew)
+The Homebrew formula `ffmpeg` is built **without** these filters. Install `ffmpeg-full` instead and link it, so that it is the `ffmpeg` in the PATH:
+
+```
+brew uninstall ffmpeg
+brew install ffmpeg-full
+brew link --force ffmpeg-full
+```
+
+On a Mac with Apple silicon, remove old Intel builds from `/usr/local/bin` (`ffmpeg`, `ffprobe`): without Rosetta they no longer start ("Bad CPU type").
+
+### Windows and Linux
+On Windows use a "full" build (e.g. from [gyan.dev](https://www.gyan.dev/ffmpeg/builds/)). The FFmpeg packages of the common Linux distributions usually include libass and freetype.
+
+### Check
+```
+ffmpeg -hide_banner -filters | grep -E " (ass|drawtext) "
+```
+must list both filters. In R, `act::helper_ffmpeg_check()` reports whether FFmpeg runs and which of these filters are missing (attribute `filters_missing`).
+
 ## Supported annotation tool formats
 * [Praat `.TextGrid`](https://www.fon.hum.uva.nl/praat/)
 * [ELAN `.eaf`](https://archive.mpi.nl/tla/elan)

@@ -11,8 +11,10 @@ helper_ffmpeg_check(executable = c("ffmpeg", "ffprobe"))
 }
 \value{
 \code{TRUE} or \code{FALSE}, with the attributes \code{path}
-(the executable that was tested) and \code{reason} (why it does not run;
-\code{NA} when it runs).
+(the executable that was tested), \code{reason} (why it does not run;
+\code{NA} when it runs) and \code{filters_missing} (character vector of
+the missing filters, empty when none is missing or when the executable is
+ffprobe or does not run).
 }
 \description{
 Runs the executable resolved by \link{helper_ffmpeg_path} (or
@@ -20,6 +22,14 @@ Runs the executable resolved by \link{helper_ffmpeg_path} (or
 works. An executable can exist and still not run, e.g. an FFmpeg built for
 Intel processors on a Mac with Apple silicon that has no Rosetta. The
 result is remembered for the session.
+}
+\details{
+For FFmpeg the check also lists the filters act needs for burnt-in text
+that are missing: \code{ass} (subtitles, needs libass) and \code{drawtext}
+(timecode, needs freetype). FFmpeg still counts as working without them
+(clips, sound and stills without text are possible). On a Mac the plain
+Homebrew formula \code{ffmpeg} is built without both; install
+\code{ffmpeg-full} instead (see the README of act).
 }
 \examples{
 ok <- act::helper_ffmpeg_check()

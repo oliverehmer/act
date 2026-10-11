@@ -531,8 +531,8 @@ helper_ffmpeg_run <- function(args, output, what = "ffmpeg", quiet = FALSE) {
 			else if (!file.exists(output)) "ffmpeg wrote no output file"
 			else "ffmpeg wrote an empty output file"
 		err <- stringr::str_trim(res$stderr %||% "")
-		message(sprintf("%s failed - %s%s\n  ffmpeg %s%s", what, reason,
-			.ffmpeg_seek_hint(args), paste(args, collapse = " "),
+		message(sprintf("%s failed - %s%s%s\n  ffmpeg %s%s", what, reason,
+			.ffmpeg_seek_hint(args), .ffmpeg_filter_hint(args), paste(args, collapse = " "),
 			if (nzchar(err)) paste0("\n  ", err) else ""))
 	}
 	FALSE
@@ -636,6 +636,16 @@ helper_ffmpeg_input_flags <- function(filePath) {
 	if (h_ok) return(sprintf("scale=-2:min(ih\\,%d)", h))
 	if (w_ok) return(sprintf("scale=min(iw\\,%d):-2", w))
 	NULL
+}
+
+.ffmpeg_filter_hint <- function(args) {
+	tryCatch({
+		missing <- attr(helper_ffmpeg_check("ffmpeg"), "filters_missing")
+		used <- missing[vapply(missing, function(f) any(stringr::str_detect(args, paste0("(^|[\\],;])", f, "="))), logical(1))]
+		if (!length(used)) return("")
+		sprintf("\n  this FFmpeg has no filter %s - on a Mac install 'ffmpeg-full' (see the README of act)",
+			paste0("'", used, "'", collapse = ", "))
+	}, error = function(e) "")
 }
 
 .ffmpeg_seek_hint <- function(args) {
