@@ -135,7 +135,12 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "RELOADTEXTGRID", replacement = if (isTRUE(reload)) "1" else "0")
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "CLOSEEDITOR",    replacement = if (isTRUE(close)) "1" else "0")
 
-	tempScriptPath <- tempfile(pattern = "openselection", tmpdir = tempdir(), fileext = ".praat")
+	# a fixed path outside tempdir(): R deletes its temp folder when the session
+	# ends, but Praat may read the script later (a message waits behind Praat's
+	# Trust window). One name also lets the user trust the script once for good.
+	scriptDir <- file.path(tools::R_user_dir("act", "cache"), "praat")
+	dir.create(scriptDir, showWarnings = FALSE, recursive = TRUE)
+	tempScriptPath <- file.path(scriptDir, "OpenSelectionInPraat.praat")
 	tempScriptCon <- file(tempScriptPath, open = "wb")
 	writeLines(enc2utf8(tx), con = tempScriptCon, sep = "\n", useBytes = TRUE)
 	close(tempScriptCon)
@@ -144,7 +149,7 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	# Praat 7 runs a script sent by sendpraat only when a later message arrives
 	# (measured 08.10.2026 with Praat 7.0.02); its own --send runs it at once.
 	# No waiting: without a running Praat, --send becomes the Praat that stays
-	# open. The script stays until tempdir() is cleaned, as Praat reads it later.
+	# open. The script is never deleted, as Praat reads it later.
 	Sys.sleep(delay)
 	if (praat != "") {
 		running <- .praat_running()
