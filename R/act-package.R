@@ -8,7 +8,7 @@
 #' @section Vignettes:
 #' - \code{vignette("export_docx_styles", package = "act")} -- transcript profiles (format of the print transcripts)
 #' - \code{vignette("install_ffmpeg", package = "act")} -- Install FFmpeg
-#' - \code{vignette("install_sendpraat", package = "act")} -- Install sendpraat
+#' - \code{vignette("install_sendpraat", package = "act")} -- Praat remote control (sendpraat as fallback)
 #'
 #' @section Package options:
 #' The package has numerous options that change the internal workings of the package.

@@ -1,5 +1,5 @@
 ---
-title: "Install sendpraat"
+title: "Praat remote control (sendpraat)"
 author: "Oliver Ehmer"
 date: "`r Sys.Date()`"
 output:
@@ -8,81 +8,55 @@ output:
     toc_float: false
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Install sendpraat}
+  %\VignetteIndexEntry{Praat remote control (sendpraat)}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
 
 # English
-## Windows
-The sendpraat program for *Windows* can be downloaded from the *Praat* website. This is the direct link to the download page:
-<https://www.fon.hum.uva.nl/praat/sendpraat.html>
 
-The download is an .exe file that can be executed directly. Due to your computer's security settings, the program should first be run by double-clicking on it. A window will open, which will close immediately afterwards. If the program does not run, you must allow it to run by accepting it’s execution in the ‘security check windows’ that will open.
+The functions `transcripts_openin_praat()`, `search_openresult_inpraat()` and `search_searchandopen_inpraat()` open a transcript in the TextGrid editor of *Praat*, with its sound and a selected time range. They remote control *Praat* with a *Praat* script.
 
-## macOS
-The *sendpraat_carbon* program for *macOS* can be downloaded from the Praat website. This is the direct link to the download page:
-<https://www.fon.hum.uva.nl/praat/sendpraat.html>
+## Recommended: the path to Praat
 
-Once the file is downloaded, it must be made executable before the program can be used. This must be done in the *macOS* terminal. You can use the terminal window in RStudio to do this. Alternatively, a separate Terminal window can be opened. The terminal is located in the Applications/Utilities folder of your Mac. 
+Set the path to your *Praat* installation once:
 
-##### (1) Determine current directory
-Enter the following command in the terminal:
+```r
+options(act.path.praat = "/Applications/Praat.app")      # macOS
+options(act.path.praat = "C:/Program Files/Praat.exe")    # Windows
+```
 
-`pwd`
+*Praat* (version 6.1 or later) then receives the script through its own command line option `--send`. If *Praat* is not running, it is started. Nothing else needs to be installed.
 
-You will get the path of the current directory.
+## Fallback: sendpraat
 
-##### (2) Move the sendpraat_carbon file
-Move the *sendpraat_carbon* file to the current directory. You can use the Finder for this.
+Only when `act.path.praat` is not set, *act* falls back to the separate program *sendpraat* and the option `act.path.sendpraat`. *sendpraat* cannot start *Praat*; *Praat* must already be running.
 
-##### (3) Making the sendpraat_carbon file executable
-Enter the following command in the terminal:
+*sendpraat* can be downloaded from the *Praat* website: <https://www.fon.hum.uva.nl/praat/sendpraat.html>
 
-`chmod 755 sendpraat_carbon`
-
-Check if it worked. To do this, enter the following command:
-
-`./sendpraat_carbon`
-
-If the execution was successful, you will get an output with various hints on how to use the program.
-
-##### (4) Move the sendpraat_carbon file
-Now move the sendpraat_carbon file to the "Applications" folder. You can use the Finder for this.
+- *Windows*: the download is an .exe file. Run it once by double-clicking so that the security check of your computer accepts it, then set `options(act.path.sendpraat = "C:/path/to/sendpraat.exe")`.
+- *macOS*: the download *sendpraat_carbon* is built for Intel processors; on a Mac with Apple silicon it needs Rosetta. Make it executable in the Terminal (`chmod 755 sendpraat_carbon`), move it to the *Applications* folder and set `options(act.path.sendpraat = "/Applications/sendpraat_carbon")`.
 
 # Deutsch
-## Windows
-Das Programm *sendpraat* für *Windows* kann auf der Internetseite von *Praat* heruntergeladen werden. Dies ist der direkte Link zur Downloadseite:
-<https://www.fon.hum.uva.nl/praat/sendpraat.html>
 
-Es handelt sich um eine .exe-Datei, die direkt ausführbar ist. Aufgrund der Sicherheitseinstellungen Ihres Computers sollte das Programm zunächst einmal durch Doppelklick ausgeführt werden. Es öffnet sich ein Fenster, das sofort darauf wieder geschlossen wird. Wenn das Programm nicht ausgeführt wird, müssen Sie in den folgenden Sicherheitsdialogen erlauben, dass es gestartet werden darf.
+Die Funktionen `transcripts_openin_praat()`, `search_openresult_inpraat()` und `search_searchandopen_inpraat()` öffnen ein Transkript im TextGrid-Editor von *Praat*, mit Ton und einem ausgewählten Zeitabschnitt. Sie steuern *Praat* mit einem *Praat*-Skript fern.
 
-## macOS
-Das Programm *sendpraat_carbon* für *macOS* kann auf der Internetseite von *Praat* heruntergeladen werden. Dies ist der direkte Link zur Downloadseite:
-<https://www.fon.hum.uva.nl/praat/sendpraat.html>
+## Empfohlen: der Pfad zu Praat
 
-Wenn die Datei heruntergeladen ist, muss diese ausführbar gemacht werden, bevor das Programm genutzt werden kann. Dies muss im *macOS* Terminal erfolgen. Sie können dafür das Terminal-Fenster in *RStudio* nutzen. Alternativ kann ein separates Terminal-Fenster geöffnet werden. Das Terminal liegt im Ordner „Programme/Dienstprogramme“ Ihres Mac. 
+Setzen Sie einmal den Pfad zu Ihrer *Praat*-Installation:
 
-##### (1) Aktuelles Verzeichnis ermitteln
-Geben Sie im Terminal den folgenden Befehl ein:
+```r
+options(act.path.praat = "/Applications/Praat.app")      # macOS
+options(act.path.praat = "C:/Program Files/Praat.exe")    # Windows
+```
 
-`pwd`
+*Praat* (ab Version 6.1) erhält das Skript dann über seine eigene Kommandozeilenoption `--send`. Läuft *Praat* nicht, wird es gestartet. Es muss nichts weiter installiert werden.
 
-Sie erhalten den Pfad des aktuellen Verzeichnisses.
+## Rückfall: sendpraat
 
-##### (2) Verschieben der *sendpraat_carbon*-Datei
-Verschieben Sie die *sendpraat_carbon*-Datei in das aktuelle Verzeichnis. Sie können hierfür den Finder benutzen.
+Nur wenn `act.path.praat` nicht gesetzt ist, weicht *act* auf das separate Programm *sendpraat* und die Option `act.path.sendpraat` aus. *sendpraat* kann *Praat* nicht starten; *Praat* muss bereits laufen.
 
-##### (3) Ausführbarmachen der *sendpraat_carbon*-Datei
-Geben Sie den folgenden Befehl im Terminal ein:
+*sendpraat* kann auf der Internetseite von *Praat* heruntergeladen werden: <https://www.fon.hum.uva.nl/praat/sendpraat.html>
 
-`chmod 755 sendpraat_carbon`
-
-Prüfen Sie, ob es funktioniert hat. Geben Sie hierfür den folgenden Befehl ein:
-
-`./sendpraat_carbon`
-
-Wenn die Ausführbarmachung erfolgreich war, erhalten Sie eine Ausgabe mit verschiedenen Hinweisen zur Nutzung des Programms.
-
-##### (4) Verschieben der *sendpraat_carbon*-Datei
-Verschieben Sie nun die *sendpraat_carbon*-Datei in den *Programme*-Ordner. Sie können hierfür den Finder benutzen.
+- *Windows*: Der Download ist eine .exe-Datei. Führen Sie sie einmal per Doppelklick aus, damit die Sicherheitsprüfung Ihres Computers sie akzeptiert, und setzen Sie dann `options(act.path.sendpraat = "C:/Pfad/zu/sendpraat.exe")`.
+- *macOS*: Der Download *sendpraat_carbon* ist für Intel-Prozessoren gebaut; auf einem Mac mit Apple Silicon braucht er Rosetta. Machen Sie die Datei im Terminal ausführbar (`chmod 755 sendpraat_carbon`), verschieben Sie sie in den Ordner *Programme* und setzen Sie `options(act.path.sendpraat = "/Applications/sendpraat_carbon")`.

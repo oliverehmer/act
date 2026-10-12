@@ -1,12 +1,13 @@
 #' Search corpus and open first result in Praat
 #'
-#' The function remote controls 'Praat' by using 'sendpraat' and a 'Praat' script. 
+#' The function remote controls 'Praat' with a 'Praat' script. 
 #' It first searches your corpus object and uses the first search hit. 
 #' The corresponding TextGrid will be opened in the 'Praat' TextGrid Editor and the search hit will be displayed.
 #' 
-#' To make this function work you need to do two things first:
-#' - Install 'sendpraat' on your computer. To do so  follow the  instructions in the vignette 'installation-sendpraat'. Show the vignette with \code{vignette("installation-sendpraat")}.
-#' - Set the path to the 'sendpraat' executable correctly by using 'options(act.path.sendpraat = ...)'.
+#' 'Praat' receives the script through its own command line option \code{--send}
+#' (from 'Praat' 6.1 on): set the path to 'Praat' with 'options(act.path.praat = ...)'.
+#' If 'Praat' is not running, it is started. Only if the path to 'Praat' is not set,
+#' 'sendpraat' is used ('options(act.path.sendpraat = ...)', see \code{vignette("install_sendpraat", package = "act")}).
 #' 
 #' 
 #' @param x Corpus object.
@@ -19,8 +20,8 @@
 #' @examples
 #' library(act)
 #'
-#' # You can only use this functions if you have installed
-#' # and located the 'sendpraat' executable properly in the package options.
+#' # You can only use this functions if you have installed 'Praat'
+#' # and located it properly in the package options.
 #' \dontrun{
 #' act::search_searchandopen_inpraat(x=examplecorpus, "pero")
 #' }
