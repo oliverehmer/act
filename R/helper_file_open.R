@@ -154,16 +154,18 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	.praat_send_wait()
 	if (praat != "") {
 		app <- if (.detect_os() == "macos") .praat_app_bundle(praat) else ""
-		running <- .praat_running()
-		# Without a running Praat, --send becomes the Praat and runs the script
-		# itself - no message to another process, so it works without the
-		# Automation permission of macOS (sender -> Praat), and it comes to the
-		# front (user 12.10.2026). With a running Praat the message is an Apple
-		# event, which macOS drops silently until the calling application
-		# (RStudio, Terminal) is allowed to control Praat; open -a then brings
-		# Praat to the front (measured 11.10.2026: within 3 s).
-		system2(praat, c("--send", shQuote(tempScriptPath)), stdout = FALSE, stderr = FALSE, wait = FALSE)
-		if (running && nzchar(app)) .praat_activate(app)
+		if (nzchar(app)) {
+			# macOS: the message to a running Praat is an Apple event; sent by a
+			# process that R started, macOS dropped it silently from RStudio
+			# (12.10.2026, no permission prompt). Started through Launch Services
+			# the sending instance is Praat itself, the event arrives from any
+			# caller, and Praat comes to the front. Without a running Praat this
+			# instance becomes the Praat and runs the script itself.
+			system2("open", c("-n", "-a", shQuote(app), "--args", "--send", shQuote(tempScriptPath)),
+			        stdout = FALSE, stderr = FALSE, wait = FALSE)
+		} else {
+			system2(praat, c("--send", shQuote(tempScriptPath)), stdout = FALSE, stderr = FALSE, wait = FALSE)
+		}
 		return(invisible(TRUE))
 	}
 	cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\"\"", shQuote(sendpraat), tempScriptPath)
@@ -186,23 +188,10 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	invisible(NULL)
 }
 
-# Is a Praat process running? (not on Windows: no activation step there)
-.praat_running <- function() {
-	if (.Platform$OS.type == "windows") return(FALSE)
-	res <- tryCatch(system2("pgrep", c("-x", "Praat"), stdout = FALSE, stderr = FALSE), error = function(e) 1L)
-	identical(res, 0L)
-}
-
 # the .app bundle of the Praat binary (macOS), "" when there is none
 .praat_app_bundle <- function(praat) {
 	app <- stringr::str_replace(praat, "/Contents/MacOS/Praat$", "")
 	if (stringr::str_detect(app, "(?i)\\.app$") && dir.exists(app)) app else ""
-}
-
-# bring a running Praat to the front (macOS)
-.praat_activate <- function(app) {
-	system2("open", c("-a", shQuote(app)), stdout = FALSE, stderr = FALSE, wait = FALSE)
-	invisible(NULL)
 }
 
 # The Praat executable: on macOS the binary inside Praat.app, "" if not found.
