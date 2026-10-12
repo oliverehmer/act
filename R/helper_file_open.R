@@ -155,12 +155,13 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	if (praat != "") {
 		app <- if (.detect_os() == "macos") .praat_app_bundle(praat) else ""
 		running <- .praat_running()
-		# macOS: a Praat that --send starts as a child of R stays behind the
-		# current window and dies with R; launched through open -a it comes to
-		# the front and --send then reaches it (measured 11.10.2026: editor 4-5 s
-		# after open -a). A running Praat stays behind after --send as well;
-		# open -a brings it to the front within 3 s.
-		if (!running && nzchar(app)) running <- .praat_launch(app)
+		# Without a running Praat, --send becomes the Praat and runs the script
+		# itself - no message to another process, so it works without the
+		# Automation permission of macOS (sender -> Praat), and it comes to the
+		# front (user 12.10.2026). With a running Praat the message is an Apple
+		# event, which macOS drops silently until the calling application
+		# (RStudio, Terminal) is allowed to control Praat; open -a then brings
+		# Praat to the front (measured 11.10.2026: within 3 s).
 		system2(praat, c("--send", shQuote(tempScriptPath)), stdout = FALSE, stderr = FALSE, wait = FALSE)
 		if (running && nzchar(app)) .praat_activate(app)
 		return(invisible(TRUE))
@@ -196,17 +197,6 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 .praat_app_bundle <- function(praat) {
 	app <- stringr::str_replace(praat, "/Contents/MacOS/Praat$", "")
 	if (stringr::str_detect(app, "(?i)\\.app$") && dir.exists(app)) app else ""
-}
-
-# start Praat through Launch Services and wait until its process is there plus
-# a moment to take messages; TRUE when it runs
-.praat_launch <- function(app) {
-	system2("open", c("-a", shQuote(app)), stdout = FALSE, stderr = FALSE, wait = TRUE)
-	for (i in seq_len(40)) {
-		if (.praat_running()) { Sys.sleep(2); return(TRUE) }
-		Sys.sleep(0.25)
-	}
-	FALSE
 }
 
 # bring a running Praat to the front (macOS)
