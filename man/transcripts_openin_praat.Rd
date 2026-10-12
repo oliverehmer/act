@@ -14,7 +14,8 @@ transcripts_openin_praat(
   filterMediaFile = c("(?i).*\\\\.(aiff|aif|wav)$", "(?i).*\\\\.mp3$"),
   delay = 0.5,
   zoomStartSec = NULL,
-  zoomEndSec = NULL
+  zoomEndSec = NULL,
+  close = FALSE
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ transcripts_openin_praat(
 \item{zoomStartSec}{Double, optional; start of the range shown in the editor. If \code{NULL} (or \code{zoomEndSec} is \code{NULL}) the editor shows the selection with 0.5 s on either side (2.5 s around a cursor without selection).}
 
 \item{zoomEndSec}{Double, optional; end of the range shown in the editor.}
+
+\item{close}{Logical; if \code{TRUE} the editor is closed after playing (only with \code{play = TRUE}).}
 }
 \value{
 Logical; \code{TRUE} if the script was handed to 'Praat' (invisibly).

@@ -23,7 +23,7 @@ search_openresult_inpraat(
 
 \item{play}{Logical; If \code{TRUE} selection will be played.}
 
-\item{close}{Logical; If \code{TRUE} TextGrid editor will be closed after playing (Currently non functional!)}
+\item{close}{Logical; If \code{TRUE} TextGrid editor will be closed after playing.}
 
 \item{filterMediaFile}{Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is uncompressed audio > compressed audio.}
 

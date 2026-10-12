@@ -13,7 +13,7 @@
 #' @param s Search object. 
 #' @param resultid Integer; Number of the search result (row in the data frame \code{s@results}) to be played. 
 #' @param play Logical; If \code{TRUE} selection will be played.
-#' @param close Logical; If \code{TRUE} TextGrid editor will be closed after playing (Currently non functional!)
+#' @param close Logical; If \code{TRUE} TextGrid editor will be closed after playing.
 #' @param filterMediaFile Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is uncompressed audio > compressed audio.
 #' @param delay Double; Time in seconds before the section will be opened in Praat. This is useful if Praat opens but the section does not. In that case increase the delay. 
 #' @seealso \code{vignette("install_sendpraat", package = "act")}
@@ -55,25 +55,16 @@ search_openresult_inpraat  <- function(x,
 		cli::cli_abort("Transcript not found in corpus object'.")
 	}
 	
-	#--- TextGrid: the original, or a temporary copy written by the helper
-	path_textgrid <- .get_textgrid_for_transcript(t)
-	is_copy <- is.na(t@file.path) || !identical(normalizePath(path_textgrid, mustWork = FALSE),
-	                                            normalizePath(t@file.path, mustWork = FALSE))
-
-	#--- sound: the first existing media file that matches filterMediaFile
-	path_longsound <- media_path_to_existing_file(t, filterMediaFile = filterMediaFile)
-	if (is.null(path_longsound)) {
-		path_longsound <- ""
-		cli::cli_warn("No media file(s) found.")
-	}
-
-	invisible(.praat_open_selection(pathTextGrid  = path_textgrid,
-	                      pathLongSound = path_longsound,
-	                      startSec      = s@results[resultid, ]$startsec,
-	                      endSec        = s@results[resultid, ]$endsec,
-	                      play          = play,
-	                      close         = close,
-	                      reload        = is_copy,
-	                      delay         = delay,
-	                      lengthSec     = t@length.sec))
+	#--- the original TextGrid when there is one, else a copy in tempdir()
+	invisible(act::transcripts_openin_praat(t               = t,
+	                                        openOriginal    = TRUE,
+	                                        filePathOut     = NULL,
+	                                        startSec        = s@results[resultid, ]$startsec,
+	                                        endSec          = s@results[resultid, ]$endsec,
+	                                        play            = play,
+	                                        filterMediaFile = filterMediaFile,
+	                                        delay           = delay,
+	                                        zoomStartSec    = NULL,
+	                                        zoomEndSec      = NULL,
+	                                        close           = close))
 }

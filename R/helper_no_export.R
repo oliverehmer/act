@@ -94,26 +94,6 @@
 # @examples
 # print("")
 
-.get_textgrid_for_transcript <- function(t) {
-
-	if (missing(t)) 	{cli::cli_abort("Transcript object t is missing.") }
-
-	#=== check in corpus object if textgrid is given and exits
-	if (!is.na(t@file.path)) {
-		if (file.exists(t@file.path)) {
-			if (stringr::str_to_lower(tools::file_ext(t@file.path))=="textgrid") {
-				return(t@file.path)
-			}
-		}
-	}
-
-	#=== create temporary textgrid
-	path <- file.path(tempdir(), stringr::str_c(t@name, ".TextGrid", collapse=""))
-	act::export_textgrid(t, path)
-	cli::cli_warn("Original TextGrid has not been found. A temporary TextGrid has been created")
-	return(path)
-}
-
 .validate_resource <- function(loaded_path, package_path) {
 	if (!file.exists(package_path)) return(TRUE)
 	if (!file.exists(loaded_path)) return(TRUE)

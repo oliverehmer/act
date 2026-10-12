@@ -26,6 +26,7 @@
 #' @param delay Double; time in seconds to wait before the script is handed to 'Praat'.
 #' @param zoomStartSec Double, optional; start of the range shown in the editor. If \code{NULL} (or \code{zoomEndSec} is \code{NULL}) the editor shows the selection with 0.5 s on either side (2.5 s around a cursor without selection).
 #' @param zoomEndSec Double, optional; end of the range shown in the editor.
+#' @param close Logical; if \code{TRUE} the editor is closed after playing (only with \code{play = TRUE}).
 #'
 #' @return Logical; \code{TRUE} if the script was handed to 'Praat' (invisibly).
 #' @seealso \link{transcripts_openin_elan}, \link{search_openresult_inpraat}
@@ -49,7 +50,8 @@ transcripts_openin_praat <- function(t,
 									 filterMediaFile = c('(?i).*\\.(aiff|aif|wav)$', '(?i).*\\.mp3$'),
 									 delay           = 0.5,
 									 zoomStartSec    = NULL,
-									 zoomEndSec      = NULL) {
+									 zoomEndSec      = NULL,
+									 close           = FALSE) {
 
 	.assert_transcript(t, missing = missing(t))
 
@@ -92,7 +94,7 @@ transcripts_openin_praat <- function(t,
 	                                startSec      = startSec,
 	                                endSec        = endSec,
 	                                play          = play,
-	                                close         = FALSE,
+	                                close         = close,
 	                                reload        = reload,
 	                                delay         = delay,
 	                                zoomStartSec  = zoomStartSec,
