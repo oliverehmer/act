@@ -70,7 +70,7 @@ corpus_export <-  function(x,
 	}
 	
 	#set progress bar
-	helper_progress_set("Exporting",length(filterTranscriptNames))
+	helper_progress_set(.progress_export_label(formats), length(filterTranscriptNames))
 	
 	for (i in filterTranscriptNames) {
 		#update progress bar

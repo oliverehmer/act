@@ -75,6 +75,16 @@ helper_progress_tick <- function() {
 .ACT_PROGRESS_LABEL_WIDTH <- 28L
 .ACT_PROGRESS_TOTAL_WIDTH <- 80L
 
+# Label of an export bar ("Exporting eaf, textgrid"); iclo builds its export
+# bars with it as well. A list too long for the label column becomes a count,
+# so the bar keeps its width.
+.progress_export_label <- function(formats) {
+	formats <- unique(stringr::str_to_lower(as.character(formats)))
+	label <- paste("Exporting", paste(formats, collapse = ", "))
+	if (nchar(label) >= .ACT_PROGRESS_LABEL_WIDTH) label <- paste("Exporting", length(formats), "formats")
+	label
+}
+
 #' Helper: Remaining time of a progress bar
 #'
 #' Formats the remaining time of a loop as a fixed-width tail
