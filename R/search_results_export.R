@@ -76,8 +76,12 @@ search_results_export <- function(s,
 	if ("printtranscript" %in% mycolnames) {
 		s@results$printtranscript <- stringr::str_replace_all(s@results$printtranscript, searchString, replacementString )
 	}
+	# the times of the stills of each hit, joined with '|' per row (empty
+	# without stills); search_results_import() splits them again
 	if ("stills.values" %in% mycolnames) {
-		s@results$stills.values <- stringr::str_flatten(unlist(s@results$stills.values))
+		sv <- s@results$stills.values
+		s@results$stills.values <- if (is.list(sv)) vapply(sv, function(v)
+			if (length(v)) paste(as.character(v), collapse = "|") else "", character(1)) else as.character(sv)
 	}
 
 	#rename columns to snake_case for output

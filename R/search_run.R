@@ -52,8 +52,11 @@ search_run <- function(x, s) {
 		# checking if 
 		#	(A) transcript contents have been modified
 		#	(B) another tier filter has been selected
-		x <- act::transcripts_update_fulltexts(x, 
-											   tierNames   = myfilter$tierNames) 
+		# only the searched transcripts: the tier filter belongs to them, applied
+		# to the others it rebuilt their fulltexts with a foreign tier set
+		x <- act::transcripts_update_fulltexts(x,
+											   transcriptNames = myfilter$transcriptNames,
+											   tierNames       = myfilter$tierNames) 
 	}
 	
 	#==== . SEARCH ====

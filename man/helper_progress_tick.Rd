@@ -4,7 +4,10 @@
 \alias{helper_progress_tick}
 \title{Helper: Advance progress bar by one tick}
 \usage{
-helper_progress_tick()
+helper_progress_tick(len = 1)
+}
+\arguments{
+\item{len}{Integer; number of items finished with this tick (default 1).}
 }
 \description{
 Helper: Advance progress bar by one tick

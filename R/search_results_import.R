@@ -111,36 +111,37 @@ search_results_import <- function(path,
 		#replace = at he beginning of cells
 		searchString <-"^\\'="
 		replacementString <- "="
-		temp$content		<-	stringr::str_replace_all(temp$content, searchString, replacementString )
-		temp$content.norm	<-	stringr::str_replace_all(temp$content.norm,searchString, replacementString)	
-		temp$hit			<-	stringr::str_replace_all(temp$hit, searchString, replacementString )
-		temp$concLeft1		<-	stringr::str_replace_all(temp$concLeft1, searchString, replacementString )
-		temp$concLeft2		<-	stringr::str_replace_all(temp$concLeft2, searchString, replacementString )
-		temp$concHit		<-	stringr::str_replace_all(temp$concHit, searchString, replacementString )
-		temp$concRight1		<-	stringr::str_replace_all(temp$concRight1, searchString, replacementString )
-		temp$concRight2		<-	stringr::str_replace_all(temp$concRight2, searchString, replacementString )
-		if ("printtranscript" %in% colnames(temp)) {
-			temp$printtranscript <- stringr::str_replace_all(temp$printtranscript, searchString, replacementString)
+		# only the columns the file has: an export without concordance has no
+		# conc* columns, and a replacement on a missing column failed
+		for (cn in intersect(c("content", "content.norm", "hit", "concLeft1", "concLeft2", "concHit",
+							   "concRight1", "concRight2", "printtranscript"), colnames(temp))) {
+			temp[[cn]] <- stringr::str_replace_all(temp[[cn]], searchString, replacementString)
 		}
 	}
 	
 	#turn factors into vectors
 	fctr.cols 					<- sapply(temp, is.factor)
 	temp[, fctr.cols] 			<- sapply(temp[, fctr.cols], as.character)
-	temp[is.na(temp)]			<- " "
+	# empty cells: " " in text columns only - a numeric or logical column
+	# with NA stays numeric / logical
+	chr.cols <- vapply(temp, is.character, logical(1))
+	temp[chr.cols] <- lapply(temp[chr.cols], function(v) { v[is.na(v)] <- " "; v })
 	
 	temp$startsec				<- as.double(temp$startsec)
 	temp$endsec					<- as.double(temp$endsec)
 	
-	temp$annotationID					<- as.integer(temp$annotationID)
-	temp$hit.length				<- as.integer(temp$hit.length)
-	temp$hit.nr					<- as.integer(temp$hit.nr)
-	temp$hit.pos.content		<- as.integer(temp$hit.pos.content)
-	temp$hit.pos.fulltext		<- as.integer(temp$hit.pos.fulltext)
-	temp$nrWordsLeft			<- as.integer(temp$nrWordsLeft)
-	temp$nrWordsRight			<- as.integer(temp$nrWordsRight)
-	temp$nrWordsHitPosition		<- as.integer(temp$nrWordsHitPosition)
-	temp$nrWordsTotal			<- as.integer(temp$nrWordsTotal)
+	for (cn in intersect(c("annotationID", "hit.length", "hit.nr", "hit.pos.content", "hit.pos.fulltext",
+						   "nrWordsLeft", "nrWordsRight", "nrWordsHitPosition", "nrWordsHit", "nrWordsTotal"), colnames(temp))) {
+		temp[[cn]] <- suppressWarnings(as.integer(temp[[cn]]))
+	}
+	# the times of the stills of each hit, exported joined with '|'
+	if ("stills.values" %in% colnames(temp)) {
+		temp$stills.values <- lapply(strsplit(as.character(temp$stills.values), "|", fixed = TRUE), function(p) {
+			p <- trimws(p); p <- p[nzchar(p)]
+			if (length(p)) suppressWarnings(as.numeric(p)) else NULL
+		})
+	}
+	if ("resultID" %in% colnames(temp)) rownames(temp) <- make.unique(as.character(temp$resultID))
 	
 	#Create a search object
 	s <- methods::new("search")

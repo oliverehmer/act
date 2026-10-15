@@ -85,9 +85,11 @@ search_concordance <- function(x,
 							as.character(temp$searchMode), sep = "|")
 		unique_grp <- unique(group_key[valid])
 
+		n_done <- 0L
 		for (g in unique_grp) {
 			idx <- which(group_key == g & valid)
 			if (length(idx) == 0) next
+			helper_progress_tick(len = length(idx)); n_done <- n_done + length(idx)
 
 			tname <- as.character(temp$transcriptName[idx[1]])
 			smode <- as.character(temp$searchMode[idx[1]])
@@ -127,6 +129,8 @@ search_concordance <- function(x,
 			# word counts stay NA for fulltext mode
 		}
 
+		# hits without a position are skipped: the bar still reaches its total
+		if (nrow(temp) > n_done) helper_progress_tick(len = nrow(temp) - n_done)
 	} else {
 		#=== content mode: the "fulltext" of each hit is its annotation content
 		hit_pos    <- as.integer(temp$hit.pos.content)
@@ -164,6 +168,8 @@ search_concordance <- function(x,
 			nrWordsRight[idx]       <- res$nrWordsRight
 			nrWordsTotal[idx]       <- res$nrWordsTotal
 		}
+		# one vectorised step for all hits
+		helper_progress_tick(len = nrow(temp))
 	}
 
 	concs <- data.frame(

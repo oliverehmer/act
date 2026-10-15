@@ -11,8 +11,12 @@
 #'
 #'
 helper_progress_set <- function(title, total) {
-	if (!getOption("act.showprogress", TRUE)) return(invisible(NULL))
 	if (!exists("act.environment", mode = "environment")) return(invisible(NULL))
+	# the state and the callback come before the console switch: a caller (the
+	# iclo viewer) shows the progress while the console bars are off
+	act.environment$pb_state <- list(start = Sys.time(), current = 0, total = max(1, total), title = title)
+	.progress_callback_call(title, 0, max(1, total))
+	if (!getOption("act.showprogress", TRUE)) return(invisible(NULL))
 	if (!requireNamespace("progress", quietly = TRUE)) {
 		cli::cli_warn("Package {.arg progress} not available.")
 		return(invisible(NULL))
@@ -26,12 +30,12 @@ helper_progress_set <- function(title, total) {
 		show_after = 0.1,
 		width = .ACT_PROGRESS_TOTAL_WIDTH
 	)
-	act.environment$pb_state <- list(start = Sys.time(), current = 0, total = max(1, total))
 	invisible(NULL)
 }
 
 #' Helper: Advance progress bar by one tick
 #'
+#' @param len Integer; number of items finished with this tick (default 1).
 #'
 #' @return NULL
 #'
@@ -41,30 +45,74 @@ helper_progress_set <- function(title, total) {
 #'
 #'
 #'
-helper_progress_tick <- function() {
-	# Only proceed if progress is enabled
-	if (!getOption("act.showprogress", TRUE)) return(invisible(NULL))
-
-	# Ensure act.environment and pb exist
+helper_progress_tick <- function(len = 1) {
 	if (!exists("act.environment", mode = "environment")) return(invisible(NULL))
+	state <- act.environment$pb_state
+	if (is.list(state)) {
+		state$current <- min(state$current + len, state$total)
+		act.environment$pb_state <- state
+		.progress_callback_call(state$title %||% "", state$current, state$total)
+	}
+	if (!getOption("act.showprogress", TRUE)) return(invisible(NULL))
 	if (!exists("pb", envir = act.environment)) return(invisible(NULL))
 
 	pb <- act.environment$pb
 
 	# Tick only if the progress bar is not finished
 	if (inherits(pb, "progress_bar") && !pb$finished) {
-		state <- act.environment$pb_state
-		if (is.list(state)) {
-			state$current <- state$current + 1
-			act.environment$pb_state <- state
-			tail <- helper_progress_eta_format(state$start, state$current, state$total)
-		} else {
-			tail <- sprintf(" (%7s left)", "?")
-		}
-		pb$tick(tokens = list(tail = tail))
+		tail <- if (is.list(state)) helper_progress_eta_format(state$start, state$current, state$total)
+		        else sprintf(" (%7s left)", "?")
+		pb$tick(len = len, tokens = list(tail = tail))
 	}
+	invisible(NULL)
 }
 
+#' Helper: Set a progress callback
+#'
+#' Registers a function that every progress bar of act (and of packages that
+#' use \code{\link{helper_progress_set}} / \code{\link{helper_progress_tick}})
+#' calls when it starts and at every step, also while the console bars are
+#' switched off (option \code{act.showprogress}). A graphical caller (a Shiny
+#' app) uses it to show the progress itself.
+#'
+#' @param fn Function with the arguments \code{title} (character),
+#'   \code{current} (number of finished items) and \code{total} (number of
+#'   all items), or \code{NULL} to remove the callback.
+#'
+#' @return The previous callback (or \code{NULL}), invisibly - pass it back to
+#'   restore it.
+#'
+#' @export
+#'
+#' @examples
+#' old <- helper_progress_callback_set(function(title, current, total)
+#' 	message(title, ": ", current, " of ", total))
+#' helper_progress_set("Counting", 3)
+#' for (i in 1:3) helper_progress_tick()
+#' helper_progress_callback_set(old)
+helper_progress_callback_set <- function(fn) {
+	if (!is.null(fn) && !is.function(fn)) cli::cli_abort("{.arg fn} must be a function or NULL.")
+	old <- act.environment$progress_callback
+	act.environment$progress_callback <- fn
+	invisible(old)
+}
+
+#' Helper: Get the progress callback
+#'
+#' @return The function set with \code{\link{helper_progress_callback_set}},
+#'   or \code{NULL}.
+#'
+#' @export
+helper_progress_callback_get <- function() {
+	act.environment$progress_callback
+}
+
+# a failing callback must not break the work it reports on
+.progress_callback_call <- function(title, current, total) {
+	fn <- act.environment$progress_callback
+	if (is.function(fn)) tryCatch(fn(title, current, total), error = function(e) NULL)
+	invisible(NULL)
+}
 
 # Progress bar geometry, kept in sync with iclo (.ICLO_PROGRESS_* constants in
 # iclo/R/config.R; act must not read iclo, so the values are duplicated here):
