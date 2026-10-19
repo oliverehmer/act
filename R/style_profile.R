@@ -12,6 +12,19 @@
 .STYLE_CASES <- c("", "lower", "upper", "capitalize")
 .STYLE_APPEARANCE <- c("font", "size", "color", "background", "italic", "bold")
 
+# The subtitles of a video: the block "video" of the default style holds the
+# look of every subtitle row (text and box), the block "video" of a tier style
+# changes single values for the tiers it matches. "size" of the default is a
+# percentage of the video height, "size" of a tier style a percentage of that.
+.STYLE_VIDEO_EFFECTS <- c("none", "outline", "shadow", "glow")
+.STYLE_VIDEO_OVERFLOW <- c("wrap", "shrink", "cut", "end")
+.STYLE_VIDEO_TIER_KEYS <- c("row", "size", "color", "effect", "effect.color", "effect.width", "lines")
+.STYLE_VIDEO_DEFAULT <- list(
+	font = "Courier New", size = 6, color = "#FFFFFF", effect = "none",
+	effect.color = "#000000", effect.width = 2,
+	box = list(background = "#000000", opacity = 0.72, padding = 0.3,
+	           overflow = "wrap", lines = 2))
+
 # What the indent "text" skips at the start of the verbal line: latching,
 # overlap bracket, comment opener, breathing, pauses. The multimodal symbols
 # are added from the anchor characters at render time.
@@ -120,6 +133,29 @@ helper_style_appearance <- function(style) {
 			stringsAsFactors = FALSE)
 	})
 	do.call(rbind, rows)
+}
+
+#' Helper: Look of the subtitle rows by a style profile
+#'
+#' The subtitles of a video show the annotations of tiers as rows; the
+#' profile holds their look in the block \code{video} of the default style
+#' (text and box) and in the block \code{video} of each tier style (the
+#' values it changes for its tiers). This helper resolves the look the way
+#' the print transcript resolves the appearance: the tier style of a tier,
+#' and for every value it leaves open the default.
+#'
+#' @param style Style profile; see \code{helper_style_read}.
+#' @param tierNames Vector of character strings; tier names.
+#'
+#' @return List with \code{text} (font, size in percent of the video height, color, effect, effect.color, effect.width), \code{box} (background, opacity, padding in font sizes, overflow, lines) and \code{rows}: one entry per tier name with \code{style} (name of the tier style), \code{row} (a subtitle row by default), \code{size} (percent of the text size), \code{color}, \code{effect}, \code{effect.color}, \code{effect.width}, \code{lines}, \code{bold}, \code{italic} and \code{acronym} (the row carries the acronym of the speaker).
+#'
+#' @export
+helper_style_video <- function(style, tierNames) {
+	profile <- .style_read(style)
+	d <- .style_by_role(profile, "default")$video
+	rows <- lapply(as.character(tierNames), function(tier_name) .style_video_row(profile, tier_name))
+	names(rows) <- as.character(tierNames)
+	list(text = d[setdiff(names(d), "box")], box = d$box, rows = rows)
 }
 
 # ===== READ =====
@@ -260,6 +296,12 @@ helper_style_appearance <- function(style) {
 		if (!is.null(style[["acronym"]]) && !is.list(style[["acronym"]])) {
 			cli::cli_abort("{.field acronym} of a style must be a group of settings in {where}.")
 		}
+		if (!is.null(style[["video"]]) && !is.list(style[["video"]])) {
+			cli::cli_abort("{.field video} of a style must be a group of settings in {where}.")
+		}
+		if (!is.null(style[["video"]][["box"]]) && !is.list(style[["video"]][["box"]])) {
+			cli::cli_abort("{.field box} of the video settings of a style must be a group of settings in {where}.")
+		}
 	}
 	invisible(TRUE)
 }
@@ -316,12 +358,20 @@ helper_style_appearance <- function(style) {
 			new_styles[[length(new_styles) + 1]] <- style
 		} else {
 			merged <- parent_styles[[hit]]
-			for (key in setdiff(names(style), "acronym")) merged[key] <- list(style[[key]])
+			for (key in setdiff(names(style), c("acronym", "video"))) merged[key] <- list(style[[key]])
 			# a child that gives its own pattern means it: the tier type it inherits no longer applies
 			if ("pattern" %in% names(style) && !"tiers" %in% names(style)) merged["tiers"] <- list(NULL)
 			if (is.list(style$acronym)) {
 				if (!is.list(merged$acronym)) merged$acronym <- list()
 				for (key in names(style$acronym)) merged$acronym[key] <- list(style$acronym[[key]])
+			}
+			if (is.list(style$video)) {
+				if (!is.list(merged$video)) merged$video <- list()
+				for (key in setdiff(names(style$video), "box")) merged$video[key] <- list(style$video[[key]])
+				if (is.list(style$video$box)) {
+					if (!is.list(merged$video$box)) merged$video$box <- list()
+					for (key in names(style$video$box)) merged$video$box[key] <- list(style$video$box[[key]])
+				}
 			}
 			parent_styles[[hit]] <- merged
 		}
@@ -421,6 +471,8 @@ helper_style_appearance <- function(style) {
 	# a layer line is aligned to its main line character by character, which
 	# holds only with one font and one size
 	if (!nzchar(role)) out[c("font", "size")] <- list(NULL)
+	if (identical(role, "default")) out$video <- .style_normalize_video(s[["video"]], full = TRUE)
+	else if (!nzchar(role) && !identical(out$type, "character")) out$video <- .style_normalize_video(s[["video"]], full = FALSE)
 	if (identical(out$type, "character")) {
 		out$applies <- .style_chr(s[["applies"]], "symbols")
 		out$pattern <- .style_chr(s[["pattern"]])
@@ -453,6 +505,41 @@ helper_style_appearance <- function(style) {
 # one of option act.tier.types (set by the package that defines the types).
 # A type without a pattern stops: a style without pattern would match no tier
 # or every tier, and the transcript would be wrong without anybody noticing.
+# The video block of a style: the default style gets every value (the ones
+# it does not state from .STYLE_VIDEO_DEFAULT), a tier style only the values
+# it states (NULL when it states none).
+.style_normalize_video <- function(v, full) {
+	if (!is.list(v)) v <- list()
+	num <- function(x) { x <- .style_num(x, NA_real_); if (is.na(x)) NULL else x }
+	chr <- function(x) { x <- .style_chr(x); if (nzchar(x)) x else NULL }
+	if (full) {
+		d <- .STYLE_VIDEO_DEFAULT
+		b <- if (is.list(v[["box"]])) v[["box"]] else list()
+		return(list(
+			font = .style_chr(v[["font"]], d$font),
+			size = .style_num(v[["size"]], d$size),
+			color = .style_chr(v[["color"]], d$color),
+			effect = .style_chr(v[["effect"]], d$effect),
+			effect.color = .style_chr(v[["effect.color"]], d$effect.color),
+			effect.width = .style_num(v[["effect.width"]], d$effect.width),
+			box = list(
+				background = .style_chr(b[["background"]], d$box$background),
+				opacity = .style_num(b[["opacity"]], d$box$opacity),
+				padding = .style_num(b[["padding"]], d$box$padding),
+				overflow = .style_chr(b[["overflow"]], d$box$overflow),
+				lines = .style_num(b[["lines"]], d$box$lines))))
+	}
+	out <- list()
+	if (!is.null(v[["row"]]) && length(v[["row"]]) == 1 && !is.na(v[["row"]])) out$row <- isTRUE(as.logical(v[["row"]]))
+	out$size <- num(v[["size"]])
+	out$color <- chr(v[["color"]])
+	out$effect <- chr(v[["effect"]])
+	out$effect.color <- chr(v[["effect.color"]])
+	out$effect.width <- num(v[["effect.width"]])
+	out$lines <- num(v[["lines"]])
+	if (length(out) == 0) NULL else out
+}
+
 .style_tier_pattern <- function(style_name, tiers, own) {
 	if (!nzchar(tiers)) return(own)
 	types <- getOption("act.tier.types", character(0))
@@ -553,6 +640,7 @@ helper_style_appearance <- function(style) {
 				p <- c(p, paste0(label, key, " must look like #1a2b3c."))
 			}
 		}
+		p <- c(p, .style_problems_video(s$video, label, full = identical(s$role, "default")))
 		if (identical(s$type, "character")) {
 			if (!s$applies %in% c("symbols", "pattern")) {
 				p <- c(p, paste0(label, "applies is '", s$applies, "'; allowed: symbols, pattern."))
@@ -586,6 +674,34 @@ helper_style_appearance <- function(style) {
 			p <- c(p, paste0(label, "align mode is '", s$align.mode, "'; allowed: bracket, point."))
 		}
 	}
+	p
+}
+
+# The video block of a style; full = the default style, which has every value.
+.style_problems_video <- function(v, label, full) {
+	p <- character(0)
+	if (is.null(v)) return(p)
+	label <- paste0(label, "video: ")
+	# the default states percent of the video height, a tier style percent of the default
+	size_max <- if (full) 100 else 400
+	if (!is.null(v$size) && (v$size <= 0 || v$size > size_max)) p <- c(p, paste0(label, "size must be a number between 0 and ", size_max, "."))
+	for (key in c("color", "effect.color")) {
+		if (!is.null(v[[key]]) && !grepl("^#[0-9A-Fa-f]{6}$", v[[key]])) p <- c(p, paste0(label, key, " must look like #1a2b3c."))
+	}
+	if (!is.null(v$effect) && !v$effect %in% .STYLE_VIDEO_EFFECTS) {
+		p <- c(p, paste0(label, "effect is '", v$effect, "'; allowed: ", paste(.STYLE_VIDEO_EFFECTS, collapse = ", "), "."))
+	}
+	if (!is.null(v$effect.width) && v$effect.width < 0) p <- c(p, paste0(label, "effect width must be 0 or more."))
+	if (!is.null(v$lines) && (v$lines < 1 || v$lines != round(v$lines))) p <- c(p, paste0(label, "lines must be a whole number of 1 or more."))
+	if (!full) return(p)
+	b <- v$box
+	if (!grepl("^#[0-9A-Fa-f]{6}$", b$background)) p <- c(p, paste0(label, "box background must look like #1a2b3c."))
+	if (b$opacity < 0 || b$opacity > 1) p <- c(p, paste0(label, "box opacity must be between 0 and 1."))
+	if (b$padding < 0) p <- c(p, paste0(label, "box padding must be 0 or more."))
+	if (!b$overflow %in% .STYLE_VIDEO_OVERFLOW) {
+		p <- c(p, paste0(label, "box overflow is '", b$overflow, "'; allowed: ", paste(.STYLE_VIDEO_OVERFLOW, collapse = ", "), "."))
+	}
+	if (b$lines < 1 || b$lines != round(b$lines)) p <- c(p, paste0(label, "box lines must be a whole number of 1 or more."))
 	p
 }
 
@@ -630,6 +746,29 @@ helper_style_appearance <- function(style) {
 		}
 	}
 	out
+}
+
+# The look of one subtitle row: the values the tier style states in its
+# video block, else those of the default style; bold and italic come from
+# the appearance chain, the acronym from the tier style.
+.style_video_row <- function(profile, tierName) {
+	style <- .style_tier(profile, tierName)
+	d <- .style_by_role(profile, "default")$video
+	# a tier without a tier style gets the default style, whose video block is
+	# the look itself, not a set of changes
+	v <- if (!nzchar(style$role) && is.list(style$video)) style$video else list()
+	a <- .style_appearance(profile, style)
+	pick <- function(key, default) if (is.null(v[[key]])) default else v[[key]]
+	list(style = style$name,
+	     row = isTRUE(v$row),
+	     size = pick("size", 100),
+	     color = pick("color", d$color),
+	     effect = pick("effect", d$effect),
+	     effect.color = pick("effect.color", d$effect.color),
+	     effect.width = pick("effect.width", d$effect.width),
+	     lines = pick("lines", d$box$lines),
+	     bold = isTRUE(a$bold), italic = isTRUE(a$italic),
+	     acronym = !isTRUE(style$acronym$suppress))
 }
 
 # ===== ACRONYMS =====
