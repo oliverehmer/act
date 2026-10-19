@@ -57,18 +57,13 @@ info <- function(...) {
 		
 		if (length(x@transcripts)>0) {
 			helper_progress_set("Reading transcripts", length(x@transcripts))
+			rows <- vector("list", length(x@transcripts))
 			#i<-1
 			for (i in 1:length(x@transcripts)) {
 				helper_progress_tick()
-				#--- words org
-				content.org     <- x@transcripts[[i]]@annotations$content
-				words.org.count <- lapply(content.org, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
-				words.org.count <- sum(unlist(words.org.count))
-				
-				#--- words norm
-				content.norm <- x@transcripts[[i]]@annotations$content.norm
-				words.norm.count <- lapply(content.norm, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
-				words.norm.count <- sum(unlist(words.norm.count))
+				#--- words org / norm (str_count is vectorised; one call per transcript)
+				words.org.count  <- sum(stringr::str_count(x@transcripts[[i]]@annotations$content,      options()$act.wordCountRegEx), na.rm=TRUE)
+				words.norm.count <- sum(stringr::str_count(x@transcripts[[i]]@annotations$content.norm, options()$act.wordCountRegEx), na.rm=TRUE)
 				
 				myRow <- data.frame(
 					transcriptName      = x@transcripts[[i]]@name,
@@ -87,8 +82,10 @@ info <- function(...) {
 					fulltext             = if (length(x@transcripts[[i]]@fulltext.signature) > 0) "yes" else "no",
 					stringsAsFactors     = FALSE
 				)
-				transcripts[nrow(transcripts)+1,] <- myRow
+				rows[[i]] <- myRow
 			}
+			# bound once: appending row by row grows the frame quadratically
+			transcripts <- do.call(rbind, rows)
 		}
 		rownames(transcripts) <- transcripts$transcriptName
 
@@ -121,6 +118,7 @@ info <- function(...) {
 						  stringsAsFactors             = FALSE)
 		
 		if (length(name.unique)>0) {
+			rows2 <- vector("list", length(name.unique))
 			for (i in 1:length(name.unique)) {
 				tiers.current                         <- temp[which(temp$name==name.unique[i]),]
 				tiers.current.interval                <- temp[which(temp$name==name.unique[i] & temp$type=="IntervalTier"),]
@@ -150,8 +148,9 @@ info <- function(...) {
 					text.tiers.words.norm.count       = sum(tiers.current.text$words.norm.count),
 					stringsAsFactors                  = FALSE
 				)
-				temp2[nrow(temp2)+1,] <- myRow
+				rows2[[i]] <- myRow
 			}
+			temp2 <- do.call(rbind, rows2)
 			temp2 <- temp2[order(temp2$tierName),]
 		}
 		rownames(temp2) <- temp2$tierName
@@ -175,24 +174,17 @@ info <- function(...) {
 			ids <- which(t@annotations$tierName==tiers.detailed$name[i])
 			#--- number of annotations
 			tiers.detailed$annotations.count[i] <- length(ids)
-			#--- words org
-			words.org.count <- lapply(t@annotations$content[ids], FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
-			tiers.detailed$words.org.count[i] <- sum(unlist(words.org.count))
-			#--- words norm
-			words.norm.count <- lapply(t@annotations$content.norm[ids], FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
-			tiers.detailed$words.norm.count[i] <- sum(unlist(words.norm.count))
+			#--- words org / norm
+			tiers.detailed$words.org.count[i]  <- sum(stringr::str_count(t@annotations$content[ids],      options()$act.wordCountRegEx), na.rm=TRUE)
+			tiers.detailed$words.norm.count[i] <- sum(stringr::str_count(t@annotations$content.norm[ids], options()$act.wordCountRegEx), na.rm=TRUE)
 		}
 
 		#--- annotations
 		annotations.count <- sum(nrow(t@annotations))
 		
-		#--- words org
-		words.org.count <- lapply(t@annotations$content, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
-		words.org.count <- sum(unlist(words.org.count))
-		
-		#--- words norm
-		words.norm.count <- lapply(t@annotations$content.norm, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
-		words.norm.count <- sum(unlist(words.norm.count))
+		#--- words org / norm
+		words.org.count  <- sum(stringr::str_count(t@annotations$content,      options()$act.wordCountRegEx), na.rm=TRUE)
+		words.norm.count <- sum(stringr::str_count(t@annotations$content.norm, options()$act.wordCountRegEx), na.rm=TRUE)
 		
 		info <- list(length.formatted  = helper_time_format(t@length.sec),
 					 length.sec        = t@length.sec,

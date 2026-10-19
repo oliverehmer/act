@@ -32,28 +32,28 @@ tiers_all <- function(x, compact=TRUE) {
 		}
 	}
 	
-	#--- Count annotations in tiers
+	#--- Count annotations and words per tier
 	if (nrow(tiers)>0) {
-		#each tier
-		i <- 1
-		for (i in 1:nrow(tiers)) {
-			
-			#--- count annotations
-			ids <- which(x@transcripts[[tiers$transcriptName[i]]]@annotations$tierName==tiers$name[i])
-			tiers$annotations.count[i]<- length(ids)
-			
-			#--- get annotations
-			annotations <- x@transcripts[[tiers$transcriptName[i]]]@annotations[ids,]
-			
-			#--- words org
-			content.org <- annotations$content
-			words.org.count <- lapply(content.org, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
-			tiers$words.org.count[i] <- sum(unlist(words.org.count))
-			
-			#--- words norm
-			content.norm <- annotations$content.norm
-			words.norm.count <- lapply(content.norm, FUN=stringr::str_count, pattern=options()$act.wordCountRegEx)
-			tiers$words.norm.count[i] <- sum(unlist(words.norm.count))
+		# per transcript, not per tier: str_count is vectorised over the
+		# annotations, and the tier is a split of one annotation table
+		# (measured 19.10.2026: 2.3 s -> well under 0.1 s for 141 transcripts)
+		tiers$annotations.count <- 0L
+		tiers$words.org.count   <- 0L
+		tiers$words.norm.count  <- 0L
+		wordRegEx <- options()$act.wordCountRegEx
+		for (tName in unique(tiers$transcriptName)) {
+			ann  <- x@transcripts[[tName]]@annotations
+			rows <- which(tiers$transcriptName==tName)
+			if (nrow(ann)==0) { next }
+			# split() keeps empty levels (tiers without annotations count 0);
+			# a duplicated tier name gets the same counts on each of its rows
+			names.u   <- unique(tiers$name[rows])
+			tierOfAnn <- factor(ann$tierName, levels=names.u)
+			sumByTier <- function(v) { v[is.na(v)] <- 0L; as.integer(vapply(split(v, tierOfAnn), sum, numeric(1))) }
+			pick      <- match(tiers$name[rows], names.u)
+			tiers$annotations.count[rows] <- as.integer(tabulate(tierOfAnn, nbins=length(names.u)))[pick]
+			tiers$words.org.count[rows]   <- sumByTier(stringr::str_count(ann$content,      wordRegEx))[pick]
+			tiers$words.norm.count[rows]  <- sumByTier(stringr::str_count(ann$content.norm, wordRegEx))[pick]
 		}
 	}
 	return(tiers)
