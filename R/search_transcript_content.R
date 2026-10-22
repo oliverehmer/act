@@ -60,11 +60,11 @@ search_transcript_content <- function(t, s) {
 	if (length(content_col) == 0 || is.na(content_col[1])) return(NULL)
 
 	#==== vectorized detection ====
-	indices <- stringr::str_detect(content_col, s@pattern)
+	indices <- stringr::str_detect(content_col, .search_regex(s@pattern))
 	if (!any(indices)) return(NULL)
 
-	hits.pos   <- stringr::str_locate_all(content_col[indices], s@pattern)
-	hits.match <- stringr::str_extract_all(content_col[indices], s@pattern)
+	hits.pos   <- stringr::str_locate_all(content_col[indices], .search_regex(s@pattern))
+	hits.match <- stringr::str_extract_all(content_col[indices], .search_regex(s@pattern))
 	ann_ids    <- ann$annotationID[indices]
 
 	#==== build matches.df vectorized (replaces rbind-in-loop) ====

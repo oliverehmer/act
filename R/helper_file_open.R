@@ -107,7 +107,7 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	# a selection or zoom outside the TextGrid ends in an error window in Praat,
 	# and Praat drops every later message until it is closed
 	lim <- function(x) {
-		x <- max(x, 0)
+		x <- max(as.numeric(x)[1], 0)
 		if (length(lengthSec) == 1 && is.finite(lengthSec) && lengthSec > 0) x <- min(x, lengthSec)
 		x
 	}
@@ -123,8 +123,8 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 
 	praatScriptPath <- file.path(system.file("extdata", "praat", package = "act"), "OpenSelectionInPraat.praat")
 	tx <- readLines(con = praatScriptPath, n = -1, warn = FALSE, encoding = "UTF-8")
-	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "PATHTEXTGRID",   replacement = pathTextGrid)
-	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "PATHLONGSOUND",  replacement = pathLongSound)
+	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "PATHTEXTGRID",   replacement = .praat_string(pathTextGrid))
+	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "PATHLONGSOUND",  replacement = .praat_string(pathLongSound))
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "SELSTARTSEC",    replacement = as.character(startSec))
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "SELENDSEC",      replacement = as.character(endSec))
 	tx <- stringi::stri_replace_all_fixed(str = tx, pattern = "ZOOMSTARTSEC",   replacement = as.character(zoomStartSec))
@@ -171,6 +171,15 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 # R session keeps this gap between its sends and waits for the remainder.
 .PRAAT_SEND_GAP_SEC <- 3
 .PRAAT_SEND_STATE <- new.env(parent = emptyenv())
+# A path goes into a Praat string literal: a quote is written twice there, a
+# line break would end the line and turn the rest of the path into commands.
+.praat_string <- function(path) {
+	if (stringr::str_detect(path, "[\r\n]")) {
+		cli::cli_abort("The path contains a line break and cannot be passed to Praat: {.path {path}}")
+	}
+	stringr::str_replace_all(path, stringr::fixed("\""), "\"\"")
+}
+
 .praat_send_wait <- function() {
 	last <- .PRAAT_SEND_STATE$last
 	if (!is.null(last)) {

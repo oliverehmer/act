@@ -120,12 +120,12 @@ search_transcript_fulltext <- function(t, s) {
 	if (length(myFulltext) == 0) return(NULL)
 	if (is.na(myFulltext))       return(NULL)
 
-	if (!stringr::str_detect(myFulltext, s@pattern)) return(NULL)
+	if (!stringr::str_detect(myFulltext, .search_regex(s@pattern))) return(NULL)
 
-	hit              <- unlist(stringr::str_extract_all(myFulltext, s@pattern))
+	hit              <- unlist(stringr::str_extract_all(myFulltext, .search_regex(s@pattern)))
 	hit.length       <- stringr::str_length(hit)
 	hit.nr           <- seq_along(hit)
-	hit.pos.fulltext <- data.frame(stringr::str_locate_all(myFulltext, s@pattern),
+	hit.pos.fulltext <- data.frame(stringr::str_locate_all(myFulltext, .search_regex(s@pattern)),
 								   stringsAsFactors = FALSE)$start
 
 	matches.recordsetNrs <- sapply(hit.pos.fulltext,
