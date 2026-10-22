@@ -73,16 +73,18 @@ brew install ffmpeg-full
 brew link --force ffmpeg-full
 ```
 
+act also finds `ffmpeg-full` when it is not linked: it prefers an FFmpeg with both filters over one without.
+
 On a Mac with Apple silicon, remove old Intel builds from `/usr/local/bin` (`ffmpeg`, `ffprobe`): without Rosetta they no longer start ("Bad CPU type").
 
 ### Windows and Linux
-On Windows use a "full" build (e.g. from [gyan.dev](https://www.gyan.dev/ffmpeg/builds/)). The FFmpeg packages of the common Linux distributions usually include libass and freetype.
+On Windows use a "full" build: `winget install Gyan.FFmpeg`, or the release-full build from [gyan.dev](https://www.gyan.dev/ffmpeg/builds/) with its `bin` folder in the PATH (then restart R). The FFmpeg packages of the common Linux distributions usually include libass and freetype.
 
 ### Check
 ```
 ffmpeg -hide_banner -filters | grep -E " (ass|drawtext) "
 ```
-must list both filters. In R, `act::helper_ffmpeg_check()` reports whether FFmpeg runs and which of these filters are missing (attribute `filters_missing`).
+must list both filters. In R, `act::helper_ffmpeg_check()` reports whether FFmpeg runs and which of these filters are missing (attribute `filters_missing`); the attribute `hint` holds the install commands for the running system.
 
 ## Supported annotation tool formats
 * [Praat `.TextGrid`](https://www.fon.hum.uva.nl/praat/)

@@ -3,7 +3,8 @@
 #' Returns the path to the FFmpeg executable using the following cascade:
 #' \enumerate{
 #'   \item Option \code{act.path.ffmpeg}, if it is set to a concrete path (any value other than the default \code{"ffmpeg"}). This path is returned as it is, without a test.
-#'   \item The first executable that runs, checked in this order: \code{Sys.which("ffmpeg")} (the PATH of the R session), then the known installation locations (\code{/opt/homebrew/bin}, \code{/opt/homebrew/opt/ffmpeg-full/bin}, \code{/usr/local/bin}, \code{/usr/bin}).
+#'   \item The first executable that runs and has the filters for burnt-in text (\code{ass}, \code{drawtext}), checked in this order: \code{Sys.which("ffmpeg")} (the PATH of the R session), then the known installation locations (\code{/opt/homebrew/bin}, \code{/opt/homebrew/opt/ffmpeg-full/bin}, \code{/usr/local/bin}, \code{/usr/bin}). So a Homebrew \code{ffmpeg-full} is found even when it is not linked and the plain formula \code{ffmpeg} is installed as well.
+#'   \item The first of these executables that runs, without these filters.
 #'   \item The first of these executables that exists, even if it does not run (\link{helper_ffmpeg_check} then reports why).
 #'   \item The literal \code{"ffmpeg"} as last resort (resolution is left to the shell).
 #' }
@@ -83,7 +84,9 @@ helper_ffprobe_path <- function() {
 #'   (the executable that was tested), \code{reason} (why it does not run;
 #'   \code{NA} when it runs) and \code{filters_missing} (character vector of
 #'   the missing filters, empty when none is missing or when the executable is
-#'   ffprobe or does not run).
+#'   ffprobe or does not run) and \code{hint} (character vector: how to
+#'   install FFmpeg with these filters on the running operating system; empty
+#'   when nothing is missing).
 #'
 #' @seealso \link{helper_ffmpeg_path}, \link{helper_ffprobe_path}
 #'
@@ -100,11 +103,15 @@ helper_ffmpeg_check <- function(executable = c("ffmpeg", "ffprobe")) {
 		reason <- if (identical(executable, "ffmpeg"))
 			"not found (not in the PATH and not in the usual locations) - install FFmpeg or set option act.path.ffmpeg"
 		else "not found (not next to FFmpeg, not in the PATH)"
-		return(structure(FALSE, path = path, reason = reason, filters_missing = character(0)))
+		return(structure(FALSE, path = path, reason = reason, filters_missing = character(0),
+			hint = .ffmpeg_install_hint(filters_only = FALSE)))
 	}
 	res <- .ffmpeg_runs(path)
 	missing <- if (isTRUE(res$ok) && identical(executable, "ffmpeg")) .ffmpeg_filters_missing(path) else character(0)
-	structure(res$ok, path = path, reason = res$reason, filters_missing = missing)
+	hint <- if (!isTRUE(res$ok)) .ffmpeg_install_hint(filters_only = FALSE)
+		else if (length(missing)) .ffmpeg_install_hint(filters_only = TRUE)
+		else character(0)
+	structure(res$ok, path = path, reason = res$reason, filters_missing = missing, hint = hint)
 }
 
 
@@ -117,9 +124,15 @@ helper_ffmpeg_check <- function(executable = c("ffmpeg", "ffprobe")) {
 	candidates <- c(unname(found), file.path(c("/opt/homebrew/bin", "/opt/homebrew/opt/ffmpeg-full/bin",
 		"/usr/local/bin", "/usr/bin"), name))
 	candidates <- unique(candidates[nzchar(candidates) & file.exists(candidates)])
-	for (candidate in candidates) {
-		if (isTRUE(.ffmpeg_runs(candidate)$ok)) return(candidate)
+	runs <- Filter(function(candidate) isTRUE(.ffmpeg_runs(candidate)$ok), candidates)
+	# with the plain Homebrew ffmpeg still installed, the first one that runs
+	# lacks the text filters although ffmpeg-full is there
+	if (identical(name, "ffmpeg")) {
+		for (candidate in runs) {
+			if (!length(.ffmpeg_filters_missing(candidate))) return(candidate)
+		}
 	}
+	if (length(runs)) return(runs[[1]])
 	if (length(candidates)) candidates[1] else name
 }
 
@@ -159,4 +172,27 @@ helper_ffmpeg_check <- function(executable = c("ffmpeg", "ffprobe")) {
 	res <- setdiff(.FFMPEG_TEXT_FILTERS, filter_names)
 	assign(key, res, envir = .FFMPEG_EXEC_CACHE)
 	res
+}
+
+# Install commands for an FFmpeg with the text filters, per operating system.
+# filters_only: an FFmpeg runs but lacks the filters (on a Mac the plain
+# Homebrew formula, which has to go before ffmpeg-full can be linked).
+.ffmpeg_install_hint <- function(filters_only = FALSE) {
+	sysname <- Sys.info()[["sysname"]]
+	if (identical(sysname, "Darwin")) {
+		c(if (filters_only) "Install FFmpeg with these filters (Homebrew):"
+		  else "Install FFmpeg with Homebrew (https://brew.sh):",
+		  if (filters_only) "  brew uninstall ffmpeg",
+		  "  brew install ffmpeg-full",
+		  "  brew link --force ffmpeg-full")
+	} else if (identical(.Platform$OS.type, "windows")) {
+		c("Install the full build of FFmpeg:",
+		  "  winget install Gyan.FFmpeg",
+		  "  (or ffmpeg-release-full from https://www.gyan.dev/ffmpeg/builds/, its bin folder in the PATH)",
+		  "Then restart R: the new PATH applies to new sessions only.")
+	} else {
+		c("Install FFmpeg from your distribution (these builds include libass and freetype):",
+		  "  sudo apt install ffmpeg   (Debian, Ubuntu)",
+		  "  sudo dnf install ffmpeg   (Fedora, with RPM Fusion)")
+	}
 }

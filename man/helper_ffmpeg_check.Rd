@@ -14,7 +14,9 @@ helper_ffmpeg_check(executable = c("ffmpeg", "ffprobe"))
 (the executable that was tested), \code{reason} (why it does not run;
 \code{NA} when it runs) and \code{filters_missing} (character vector of
 the missing filters, empty when none is missing or when the executable is
-ffprobe or does not run).
+ffprobe or does not run) and \code{hint} (character vector: how to
+install FFmpeg with these filters on the running operating system; empty
+when nothing is missing).
 }
 \description{
 Runs the executable resolved by \link{helper_ffmpeg_path} (or
