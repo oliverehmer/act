@@ -36,9 +36,7 @@ It opens a search result in the 'Praat' TextGrid Editor.
 \details{
 'Praat' receives the script through its own command line option \code{--send}
 (from 'Praat' 6.1 on): set the path to 'Praat' with 'options(act.path.praat = ...)'.
-If 'Praat' is not running, it is started. Only if the path to 'Praat' is not set,
-'sendpraat' is used ('options(act.path.sendpraat = ...)', see \code{vignette("install_sendpraat", package = "act")}).
-'Praat' 7 runs a 'sendpraat' message late, so the path to 'Praat' is the better choice.
+If 'Praat' is not running, it is started (see \code{vignette("praat_remote_control", package = "act")}).
 }
 \examples{
 library(act)
@@ -52,5 +50,5 @@ act::search_openresult_inpraat(x=examplecorpus, s=mysearch, resultid=1, TRUE, TR
 }
 }
 \seealso{
-\code{vignette("install_sendpraat", package = "act")}
+\code{vignette("praat_remote_control", package = "act")}
 }

@@ -5,9 +5,7 @@
 #' 
 #' 'Praat' receives the script through its own command line option \code{--send}
 #' (from 'Praat' 6.1 on): set the path to 'Praat' with 'options(act.path.praat = ...)'.
-#' If 'Praat' is not running, it is started. Only if the path to 'Praat' is not set,
-#' 'sendpraat' is used ('options(act.path.sendpraat = ...)', see \code{vignette("install_sendpraat", package = "act")}).
-#' 'Praat' 7 runs a 'sendpraat' message late, so the path to 'Praat' is the better choice.
+#' If 'Praat' is not running, it is started (see \code{vignette("praat_remote_control", package = "act")}).
 #' 
 #' @param x Corpus object.
 #' @param s Search object. 
@@ -16,7 +14,7 @@
 #' @param close Logical; If \code{TRUE} TextGrid editor will be closed after playing.
 #' @param filterMediaFile Vector of character strings; Each element of the vector is a regular expression. Expressions will be checked consecutively. The first match with an existing media file will be used for playing. The default checking order is uncompressed audio > compressed audio.
 #' @param delay Double; Time in seconds before the section will be opened in Praat. This is useful if Praat opens but the section does not. In that case increase the delay. 
-#' @seealso \code{vignette("install_sendpraat", package = "act")}
+#' @seealso \code{vignette("praat_remote_control", package = "act")}
 #'
 #' @export
 #'

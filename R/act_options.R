@@ -21,12 +21,6 @@
 		description = "Path to Praat executable",
 		type        = "path"
 	),
-	act.path.sendpraat = list(
-		value       = "",
-		group       = "path",
-		description = "Path to sendpraat executable",
-		type        = "path"
-	),
 	act.path.elan = list(
 		value       = "",
 		group       = "path",

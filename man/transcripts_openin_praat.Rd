@@ -58,9 +58,7 @@ replaced in 'Praat': the open object may hold edits that are not saved yet.
 
 'Praat' receives the script through its own command line option \code{--send}
 (from 'Praat' 6.1 on): set the path to 'Praat' with 'options(act.path.praat = ...)'.
-If 'Praat' is not running, it is started. Only if the path to 'Praat' is not set,
-'sendpraat' is used ('options(act.path.sendpraat = ...)', see \code{vignette("install_sendpraat", package = "act")}).
-'Praat' 7 runs a 'sendpraat' message late, so the path to 'Praat' is the better choice.
+If 'Praat' is not running, it is started (see \code{vignette("praat_remote_control", package = "act")}).
 }
 \examples{
 library(act)

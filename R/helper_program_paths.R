@@ -1,13 +1,12 @@
-# ===== PROGRAM PATHS (Praat, sendpraat, ELAN) =====
+# ===== PROGRAM PATHS (Praat, ELAN) =====
 
-# Fills act.path.praat, act.path.sendpraat and act.path.elan at package load
+# Fills act.path.praat and act.path.elan at package load
 # when they are empty or point nowhere, so "open in Praat/ELAN" works without
 # configuration. A path set later (e.g. by a config file) always wins.
 .act_detect_programs <- function() {
 	targets <- list(
-		act.path.praat     = .act_program_candidates_praat,
-		act.path.sendpraat = .act_program_candidates_sendpraat,
-		act.path.elan      = .act_program_candidates_elan
+		act.path.praat = .act_program_candidates_praat,
+		act.path.elan  = .act_program_candidates_elan
 	)
 	for (option_name in names(targets)) {
 		current <- getOption(option_name, "")
@@ -34,18 +33,6 @@
 				 file.path(Sys.getenv("USERPROFILE"), "Desktop", "Praat.exe")))
 	}
 	unname(Sys.which("praat"))
-}
-
-.act_program_candidates_sendpraat <- function() {
-	sysname <- Sys.info()[["sysname"]]
-	if (identical(sysname, "Darwin")) {
-		return(c("/Applications/sendpraat", "/usr/local/bin/sendpraat", "/opt/homebrew/bin/sendpraat"))
-	}
-	if (.Platform$OS.type == "windows") {
-		roots <- .act_program_roots_windows()
-		return(c(file.path(roots, "Praat", "sendpraat.exe"), file.path(roots, "sendpraat.exe")))
-	}
-	unname(Sys.which("sendpraat"))
 }
 
 # Several ELAN versions can be installed side by side (ELAN_6.7, ELAN_7.1);

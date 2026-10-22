@@ -19,8 +19,7 @@ The corresponding TextGrid will be opened in the 'Praat' TextGrid Editor and the
 \details{
 'Praat' receives the script through its own command line option \code{--send}
 (from 'Praat' 6.1 on): set the path to 'Praat' with 'options(act.path.praat = ...)'.
-If 'Praat' is not running, it is started. Only if the path to 'Praat' is not set,
-'sendpraat' is used ('options(act.path.sendpraat = ...)', see \code{vignette("install_sendpraat", package = "act")}).
+If 'Praat' is not running, it is started (see \code{vignette("praat_remote_control", package = "act")}).
 }
 \examples{
 library(act)
@@ -35,5 +34,5 @@ act::search_searchandopen_inpraat(x=examplecorpus, "pero")
 
 }
 \seealso{
-\code{vignette("install_sendpraat", package = "act")}
+\code{vignette("praat_remote_control", package = "act")}
 }

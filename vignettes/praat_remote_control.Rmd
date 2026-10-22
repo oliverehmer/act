@@ -1,5 +1,5 @@
 ---
-title: "Praat remote control (sendpraat)"
+title: "Praat remote control"
 author: "Oliver Ehmer"
 date: "`r Sys.Date()`"
 output:
@@ -8,7 +8,7 @@ output:
     toc_float: false
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Praat remote control (sendpraat)}
+  %\VignetteIndexEntry{Praat remote control}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -17,46 +17,28 @@ vignette: >
 
 The functions `transcripts_openin_praat()`, `search_openresult_inpraat()` and `search_searchandopen_inpraat()` open a transcript in the TextGrid editor of *Praat*, with its sound and a selected time range. They remote control *Praat* with a *Praat* script.
 
-## Recommended: the path to Praat
+## The path to Praat
 
-Set the path to your *Praat* installation once:
+*act* looks for *Praat* in the usual places when it is loaded (`/Applications/Praat.app` on macOS, the program folders on Windows, the PATH on Linux). Elsewhere, set the path once:
 
 ```r
 options(act.path.praat = "/Applications/Praat.app")      # macOS
 options(act.path.praat = "C:/Program Files/Praat.exe")    # Windows
 ```
 
-*Praat* (version 6.1 or later) then receives the script through its own command line option `--send`. If *Praat* is not running, it is started. Nothing else needs to be installed.
-
-## Fallback: sendpraat
-
-Only when `act.path.praat` is not set, *act* falls back to the separate program *sendpraat* and the option `act.path.sendpraat`. *sendpraat* cannot start *Praat*; *Praat* must already be running.
-
-*sendpraat* can be downloaded from the *Praat* website: <https://www.fon.hum.uva.nl/praat/sendpraat.html>
-
-- *Windows*: the download is an .exe file. Run it once by double-clicking so that the security check of your computer accepts it, then set `options(act.path.sendpraat = "C:/path/to/sendpraat.exe")`.
-- *macOS*: the download *sendpraat_carbon* is built for Intel processors; on a Mac with Apple silicon it needs Rosetta. Make it executable in the Terminal (`chmod 755 sendpraat_carbon`), move it to the *Applications* folder and set `options(act.path.sendpraat = "/Applications/sendpraat_carbon")`.
+*Praat* (version 6.1 or later) receives the script through its own command line option `--send`. If *Praat* is not running, it is started. Nothing else needs to be installed; the separate program *sendpraat* is no longer used.
 
 # Deutsch
 
 Die Funktionen `transcripts_openin_praat()`, `search_openresult_inpraat()` und `search_searchandopen_inpraat()` öffnen ein Transkript im TextGrid-Editor von *Praat*, mit Ton und einem ausgewählten Zeitabschnitt. Sie steuern *Praat* mit einem *Praat*-Skript fern.
 
-## Empfohlen: der Pfad zu Praat
+## Der Pfad zu Praat
 
-Setzen Sie einmal den Pfad zu Ihrer *Praat*-Installation:
+*act* sucht *Praat* beim Laden an den üblichen Orten (`/Applications/Praat.app` unter macOS, die Programmordner unter Windows, den PATH unter Linux). Liegt es woanders, setzen Sie den Pfad einmal:
 
 ```r
 options(act.path.praat = "/Applications/Praat.app")      # macOS
 options(act.path.praat = "C:/Program Files/Praat.exe")    # Windows
 ```
 
-*Praat* (ab Version 6.1) erhält das Skript dann über seine eigene Kommandozeilenoption `--send`. Läuft *Praat* nicht, wird es gestartet. Es muss nichts weiter installiert werden.
-
-## Rückfall: sendpraat
-
-Nur wenn `act.path.praat` nicht gesetzt ist, weicht *act* auf das separate Programm *sendpraat* und die Option `act.path.sendpraat` aus. *sendpraat* kann *Praat* nicht starten; *Praat* muss bereits laufen.
-
-*sendpraat* kann auf der Internetseite von *Praat* heruntergeladen werden: <https://www.fon.hum.uva.nl/praat/sendpraat.html>
-
-- *Windows*: Der Download ist eine .exe-Datei. Führen Sie sie einmal per Doppelklick aus, damit die Sicherheitsprüfung Ihres Computers sie akzeptiert, und setzen Sie dann `options(act.path.sendpraat = "C:/Pfad/zu/sendpraat.exe")`.
-- *macOS*: Der Download *sendpraat_carbon* ist für Intel-Prozessoren gebaut; auf einem Mac mit Apple Silicon braucht er Rosetta. Machen Sie die Datei im Terminal ausführbar (`chmod 755 sendpraat_carbon`), verschieben Sie sie in den Ordner *Programme* und setzen Sie `options(act.path.sendpraat = "/Applications/sendpraat_carbon")`.
+*Praat* (ab Version 6.1) erhält das Skript über seine eigene Kommandozeilenoption `--send`. Läuft *Praat* nicht, wird es gestartet. Es muss nichts weiter installiert werden; das separate Programm *sendpraat* wird nicht mehr benutzt.

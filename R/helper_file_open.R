@@ -87,8 +87,8 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 
 # ===== PRAAT: OPEN A TEXTGRID WITH ITS SOUND AND A SELECTION =====
 # Shared by transcripts_openin_praat() and search_openresult_inpraat(): writes
-# the Praat script with the values filled in and runs it through sendpraat;
-# starts Praat when it does not answer yet.
+# the Praat script with the values filled in and sends it to Praat (--send);
+# starts Praat when it does not run yet.
 #   reload  TRUE removes a TextGrid object of the same name before reading the
 #           file: a temporary copy changes between two calls, and Praat would
 #           otherwise keep showing the old object. Never for an original file -
@@ -96,11 +96,9 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 .praat_open_selection <- function(pathTextGrid, pathLongSound, startSec, endSec,
 								  play = FALSE, close = FALSE, reload = FALSE, delay = 0.5,
 								  zoomStartSec = NULL, zoomEndSec = NULL, lengthSec = NA) {
-	praat     <- .praat_binary(getOption("act.path.praat"))
-	sendpraat <- getOption("act.path.sendpraat")
-	if (is.null(sendpraat) || !nzchar(sendpraat) || !file.exists(sendpraat)) sendpraat <- ""
-	if (praat == "" && sendpraat == "") {
-		cli::cli_abort("Neither Praat nor sendpraat found. Please indicate the location of Praat in 'options(act.path.praat = ...)'.")
+	praat <- .praat_binary(getOption("act.path.praat"))
+	if (praat == "") {
+		cli::cli_abort("Praat not found. Please indicate the location of Praat in 'options(act.path.praat = ...)'.")
 	}
 	if (is.null(pathLongSound)) pathLongSound <- ""
 	pathTextGrid <- normalizePath(pathTextGrid, winslash = "/", mustWork = FALSE)
@@ -146,31 +144,26 @@ helper_file_app_available <- function(app = c("elan", "praat")) {
 	close(tempScriptCon)
 	tempScriptPath <- normalizePath(tempScriptPath, winslash = "/", mustWork = FALSE)
 
-	# Praat 7 runs a script sent by sendpraat only when a later message arrives
-	# (measured 08.10.2026 with Praat 7.0.02); its own --send runs it at once.
+	# Praat's own --send, not the separate sendpraat: Praat 7 ran a sendpraat
+	# message only when a later message arrived (measured 08.10.2026, 7.0.02).
 	# No waiting: without a running Praat, --send becomes the Praat that stays
 	# open. The script is never deleted, as Praat reads it later.
 	Sys.sleep(delay)
 	.praat_send_wait()
-	if (praat != "") {
-		app <- if (.detect_os() == "macos") .praat_app_bundle(praat) else ""
-		if (nzchar(app)) {
-			# macOS: the message to a running Praat is an Apple event; sent by a
-			# process that R started, macOS dropped it silently from RStudio
-			# (12.10.2026, no permission prompt). Started through Launch Services
-			# the sending instance is Praat itself, the event arrives from any
-			# caller, and Praat comes to the front. Without a running Praat this
-			# instance becomes the Praat and runs the script itself.
-			system2("open", c("-n", "-a", shQuote(app), "--args", "--send", shQuote(tempScriptPath)),
-			        stdout = FALSE, stderr = FALSE, wait = FALSE)
-		} else {
-			system2(praat, c("--send", shQuote(tempScriptPath)), stdout = FALSE, stderr = FALSE, wait = FALSE)
-		}
-		return(invisible(TRUE))
+	app <- if (.detect_os() == "macos") .praat_app_bundle(praat) else ""
+	if (nzchar(app)) {
+		# macOS: the message to a running Praat is an Apple event; sent by a
+		# process that R started, macOS dropped it silently from RStudio
+		# (12.10.2026, no permission prompt). Started through Launch Services
+		# the sending instance is Praat itself, the event arrives from any
+		# caller, and Praat comes to the front. Without a running Praat this
+		# instance becomes the Praat and runs the script itself.
+		system2("open", c("-n", "-a", shQuote(app), "--args", "--send", shQuote(tempScriptPath)),
+		        stdout = FALSE, stderr = FALSE, wait = FALSE)
+	} else {
+		system2(praat, c("--send", shQuote(tempScriptPath)), stdout = FALSE, stderr = FALSE, wait = FALSE)
 	}
-	cmd  <- sprintf("%s praat \"runScript: \\\"%s\\\"\"", shQuote(sendpraat), tempScriptPath)
-	rslt <- system(cmd, intern = FALSE, ignore.stderr = TRUE, ignore.stdout = TRUE, wait = TRUE)
-	invisible(rslt == 0)
+	invisible(TRUE)
 }
 
 # Two messages within a second crash Praat 7 while it still reads the first
