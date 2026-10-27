@@ -116,17 +116,6 @@ tiers_rename <- function(x,
 		}
 	}
 	
-	#HISTORY corpus
-	x@history[[length(x@history)+1]] <- list(  
-		modification                  ="tiers_rename",
-		systime                       = Sys.time(),
-		tiers.renamed.count           =tiers_renamed_nr,
-		tiers.problematic.count       =tiers_problematic_nr,
-		transcripts.modified.count    =length(transcripts_modified_ids),
-		transcripts.modified.ids      =transcripts_modified_ids,
-		transcripts.problematic.count =length(transcripts_problematic_ids),
-		transcripts.problematic.ids   =transcripts_problematic_ids
-	)
 	
 	return (x)
 }

@@ -78,15 +78,6 @@ annotations_delete <- function (x,
 		}
 	} #next transcript
 	
-	#HISTORY corpus
-	x@history[[length(x@history)+1]] <-  list(
-		modification                    = "annotations_delete",
-		systime                         = Sys.time(),
-		pattern                         = pattern,
-		transcripts.modified.count      = length(transcripts_modified_ids),
-		transcripts.modified.ids        = transcripts_modified_ids,
-		annotations.deleted.total.count = annotations_deleted_total_nr
-	)
 	
 	return (x)
 }

@@ -97,16 +97,5 @@ transcripts_filter <- function (x,
 		}
 	} #next transcript
 	
-	#HISTORY corpus: update history
-	x@history[[length(x@history)+1]] <- list(
-		modification               = "transcripts_filter",
-		systime                    = Sys.time(),
-		transcripts.deleted.count  = transcripts.deleted.count,
-		transcripts.deleted.ids    = transcripts.deleted.ids,
-		transcripts.modified.count = length(transcripts.deleted.ids),
-		transcripts.modified.ids   = transcripts.modified.ids,
-		tiers.deleted.count        = tiers.deleted.count,
-		annotations.deleted.count  = annotations.deleted.count
-	)
 	return (x)
 }

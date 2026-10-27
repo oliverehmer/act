@@ -207,16 +207,6 @@ tiers_add <- function( x,
 		}
 	}
 	
-	#HISTORY corpus
-	x@history[[length(x@history)+1]] <- list(  
-		modification                 ="tiers_add",
-		systime                      = Sys.time(),
-		tiers.added.count            = tiers_added_count_all,
-		transcripts.modified.count   = length(transcripts_modified_ids),
-		transcripts.modified.ids   = transcripts_modified_ids,
-		tier.already.existed.in.transcript.count = length(alreadyExistsInTranscripts),
-		tier.already.existed.in.transcriptNames = alreadyExistsInTranscripts
-	)
 	
 	return (x)
 }

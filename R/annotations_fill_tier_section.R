@@ -100,18 +100,6 @@ annotations_fill_tier_section <- function(
       }
     }
     
-    # Add to history
-    x@history[[length(x@history) + 1]] <- list(
-      modification = "annotations_fill_tier_section",
-      systime = Sys.time(),
-      tier_pattern = tier_pattern,
-      tier_name = tier_name,
-      content = content,
-      startsec = startsec,
-      endsec = endsec,
-      overwrite = overwrite,
-      annotations_modified = sum(in_tier_section)
-    )
   }
   
   return(x)

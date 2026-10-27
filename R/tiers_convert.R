@@ -98,13 +98,6 @@ tiers_convert <- function(x,
 		tiers_converted_all <- c(tiers_converted_all, tiers_converted_transcript)
 	}
 	
-	#HISTORY corpus
-	x@history[[length(x@history)+1]] <- list(  
-		modification               = "tiers_convert",
-		systime                    = Sys.time(),
-		tiers.converted.count      = length(tiers_converted_all),
-		transcripts.modified.count = length(transcripts_modified_ids),
-		transcripts.modified.ids   = transcripts_modified_ids)
 	
 	
 	return (x)

@@ -86,16 +86,6 @@ tiers_delete <- function(x,
 		transcripts_modified_ids <- as.character()
 	}		
 	
-	#HISTORY corpus
-	x@history[[length(x@history)+1]] <- list(  
-		modification                 ="tiers_delete",
-		systime                      = Sys.time(),
-		tiers.deleted.count          = length(tiers_deleted_names_all),
-		tiers.deleted.names          = tiers_deleted_names_all,
-		annotations.deleted.count          = annotations_deleted_count_all,
-		transcripts.modified.count   = length(transcripts_modified_ids),
-		transcripts.modified.ids   = transcripts_modified_ids
-	)
 	
 	return (x)
 }

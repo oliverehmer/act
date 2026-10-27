@@ -88,13 +88,6 @@ tiers_sort <- function(x,
 		
 	}
 	
-	#HISTORY corpus
-	x@history[[length(x@history)+1]] <- list(  
-		modification               = "tiers_sort",
-		systime                    = Sys.time(),
-		transcripts.modified.count = length(transcripts_modified_ids),
-		transcripts.modified.ids   = transcripts_modified_ids
-		)
 	
 	return (x)
 }

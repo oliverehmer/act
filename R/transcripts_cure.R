@@ -89,21 +89,5 @@ transcripts_cure <- function (x,
 		}
 	} #next transcript
 
-	#HISTORY corpus
-	x@history[[length(x@history)+1]] <- list(
-		modification                                  = "transcripts_cure",
-		systime                                       = Sys.time(),
-		transcripts.cured.count                       = length(transcripts.cured.ids),
-		transcripts.cured.ids                         = transcripts.cured.ids,
-		annotationsTimesReversed.deleted.count        = annotationsTimesReversed.deleted.count,
-		annotationsTimesBelowZero.deleted.count       = annotationsTimesBelowZero.deleted.count,
-		annotationsTimesBelowZero.corrected.count     = annotationsTimesBelowZero.corrected.count,
-		annotationsOverlap.corrected.count		      = annotationsOverlap.corrected.count,
-		transcriptLengthZero.corrected.count          = transcriptLengthZero.corrected.count,
-		annotationsZeroDuration.merged.count          = annotationsZeroDuration.merged.count,
-		annotationsZeroDuration.extended.count        = annotationsZeroDuration.extended.count,
-		annotationsZeroDuration.deleted.count         = annotationsZeroDuration.deleted.count,
-		tiersMissing.added.count				      = tiersMissing.added.count
-	)
 	return (x)
 }

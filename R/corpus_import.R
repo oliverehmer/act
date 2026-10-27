@@ -247,12 +247,6 @@ corpus_import <- function(x,
 	#test
 	x@import.results <- results
 
-	#--- update history
-	x@history[[length(x@history)+1]] <- list(
-		modification  ="corpus_import",
-		systime       = Sys.time(),
-		results       = "See 'x@import.results'"
-	)
 
 	#--- add transcripts to corpus
 	if (length(test)==0) {

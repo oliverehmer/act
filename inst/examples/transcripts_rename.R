@@ -12,25 +12,25 @@ test <- act::transcripts_rename(examplecorpus, newTranscriptNames=new.names)
 # check
 names(test@transcripts)
 test@transcripts[[1]]@name
-test@history[length(test@history)]
+names(test@transcripts)
 
 # convert to lower case
 test <- act::transcripts_rename(examplecorpus, toLower=TRUE)
-test@history[length(test@history)]
+names(test@transcripts)
 
 # search replace
 test <- act::transcripts_rename(examplecorpus, 
  searchPatterns=c("ARG", "BOL"), 
  searchReplacements = c("ARGENTINA", "BOLIVIA")
 )
-test@history[length(test@history)]
+names(test@transcripts)
 
 # search replace ignoring upper and lower case
 test <- act::transcripts_rename(examplecorpus, 
  searchPatterns=c("(?i)arg", "(?i)bol"), 
  searchReplacements = c("ARGENTINA", "BOLIVIA")
 )
-test@history[length(test@history)]
+names(test@transcripts)
 
 
 # search replace too much

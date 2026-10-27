@@ -108,17 +108,6 @@ transcripts_add <- function(x,
 		if (assignMedia)	{	x <- act::media_assign(x, transcriptNames=transcripts_added_ids)	}
 	}
 	
-	#===
-	x@history[[length(x@history)+1]] <- list(
-		modification               = "transcripts_add",
-		systime                    = Sys.time(),
-		transcripts.added.count    = length(transcripts_added_ids),
-		transcripts.added.ids      = transcripts_added_ids,
-		transcripts.skipped.count  = transcripts_skipped_nr,
-		transcripts.skipped.ids    = transcripts_skipped_ids,
-		transcripts.renamed.count  = length(transcriptNames.info$names.modified.ids),
-		transcripts.renamed.ids    = transcriptNames.info$names.modified.ids
-	)
 	
 	return(x)
 }

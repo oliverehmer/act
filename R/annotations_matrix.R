@@ -104,14 +104,6 @@ annotations_matrix <- function(x,
 		}
 	}
 	
-	#HISTORY corpus
-	x@history[[length(x@history)+1]] <- list(
-		modification                = "annotations_matrix",
-		systime                     = Sys.time(),
-		transcripts.modified.count  = length(transcripts_modified_ids),
-		transcripts.modified.ids    = transcripts_modified_ids,
-		annotations.modified.count  = annotations_modified_nr
-	)
 	
 	return (x)
 }

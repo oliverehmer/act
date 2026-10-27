@@ -22,12 +22,5 @@ transcripts_delete <- function(x, transcriptNames) {
 	x@transcripts <-	x@transcripts[names(x@transcripts) %in% transcriptNames == FALSE]  
 	
 	
-	#HISTORY corpus: update history
-	x@history[[length(x@history)+1]] <- list(
-		modification               = "transcripts_delete",
-		systime                    = Sys.time(),
-		transcripts.deleted.names  = transcripts.deleted.names,
-		transcripts.deleted.count  = length(transcripts.deleted.ids)
-	)
 	return(x)
 }

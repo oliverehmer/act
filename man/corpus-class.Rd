@@ -10,7 +10,8 @@ It collects the annotations and meta data from loaded annotation files.
 }
 \details{
 Some of the slots are defined by the user.
-Some slots report results, such as \code{@import.results} and \code{@history} and .
+Some slots report results, such as \code{@import.results} and \code{@media.assign.results}.
+What the functions did to a transcript is recorded in the \code{@history} of that transcript object.
 Other slots are settings and are used when performing functions on the corpus object.
 }
 \section{Slots}{
@@ -37,8 +38,6 @@ Other slots are settings and are used when performing functions on the corpus ob
 \item{\code{import.results}}{Data.frame; information about the import of the annotation files.}
 
 \item{\code{media.assign.results}}{Data.frame; information about the media assignment.}
-
-\item{\code{history}}{List; History of modifications made by any of the package functions to the corpus.}
 }}
 
 \examples{

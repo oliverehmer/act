@@ -67,13 +67,6 @@ transcripts_rename <- function(x,
 	#--- rename
 	x <- act::helper_transcript_names_set(x, transcriptNames.info$names.ok.ids)
 	
-	#HISTORY corpus: update history
-	x@history[[length(x@history)+1]] <- list(
-		modification               = "transcripts_rename",
-		systime                    = Sys.time(),
-		transcripts.renamed.ids    = setdiff(oldtranscriptNames, names(x@transcripts)),
-		transcripts.renamed.count  = length(setdiff(oldtranscriptNames, names(x@transcripts)))
-	)
 	
 	return(x)
 }

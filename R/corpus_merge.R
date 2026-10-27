@@ -91,18 +91,8 @@ corpus_merge <- function(x,
 			}
 		}
 
-		x@history <- c(x@history, lapply(src@history, function(h) { h$source.corpus <- src@name; h }))
 	}
 
-	x@history[[length(x@history) + 1]] <- list(
-		modification             = "corpus_merge",
-		systime                  = Sys.time(),
-		sources.count            = length(insert_list),
-		transcripts.added.count  = transcripts_added_total,
-		transcripts.skipped      = transcripts_skipped,
-		transcripts.overwritten  = transcripts_overwritten,
-		conflictTranscripts      = conflictTranscripts
-	)
 
 	return(x)
 }

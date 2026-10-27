@@ -57,7 +57,7 @@ library(act)
 x <- act::tiers_add(examplecorpus,
 					tierName="TEST")
 #check results
-x@history[length(x@history)]
+tail(x@transcripts[[1]]@history, 1)
 #have a look at the first transcript
 x@transcripts[[1]]@tiers
 #--> New tier is inserted in the end.
@@ -67,7 +67,7 @@ x <- act::tiers_add(examplecorpus,
 					tierName="TEST",
 					positionAbsolute=2)
 #check results
-x@history[length(x@history)]
+tail(x@transcripts[[1]]@history, 1)
 #have a look at the first transcript
 x@transcripts[[1]]@tiers
 #--> New tier is inserted as second tier.
@@ -90,7 +90,7 @@ x <- act::tiers_add(examplecorpus,
 					insertOnlyIfDestinationExists=TRUE)
 
 #Check results
-x@history[length(x@history)]
+tail(x@transcripts[[1]]@history, 1)
 #Have a look at the transcript 1:
 # Tier 'TEST' was in first position (e.g. where 'Entrevistador' was before).
 x@transcripts[[1]]@tiers
@@ -106,7 +106,7 @@ x <- act::tiers_add(examplecorpus,
 					relativePositionToDestinationTier=1,
 					insertOnlyIfDestinationExists=FALSE)
 #check results
-x@history[length(x@history)]
+tail(x@transcripts[[1]]@history, 1)
 #Have a look at the transcript 1:
 # Tier 'TEST' was inserted after the tier 'Entrevistador'.
 x@transcripts[[1]]@tiers

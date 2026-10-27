@@ -129,12 +129,6 @@ corpus_new <- function(pathsAnnotationFiles      = NULL,
 	if (is.null(act_replacementMatrix))  {	cli::cli_abort("Normalization matrix not read.")		}
 	x@normalization.matrix <- act_replacementMatrix
 	
-	#--- update history
-	x@history <- list(
-		list(modification  ="corpus_new",
-			 systime       = Sys.time()
-		)
-	)
 	
 	#--- if annotation files are not imported: check
 	if (!missing(pathsAnnotationFiles)) {

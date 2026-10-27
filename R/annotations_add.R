@@ -226,19 +226,7 @@ annotations_add <- function(
   x@annotations <- x@annotations[order(x@annotations$startsec, x@annotations$tierName), ]
   rownames(x@annotations) <- NULL
   
-  # ===== UPDATE METADATA =====
 
-  # Add to history
-  x@history[[length(x@history) + 1]] <- list(
-    modification = "annotations_add",
-    systime = Sys.time(),
-    tierName = tierName,
-    startsec = startsec,
-    endsec = endsec,
-    annotationID = new_annot_id,
-    overwrite = overwrite,
-    overlaps_handled = has_overlaps
-  )
   
   return(x)
 }

@@ -47,5 +47,5 @@ library(act)
 all.tierNames <- unique(act::tiers_all(examplecorpus)$name)
 some.tierNames <- all.tierNames[1:10]
 x <- act::transcripts_filter(examplecorpus, filterTierNames=some.tierNames)
-x@history[[length(x@history)]]
+tail(x@transcripts[[1]]@history, 1)
 }
