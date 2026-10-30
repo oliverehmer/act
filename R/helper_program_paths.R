@@ -1,24 +1,62 @@
-# ===== PROGRAM PATHS (Praat, ELAN) =====
-
-# Fills act.path.praat and act.path.elan at package load
-# when they are empty or point nowhere, so "open in Praat/ELAN" works without
-# configuration. A path set later (e.g. by a config file) always wins.
-.act_detect_programs <- function() {
+#' Helper: Find Praat and ELAN at their usual places
+#'
+#' Fills the options \code{act.path.praat} and \code{act.path.elan} with the
+#' programs found at the usual installation places: on macOS
+#' \code{/Applications} and \code{~/Applications}, on Windows the program
+#' folders, elsewhere \code{/opt}, the home folder and the search path. When
+#' several ELAN versions are installed side by side (\code{ELAN_6.7},
+#' \code{ELAN_7.1}), the newest one is taken.
+#'
+#' An option that already points to an existing program is kept. An option
+#' that is empty or points nowhere (for example to an ELAN version removed
+#' after an update) is replaced by the program found. act calls the helper
+#' when it is loaded.
+#'
+#' @return Invisibly, a data frame with one row per option: \code{option},
+#'   \code{before} (value before the call), \code{after} (value after the
+#'   call) and \code{changed} (logical).
+#'
+#' @export
+#'
+#' @examples
+#' act::helper_program_paths_detect()
+#'
+helper_program_paths_detect <- function() {
 	targets <- list(
 		act.path.praat = .act_program_candidates_praat,
 		act.path.elan  = .act_program_candidates_elan
 	)
+	before <- character(0)
+	after  <- character(0)
 	for (option_name in names(targets)) {
 		current <- getOption(option_name, "")
-		if (is.character(current) && length(current) == 1 && nzchar(current) && file.exists(current)) next
+		current_text <- if (is.character(current) && length(current) >= 1 && !is.na(current[1])) current[1] else ""
+		before[option_name] <- current_text
+		after[option_name]  <- current_text
+		if (nzchar(current_text) && file.exists(current_text)) next
 		candidates <- tryCatch(targets[[option_name]](), error = function(e) character(0))
 		found <- candidates[nzchar(candidates) & file.exists(candidates)]
 		if (length(found) > 0) {
 			value <- list(found[1])
 			names(value) <- option_name
 			options(value)
+			after[option_name] <- found[1]
 		}
 	}
+	invisible(data.frame(option = names(targets), before = unname(before[names(targets)]),
+						 after = unname(after[names(targets)]),
+						 changed = unname(before[names(targets)] != after[names(targets)]),
+						 stringsAsFactors = FALSE))
+}
+
+# ===== PROGRAM PATHS (Praat, ELAN) =====
+
+# Called at package load when the options are empty or point nowhere, so
+# "open in Praat/ELAN" works without configuration. A path set later (e.g. by
+# a config file) wins, unless it points nowhere: iclo::config() then calls
+# helper_program_paths_detect() again.
+.act_detect_programs <- function() {
+	helper_program_paths_detect()
 	invisible(NULL)
 }
 
