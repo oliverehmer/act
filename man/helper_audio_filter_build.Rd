@@ -8,7 +8,7 @@ helper_audio_filter_build(audio_normalize = FALSE, audio_anonymize = NULL)
 }
 \arguments{
 \item{audio_normalize}{Logical. If \code{TRUE} and option
-\code{act.ffmpeg.audio.loudnorm} is set, the loudnorm filter is applied.
+\code{act.ffmpeg.audio.normalize} is \code{TRUE}, the loudness is normalized.
 Default is \code{FALSE}.}
 
 \item{audio_anonymize}{\code{data.frame} with columns \code{start} and
@@ -42,5 +42,5 @@ are generated inside the filter graph.
 Audio filter and beep frequency are read from options:
 \code{act.ffmpeg.audio.anony_filter},
 \code{act.ffmpeg.audio.anony_beep_freq},
-\code{act.ffmpeg.audio.loudnorm}.
+\code{act.ffmpeg.audio.normalize}.
 }

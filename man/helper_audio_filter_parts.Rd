@@ -23,8 +23,8 @@ helper_audio_filter_parts(
 \item{mono}{Logical; \code{TRUE} writes one channel (the mix of both, or the
 chosen side).}
 
-\item{normalize}{Logical; \code{TRUE} applies the loudness filter of the
-option \code{act.ffmpeg.audio.loudnorm} (nothing if it is not set).}
+\item{normalize}{Logical; \code{TRUE} applies the loudness normalization
+(nothing if the option \code{act.ffmpeg.audio.normalize} is \code{FALSE}).}
 
 \item{ranges}{Data frame with columns \code{start} and \code{end} (seconds
 from the start of the output) or \code{NULL}: the ranges to anonymize.

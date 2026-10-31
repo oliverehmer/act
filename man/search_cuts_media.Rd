@@ -54,7 +54,7 @@ search_cuts_media(
 
 \item{audioPanning}{Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.channels_from_column' .}
 
-\item{audioNormalize}{Logical; If \code{TRUE} and option \code{act.ffmpeg.audio.loudnorm} is set, a loudnorm filter is appended to the audio filter chain. Default is \code{FALSE}.}
+\item{audioNormalize}{Logical; If \code{TRUE} and option \code{act.ffmpeg.audio.normalize} is \code{TRUE}, a loudnorm filter is appended to the audio filter chain. Default is \code{FALSE}.}
 
 \item{outputOS}{Vector of character Strings; Saves FFMpeg cut list in format for \code{"win"}=windows, \code{"mac"}=apple ox/linux.}
 

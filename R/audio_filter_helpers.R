@@ -1,3 +1,7 @@
+# One loudness for every export: -16 LUFS (online and presentations; broadcast
+# would be -23, streaming -14), loudness range 7, true peak -2 dB
+.AUDIO_LOUDNORM <- "loudnorm=I=-16:LRA=7:TP=-2"
+
 #' Build the FFmpeg sound filters: channel, loudness, anonymization
 #'
 #' One builder for the sound filters of every export (viewer clips and sound
@@ -19,8 +23,8 @@
 #'   (a stereo file with the same signal twice).
 #' @param mono Logical; \code{TRUE} writes one channel (the mix of both, or the
 #'   chosen side).
-#' @param normalize Logical; \code{TRUE} applies the loudness filter of the
-#'   option \code{act.ffmpeg.audio.loudnorm} (nothing if it is not set).
+#' @param normalize Logical; \code{TRUE} applies the loudness normalization
+#'   (nothing if the option \code{act.ffmpeg.audio.normalize} is \code{FALSE}).
 #' @param ranges Data frame with columns \code{start} and \code{end} (seconds
 #'   from the start of the output) or \code{NULL}: the ranges to anonymize.
 #'   \code{NULL} switches the anonymization off; an empty data frame keeps it
@@ -57,8 +61,7 @@ helper_audio_filter_parts <- function(channel   = "stereo",
                                       distort   = NULL,
                                       beepFreq  = getOption("act.ffmpeg.audio.anony_beep_freq", 800)) {
 	mode <- if (identical(mode, "silence")) "mute" else mode
-	ln <- getOption("act.ffmpeg.audio.loudnorm")
-	ln <- if (isTRUE(normalize) && !is.null(ln) && nzchar(ln)) ln else NULL
+	ln <- if (isTRUE(normalize) && isTRUE(getOption("act.ffmpeg.audio.normalize", TRUE))) .AUDIO_LOUDNORM else NULL
 	pre <- .audio_channel_pan(channel, mono)
 	pre_str <- if (length(pre)) paste0(pre, ",") else ""
 	tail_ln <- if (is.null(ln)) "[aout]" else paste0("[amixed];[amixed]", ln, "[aout]")
@@ -125,10 +128,10 @@ helper_audio_filter_parts <- function(channel   = "stereo",
 #' Audio filter and beep frequency are read from options:
 #' \code{act.ffmpeg.audio.anony_filter},
 #' \code{act.ffmpeg.audio.anony_beep_freq},
-#' \code{act.ffmpeg.audio.loudnorm}.
+#' \code{act.ffmpeg.audio.normalize}.
 #'
 #' @param audio_normalize Logical. If \code{TRUE} and option
-#'   \code{act.ffmpeg.audio.loudnorm} is set, the loudnorm filter is applied.
+#'   \code{act.ffmpeg.audio.normalize} is \code{TRUE}, the loudness is normalized.
 #'   Default is \code{FALSE}.
 #' @param audio_anonymize \code{data.frame} with columns \code{start} and
 #'   \code{end} (numeric, seconds relative to cut start), or \code{NULL} for

@@ -107,10 +107,10 @@
 		group       = "ffmpeg",
 		description = "Write act.* metadata tags (and timecode track for MP4) into cut files. See helper_metadata_ffmpeg_args() and helper_metadata_exif_write()."
 	),
-	act.ffmpeg.audio.loudnorm = list(
-		value       = NULL,
+	act.ffmpeg.audio.normalize = list(
+		value       = TRUE,
 		group       = "ffmpeg",
-		description = "loudnorm filter string for audio normalization applied during cutting (NULL = disabled). Example: \"loudnorm=I=-16:LRA=7:TP=-2\""
+		description = "Loudness normalization of the sound of cuts and sound files (EBU R128 loudnorm, -16 LUFS, loudness range 7, true peak -2 dB). TRUE: applied where a call asks for it (helper_audio_filter_parts(normalize = TRUE), search_cuts_media(audioNormalize = TRUE)); FALSE: never."
 	),
 	act.ffmpeg.audio.anony_filter = list(
 		value       = NULL,
