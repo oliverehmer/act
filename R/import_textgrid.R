@@ -215,6 +215,7 @@ import_textgrid <- function(filePath=NULL,
 		t@tiers <- act::helper_tiers_new_table(tierNames=tierinfo$tierName, tierTypes=tierinfo$type)
 	}
 	
+	t@file.state <- if (is.null(filePath)) list() else helper_file_state(filePath, hash = if (exists("read_result", inherits = FALSE)) read_result$hash else NULL)
 	t@history <- list( 
 						 c(list(modification = "import_textgrid", systime = Sys.time()), .history_file_info(filePath))
 	)

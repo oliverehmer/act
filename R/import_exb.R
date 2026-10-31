@@ -285,6 +285,7 @@ import_exb <- function(filePath=NULL,
 		t@tiers <- act::helper_tiers_new_table(tierNames=mytiers$tierName)
 	}
 	
+	t@file.state <- if (is.null(filePath)) list() else helper_file_state(filePath, hash = NULL)
 	t@history <- list(
 						 c(list(modification = "import_exb", systime = Sys.time()), .history_file_info(filePath))
 	)

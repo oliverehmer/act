@@ -144,6 +144,7 @@ import_srt <- function(filePath,
 	#make transcript 1 sec longer than last annotation
 	t@length.sec <- max(as.double(ann$startsec)+1, as.double(ann$endsec)+1)
 	
+	t@file.state <- if (is.null(filePath)) list() else helper_file_state(filePath, hash = NULL)
 	t@history <- list( 
 						 c(list(modification = "import_srt", systime = Sys.time()), .history_file_info(filePath))
 	)

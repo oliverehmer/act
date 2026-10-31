@@ -2,10 +2,12 @@
 #' 
 #' Example corpus with data loaded from the example annotations files that come with the package
 #'
-#' You can download the corresponding media files from 
-#' - www.oliverehmer.de in the section "Digital Humanities or
-#' - from Github: https://github.com/oliverehmer/act_examplecorpus/.
-#' Alternatively you can use the download commands in the example section below.
+#' The corpus comes without media files. To try it with its media (about 64 MB,
+#' downloaded once from GitHub, \url{https://github.com/oliverehmer/act_examplecorpus/})
+#' use \link{examplecorpus_media}: \code{x <- act::examplecorpus_media()}.
+#' The paths in the corpus are relative to the example folder
+#' \code{system.file("extdata", "examplecorpus", package = "act")}. It is built by
+#' \code{data-raw/examplecorpus_build.R} of the package sources.
 #' @docType data
 #'
 #' @usage data(examplecorpus)

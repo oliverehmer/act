@@ -66,6 +66,7 @@
 #' @slot file.encoding Character string; \code{[READ ONLY]} Encoding applied to the file when reading.
 #' @slot file.type Character string; \code{[READ ONLY]} Type of the original annotation file/object, e.g. 'eaf' or 'textgrid' for files and 'rpraat' for a rPraat .TextGrid object.
 #' @slot file.content Character string; \code{[READ ONLY]} Content of the original annotation file/object.
+#' @slot file.state List; \code{[READ ONLY]} State of the file the transcript was read from or last written to: \code{path}, \code{hash} (fingerprint, see \link{helper_file_hash_compute}), \code{size}, \code{mtime}, \code{time} (see \link{helper_file_state}). Compared with the file on disk before it is overwritten (\link{helper_file_state_changed}). Empty for a transcript without a file of its own.
 #' @slot import.result Character string; \code{[READ ONLY]} Information about the success of the import of the annotation file.
 #' @slot load.message Character string; \code{[READ ONLY]} Possibly messages about errors that occurred on importing the annotation file.
 #' @slot length.sec Double; \code{[READ ONLY]} Duration of the transcript in seconds.
@@ -94,6 +95,7 @@ methods::setClass("transcript",
 				  	file.encoding              = "character",
 				  	file.type                  = "character",
 				  	file.content               = "ANY",
+				  	file.state                 = "list",
 				  	
 				  	import.result                = "character",
 				  	load.message               = "character",
@@ -118,6 +120,7 @@ methods::setClass("transcript",
 				  	file.encoding              = "",
 				  	file.type                  = "",
 				  	file.content               = character(),
+				  	file.state                 = list(),
 				  	
 				  	import.result                = "",
 				  	load.message               = "",
@@ -155,7 +158,8 @@ transcript_show <- function (object) {
 		"file.path"     = object@file.path,
 		"file.encoding" = object@file.encoding,
 		"file.type"     = object@file.type,
-		"file.content"  = if(length(object@file.content)==0) "[empty]" else "[check directly]"
+		"file.content"  = if(length(object@file.content)==0) "[empty]" else "[check directly]",
+		"file.state"    = if (!length(object@file.state)) "[empty]" else paste0(substr(object@file.state$hash %||% "", 1, 12), "... (", format(object@file.state$mtime %||% NA), ")")
 	), width = w)
 
 	.show_sep()

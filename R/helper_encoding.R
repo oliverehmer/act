@@ -151,6 +151,8 @@ helper_encoding_file_detect <- function(filePath) {
 #'   \item{\code{status}}{\code{"ok"} or \code{"error"}.}
 #'   \item{\code{message}}{Collected diagnostic messages, separated by
 #'     \code{"; "}.}
+#'   \item{\code{hash}}{Fingerprint of the bytes read (see
+#'     \code{\link{helper_file_hash_compute}}), \code{NA} when nothing was read.}
 #' }
 #'
 #' @seealso \code{\link{helper_encoding_file_detect}},
@@ -211,6 +213,7 @@ helper_annotationfile_read <- function(filePath,
 	#non-UTF-8 locales (Windows). windows-1252 is used for LATIN1-detected
 	#files because it is the practical superset (0x80-0x9F: euro sign, smart
 	#quotes, dashes) and identical to ISO-8859-1 everywhere else.
+	raw_content <- NULL
 	lines <- tryCatch({
 		raw_content <- readBin(filePath, what = "raw", n = file.info(filePath)$size)
 		txt <- stringi::stri_encode(raw_content, from = read_encoding, to = "UTF-8")
@@ -291,7 +294,8 @@ helper_annotationfile_read <- function(filePath,
 		encoding_declared = declared_encoding,
 		encoding_match    = encoding_match,
 		status            = status,
-		message           = paste(messages, collapse = "; ")
+		message           = paste(messages, collapse = "; "),
+		hash              = if (is.null(raw_content)) NA_character_ else .file_hash_raw(raw_content)
 	)
 }
 

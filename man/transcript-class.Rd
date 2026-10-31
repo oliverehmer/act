@@ -27,6 +27,8 @@ on the object.
 
 \item{\code{file.content}}{Character string; \code{[READ ONLY]} Content of the original annotation file/object.}
 
+\item{\code{file.state}}{List; \code{[READ ONLY]} State of the file the transcript was read from or last written to: \code{path}, \code{hash} (fingerprint, see \link{helper_file_hash_compute}), \code{size}, \code{mtime}, \code{time} (see \link{helper_file_state}). Compared with the file on disk before it is overwritten (\link{helper_file_state_changed}). Empty for a transcript without a file of its own.}
+
 \item{\code{import.result}}{Character string; \code{[READ ONLY]} Information about the success of the import of the annotation file.}
 
 \item{\code{load.message}}{Character string; \code{[READ ONLY]} Possibly messages about errors that occurred on importing the annotation file.}

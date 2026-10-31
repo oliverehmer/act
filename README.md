@@ -92,8 +92,11 @@ must list both filters. In R, `act::helper_ffmpeg_check()` reports whether FFmpe
 * [Exmaralda `.exb`](https://exmaralda.org/en/)
 
 ## Related R packages 
-An example data set including anntoation and media files is available:
-* Download a ZIP file at [GitHub] (https://github.com/oliverehmer/act_examplecorpus)
+An example corpus comes with the package (`act::examplecorpus`, annotations only). With its media files (downloaded once from [GitHub](https://github.com/oliverehmer/act_examplecorpus), about 64 MB):
+
+```r
+x <- act::examplecorpus_media()
+```
 
 You might be interested in the following R packages, that functionally overlap with the act package.
 * `ExmaraldaR` on [GitHub](https://github.com/TimoSchuer/ExmaraldaR)

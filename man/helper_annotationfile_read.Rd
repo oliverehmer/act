@@ -43,6 +43,8 @@ applicable.}
 \item{\code{status}}{\code{"ok"} or \code{"error"}.}
 \item{\code{message}}{Collected diagnostic messages, separated by
 \code{"; "}.}
+\item{\code{hash}}{Fingerprint of the bytes read (see
+\code{\link{helper_file_hash_compute}}), \code{NA} when nothing was read.}
 }
 }
 \description{

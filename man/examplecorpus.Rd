@@ -20,12 +20,12 @@ data(examplecorpus)
 Example corpus with data loaded from the example annotations files that come with the package
 }
 \details{
-You can download the corresponding media files from
-\itemize{
-\item www.oliverehmer.de in the section "Digital Humanities or
-\item from Github: https://github.com/oliverehmer/act_examplecorpus/.
-Alternatively you can use the download commands in the example section below.
-}
+The corpus comes without media files. To try it with its media (about 64 MB,
+downloaded once from GitHub, \url{https://github.com/oliverehmer/act_examplecorpus/})
+use \link{examplecorpus_media}: \code{x <- act::examplecorpus_media()}.
+The paths in the corpus are relative to the example folder
+\code{system.file("extdata", "examplecorpus", package = "act")}. It is built by
+\code{data-raw/examplecorpus_build.R} of the package sources.
 }
 \examples{
 library(act)
@@ -33,35 +33,13 @@ library(act)
 # Summary of the data in the corpus
 examplecorpus
 
-# Summary of the data in th second transcripts in the corpus
+# Summary of the data in the second transcript in the corpus
 examplecorpus@transcripts[[2]]
 
 \dontrun{
-# Download example corpus with media files
-destinationpath <- 
-temp <- tempfile()
-download.file(options()$act.examplecorpusURL, temp)
-unzip(zipfile=temp, exdir=destinationpath)
-
-# Set the URL for the ZIP archive
-url <- options()$act.examplecorpusURL
-
-# Define output path
-output_dir <- "/EXISTING_FOLDERON_YOUR_COMPUTER/examplecorpus"
-output_path <- file.path(output_dir, "act_examplecorpus.zip")
-
-# Download the ZIP file
-download.file(url, output_path, mode = "wb")
-
-# Unzip it to the output directory
-unzip(output_path, exdir = output_dir)
-
-# Rename the extracted folder
-folder_old <- file.path(output_dir, "act_examplecorpus-main")
-folder_new <- file.path(output_dir, "act_examplecorpus")
-if (dir.exists(folder_new)) unlink(folder_new, recursive = TRUE)
-file.rename(folder_old, folder_new)
-
+# The example corpus with its media files (downloaded once, about 64 MB)
+x <- act::examplecorpus_media()
+x@transcripts[[1]]@media
 }
 }
 \seealso{
