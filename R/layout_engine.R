@@ -2202,7 +2202,7 @@ render_annotation_tokens <- function(text, anchors, width, prefix_first,
                                      min_description = 10L,
                                      continuation_arrow = 2L,
                                      rect_directives = NULL) {
-	rect_option <- as.integer(getOption("act.layout.rectangle.max.lines", 2L))
+	rect_option <- as.integer(getOption("act.layout.rectangle.max.lines", 1L))
 	tokens <- tokenize_content(text)
 	prefix_first_g <- helper_text_graphemes_split(prefix_first)
 	if (!is.null(start_col) && start_col > length(prefix_first_g) + 1L) {
