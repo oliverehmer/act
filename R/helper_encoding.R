@@ -153,6 +153,8 @@ helper_encoding_file_detect <- function(filePath) {
 #'     \code{"; "}.}
 #'   \item{\code{hash}}{Fingerprint of the bytes read (see
 #'     \code{\link{helper_file_hash_compute}}), \code{NA} when nothing was read.}
+#'   \item{\code{state}}{State of the file as it was read (see
+#'     \code{\link{helper_file_state}}), an empty list when nothing was read.}
 #' }
 #'
 #' @seealso \code{\link{helper_encoding_file_detect}},
@@ -214,8 +216,11 @@ helper_annotationfile_read <- function(filePath,
 	#files because it is the practical superset (0x80-0x9F: euro sign, smart
 	#quotes, dashes) and identical to ISO-8859-1 everywhere else.
 	raw_content <- NULL
+	# size and time BEFORE the bytes: a change in between then counts as a
+	# change later (the hash of the bytes read never meets a newer time)
+	info_read <- file.info(filePath)
 	lines <- tryCatch({
-		raw_content <- readBin(filePath, what = "raw", n = file.info(filePath)$size)
+		raw_content <- readBin(filePath, what = "raw", n = info_read$size)
 		txt <- stringi::stri_encode(raw_content, from = read_encoding, to = "UTF-8")
 		stringi::stri_split_lines1(txt)
 	}, error = function(e) NULL)
@@ -295,7 +300,8 @@ helper_annotationfile_read <- function(filePath,
 		encoding_match    = encoding_match,
 		status            = status,
 		message           = paste(messages, collapse = "; "),
-		hash              = if (is.null(raw_content)) NA_character_ else .file_hash_raw(raw_content)
+		hash              = if (is.null(raw_content)) NA_character_ else .file_hash_raw(raw_content),
+		state             = if (is.null(raw_content)) list() else .file_state_make(filePath, .file_hash_raw(raw_content), info_read)
 	)
 }
 

@@ -56,11 +56,7 @@ helper_file_state <- function(filePath, hash = NULL) {
 	}
 	info <- file.info(filePath[1])
 	if (is.null(hash) || is.na(hash[1])) hash <- helper_file_hash_compute(filePath[1])
-	list(path  = filePath[1],
-		 hash  = as.character(hash[1]),
-		 size  = as.numeric(info$size),
-		 mtime = info$mtime,
-		 time  = Sys.time())
+	.file_state_make(filePath[1], hash, info)
 }
 
 #' Has a file changed since its state was taken?
@@ -101,7 +97,30 @@ helper_file_state_changed <- function(state, filePath = NULL) {
 		isTRUE(abs(as.numeric(info$mtime) - as.numeric(state$mtime)) < 1)) {
 		return(FALSE)
 	}
-	!identical(helper_file_hash_compute(filePath), as.character(state$hash[1]))
+	!identical(.file_hash_seen(filePath, info), as.character(state$hash[1]))
+}
+
+# A sync service (OneDrive) may change the time of a file alone: the hash is
+# then remembered for that size and time, so the next check does not read
+# the whole file again (one entry per file, for the R session).
+.FILE_HASH_SEEN <- new.env(parent = emptyenv(), hash = TRUE)
+
+.file_hash_seen <- function(filePath, info) {
+	key <- normalizePath(filePath, winslash = "/", mustWork = FALSE)
+	seen <- .FILE_HASH_SEEN[[key]]
+	if (!is.null(seen) && isTRUE(seen$size == as.numeric(info$size)) &&
+		isTRUE(abs(seen$mtime - as.numeric(info$mtime)) < 1)) return(seen$hash)
+	hash <- helper_file_hash_compute(filePath)
+	assign(key, list(size = as.numeric(info$size), mtime = as.numeric(info$mtime), hash = hash), envir = .FILE_HASH_SEEN)
+	hash
+}
+
+.file_state_make <- function(path, hash, info) {
+	list(path  = path,
+		 hash  = as.character(hash[1]),
+		 size  = as.numeric(info$size),
+		 mtime = info$mtime,
+		 time  = Sys.time())
 }
 
 # the fingerprint of bytes read already (helper_annotationfile_read)

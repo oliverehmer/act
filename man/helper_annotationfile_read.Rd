@@ -45,6 +45,8 @@ applicable.}
 \code{"; "}.}
 \item{\code{hash}}{Fingerprint of the bytes read (see
 \code{\link{helper_file_hash_compute}}), \code{NA} when nothing was read.}
+\item{\code{state}}{State of the file as it was read (see
+\code{\link{helper_file_state}}), an empty list when nothing was read.}
 }
 }
 \description{

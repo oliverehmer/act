@@ -556,7 +556,7 @@ import_eaf <- function(filePath=NULL,
 	#tiers: all are interval tiers 
 	t@tiers <- act::helper_tiers_new_table(tierNames=tiers$tierName)
 	
-	t@file.state <- if (is.null(filePath)) list() else helper_file_state(filePath, hash = if (exists("read_result", inherits = FALSE)) read_result$hash else NULL)
+	t@file.state <- if (is.null(filePath)) list() else if (exists("read_result", inherits = FALSE) && length(read_result$state)) read_result$state else helper_file_state(filePath, hash = NULL)
 	t@history <- list( 
 				   c(list(modification = "import_eaf", systime = Sys.time()), .history_file_info(filePath))
 	             )
