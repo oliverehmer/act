@@ -4,7 +4,7 @@
 \alias{helper_transcripts_compare}
 \title{Helper: Compare two versions of a transcript}
 \usage{
-helper_transcripts_compare(x, y, gap = 0, digits = 3)
+helper_transcripts_compare(x, y, gap = 0, digits = 3, content = FALSE)
 }
 \arguments{
 \item{x}{Transcript object; the older version.}
@@ -16,11 +16,16 @@ helper_transcripts_compare(x, y, gap = 0, digits = 3)
 touching and overlapping regions.}
 
 \item{digits}{Integer; number of decimals to which times are rounded.}
+
+\item{content}{Logical; if \code{TRUE}, \code{regions} gets the columns
+\code{content.old} and \code{content.new}: the text of the removed and of the
+added annotations in the region (several joined by \code{" | "}).}
 }
 \value{
 List with three data frames: \code{regions} (columns \code{tierName},
 \code{startsec}, \code{endsec}, \code{change} with the values
-\code{"added"}, \code{"removed"}, \code{"changed"}), \code{tiers} (columns
+\code{"added"}, \code{"removed"}, \code{"changed"}; with \code{content} also
+\code{content.old}, \code{content.new}), \code{tiers} (columns
 \code{change} with the values \code{"added"}, \code{"removed"},
 \code{"renamed"}, \code{"moved"}, \code{tierName}, \code{tierName.new}) and
 \code{media} (columns \code{change}, \code{path}).

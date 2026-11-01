@@ -21,10 +21,14 @@
 #'   \code{gap} seconds apart are joined into one region. \code{0} joins only
 #'   touching and overlapping regions.
 #' @param digits Integer; number of decimals to which times are rounded.
+#' @param content Logical; if \code{TRUE}, \code{regions} gets the columns
+#'   \code{content.old} and \code{content.new}: the text of the removed and of the
+#'   added annotations in the region (several joined by \code{" | "}).
 #'
 #' @return List with three data frames: \code{regions} (columns \code{tierName},
 #'   \code{startsec}, \code{endsec}, \code{change} with the values
-#'   \code{"added"}, \code{"removed"}, \code{"changed"}), \code{tiers} (columns
+#'   \code{"added"}, \code{"removed"}, \code{"changed"}; with \code{content} also
+#'   \code{content.old}, \code{content.new}), \code{tiers} (columns
 #'   \code{change} with the values \code{"added"}, \code{"removed"},
 #'   \code{"renamed"}, \code{"moved"}, \code{tierName}, \code{tierName.new}) and
 #'   \code{media} (columns \code{change}, \code{path}).
@@ -35,7 +39,7 @@
 #'
 #' @example inst/examples/helper_transcripts_compare.R
 #'
-helper_transcripts_compare <- function(x, y, gap = 0, digits = 3) {
+helper_transcripts_compare <- function(x, y, gap = 0, digits = 3, content = FALSE) {
 	.assert_transcript(x, arg = "x", missing = missing(x))
 	.assert_transcript(y, arg = "y", missing = missing(y))
 
@@ -86,11 +90,16 @@ helper_transcripts_compare <- function(x, y, gap = 0, digits = 3) {
 			if (nrow(only_y)) data.frame(startsec = only_y$startsec, endsec = only_y$endsec, change = "added", stringsAsFactors = FALSE))
 		joined <- .compare_join_regions(parts, gap)
 		joined$tierName <- tier
-		regions[[tier]] <- joined[, c("tierName", "startsec", "endsec", "change")]
+		if (isTRUE(content)) {
+			joined$content.old <- .compare_region_text(only_x, joined)
+			joined$content.new <- .compare_region_text(only_y, joined)
+		}
+		regions[[tier]] <- joined[, c("tierName", "startsec", "endsec", "change", if (isTRUE(content)) c("content.old", "content.new"))]
 	}
 	regions <- if (length(regions)) do.call(rbind, unname(regions)) else
 		data.frame(tierName = character(0), startsec = double(0), endsec = double(0),
 				   change = character(0), stringsAsFactors = FALSE)
+	if (isTRUE(content) && !nrow(regions)) { regions$content.old <- character(0); regions$content.new <- character(0) }
 	rownames(regions) <- NULL
 
 	paths_x <- unique(as.character(x@media$path))
@@ -127,6 +136,16 @@ helper_transcripts_compare <- function(x, y, gap = 0, digits = 3) {
 		if (!nrow(rows)) return(character(0))
 		paste(sprintf("%.*f", digits, rows$startsec), sprintf("%.*f", digits, rows$endsec), rows$content, sep = "\u241f")
 	}), tiers)
+}
+
+# the text of the annotations of one side that lie in each joined region
+.compare_region_text <- function(rows, joined) {
+	vapply(seq_len(nrow(joined)), function(i) {
+		if (!nrow(rows)) return("")
+		end <- ifelse(is.na(rows$endsec), rows$startsec, rows$endsec)
+		in_region <- rows$startsec >= joined$startsec[i] & end <= joined$endsec[i]
+		paste(rows$content[in_region], collapse = " | ")
+	}, character(1))
 }
 
 .compare_join_regions <- function(parts, gap) {
