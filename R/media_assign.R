@@ -129,7 +129,9 @@ media_assign <- function(x,
 	#    instead of O(N) grep, avoids quadratic blow-up on large corpora)
 	paths_by_id <- NULL
 	if (nzchar(namesExtractPattern)) {
-		media_ids   <- stringr::str_to_lower(stringr::str_extract(file.names, namesExtractPattern))
+		# the id from the name WITHOUT the extension: "rec05f.wav" with a pattern
+		# like "^[^_]+(?:_[^_]+)?" would otherwise take ".wav" into the id
+		media_ids   <- stringr::str_to_lower(stringr::str_extract(tools::file_path_sans_ext(file.names), namesExtractPattern))
 		paths_by_id <- split(paths.new, media_ids)
 	}
 
