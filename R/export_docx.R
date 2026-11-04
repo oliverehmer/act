@@ -114,6 +114,8 @@ export_docx <- function (   t,
 	from_profile <- .docx_profile_styles(doc, profile, symbol_chars)
 	doc <- from_profile$doc
 	character_rules <- from_profile$rules
+	layer_symbols <- .docx_layer_symbol_styles(doc, profile, result, plan, rendered$anchors, character_rules)
+	doc <- layer_symbols$doc
 	if (length(from_profile$created) > 0 && identical(profile$word$look, "file")) {
 		cli::cli_alert_info("Styles missing in the Word file, created from the profile: {.val {from_profile$created}}")
 	}
@@ -134,7 +136,6 @@ export_docx <- function (   t,
 		previous_main_row <- NA_integer_
 		emitted_any <- FALSE
 		space_lines <- isTRUE(profile$space.lines)
-		layer_look <- .docx_layer_look(profile, result)
 		line_in_row <- stats::ave(seq_len(nrow(plan)), plan$row, FUN = seq_along)
 		for (p in seq_len(nrow(plan))) {
 			row_p <- plan$row[p]
@@ -147,8 +148,9 @@ export_docx <- function (   t,
 				.docx_par_add(paragraphs, "", space_style_name)
 			}
 			if (isTRUE(result$show[row_p])) {
-				.docx_add_line_rules(paragraphs, plan$line[p], result$style[row_p], character_rules,
-				                     owners = .docx_symbol_owners(layer_look, rendered$anchors, row_p, line_in_row[p]))
+				.docx_add_line_rules(paragraphs, plan$line[p], result$style[row_p],
+				                     .docx_rules_of_row(character_rules, layer_symbols$styles, as.character(result$tierName[row_p])),
+				                     owners = .docx_symbol_owners(layer_symbols$styles, rendered$anchors, row_p, line_in_row[p], plan$line[p]))
 				if (isTRUE(result$is_main[row_p])) previous_main_row <- row_p
 				emitted_any <- TRUE
 			}
