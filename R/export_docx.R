@@ -120,6 +120,7 @@ export_docx <- function (   t,
 		cli::cli_alert_info("Styles missing in the Word file, created from the profile: {.val {from_profile$created}}")
 	}
 	paragraphs <- .docx_paragraphs_new(doc)
+	paragraphs$direct <- layer_symbols$direct
 	.docx_add_header(paragraphs, l, t, headerPreface, headerTitle,
 	                 headerSubtitle, headerDescription,
 	                 headerInsertSource)

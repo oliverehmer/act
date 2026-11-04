@@ -61,7 +61,8 @@
 			pattern <- if (identical(s$applies, "symbols")) .docx_symbol_class(symbol_chars) else s$pattern
 			if (!is.na(pattern) && nzchar(pattern)) {
 				rules[[length(rules) + 1]] <- list(pattern = pattern, style_id = xml2::xml_attr(node, "styleId"),
-				                                   symbols = identical(s$applies, "symbols"))
+				                                   symbols = identical(s$applies, "symbols"),
+				                                   bold = s$bold, italic = s$italic)
 			}
 		}
 	}
@@ -231,7 +232,7 @@
 		piece <- paste(chars[idx], collapse = "")
 		i <- idx[1]
 		if (is.na(owner[i]) && is.na(layer[i])) return(officer::ftext(piece))
-		officer::run_wordtext(piece, style_id = if (is.na(layer[i])) owner[i] else style_of_layer[[layer[i]]])
+		.docx_run_styled(paragraphs, piece, if (is.na(layer[i])) owner[i] else style_of_layer[[layer[i]]])
 	})
 	.docx_fpar_add(paragraphs, do.call(officer::fpar, unname(runs)), style)
 }
@@ -242,10 +243,14 @@
 # look of that layer. The look lives in a character style of its own, based on
 # the style for the symbols, so that changing it in Word changes every symbol of
 # the layer; layers of the same look share one. Returns the document and, per
-# layer tier with symbols, the id of its character style (NULL = not asked for).
+# layer tier with symbols, the id of its character style (NULL = not asked for),
+# and per style what bold and italic must be on the symbols themselves.
 .docx_layer_symbol_styles <- function(doc, profile, result, plan, anchors, rules) {
-	none <- list(doc = doc, styles = NULL)
 	base <- Filter(function(r) isTRUE(r$symbols), rules)
+	stated <- function(bold, italic) Filter(Negate(is.null), list(bold = bold, italic = italic))
+	direct <- list()
+	if (length(base) > 0) direct[[base[[length(base)]]$style_id]] <- stated(base[[length(base)]]$bold, base[[length(base)]]$italic)
+	none <- list(doc = doc, styles = NULL, direct = direct)
 	if (is.null(result) || length(base) == 0) return(none)
 	symbol_style <- Filter(function(s) identical(s$type, "character") && isTRUE(s$active) && identical(s$applies, "symbols") && isTRUE(s$from.layer), profile$styles)
 	if (length(symbol_style) == 0) return(none)
@@ -277,13 +282,35 @@
 			if (!exists) node <- .docx_style_create(xml, name, "character", base_word, based_type = "character")
 			if (from_profile || !exists) .docx_style_appearance(node, look, "character", keys = names(look))
 			made[[key]] <- xml2::xml_attr(node, "styleId")
+			own <- base[[length(base)]]
+			direct[[made[[key]]]] <- stated(if (!is.null(look$bold)) look$bold else own$bold,
+			                                if (!is.null(look$italic)) look$italic else own$italic)
 		}
 		style_ids[tier] <- made[[key]]
 	}
 	xml2::write_xml(xml, file = styles_file)
 	read_styles <- utils::getFromNamespace("read_docx_styles", "officer")
 	doc$styles <- read_styles(doc$package_dir)
-	list(doc = doc, styles = style_ids)
+	list(doc = doc, styles = style_ids, direct = direct)
+}
+
+# Bold and italic of a symbol stand on the run itself: in a Word style they are
+# toggles, "not bold" in a character style does not take the bold of a bold
+# paragraph away (and "bold" would take it off). Only direct format is absolute,
+# so a symbol stays as the profile says whatever its line is. The colour has no
+# such rule and stays in the style.
+.docx_run_styled <- function(paragraphs, text, style_id) {
+	look <- paragraphs$direct[[style_id]]
+	if (length(look) == 0) return(officer::run_wordtext(text, style_id = style_id))
+	structure(list(text = text, style_id = style_id, look = look), class = c("act_run_symbol", "run"))
+}
+
+#' @exportS3Method officer::to_wml
+to_wml.act_run_symbol <- function(x, add_ns = FALSE, ...) {
+	props <- sprintf("<w:rStyle w:val=\"%s\"/>", x$style_id)
+	if (!is.null(x$look$bold))   props <- c(props, sprintf("<w:b w:val=\"%s\"/>", if (isTRUE(x$look$bold)) "1" else "0"))
+	if (!is.null(x$look$italic)) props <- c(props, sprintf("<w:i w:val=\"%s\"/>", if (isTRUE(x$look$italic)) "1" else "0"))
+	paste0("<w:r><w:rPr>", paste(props, collapse = ""), "</w:rPr><w:t xml:space=\"preserve\">", .docx_xml_escape(x$text), "</w:t></w:r>")
 }
 
 # The rules of one line: in a layer line the symbols take the style of that layer.
