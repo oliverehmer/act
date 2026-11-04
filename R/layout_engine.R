@@ -4047,44 +4047,73 @@ compute_bracket_pairs <- function(ann) {
 	j_consumed <- lapply(open_counts, function(k) rep(FALSE, k))
 	claim_time <- lapply(open_counts, function(k) rep(NA_real_, k))
 
+	pair_i <- pair_x <- pair_j <- pair_occ <- integer(0)
 	add_pair <- function(i, x, j, occ, t_value) {
-		pairs <<- rbind(pairs, data.frame(
-			i_row = i, i_occurrence = x, j_row = j, j_occurrence = occ))
+		pair_i <<- c(pair_i, i)
+		pair_x <<- c(pair_x, x)
+		pair_j <<- c(pair_j, j)
+		pair_occ <<- c(pair_occ, occ)
 		j_consumed[[j]][occ] <<- TRUE
 		if (is.na(claim_time[[i]][x])) claim_time[[i]][x] <<- t_value
 	}
+	pairs_collected <- function() {
+		if (length(pair_i) == 0) return(pairs)
+		data.frame(i_row = pair_i, i_occurrence = pair_x,
+		           j_row = pair_j, j_occurrence = pair_occ)
+	}
 
 	sim_tolerance <- 0.1
+
+	# Only brackets around the follower's time can match; going through all of
+	# them for every follower made a whole recording quadratic (14.5 of 22 s at
+	# 6288 annotations). The margins keep the exact tests in find_best() decisive.
+	flat_i <- rep(main_rows, times = open_counts[main_rows])
+	flat_x <- sequence(open_counts[main_rows])
+	flat_start <- unlist(lapply(bracket_info[main_rows], function(info) info$fragment_start),
+	                     use.names = FALSE)
+	flat_end <- unlist(lapply(bracket_info[main_rows], function(info) info$fragment_end),
+	                   use.names = FALSE)
+	by_start <- order(flat_start)
+	sorted_start <- flat_start[by_start]
+	running_end <- cummax(flat_end[by_start])
+
+	brackets_near <- function(bracket_time) {
+		last <- findInterval(bracket_time + 1e-6, sorted_start)
+		first <- findInterval(bracket_time - end_tolerance - 1e-6, running_end) + 1L
+		if (first > last) return(integer(0))
+		# ascending = i, then x: with the score tolerance below, a tie depends on this order
+		sort(by_start[first:last])
+	}
 
 	find_best <- function(j, j_unit_start, bracket_time_j, used_targets,
 	                      allow_consumed, simultaneous_only) {
 		best <- NULL
 		best_score <- Inf
-		for (i in main_rows) {
+		for (k in brackets_near(bracket_time_j)) {
+			i <- flat_i[k]
+			x <- flat_x[k]
 			if (i == j) next
 			if (identical(ann$tierName[i], ann$tierName[j])) next
 			info_i <- bracket_info[[i]]
-			for (x in seq_len(nrow(info_i))) {
-				fx_start <- info_i$fragment_start[x]
-				fx_end   <- info_i$fragment_end[x]
-				earlier <- fx_start < j_unit_start ||
-					(fx_start == j_unit_start && i < j)
-				if (!earlier) next
-				start_diff <- abs(fx_start - j_unit_start)
-				if (simultaneous_only && start_diff > sim_tolerance) next
-				if (!simultaneous_only && allow_consumed &&
-				    start_diff <= sim_tolerance) next
-				if (bracket_time_j < fx_start - 1e-9) next
-				if (bracket_time_j >= fx_end + end_tolerance) next
-				if (!allow_consumed && j_consumed[[i]][x]) next
-				if (paste(i, x) %in% used_targets) next
-				if (!is.na(claim_time[[i]][x]) &&
-				    abs(bracket_time_j - claim_time[[i]][x]) > share_tolerance) next
-				score <- abs(info_i$time[x] - bracket_time_j)
-				if (score < best_score - 1e-9) {
-					best_score <- score
-					best <- c(i, x)
-				}
+			fx_start <- info_i$fragment_start[x]
+			fx_end   <- info_i$fragment_end[x]
+			earlier <- fx_start < j_unit_start ||
+				(fx_start == j_unit_start && i < j)
+			if (!earlier) next
+			start_diff <- abs(fx_start - j_unit_start)
+			if (simultaneous_only && start_diff > sim_tolerance) next
+			if (!simultaneous_only && allow_consumed &&
+			    start_diff <= sim_tolerance) next
+			if (bracket_time_j < fx_start - 1e-9) next
+			if (bracket_time_j >= fx_end + end_tolerance) next
+			if (!allow_consumed && j_consumed[[i]][x]) next
+			if (paste(i, x) %in% used_targets) next
+			if (!is.na(claim_time[[i]][x]) &&
+			    abs(bracket_time_j - claim_time[[i]][x]) > share_tolerance) next
+			score <- abs(info_i$time[x] - bracket_time_j)
+			if (score < best_score - 1e-9) {
+				best_score <- score
+				best <- c(i, x)
 			}
 		}
 		best
@@ -4150,7 +4179,7 @@ compute_bracket_pairs <- function(ann) {
 			}
 		}
 	}
-	pairs
+	pairs_collected()
 }
 
 # ======================================================================
