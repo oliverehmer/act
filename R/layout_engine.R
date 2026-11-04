@@ -2045,6 +2045,11 @@ apply_text_indent <- function(ann, i, rendered_cache, ref_main) {
 # memory in long sessions.
 .GRAPHEME_CACHE <- new.env(parent = emptyenv(), hash = TRUE)
 
+# R refuses a name over 10000 bytes, in every locale (measured 04.11.2026), and a
+# joined Mondada row of a whole recording is longer. Such a text stays out of the
+# memo: nothing may ask an environment for it, not even to read.
+.memo_key_fits <- function(key) nchar(key, type = "bytes") <= 10000L
+
 #' Helper: Split a text into graphemes
 #'
 #' Splits a character string into its user-perceived characters (grapheme
@@ -2063,6 +2068,7 @@ apply_text_indent <- function(ann, i, rendered_cache, ref_main) {
 helper_text_graphemes_split <- function(text) {
 	if (length(text) != 1L) cli::cli_abort("{.arg text} must be a single character string.")
 	if (is.na(text) || nchar(text) == 0) return(character(0))
+	if (!.memo_key_fits(text)) return(stringi::stri_split_boundaries(text, type = "character")[[1]])
 	cached <- .GRAPHEME_CACHE[[text]]
 	if (!is.null(cached)) return(cached)
 	result <- stringi::stri_split_boundaries(text, type = "character")[[1]]
@@ -5215,8 +5221,11 @@ apply_mm_span_stretch <- function(ann, mm_matches, all_anchor_chars,
 
 symbol_positions_in_text <- function(text, char_vector) {
 	key <- paste0(text, "\u0001", paste(char_vector, collapse = ""))
-	cached <- .SYMBOL_POSITIONS_CACHE[[key]]
-	if (!is.null(cached)) return(cached)
+	remember <- .memo_key_fits(key)
+	if (remember) {
+		cached <- .SYMBOL_POSITIONS_CACHE[[key]]
+		if (!is.null(cached)) return(cached)
+	}
 	graphemes <- helper_text_graphemes_split(text)
 	hits <- which(graphemes %in% char_vector)
 	result <- if (length(hits) == 0) {
@@ -5228,6 +5237,7 @@ symbol_positions_in_text <- function(text, char_vector) {
 		           occurrence = .running_occurrence(chars),
 		           index = hits)
 	}
+	if (!remember) return(result)
 	if (length(.SYMBOL_POSITIONS_CACHE) > 100000L) {
 		rm(list = ls(.SYMBOL_POSITIONS_CACHE, all.names = TRUE),
 		   envir = .SYMBOL_POSITIONS_CACHE)
