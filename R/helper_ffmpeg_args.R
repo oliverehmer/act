@@ -835,9 +835,9 @@ helper_media_video_timing_read <- function(filePath, videoOffset = NULL, videoFp
 	}
 	offset <- suppressWarnings(as.numeric(videoOffset)[1])
 	fps    <- suppressWarnings(as.numeric(videoFps)[1])
-	has_file <- length(filePath) == 1L && !is.na(filePath) && file.exists(filePath)
+	# the file is touched only when asked for it: a stat on a hanging drive holds R
 	if ((length(offset) == 0 || !is.finite(offset) || length(fps) == 0 || !is.finite(fps) || fps <= 0) &&
-	    has_file) {
+	    length(filePath) == 1L && !is.na(filePath) && file.exists(filePath)) {
 		from_file <- .ffmpeg_video_timing(filePath)
 		if (length(offset) == 0 || !is.finite(offset)) offset <- from_file$offset
 		if (length(fps) == 0 || !is.finite(fps) || fps <= 0) fps <- 1 / from_file$frame_dur
