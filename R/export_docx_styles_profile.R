@@ -198,9 +198,9 @@
 # One paragraph per line; where a character rule matches, the text is
 # written as a run with that character style. The text is the same
 # character for character, so the alignment holds. A later rule wins.
-.docx_add_line_rules <- function(doc, line, style, rules, owners = NULL) {
+.docx_add_line_rules <- function(paragraphs, line, style, rules, owners = NULL) {
 	if ((length(rules) == 0 && is.null(owners)) || is.na(line) || !nzchar(line)) {
-		return(officer::body_add_par(doc, value = line, style = style))
+		return(.docx_par_add(paragraphs, line, style))
 	}
 	chars <- helper_text_graphemes_split(line)
 	owner <- rep(NA_character_, length(chars))
@@ -221,7 +221,7 @@
 		layer[owners$pos[ok]] <- owners$tier[ok]
 	}
 	if (all(is.na(owner)) && all(is.na(layer))) {
-		return(officer::body_add_par(doc, value = line, style = style))
+		return(.docx_par_add(paragraphs, line, style))
 	}
 	key <- paste(ifelse(is.na(owner), "", owner), ifelse(is.na(layer), "", layer))
 	group <- cumsum(c(TRUE, key[-1] != key[-length(key)]))
@@ -233,7 +233,7 @@
 		if (is.na(layer[i])) return(officer::run_wordtext(piece, style_id = owner[i]))
 		.docx_run_symbol(piece, owner[i], look_of[[layer[i]]])
 	})
-	officer::body_add_fpar(doc, do.call(officer::fpar, unname(runs)), style = style)
+	.docx_fpar_add(paragraphs, do.call(officer::fpar, unname(runs)), style)
 }
 
 # ===== SYMBOLS IN THE LOOK OF THEIR LAYER LINE =====

@@ -117,9 +117,10 @@ export_docx <- function (   t,
 	if (length(from_profile$created) > 0 && identical(profile$word$look, "file")) {
 		cli::cli_alert_info("Styles missing in the Word file, created from the profile: {.val {from_profile$created}}")
 	}
-	doc <- .docx_add_header(doc, l, t, headerPreface, headerTitle,
-	                        headerSubtitle, headerDescription,
-	                        headerInsertSource)
+	paragraphs <- .docx_paragraphs_new(doc)
+	.docx_add_header(paragraphs, l, t, headerPreface, headerTitle,
+	                 headerSubtitle, headerDescription,
+	                 headerInsertSource)
 
 	if (!is.null(result)) {
 		style_default_name <- .layout_style_base_get(l, "transcript.default")$docx.template.name
@@ -139,23 +140,24 @@ export_docx <- function (   t,
 			row_p <- plan$row[p]
 			if (mondada) {
 				if (space_lines && emitted_any && isTRUE(result$is_main[row_p])) {
-					doc <- officer::body_add_par(doc, "", style = space_style_name)
+					.docx_par_add(paragraphs, "", space_style_name)
 				}
 			} else if (space_lines && emitted_any && isTRUE(result$is_main[row_p]) &&
 			           !identical(row_p, previous_main_row)) {
-				doc <- officer::body_add_par(doc, "", style = space_style_name)
+				.docx_par_add(paragraphs, "", space_style_name)
 			}
 			if (isTRUE(result$show[row_p])) {
-				doc <- .docx_add_line_rules(doc, plan$line[p], result$style[row_p], character_rules,
-				                            owners = .docx_symbol_owners(layer_look, rendered$anchors, row_p, line_in_row[p]))
+				.docx_add_line_rules(paragraphs, plan$line[p], result$style[row_p], character_rules,
+				                     owners = .docx_symbol_owners(layer_look, rendered$anchors, row_p, line_in_row[p]))
 				if (isTRUE(result$is_main[row_p])) previous_main_row <- row_p
 				emitted_any <- TRUE
 			}
 		}
 		if (emitted_any) {
-			doc <- officer::body_add_par(doc, "", style = space_style_name)
+			.docx_par_add(paragraphs, "", space_style_name)
 		}
 	}
+	doc <- .docx_paragraphs_insert(doc, paragraphs)
 
 	if (!is.null(pathOutput)) {
 		base_path <- tools::file_path_sans_ext(pathOutput)
@@ -199,32 +201,103 @@ export_docx <- function (   t,
 	return(results)
 }
 
-.docx_add_header <- function(doc, l, t, headerPreface, headerTitle,
+.docx_add_header <- function(paragraphs, l, t, headerPreface, headerTitle,
                              headerSubtitle, headerDescription,
                              headerInsertSource) {
-	if (!isTRUE(l[["header.insert"]])) return(doc)
-	add_block <- function(doc, value, style_name) {
+	if (!isTRUE(l[["header.insert"]])) return(invisible(NULL))
+	add_block <- function(value, style_name) {
 		value <- as.character(value)
 		value <- value[!is.na(value)]
-		if (length(value) == 0 || !any(nzchar(value))) return(doc)
+		if (length(value) == 0 || !any(nzchar(value))) return(invisible(NULL))
 		value <- paste(value, collapse = "\n")
 		style <- .layout_style_base_get(l, style_name)$docx.template.name
 		for (line in unlist(stringr::str_split(value, "\n"))) {
-			doc <- officer::body_add_par(doc, value = line, style = style)
+			.docx_par_add(paragraphs, line, style)
 		}
-		doc
 	}
-	doc <- add_block(doc, headerPreface,     "header.preface")
-	doc <- add_block(doc, headerTitle,       "header.title")
-	doc <- add_block(doc, headerSubtitle,    "header.subtitle")
-	doc <- add_block(doc, headerDescription, "header.info")
+	add_block(headerPreface,     "header.preface")
+	add_block(headerTitle,       "header.title")
+	add_block(headerSubtitle,    "header.subtitle")
+	add_block(headerDescription, "header.info")
 	if (isTRUE(headerInsertSource) && nrow(t@annotations) > 0) {
 		source_line <- paste0("(", t@name, ", ",
 			helper_time_format(min(t@annotations$startsec), format = .layout_time_format(l)), "-",
 			helper_time_format(max(t@annotations$endsec), format = .layout_time_format(l)), ")")
-		doc <- officer::body_add_par(doc, value = source_line,
-			style = .layout_style_base_get(l, "header.subtitle")$docx.template.name)
+		.docx_par_add(paragraphs, source_line, .layout_style_base_get(l, "header.subtitle")$docx.template.name)
 	}
+	invisible(NULL)
+}
+
+# ===== THE PARAGRAPHS OF THE DOCUMENT =====
+# officer::body_add_par() looks for its place in the document and copies the list
+# of all paragraphs for every paragraph: 333 s for 6288 annotations, 17 s when they
+# are collected as text and go in at once. The XML is the same, byte for byte.
+.docx_paragraphs_new <- function(doc) {
+	paragraphs <- new.env(parent = emptyenv())
+	paragraphs$styles <- officer::styles_info(doc, type = "paragraph")
+	paragraphs$xml <- character(1024)
+	paragraphs$n <- 0L
+	paragraphs
+}
+
+.docx_paragraph_put <- function(paragraphs, xml) {
+	force(xml)
+	paragraphs$n <- paragraphs$n + 1L
+	if (paragraphs$n > length(paragraphs$xml)) length(paragraphs$xml) <- 2L * length(paragraphs$xml)
+	paragraphs$xml[paragraphs$n] <- xml
+	invisible(NULL)
+}
+
+.docx_style_id <- function(paragraphs, style) {
+	styles <- paragraphs$styles
+	if (is.null(style)) return(styles$style_id[which(styles$is_default)[1]])
+	i <- match(style, styles$style_name)
+	if (is.na(i)) {
+		cli::cli_abort("Could not match any paragraph style named {.val {style}} in the Word file: {.val {styles$style_name}}.")
+	}
+	styles$style_id[i]
+}
+
+# text of a paragraph, as officer writes it (.docx_xml_escape also takes quotes, for attributes)
+.docx_text_escape <- function(text) {
+	text <- enc2utf8(as.character(text))
+	text <- gsub("&", "&amp;", text, fixed = TRUE, useBytes = TRUE)
+	text <- gsub("<", "&lt;", text, fixed = TRUE, useBytes = TRUE)
+	text <- gsub(">", "&gt;", text, fixed = TRUE, useBytes = TRUE)
+	Encoding(text) <- "UTF-8"
+	text
+}
+
+.docx_par_add <- function(paragraphs, value, style) {
+	.docx_paragraph_put(paragraphs, paste0("<w:p><w:pPr><w:pStyle w:val=\"", .docx_style_id(paragraphs, style),
+		"\"/></w:pPr><w:r><w:t xml:space=\"preserve\">", .docx_text_escape(value), "</w:t></w:r></w:p>"))
+}
+
+.docx_fpar_add <- function(paragraphs, value, style) {
+	.docx_paragraph_put(paragraphs, officer::to_wml(value, add_ns = FALSE, style_id = .docx_style_id(paragraphs, style)))
+}
+
+.docx_paragraphs_insert <- function(doc, paragraphs) {
+	if (paragraphs$n == 0L) return(doc)
+	body <- xml2::xml_find_first(officer::docx_body_xml(doc), "/w:document/w:body")
+	parsed <- xml2::read_xml(paste0(
+		"<w:body xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"",
+		" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\"",
+		" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\"",
+		" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\">",
+		paste(paragraphs$xml[seq_len(paragraphs$n)], collapse = ""), "</w:body>"))
+	section <- xml2::xml_find_first(body, "w:sectPr")
+	for (paragraph in xml2::xml_children(parsed)) {
+		if (inherits(section, "xml_missing")) xml2::xml_add_child(body, paragraph)
+		else xml2::xml_add_sibling(section, paragraph, .where = "before")
+	}
+	# officer's cursor must know them, or what a caller adds to the returned document
+	# lands before the transcript. Reading the file back instead would turn on
+	# evenAndOddHeaders in the next print (officer reads w:val="0" as set).
+	blocks <- xml2::xml_name(xml2::xml_children(body))
+	blocks <- blocks[blocks != "sectPr"]
+	doc$officer_cursor$nodes_names <- blocks
+	doc$officer_cursor$which <- length(blocks)
 	doc
 }
 
