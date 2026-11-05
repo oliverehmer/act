@@ -16,7 +16,7 @@ Vector of character strings: \code{"video"}, \code{"audio"} or
 \description{
 Tells video from sound files by their extension, using the options
 \code{act.media.fileformats.video} and \code{act.media.fileformats.audio}.
-These two options are the only list of media formats in act and iclo.
+These two options are the only list of media formats in act and mica.
 }
 \examples{
 act::helper_media_type(c("rec.mp4", "rec.WAV", "still.png"))

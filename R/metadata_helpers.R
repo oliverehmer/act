@@ -75,7 +75,7 @@ helper_metadata_ffmpeg_argv <- function(sourcePath, startsec, clipID, fps = NULL
 #' requires Perl on the system). When `exifr` is not installed or `perl`
 #' is not on the system path, the function silently returns without
 #' modifying the file. The single setup hint is emitted by
-#' `iclo::config()` (not by this helper, to keep it usable as a quiet
+#' `mica::config()` (not by this helper, to keep it usable as a quiet
 #' library primitive).
 #'
 #' Uses `-overwrite_original` to avoid `.jpg_original` backup files.

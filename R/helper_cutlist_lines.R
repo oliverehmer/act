@@ -1,6 +1,6 @@
 #' Write the lines of a terminal script (cut list)
 #'
-#' One writer for every line of the render scripts that act and iclo save
+#' One writer for every line of the render scripts that act and mica save
 #' with \link{helper_cutlist_save}: ffmpeg and exiftool calls, folders,
 #' deletions, comments, messages and calls of other scripts. The caller
 #' collects the parts of each line (for ffmpeg the argument vector of

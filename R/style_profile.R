@@ -547,7 +547,7 @@ helper_style_video <- function(style, tierNames) {
 	if (length(pattern) != 1 || is.na(pattern) || !nzchar(pattern)) {
 		cli::cli_abort(c(
 			"Style {.val {style_name}} refers to the tier type {.val {tiers}}, which is not defined.",
-			"i" = "Set the option {.field act.tier.types} (a named vector type = pattern), e.g. with {.code iclo::config()}."))
+			"i" = "Set the option {.field act.tier.types} (a named vector type = pattern), e.g. with {.code mica::config()}."))
 	}
 	pattern
 }

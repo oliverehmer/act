@@ -53,7 +53,7 @@ helper_program_paths_detect <- function() {
 
 # Called at package load when the options are empty or point nowhere, so
 # "open in Praat/ELAN" works without configuration. A path set later (e.g. by
-# a config file) wins, unless it points nowhere: iclo::config() then calls
+# a config file) wins, unless it points nowhere: mica::config() then calls
 # helper_program_paths_detect() again.
 .act_detect_programs <- function() {
 	helper_program_paths_detect()

@@ -13,7 +13,7 @@
 helper_progress_set <- function(title, total) {
 	if (!exists("act.environment", mode = "environment")) return(invisible(NULL))
 	# the state and the callback come before the console switch: a caller (the
-	# iclo viewer) shows the progress while the console bars are off
+	# mica viewer) shows the progress while the console bars are off
 	act.environment$pb_state <- list(start = Sys.time(), current = 0, total = max(1, total), title = title)
 	.progress_callback_call(title, 0, max(1, total))
 	if (!getOption("act.showprogress", TRUE)) return(invisible(NULL))
@@ -114,8 +114,8 @@ helper_progress_callback_get <- function() {
 	invisible(NULL)
 }
 
-# Progress bar geometry, kept in sync with iclo (.ICLO_PROGRESS_* constants in
-# iclo/R/config.R; act must not read iclo, so the values are duplicated here):
+# Progress bar geometry, kept in sync with mica (.MICA_PROGRESS_* constants in
+# mica/R/config.R; act must not read mica, so the values are duplicated here):
 # label column 28 = longest bar label ("Scanning sequences folders", 26) + 2,
 # total width 80 = right edge of the cli section rules. The fixed-width tail
 # (15 chars, sized for "(59m 20s left)") keeps the bar itself at a constant
@@ -123,7 +123,7 @@ helper_progress_callback_get <- function() {
 .ACT_PROGRESS_LABEL_WIDTH <- 28L
 .ACT_PROGRESS_TOTAL_WIDTH <- 80L
 
-# Label of an export bar ("Exporting eaf, textgrid"); iclo builds its export
+# Label of an export bar ("Exporting eaf, textgrid"); mica builds its export
 # bars with it as well. A list too long for the label column becomes a count,
 # so the bar keeps its width.
 .progress_export_label <- function(formats) {
@@ -137,7 +137,7 @@ helper_progress_callback_get <- function() {
 #'
 #' Formats the remaining time of a loop as a fixed-width tail
 #' \code{" (%7s left)"} (15 characters, fits "59m 20s"), estimated from the
-#' elapsed time per finished item. The progress bars of act and iclo use it.
+#' elapsed time per finished item. The progress bars of act and mica use it.
 #'
 #' @param start POSIXct; start time of the loop.
 #' @param current Integer; number of finished items.

@@ -53,7 +53,7 @@ media_build <- function(paths) {
 #'
 #' Tells video from sound files by their extension, using the options
 #' \code{act.media.fileformats.video} and \code{act.media.fileformats.audio}.
-#' These two options are the only list of media formats in act and iclo.
+#' These two options are the only list of media formats in act and mica.
 #'
 #' @param filePaths Vector of character strings; file paths or names.
 #'

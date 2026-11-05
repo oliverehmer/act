@@ -25,7 +25,7 @@ Uses the bundled exiftool from the \code{exifr} package (which itself
 requires Perl on the system). When \code{exifr} is not installed or \code{perl}
 is not on the system path, the function silently returns without
 modifying the file. The single setup hint is emitted by
-\code{iclo::config()} (not by this helper, to keep it usable as a quiet
+\code{mica::config()} (not by this helper, to keep it usable as a quiet
 library primitive).
 }
 \details{

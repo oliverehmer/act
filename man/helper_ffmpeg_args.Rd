@@ -63,7 +63,7 @@ Character vector of FFmpeg arguments.
 }
 \description{
 Builds the argument vector (without the program name) for one FFmpeg call
-that writes a single image (JPG or PNG). All image outputs of act and iclo
+that writes a single image (JPG or PNG). All image outputs of act and mica
 are built here, so the rules for reading video sources apply in one place:
 \itemize{
 \item The seek is done in two stages: a fast seek to one second before

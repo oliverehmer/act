@@ -34,7 +34,7 @@ this value is written as the script variable of the input file
 Character vector with the script lines.
 }
 \description{
-One writer for every line of the render scripts that act and iclo save
+One writer for every line of the render scripts that act and mica save
 with \link{helper_cutlist_save}: ffmpeg and exiftool calls, folders,
 deletions, comments, messages and calls of other scripts. The caller
 collects the parts of each line (for ffmpeg the argument vector of

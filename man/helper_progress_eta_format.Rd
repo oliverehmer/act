@@ -19,5 +19,5 @@ Character string.
 \description{
 Formats the remaining time of a loop as a fixed-width tail
 \code{" (\%7s left)"} (15 characters, fits "59m 20s"), estimated from the
-elapsed time per finished item. The progress bars of act and iclo use it.
+elapsed time per finished item. The progress bars of act and mica use it.
 }
