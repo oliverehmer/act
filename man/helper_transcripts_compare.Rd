@@ -4,7 +4,14 @@
 \alias{helper_transcripts_compare}
 \title{Helper: Compare two versions of a transcript}
 \usage{
-helper_transcripts_compare(x, y, gap = 0, digits = 3, content = FALSE)
+helper_transcripts_compare(
+  x,
+  y,
+  gap = 0,
+  digits = 3,
+  content = FALSE,
+  pairs = FALSE
+)
 }
 \arguments{
 \item{x}{Transcript object; the older version.}
@@ -20,6 +27,12 @@ touching and overlapping regions.}
 \item{content}{Logical; if \code{TRUE}, \code{regions} gets the columns
 \code{content.old} and \code{content.new}: the text of the removed and of the
 added annotations in the region (several joined by \code{" | "}).}
+
+\item{pairs}{Logical; if \code{TRUE}, the list gets a fourth data frame
+\code{annotations}: one row per changed annotation of the tiers that exist in
+both versions. An annotation of \code{x} and one of \code{y} form a pair when
+they overlap in time, the largest overlap first and each annotation at most
+once; what stays without a partner is \code{"added"} or \code{"removed"}.}
 }
 \value{
 List with three data frames: \code{regions} (columns \code{tierName},
@@ -28,7 +41,11 @@ List with three data frames: \code{regions} (columns \code{tierName},
 \code{content.old}, \code{content.new}), \code{tiers} (columns
 \code{change} with the values \code{"added"}, \code{"removed"},
 \code{"renamed"}, \code{"moved"}, \code{tierName}, \code{tierName.new}) and
-\code{media} (columns \code{change}, \code{path}).
+\code{media} (columns \code{change}, \code{path}). With \code{pairs} also
+\code{annotations} (columns \code{tierName}, \code{startsec.old},
+\code{endsec.old}, \code{content.old}, \code{startsec.new}, \code{endsec.new},
+\code{content.new}, \code{change} with the values \code{"text"}, \code{"time"},
+\code{"text, time"}, \code{"added"}, \code{"removed"}).
 }
 \description{
 Compares the content of two versions of a transcript and reports where they

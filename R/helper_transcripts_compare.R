@@ -24,6 +24,11 @@
 #' @param content Logical; if \code{TRUE}, \code{regions} gets the columns
 #'   \code{content.old} and \code{content.new}: the text of the removed and of the
 #'   added annotations in the region (several joined by \code{" | "}).
+#' @param pairs Logical; if \code{TRUE}, the list gets a fourth data frame
+#'   \code{annotations}: one row per changed annotation of the tiers that exist in
+#'   both versions. An annotation of \code{x} and one of \code{y} form a pair when
+#'   they overlap in time, the largest overlap first and each annotation at most
+#'   once; what stays without a partner is \code{"added"} or \code{"removed"}.
 #'
 #' @return List with three data frames: \code{regions} (columns \code{tierName},
 #'   \code{startsec}, \code{endsec}, \code{change} with the values
@@ -31,7 +36,11 @@
 #'   \code{content.old}, \code{content.new}), \code{tiers} (columns
 #'   \code{change} with the values \code{"added"}, \code{"removed"},
 #'   \code{"renamed"}, \code{"moved"}, \code{tierName}, \code{tierName.new}) and
-#'   \code{media} (columns \code{change}, \code{path}).
+#'   \code{media} (columns \code{change}, \code{path}). With \code{pairs} also
+#'   \code{annotations} (columns \code{tierName}, \code{startsec.old},
+#'   \code{endsec.old}, \code{content.old}, \code{startsec.new}, \code{endsec.new},
+#'   \code{content.new}, \code{change} with the values \code{"text"}, \code{"time"},
+#'   \code{"text, time"}, \code{"added"}, \code{"removed"}).
 #'
 #' @seealso \link{helper_transcript_patch_make}
 #'
@@ -39,7 +48,7 @@
 #'
 #' @example inst/examples/helper_transcripts_compare.R
 #'
-helper_transcripts_compare <- function(x, y, gap = 0, digits = 3, content = FALSE) {
+helper_transcripts_compare <- function(x, y, gap = 0, digits = 3, content = FALSE, pairs = FALSE) {
 	.assert_transcript(x, arg = "x", missing = missing(x))
 	.assert_transcript(y, arg = "y", missing = missing(y))
 
@@ -77,6 +86,7 @@ helper_transcripts_compare <- function(x, y, gap = 0, digits = 3, content = FALS
 		stringsAsFactors = FALSE)
 
 	regions <- list()
+	annotations <- list()
 	for (tier in intersect(tiers_x, tiers_y)) {
 		occ_x <- .patch_occurrence(sig_x[[tier]])
 		occ_y <- .patch_occurrence(sig_y[[tier]])
@@ -85,6 +95,7 @@ helper_transcripts_compare <- function(x, y, gap = 0, digits = 3, content = FALS
 		only_x <- rows_x[!(occ_x %in% occ_y), , drop = FALSE]
 		only_y <- rows_y[!(occ_y %in% occ_x), , drop = FALSE]
 		if (!nrow(only_x) && !nrow(only_y)) next
+		if (isTRUE(pairs)) annotations[[tier]] <- .compare_pairs(only_x, only_y, tier)
 		parts <- rbind(
 			if (nrow(only_x)) data.frame(startsec = only_x$startsec, endsec = only_x$endsec, change = "removed", stringsAsFactors = FALSE),
 			if (nrow(only_y)) data.frame(startsec = only_y$startsec, endsec = only_y$endsec, change = "added", stringsAsFactors = FALSE))
@@ -109,7 +120,64 @@ helper_transcripts_compare <- function(x, y, gap = 0, digits = 3, content = FALS
 		path   = c(setdiff(paths_y, paths_x), setdiff(paths_x, paths_y)),
 		stringsAsFactors = FALSE)
 
-	list(regions = regions, tiers = tiers, media = media)
+	out <- list(regions = regions, tiers = tiers, media = media)
+	if (isTRUE(pairs)) {
+		out$annotations <- if (length(annotations)) do.call(rbind, unname(annotations)) else .compare_pairs_empty()
+		rownames(out$annotations) <- NULL
+	}
+	out
+}
+
+# The changed annotations of one tier as pairs (old, new): the largest time overlap
+# pairs first, every annotation at most once. A split or a merge keeps the part
+# with the largest overlap as the pair; the rest is added or removed.
+.compare_pairs <- function(old, new, tier) {
+	end_old <- ifelse(is.na(old$endsec), old$startsec, old$endsec)
+	end_new <- ifelse(is.na(new$endsec), new$startsec, new$endsec)
+	pair_new <- rep(NA_integer_, nrow(old))
+	if (nrow(old) && nrow(new)) {
+		ov <- outer(seq_len(nrow(old)), seq_len(nrow(new)), function(i, j)
+			pmin(end_old[i], end_new[j]) - pmax(old$startsec[i], new$startsec[j]))
+		# two points at the same time overlap by 0 and still belong together
+		ov[ov < 0] <- NA
+		repeat {
+			if (all(is.na(ov))) break
+			k <- which(ov == max(ov, na.rm = TRUE), arr.ind = TRUE)[1, ]
+			pair_new[k[1]] <- k[2]
+			ov[k[1], ] <- NA
+			ov[, k[2]] <- NA
+		}
+	}
+	used_new <- pair_new[!is.na(pair_new)]
+	rows <- list()
+	for (i in seq_len(nrow(old))) {
+		j <- pair_new[i]
+		if (is.na(j)) {
+			rows[[length(rows) + 1L]] <- data.frame(tierName = tier, startsec.old = old$startsec[i], endsec.old = old$endsec[i],
+				content.old = old$content[i], startsec.new = NA_real_, endsec.new = NA_real_, content.new = NA_character_,
+				change = "removed", stringsAsFactors = FALSE)
+			next
+		}
+		same_text <- identical(old$content[i], new$content[j])
+		same_time <- identical(old$startsec[i], new$startsec[j]) && identical(old$endsec[i], new$endsec[j])
+		rows[[length(rows) + 1L]] <- data.frame(tierName = tier, startsec.old = old$startsec[i], endsec.old = old$endsec[i],
+			content.old = old$content[i], startsec.new = new$startsec[j], endsec.new = new$endsec[j], content.new = new$content[j],
+			change = if (!same_text && !same_time) "text, time" else if (!same_text) "text" else "time", stringsAsFactors = FALSE)
+	}
+	for (j in setdiff(seq_len(nrow(new)), used_new)) {
+		rows[[length(rows) + 1L]] <- data.frame(tierName = tier, startsec.old = NA_real_, endsec.old = NA_real_, content.old = NA_character_,
+			startsec.new = new$startsec[j], endsec.new = new$endsec[j], content.new = new$content[j],
+			change = "added", stringsAsFactors = FALSE)
+	}
+	out <- do.call(rbind, rows)
+	at <- ifelse(is.na(out$startsec.new), out$startsec.old, out$startsec.new)
+	out[order(at), , drop = FALSE]
+}
+
+.compare_pairs_empty <- function() {
+	data.frame(tierName = character(0), startsec.old = double(0), endsec.old = double(0), content.old = character(0),
+			   startsec.new = double(0), endsec.new = double(0), content.new = character(0), change = character(0),
+			   stringsAsFactors = FALSE)
 }
 
 .compare_tier_order <- function(t) {
