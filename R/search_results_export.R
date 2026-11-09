@@ -153,7 +153,7 @@ search_results_export <- function(s,
 		}
 	} else {
 		if (!file.exists(path)) {
-			openxlsx::write.xlsx(s@results, file=path, sheetName="data", overwrite=TRUE)
+			.search_results_write_xlsx(s@results, path)
 		} else if(file.exists(path) & overwrite) {
 			file.remove(path)
 			#wait until file does not exist anymore
@@ -167,10 +167,21 @@ search_results_export <- function(s,
 			if (file.exists(path)) {
 				cli::cli_warn("Unable to overwrite existing file. No .xlsx file written")
 			} else {
-				openxlsx::write.xlsx(s@results, file=path, sheetName="data", overwrite=TRUE)
+				.search_results_write_xlsx(s@results, path)
 			}
 		} else {
 			cli::cli_warn("Destination file already exists. No .xlsx file written")
 		}
 	}
+}
+
+# The results as an Excel file (sheet "data"). openxlsx2, as everywhere in
+# act and mica: a missing value is an empty cell (na.strings = NULL; the
+# default of openxlsx2 would write #N/A).
+.search_results_write_xlsx <- function(results, path) {
+	wb <- openxlsx2::wb_workbook()
+	wb <- openxlsx2::wb_add_worksheet(wb, "data")
+	wb <- openxlsx2::wb_add_data(wb, sheet = "data", x = results, na.strings = NULL)
+	openxlsx2::wb_save(wb, path, overwrite = TRUE)
+	invisible(path)
 }

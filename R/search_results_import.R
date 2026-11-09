@@ -36,7 +36,12 @@ search_results_import <- function(path,
 			rownames(temp)<- temp$resultID
 		}
 	} else {
-		temp <- openxlsx::read.xlsx(xlsxFile=path, sheet=sheetName)
+		# openxlsx2 as everywhere in act and mica; the text "NA" stays text (the
+		# old openxlsx read it as missing). Spaces in column names become dots,
+		# as the old reader did, so that older exports keep their names.
+		temp <- openxlsx2::read_xlsx(path, sheet = sheetName, skip_empty_rows = TRUE, skip_empty_cols = TRUE, check_names = FALSE)
+		rownames(temp) <- NULL
+		colnames(temp) <- gsub(" ", ".", colnames(temp), fixed = TRUE)
 	}
 	
 	# Normalize column names: both new snake_case exports and old legacy formats
