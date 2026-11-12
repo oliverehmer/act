@@ -133,7 +133,8 @@ export_textgrid <- function(t,
 				
 				myTG <- append(myTG, sprintf("    item [%s]:", tierNr))
 				myTG <- append(myTG,         "        class = \"IntervalTier\" ")
-				myTG <- append(myTG, sprintf("        name = \"%s\" " , t@tiers$name[tierNr]))
+				# a quote in a name is doubled like in a text, or the name ends there when the file is read
+				myTG <- append(myTG, sprintf("        name = \"%s\" " , stringr::str_replace_all(t@tiers$name[tierNr], "\"", "\"\"")))
 				myTG <- append(myTG, sprintf("        xmin = %s ", as.character(textgrid.startsec)))
 				myTG <- append(myTG, sprintf("        xmax = %s ", as.character(textgrid.endsec)))
 				myTG <- append(myTG, sprintf("        intervals: size = %s " , intervalNr))
@@ -159,7 +160,7 @@ export_textgrid <- function(t,
 				
 				myTG <- append(myTG, sprintf("    item [%s]:", tierNr))
 				myTG <- append(myTG,         "        class = \"TextTier\" ")
-				myTG <- append(myTG, sprintf("        name = \"%s\" " , t@tiers$name[tierNr]))
+				myTG <- append(myTG, sprintf("        name = \"%s\" " , stringr::str_replace_all(t@tiers$name[tierNr], "\"", "\"\"")))
 				myTG <- append(myTG, sprintf("        xmin = %s ", as.character(textgrid.startsec)))
 				myTG <- append(myTG, sprintf("        xmax = %s ", as.character(textgrid.endsec)))
 				myTG <- append(myTG, sprintf("        points: size = %s " , pointNr))

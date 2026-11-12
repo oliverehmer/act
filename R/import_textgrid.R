@@ -115,11 +115,13 @@ import_textgrid <- function(filePath=NULL,
 	t@length.sec <- max(as.double(alltimes[[1]][,4]))
 	
 	#== extract tier info
-	regex_tierinfo <- '(?<!Object\\s)(?:class\\s=\\s")(.+?)(?s:\\".*?name\\s=\\s")(.*?)(?s:\\".*?xmin\\s=)(.*\\d)(?s:.*?xmax\\s=)(.*\\d)(?s:.*?(?:intervals|points):\\ssize\\s=)(.*\\d)'
+	regex_tierinfo <- '(?<!Object\\s)(?:class\\s=\\s")(.+?)(?s:\\".*?name\\s=\\s")((?:[^"\\r\\n]|"")*)(?s:\\".*?xmin\\s=)(.*\\d)(?s:.*?xmax\\s=)(.*\\d)(?s:.*?(?:intervals|points):\\ssize\\s=)(.*\\d)'
 	tierinfo <- stringr::str_match_all(mytg.merge, regex_tierinfo)
 	tierinfo <- do.call(rbind, lapply(tierinfo, data.frame, stringsAsFactors=FALSE))
 	colnames(tierinfo) <- c("none","type","tierName", "xmin","xmax","size")
 	tierinfo <- tierinfo[,c("type","tierName","xmin","xmax","size")]
+	# Praat doubles a quote inside a name, like inside a text
+	tierinfo$tierName <- stringr::str_replace_all(tierinfo$tierName, "\"\"", "\"")
 	
 	tierinfo$xmin <- as.double(tierinfo$xmin)
 	tierinfo$xmax <- as.double(tierinfo$xmax)
