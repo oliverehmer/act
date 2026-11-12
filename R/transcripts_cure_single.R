@@ -37,6 +37,12 @@ transcripts_cure_single <- function (t,
 
 	.assert_transcript(t, missing = missing(t))
 
+	# a transcript an older version read from an eaf without annotations (and a
+	# cache has kept since) holds a table without columns: the exports need them
+	if (ncol(t@annotations)==0) {
+		t@annotations <- .emptyAnnotations
+	}
+
 	#--- annotationsTimesReversed
 	annotationsTimesReversed.deleted.count <- 0
 	if (annotationsTimesReversed) {
