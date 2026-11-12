@@ -24,7 +24,8 @@ export_docx(
   mainTierNames = NULL,
   alignChars = NULL,
   alignModes = NULL,
-  style = NULL
+  style = NULL,
+  headerTable = NULL
 )
 }
 \arguments{
@@ -67,6 +68,8 @@ export_docx(
 \item{alignModes}{Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the tier styles of the profile.}
 
 \item{style}{Transcript profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. \code{NULL} uses the profile \code{"act"}.}
+
+\item{headerTable}{Data frame or \code{NULL}; a small table put right after the preface (e.g. a status table to tick). The column names are the head row, every row of the data frame a table row, all cells as text. The cells take the Word style of the preface, the columns fit their text. \code{NULL} adds no table.}
 }
 \value{
 Officer doc; transcript as object from library officer.

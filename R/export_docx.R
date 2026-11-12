@@ -31,6 +31,7 @@
 #' @param alignChars Named vector of character strings; anchor characters per layer tier (names = tier names, values = the characters). \code{NULL} derives them from the tier styles of the profile.
 #' @param alignModes Named vector of character strings; alignment mode per layer tier (\code{"bracket"} or \code{"point"}). \code{NULL} derives the mode from the tier styles of the profile.
 #' @param style Transcript profile: the name of a profile, the path of a profile file or a profile read with \code{helper_style_read}. \code{NULL} uses the profile \code{"act"}.
+#' @param headerTable Data frame or \code{NULL}; a small table put right after the preface (e.g. a status table to tick). The column names are the head row, every row of the data frame a table row, all cells as text. The cells take the Word style of the preface, the columns fit their text. \code{NULL} adds no table.
 #'
 #' @return Officer doc; transcript as object from library officer.
 #'
@@ -59,7 +60,8 @@ export_docx <- function (   t,
 							mainTierNames                = NULL,
 							alignChars                   = NULL,
 							alignModes                   = NULL,
-							style                        = NULL
+							style                        = NULL,
+							headerTable                  = NULL
 ) {
 	.assert_transcript(t, missing = missing(t))
 	l <- .style_layout(style)
@@ -123,7 +125,7 @@ export_docx <- function (   t,
 	paragraphs$direct <- layer_symbols$direct
 	.docx_add_header(paragraphs, l, t, headerPreface, headerTitle,
 	                 headerSubtitle, headerDescription,
-	                 headerInsertSource)
+	                 headerInsertSource, headerTable)
 
 	if (!is.null(result)) {
 		style_default_name <- .layout_style_base_get(l, "transcript.default")$docx.template.name
@@ -206,7 +208,7 @@ export_docx <- function (   t,
 
 .docx_add_header <- function(paragraphs, l, t, headerPreface, headerTitle,
                              headerSubtitle, headerDescription,
-                             headerInsertSource) {
+                             headerInsertSource, headerTable = NULL) {
 	if (!isTRUE(l[["header.insert"]])) return(invisible(NULL))
 	add_block <- function(value, style_name) {
 		value <- as.character(value)
@@ -219,6 +221,9 @@ export_docx <- function (   t,
 		}
 	}
 	add_block(headerPreface,     "header.preface")
+	if (is.data.frame(headerTable) && ncol(headerTable) > 0) {
+		.docx_table_add(paragraphs, headerTable, .layout_style_base_get(l, "header.preface")$docx.template.name)
+	}
 	add_block(headerTitle,       "header.title")
 	add_block(headerSubtitle,    "header.subtitle")
 	add_block(headerDescription, "header.info")
@@ -274,6 +279,35 @@ export_docx <- function (   t,
 .docx_par_add <- function(paragraphs, value, style) {
 	.docx_paragraph_put(paragraphs, paste0("<w:p><w:pPr><w:pStyle w:val=\"", .docx_style_id(paragraphs, style),
 		"\"/></w:pPr><w:r><w:t xml:space=\"preserve\">", .docx_text_escape(value), "</w:t></w:r></w:p>"))
+}
+
+# A small table in the paragraph style of the preface: thin grey lines, no
+# font of its own. Word fits the columns to their text (autofit, cell widths
+# auto); the grid is a first guess from the longest text of each column for
+# programs that do not fit on opening. The last column may wrap, the others not.
+.docx_table_add <- function(paragraphs, table, style) {
+	style_id <- .docx_style_id(paragraphs, style)
+	head <- names(table)
+	cells <- rbind(head, as.matrix(table))
+	cells[is.na(cells)] <- ""
+	n_col <- ncol(cells)
+	widths <- round(apply(cells, 2, function(col) max(nchar(col), 3)) * 110 + 200)
+	border <- "w:val=\"single\" w:sz=\"4\" w:space=\"0\" w:color=\"808080\""
+	cell_xml <- function(text, j, bold) paste0(
+		"<w:tc><w:tcPr><w:tcW w:w=\"0\" w:type=\"auto\"/>", if (j < n_col) "<w:noWrap/>" else "", "</w:tcPr>",
+		"<w:p><w:pPr><w:pStyle w:val=\"", style_id, "\"/><w:spacing w:before=\"0\" w:after=\"0\"/>",
+		"<w:ind w:left=\"0\" w:hanging=\"0\"/><w:jc w:val=\"", if (j == 1 || j == n_col) "left" else "center", "\"/></w:pPr>",
+		"<w:r>", if (bold) "<w:rPr><w:b/></w:rPr>" else "", "<w:t xml:space=\"preserve\">",
+		.docx_text_escape(text), "</w:t></w:r></w:p></w:tc>")
+	rows <- vapply(seq_len(nrow(cells)), function(i) paste0("<w:tr>", paste0(vapply(seq_len(n_col), function(j)
+		cell_xml(cells[i, j], j, bold = i == 1 && j == 1), character(1)), collapse = ""), "</w:tr>"), character(1))
+	.docx_paragraph_put(paragraphs, paste0(
+		"<w:tbl><w:tblPr><w:tblW w:w=\"0\" w:type=\"auto\"/><w:tblBorders>",
+		paste0("<w:", c("top", "left", "bottom", "right", "insideH", "insideV"), " ", border, "/>", collapse = ""),
+		"</w:tblBorders><w:tblLayout w:type=\"autofit\"/><w:tblCellMar><w:left w:w=\"70\" w:type=\"dxa\"/>",
+		"<w:right w:w=\"70\" w:type=\"dxa\"/></w:tblCellMar><w:tblLook w:val=\"0000\"/></w:tblPr><w:tblGrid>",
+		paste0("<w:gridCol w:w=\"", widths, "\"/>", collapse = ""), "</w:tblGrid>",
+		paste0(rows, collapse = ""), "</w:tbl>"))
 }
 
 .docx_fpar_add <- function(paragraphs, value, style) {
