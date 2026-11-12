@@ -114,6 +114,8 @@ import_eaf <- function(filePath=NULL,
 	medialinks <- stringr::str_match_all(myeaf.merge, regex_media)
 	medialinks <- unique(unlist(medialinks))
 	medialinks <- stringr::str_replace_all(string=medialinks, pattern="file:///", replacement="")
+	# ELAN writes "&amp;" for an ampersand in a folder name
+	medialinks <- .xml_decode(medialinks)
 	
 	#=== extract linguistic_types and constraints
 	regex_constraints <- '(?s)(<LINGUISTIC_TYPE)(.*?CONSTRAINTS="(.*?)")(.*?LINGUISTIC_TYPE_ID="(.*?)")(.*?/>)'
@@ -513,7 +515,7 @@ import_eaf <- function(filePath=NULL,
 		
 		#=== if it is not a completely empty transcript
 		if (!nrow(ann)==0)  	{
-			ann$content <- .replace_newlines(.strip_invalid_xml_chars(textutils::HTMLdecode(ann$content)))
+			ann$content <- .replace_newlines(.strip_invalid_xml_chars(.xml_decode(ann$content)))
 
 			#=== get rid of empty intervals
 			if (options()$act.import.readEmptyIntervals==FALSE) 		{
@@ -539,17 +541,19 @@ import_eaf <- function(filePath=NULL,
 			t@length.sec <- max( t@length.sec, as.double(annotations$startsec)+1, as.double(annotations$endsec)+1)
 			
 			#=== html conversion
-			ann$tierName    <- textutils::HTMLdecode(ann$tierName)
+			ann$tierName    <- .xml_decode(ann$tierName)
 			
 		}
 		#=== html conversion
-		tiers$tierName     	   <- textutils::HTMLdecode(tiers$tierName)
+		tiers$tierName     	   <- .xml_decode(tiers$tierName)
 	}
 	
 	#=== assign other values to object
 	#annotations
-	t@annotations 	<- ann
-	
+	# a file with tiers and no annotation: the table keeps its columns (like
+	# import_textgrid), or the transcript cannot be exported or compared again
+	t@annotations 	<- if (ncol(ann)==0) .emptyAnnotations else ann
+
 	#media
 	t@media <- media_build(medialinks)
 	

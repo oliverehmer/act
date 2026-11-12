@@ -69,15 +69,11 @@ export_eaf <- function(t,
 		cli::cli_abort("Missing columns. Annotations need to contain: {.val {myCols}}")
 	}
 	ann <- ann[,myCols]
-	
+	# a missing text is no text: sprintf() would write the word "NA" into the file
+	ann$content[is.na(ann$content)] <- ""
+
 	# XML escape helper: escape special characters for XML output
-	xml_escape <- function(x) {
-		x <- gsub("&",  "&amp;",  x, fixed = TRUE)
-		x <- gsub("<",  "&lt;",   x, fixed = TRUE)
-		x <- gsub(">",  "&gt;",   x, fixed = TRUE)
-		x <- gsub("\"", "&quot;", x, fixed = TRUE)
-		x
-	}
+	xml_escape <- .xml_escape
 	
 	#--- generate EAF-XML-document
 	myEAF <-               "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -112,7 +108,7 @@ export_eaf <- function(t,
 						time_origin_attr <- sprintf(" TIME_ORIGIN=\"%d\"", as.integer(round(-ss * 1000)))
 					}
 				}
-				myEAF <- append(myEAF, sprintf("         <MEDIA_DESCRIPTOR MEDIA_URL=\"file:///%s\" MIME_TYPE=\"%s\"%s/>", mediaPath, myMimeType, time_origin_attr))
+				myEAF <- append(myEAF, sprintf("         <MEDIA_DESCRIPTOR MEDIA_URL=\"file:///%s\" MIME_TYPE=\"%s\"%s/>", xml_escape(mediaPath), myMimeType, time_origin_attr))
 			}
 		}
 	}

@@ -153,6 +153,30 @@
 	gsub("[\x01-\x08\x0b\x0c\x0e-\x1f\x7f]", "", x)
 }
 
+# "&amp;lt;" in a file is the text "&lt;": the ampersand is decoded last
+# (textutils::HTMLdecode() alone decodes it first and then the rest again,
+# so a typed "&amp;" came back as "&")
+.xml_decode <- function(x) {
+	if (length(x) == 0L) {
+		return(x)
+	}
+	mark <- "\x01amp\x01"
+	x <- gsub("&amp;", mark, x, fixed = TRUE)
+	x <- textutils::HTMLdecode(x)
+	gsub(mark, "&", x, fixed = TRUE)
+}
+
+# text and attribute values of an XML file: a control character (pasted from a
+# text program) or U+FFFE / U+FFFF makes the file no XML, ELAN refuses it
+.xml_escape <- function(x) {
+	x <- stringr::str_replace_all(.strip_invalid_xml_chars(x), "[\\uFFFE\\uFFFF]", "")
+	x <- gsub("&",  "&amp;",  x, fixed = TRUE)
+	x <- gsub("<",  "&lt;",   x, fixed = TRUE)
+	x <- gsub(">",  "&gt;",   x, fixed = TRUE)
+	x <- gsub("\"", "&quot;", x, fixed = TRUE)
+	x
+}
+
 .replace_newlines <- function(x, replacement = getOption("act.import.replaceNewlinesWith", default = " ")) {
 	if (length(x) == 0L) {
 		return(x)
