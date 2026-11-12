@@ -173,7 +173,9 @@ helper_media_unique <- function(paths, uniqueBy = c("name", "name_size"), prefer
 # mount from elsewhere (tests)
 .storage_mounts_mac <- function(lines = NULL) {
 	if (is.null(lines)) lines <- suppressWarnings(system2("mount", stdout = TRUE, stderr = FALSE))
-	m <- stringr::str_match(lines, "^(.*) on (.*) \\(([^,)]+)(.*)\\)$")
+	# the mount point starts at the first " on /": a volume named "Fotos on Tour"
+	# keeps its name whole
+	m <- stringr::str_match(lines, "^(.*?) on (/.*) \\(([^,)]+)(.*)\\)$")
 	m <- m[!is.na(m[, 1]), , drop = FALSE]
 	if (nrow(m) == 0) return(NULL)
 	type <- tolower(m[, 4]); flags <- m[, 5]; point <- m[, 3]
