@@ -169,9 +169,10 @@ helper_media_unique <- function(paths, uniqueBy = c("name", "name_size"), prefer
 
 .STORAGE_NETWORK_TYPES <- c("smbfs", "afpfs", "nfs", "nfs4", "cifs", "smb3", "webdav", "davfs", "fuse.sshfs", "sshfs", "ftp", "9p", "fuse.rclone")
 
-# macOS: "<device> on <point> (<type>, <flags>)"
-.storage_mounts_mac <- function() {
-	lines <- suppressWarnings(system2("mount", stdout = TRUE, stderr = FALSE))
+# macOS: "<device> on <point> (<type>, <flags>)"; lines given = the output of
+# mount from elsewhere (tests)
+.storage_mounts_mac <- function(lines = NULL) {
+	if (is.null(lines)) lines <- suppressWarnings(system2("mount", stdout = TRUE, stderr = FALSE))
 	m <- stringr::str_match(lines, "^(.*) on (.*) \\(([^,)]+)(.*)\\)$")
 	m <- m[!is.na(m[, 1]), , drop = FALSE]
 	if (nrow(m) == 0) return(NULL)
