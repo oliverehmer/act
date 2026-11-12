@@ -13,7 +13,9 @@ media_assign(
   transcriptNames = NULL,
   deleteExistingMedia = TRUE,
   onlyUniqueFiles = TRUE,
-  readMetadata = FALSE
+  readMetadata = FALSE,
+  uniqueBy = c("name", "name_size"),
+  preferLocal = FALSE
 )
 }
 \arguments{
@@ -34,6 +36,10 @@ media_assign(
 \item{onlyUniqueFiles}{Logical; if \code{TRUE} media files with the same name (in different locations) will only be added once; if \code{FALSE} all media files found will be added, irrespective of possible doublets.}
 
 \item{readMetadata}{Logical; if \code{TRUE} the read-derived media columns (\code{length.sec}, \code{video.*}, \code{startsec} etc.) are filled via \code{media_metadata_read} after assignment. Default \code{FALSE} (fast; no file reading).}
+
+\item{uniqueBy}{Character string; with \code{onlyUniqueFiles = TRUE}, which files count as the same: \code{"name"} (the same file name) or \code{"name_size"} (the same name and the same size; two files with the same name but another size are both kept). See \link{helper_media_unique}.}
+
+\item{preferLocal}{Logical; with \code{onlyUniqueFiles = TRUE}, if \code{TRUE} the copy on an internal disk wins over one on an external disk, which wins over one on a network drive (\link{helper_storage_kind}); among places of the same kind the first search path wins. If \code{FALSE} the first search path wins.}
 }
 \value{
 Corpus object.

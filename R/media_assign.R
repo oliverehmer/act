@@ -16,6 +16,8 @@
 #' @param deleteExistingMedia Logical; if \code{TRUE} existing media links will be deleted, if \code{FALSE} existing media links will be preserved and new links will be added.
 #' @param onlyUniqueFiles Logical; if \code{TRUE} media files with the same name (in different locations) will only be added once; if \code{FALSE} all media files found will be added, irrespective of possible doublets.
 #' @param readMetadata Logical; if \code{TRUE} the read-derived media columns (\code{length.sec}, \code{video.*}, \code{startsec} etc.) are filled via \code{media_metadata_read} after assignment. Default \code{FALSE} (fast; no file reading).
+#' @param uniqueBy Character string; with \code{onlyUniqueFiles = TRUE}, which files count as the same: \code{"name"} (the same file name) or \code{"name_size"} (the same name and the same size; two files with the same name but another size are both kept). See \link{helper_media_unique}.
+#' @param preferLocal Logical; with \code{onlyUniqueFiles = TRUE}, if \code{TRUE} the copy on an internal disk wins over one on an external disk, which wins over one on a network drive (\link{helper_storage_kind}); among places of the same kind the first search path wins. If \code{FALSE} the first search path wins.
 #'
 #'
 #' @return Corpus object.
@@ -34,7 +36,10 @@ media_assign <- function(x,
 						 transcriptNames             = NULL,
 						 deleteExistingMedia         = TRUE,
 						 onlyUniqueFiles             = TRUE,
-						 readMetadata                = FALSE) {
+						 readMetadata                = FALSE,
+						 uniqueBy                    = c("name", "name_size"),
+						 preferLocal                 = FALSE) {
+	uniqueBy <- match.arg(uniqueBy)
 	# x <- corpus
 	# searchPaths        <- NULL
 	# searchSubfolders <- TRUE
@@ -174,8 +179,7 @@ media_assign <- function(x,
 		}
 
 		if (onlyUniqueFiles) {
-			#select for file paths only unique file names
-			myMediaFiles <- myMediaFiles[!duplicated(basename(myMediaFiles))]
+			myMediaFiles <- helper_media_unique(myMediaFiles, uniqueBy = uniqueBy, preferLocal = preferLocal)
 		}
 
 		if (deleteExistingMedia) {

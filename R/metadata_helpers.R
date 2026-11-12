@@ -775,19 +775,15 @@ helper_metadata_probe_fps <- function(file_path) {
 
 # Longest mount point that is a prefix of the path (unix mount table).
 .media_volume_mountpoint_unix <- function(p) {
-	out <- .metadata_process_run("mount")$out
-	mps <- sub("^.* on (.*) \\(.*$", "\\1", out)
-	mps <- mps[nzchar(mps)]
-	cand <- mps[startsWith(paste0(p, "/"), paste0(sub("/$", "", mps), "/"))]
-	if (length(cand) == 0) return("/")
-	cand[which.max(nchar(cand))]
+	# the one mount table of act (helper_storage.R), read at most every 30 s
+	mp <- .storage_mount_of(p)
+	if (is.na(mp)) "/" else mp
 }
 
 # File system type of a unix mount point (from the mount table).
 .media_volume_fstype_unix <- function(mp) {
-	out <- .metadata_process_run("mount")$out
-	ln <- out[grepl(paste0(" on ", mp, " ("), out, fixed = TRUE)][1]
-	if (is.na(ln)) return(NA_character_)
-	m <- regmatches(ln, regexec("\\(([^,)]+)", ln))[[1]]
-	if (length(m) == 2) m[2] else NA_character_
+	mounts <- .storage_mounts()
+	if (is.null(mounts)) return(NA_character_)
+	type <- mounts$type[mounts$point == mp][1]
+	if (length(type) == 0) NA_character_ else type
 }
