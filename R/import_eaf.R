@@ -99,6 +99,8 @@ import_eaf <- function(filePath=NULL,
 		return(t)
 	} 
 	
+	annotations.empty.skipped <- 0L
+
 	#=== merge lines into a long text
 	myeaf.merge <- stringr::str_c(myeaf, collapse = "\n")
 	if (!stringr::str_detect(myeaf.merge, pattern="http://www.mpi.nl/tools/elan/EAFv3.0.xsd" )) {
@@ -519,6 +521,8 @@ import_eaf <- function(filePath=NULL,
 
 			#=== get rid of empty intervals
 			if (options()$act.import.readEmptyIntervals==FALSE) 		{
+				# counted for the history entry: a file written from this transcript no longer holds them
+				annotations.empty.skipped <- sum(.is_empty_content(ann$content))
 				ann <- ann[!.is_empty_content(ann$content),]
 			}
 			ann <- ann[is.na(ann["content"])==FALSE,]
@@ -561,8 +565,8 @@ import_eaf <- function(filePath=NULL,
 	t@tiers <- act::helper_tiers_new_table(tierNames=tiers$tierName)
 	
 	t@file.state <- if (is.null(filePath)) list() else if (exists("read_result", inherits = FALSE) && length(read_result$state)) read_result$state else helper_file_state(filePath, hash = NULL)
-	t@history <- list( 
-				   c(list(modification = "import_eaf", systime = Sys.time()), .history_file_info(filePath))
+	t@history <- list(
+				   c(list(modification = "import_eaf", systime = Sys.time(), annotations.empty.skipped = as.integer(annotations.empty.skipped)), .history_file_info(filePath))
 	             )
 	
 	return(t)
