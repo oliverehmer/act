@@ -13,6 +13,7 @@
 #' @param createMediaLinks Logical; if \code{TRUE} media links will be created.
 #' @param mediaMaxFiles Integer or \code{NULL}; maximum number of media files to link (\code{NULL} = all).
 #' @param mediaWriteOffset Logical; if \code{TRUE} a negative \code{TIME_ORIGIN} attribute (in milliseconds) is written for clip media (rows with \code{kind == "clip"} and \code{startsec > 0}), derived from \code{startsec}. Default \code{FALSE} (no offset). Note: clip media are currently not linked at all in the exported .eaf, because 'ELAN' does not support negative media offsets - only full recordings (offset 0) are linked. This parameter takes effect once clip linking is re-enabled in the code.
+#' @param mediaPath Character string; how the media files are named in the .eaf: \code{"absolute"} (the full path, as before), \code{"relative"} (the way from the folder of the .eaf to the media file; a media file on another drive is named by its file name) or \code{"filename"} (the file name only: 'ELAN' finds a media file that lies beside the .eaf).
 #'
 #' @return Contents of the .eaf file (only if \code{pathOutput} is left empty)
 #' @export
@@ -28,9 +29,13 @@ export_eaf <- function(t,
 					   filterSectionEndsec = NULL,
 					   createMediaLinks=TRUE,
 					   mediaMaxFiles=NULL,
-					   mediaWriteOffset=FALSE) {
+					   mediaWriteOffset=FALSE,
+					   mediaPath="absolute") {
 	
 	.assert_transcript(t, missing = missing(t))
+	if (!is.character(mediaPath) || length(mediaPath) != 1 || !mediaPath %in% c("absolute", "relative", "filename")) {
+		cli::cli_abort("{.arg mediaPath} must be {.val absolute}, {.val relative} or {.val filename}.")
+	}
 	
 	#--- check if output folder exists
 	if (!is.null(pathOutput)) {
@@ -91,13 +96,13 @@ export_eaf <- function(t,
 				if (is_clip && !elan_supports_negative_offset) {
 					next
 				}
-				mediaPath <- media_sel$path[i]
+				mediaFile <- media_sel$path[i]
 				myMimeType <- "unknown"
-				if (tolower(tools::file_ext(mediaPath)) %in% c("wav")) {
+				if (tolower(tools::file_ext(mediaFile)) %in% c("wav")) {
 					myMimeType <-"audio/x-wav"
-				} else if (tolower(tools::file_ext(mediaPath)) %in% c("mp3", "aif", "aiff")) {
+				} else if (tolower(tools::file_ext(mediaFile)) %in% c("mp3", "aif", "aiff")) {
 					myMimeType <-"audio/*"
-				} else if (tolower(tools::file_ext(mediaPath)) %in% c("mp4", "mov", "mpg")) {
+				} else if (tolower(tools::file_ext(mediaFile)) %in% c("mp4", "mov", "mpg")) {
 					myMimeType <-"video/mp4"
 				}
 				#--- optional TIME_ORIGIN offset for clips
@@ -108,7 +113,9 @@ export_eaf <- function(t,
 						time_origin_attr <- sprintf(" TIME_ORIGIN=\"%d\"", as.integer(round(-ss * 1000)))
 					}
 				}
-				myEAF <- append(myEAF, sprintf("         <MEDIA_DESCRIPTOR MEDIA_URL=\"file:///%s\" MIME_TYPE=\"%s\"%s/>", xml_escape(mediaPath), myMimeType, time_origin_attr))
+				links <- .eaf_media_links(mediaFile, mediaPath, pathOutput)
+				myEAF <- append(myEAF, sprintf("         <MEDIA_DESCRIPTOR MEDIA_URL=\"file:///%s\" MIME_TYPE=\"%s\"%s%s/>", xml_escape(links$url), myMimeType,
+											   if (is.null(links$relative)) "" else sprintf(" RELATIVE_MEDIA_URL=\"%s\"", xml_escape(links$relative)), time_origin_attr))
 			}
 		}
 	}
@@ -206,4 +213,40 @@ export_eaf <- function(t,
 		writeBin(charToRaw(myEAF), fileConn, endian="little")
 		close(fileConn)
 	}
+}
+
+# The two ways a media file is named in a MEDIA_DESCRIPTOR. "absolute": the full path and nothing else
+# (as act always wrote it). "filename" and "relative": the name alone as MEDIA_URL - ELAN then looks
+# beside the .eaf - and RELATIVE_MEDIA_URL as ELAN writes it itself ("./name", or the way from the folder
+# of the .eaf). Without a place to start from (no pathOutput) and across drives "relative" is the name.
+.eaf_media_links <- function(mediaFile, mediaPath, pathOutput) {
+	if (identical(mediaPath, "absolute")) return(list(url = mediaFile, relative = NULL))
+	name <- basename(mediaFile)
+	beside <- paste0("./", name)
+	if (identical(mediaPath, "filename") || is.null(pathOutput)) return(list(url = name, relative = beside))
+	rel <- .path_relative(dirname(pathOutput), mediaFile)
+	list(url = name, relative = if (is.null(rel)) beside else rel)
+}
+
+# The way from a folder to a file ("../media/x.mp4", "./x.mp4"), or NULL when they lie on different
+# drives (Windows: another letter; macOS: another volume under /Volumes).
+.path_relative <- function(fromDir, toFile) {
+	parts <- function(x) {
+		x <- gsub("\\\\", "/", normalizePath(x, winslash = "/", mustWork = FALSE))
+		p <- strsplit(x, "/", fixed = TRUE)[[1]]
+		p[nzchar(p)]
+	}
+	drive <- function(p) {
+		if (length(p) && grepl("^[A-Za-z]:$", p[1])) return(toupper(p[1]))
+		if (length(p) > 1 && identical(p[1], "Volumes")) return(p[2])
+		""
+	}
+	a <- parts(fromDir); b <- parts(toFile)
+	if (!length(b) || !identical(drive(a), drive(b))) return(NULL)
+	n <- 0L
+	while (n < length(a) && n < length(b) - 1L && identical(a[n + 1L], b[n + 1L])) n <- n + 1L
+	up <- rep("..", length(a) - n)
+	rest <- b[seq_along(b) > n]
+	if (!length(up)) return(paste0("./", paste(rest, collapse = "/")))
+	paste(c(up, rest), collapse = "/")
 }
