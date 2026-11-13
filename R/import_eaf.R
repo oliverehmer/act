@@ -115,7 +115,7 @@ import_eaf <- function(filePath=NULL,
 	regex_media <- '(?s)(?<=\\bMEDIA_URL=").+?(?=")'
 	medialinks <- stringr::str_match_all(myeaf.merge, regex_media)
 	medialinks <- unique(unlist(medialinks))
-	medialinks <- stringr::str_replace_all(string=medialinks, pattern="file:///", replacement="")
+	medialinks <- .eaf_media_path(medialinks)
 	# ELAN writes "&amp;" for an ampersand in a folder name
 	medialinks <- .xml_decode(medialinks)
 	
@@ -584,6 +584,19 @@ import_eaf <- function(filePath=NULL,
 			   annotation.ref      = .eaf_attribute(tags[, 2], "ANNOTATION_REF"),
 			   annotation.previous = .eaf_attribute(tags[, 2], "PREVIOUS_ANNOTATION"),
 			   stringsAsFactors    = FALSE)
+}
+
+# ELAN writes an absolute path as file:///Users/x/rec.mp4 (the path starts at the third slash),
+# act as file:////Users/x/rec.mp4. With the scheme cut off as a whole, a file saved in ELAN came
+# back as Users/x/rec.mp4 - a relative path that does not exist. A bare file name and a Windows
+# drive (C:/...) stay as they are.
+.eaf_media_path <- function(urls) {
+	if (!length(urls)) return(urls)
+	schemed <- stringr::str_detect(urls, "^file:///")
+	paths <- stringr::str_remove(urls, "^file:///")
+	absolute <- schemed & stringr::str_detect(paths, "/") & !stringr::str_detect(paths, "^(/|[A-Za-z]:)")
+	paths[absolute] <- paste0("/", paths[absolute])
+	paths
 }
 
 .eaf_attribute <- function(tags, name) {
