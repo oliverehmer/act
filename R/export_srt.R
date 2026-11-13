@@ -50,15 +50,11 @@ export_srt <- function(t,
 	alltimes <- unique(alltimes)
 	
 	#--- function for formatting times
+	# from whole milliseconds: with the seconds cut off and the fraction rounded apart,
+	# 12.9996 came out as 00:00:12,000 - a second early, and before its own start
 	hhmmsscomma <- function(time){
-		paste(paste(
-			formatC(time %/% (60*60) %% 24, width = 2, format = "d", flag = "0")
-					,":", formatC(time %/% 60 %% 60, width = 2, format = "d", flag = "0")
-					,":", formatC(time %% 60, width = 2, format = "d", flag = "0")
-					, ",", substr(sprintf("%1.3f", round(time %% 1,3)),3,6)
-					, sep='' 
-					)
-			)
+		ms <- round(time * 1000)
+		sprintf("%02d:%02d:%02d,%03d", as.integer(ms %/% 3600000 %% 24), as.integer(ms %/% 60000 %% 60), as.integer(ms %/% 1000 %% 60), as.integer(ms %% 1000))
 	}
 	
 	#--- iterate all times
@@ -88,7 +84,8 @@ export_srt <- function(t,
 			
 			#content
 			if (speakerShow) {
-				tierNames  <- substr(t@annotations$tierName[ids], 1, speakerWidth)
+				tierNames  <- t@annotations$tierName[ids]
+				if (speakerWidth >= 0) tierNames <- substr(tierNames, 1, speakerWidth)
 				tierNames <- paste(tierNames, speakerEnding, sep='')
 				text <- paste(text,paste(tierNames, ' ', t@annotations$content[ids], collapse='\n'),'\n', sep='')
 			} else {

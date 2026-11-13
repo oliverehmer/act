@@ -29,7 +29,7 @@ import_srt <- function(filePath,
 	if (!is.null(transcriptName)) {
 		t@name <- transcriptName
 	} else {
-		t@name				<- stringr::str_replace(basename(filePath), ".srt","")
+		t@name				<- stringr::str_remove(basename(filePath), "(?i)\\.srt$")
 	}
 	t@file.type 			<- "srt"
 	t@import.result 		<- "ok"
