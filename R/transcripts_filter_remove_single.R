@@ -48,7 +48,6 @@ transcripts_filter_remove_single <- function (t,
 		}
 		if (is.null(filterSectionEndsec)) {
 			cli::cli_abort("If you set {.arg filterSectionStartsec} you also need to set {.arg filterSectionEndsec}")
-			filterSectionEndsec<- as.double(filterSectionEndsec)
 		}	
 	} else {
 		if (!is.null(filterSectionEndsec)) {

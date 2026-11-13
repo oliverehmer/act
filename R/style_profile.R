@@ -18,7 +18,6 @@
 # percentage of the video height, "size" of a tier style a percentage of that.
 .STYLE_VIDEO_EFFECTS <- c("none", "outline", "shadow", "glow")
 .STYLE_VIDEO_OVERFLOW <- c("wrap", "shrink", "cut", "end")
-.STYLE_VIDEO_TIER_KEYS <- c("row", "size", "color", "effect", "effect.color", "effect.width", "lines")
 .STYLE_VIDEO_DEFAULT <- list(
 	font = "Courier New", size = 6, color = "#FFFFFF", effect = "none",
 	effect.color = "#000000", effect.width = 2,
