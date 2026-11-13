@@ -243,11 +243,11 @@ import_eaf <- function(filePath=NULL,
 		if (nrow(tiers)>0) {
 			#--- iterate through tiers and extract info
 			# Those are the difficult referring types:
-			regex_ann_referring <- '(?s)(<REF_ANNOTATION)(.ANNOTATION_ID="(.*?)")(.ANNOTATION_REF="(.*?)")(.PREVIOUS_ANNOTATION="(.*?)")?(.*?<ANNOTATION_VALUE>(.*?)</ANNOTATION_VALUE>)'
+			regex_ann_referring <- '(?s)<REF_ANNOTATION\\b([^>]*)>(.*?)</REF_ANNOTATION>'
 			constraints_ann_referring <- c("Symbolic_Association",    "Symbolic_Subdivision")
 			
 			#These are the other types (there might be more), but this is not checked: 
-			regex_ann_alignable <- '(?s)(<ALIGNABLE_ANNOTATION)(.*?ANNOTATION_ID="(.*?)")(.*?TIME_SLOT_REF1="(.*?)")(.*?TIME_SLOT_REF2="(.*?)">)(.*?<ANNOTATION_VALUE>(.*?)</ANNOTATION_VALUE>)'
+			regex_ann_alignable <- '(?s)<ALIGNABLE_ANNOTATION\\b([^>]*)>(.*?)</ALIGNABLE_ANNOTATION>'
 			constraints_ann_alignable <- c("Time_Subdivision",    "Included_In", "No_Constraint")
 			
 			#i <- 1
@@ -261,34 +261,32 @@ import_eaf <- function(filePath=NULL,
 				
 				if (tiers$constraint[i] %in% constraints_ann_referring) {
 					myRegEx <- regex_ann_referring
-					annotations.tier <- stringr::str_match_all(annotations.block[i], myRegEx)
-					annotations.tier <- do.call(rbind, lapply(annotations.tier, data.frame, stringsAsFactors=FALSE))
+					annotations.tier <- .eaf_annotations_read(annotations.block[i], myRegEx)
 					#View(annotations.tier)
 					if (nrow(annotations.tier)>0) {
 						annotations.tier <- data.frame(cbind(         tier=tiers$tierName[i], 
 														   type=tiers$tierType[i],
 														   hierarchy=tiers$tier.hierarchy[i],
-														   id=annotations.tier[, 4], 
-														   content=annotations.tier[, 10], 
+														   id=annotations.tier$id,
+														   content=annotations.tier$content,
 														   ts1=NA,
 														   ts2=NA, 
-														   annotation.ref=annotations.tier[, 6], 
-														   annotation.previous=annotations.tier[, 8]),
+														   annotation.ref=annotations.tier$annotation.ref,
+														   annotation.previous=annotations.tier$annotation.previous),
 													   stringsAsFactors=FALSE)
 					}
 				} else {
 					myRegEx <- regex_ann_alignable
-					annotations.tier <- stringr::str_match_all(annotations.block[i], myRegEx)
-					annotations.tier <- do.call(rbind, lapply(annotations.tier, data.frame, stringsAsFactors=FALSE))
+					annotations.tier <- .eaf_annotations_read(annotations.block[i], myRegEx)
 					#View(annotations.tier)
 					if (nrow(annotations.tier)>0) {
 						annotations.tier <- data.frame(cbind(         tier=tiers$tierName[i], 
 														   type=tiers$tierType[i],
 														   hierarchy=tiers$tier.hierarchy[i],
-														   id=annotations.tier[, 4], 
-														   content=annotations.tier[, 10], 
-														   ts1=annotations.tier[, 6],
-														   ts2=annotations.tier[, 8], 
+														   id=annotations.tier$id,
+														   content=annotations.tier$content,
+														   ts1=annotations.tier$ts1,
+														   ts2=annotations.tier$ts2,
 														   annotation.ref=NA, 
 														   annotation.previous=NA),
 													   stringsAsFactors=FALSE)
@@ -568,7 +566,27 @@ import_eaf <- function(filePath=NULL,
 	t@history <- list(
 				   c(list(modification = "import_eaf", systime = Sys.time(), annotations.empty.skipped = as.integer(annotations.empty.skipped)), .history_file_info(filePath))
 	             )
-	
+
 	return(t)
+}
+
+# Attributes are read by name: ELAN writes them in alphabetical order, other tools do not, and
+# further ones (CVE_REF, EXT_REF, LANG_REF) may stand anywhere. A value written as one closed
+# tag (<ANNOTATION_VALUE/>) is no text - it must not take the text of the next annotation.
+.eaf_annotations_read <- function(block, regex) {
+	tags <- stringr::str_match_all(block, regex)[[1]]
+	value <- stringr::str_match(tags[, 3], '(?s)<ANNOTATION_VALUE>(.*?)</ANNOTATION_VALUE>')[, 2]
+	value[is.na(value)] <- ""
+	data.frame(id                  = .eaf_attribute(tags[, 2], "ANNOTATION_ID"),
+			   content             = value,
+			   ts1                 = .eaf_attribute(tags[, 2], "TIME_SLOT_REF1"),
+			   ts2                 = .eaf_attribute(tags[, 2], "TIME_SLOT_REF2"),
+			   annotation.ref      = .eaf_attribute(tags[, 2], "ANNOTATION_REF"),
+			   annotation.previous = .eaf_attribute(tags[, 2], "PREVIOUS_ANNOTATION"),
+			   stringsAsFactors    = FALSE)
+}
+
+.eaf_attribute <- function(tags, name) {
+	stringr::str_match(tags, paste0('(?:^|\\s)', name, '="([^"]*)"'))[, 2]
 }
 
