@@ -18,7 +18,7 @@ helper_media_unique(
 
 \item{preferLocal}{Logical; if \code{TRUE} local places win over network drives.}
 
-\item{kinds}{Vector of character strings or \code{NULL}; the kind of place of each path (\code{"internal"}, \code{"external"}, \code{"network"}, \code{"unknown"}), when the caller knows better than \link{helper_storage_kind}; \code{NULL} asks \link{helper_storage_kind}.}
+\item{kinds}{Vector of character strings or \code{NULL}; the kind of place of each path (\code{"internal"}, \code{"external"}, \code{"cloud"}, \code{"network"}, \code{"unknown"}), when the caller knows better than \link{helper_storage_kind}; \code{NULL} asks \link{helper_storage_kind}.}
 }
 \value{
 Vector of character strings; the kept paths, in the order of \code{paths}.
@@ -30,7 +30,8 @@ files count as the same is set by \code{uniqueBy}: the same file name
 two files with the same name but another size are then two files and both
 are kept). Of the same files the one from the best place is kept: with
 \code{preferLocal = TRUE} an internal disk before an external disk before
-a network drive (\link{helper_storage_kind}); among places of the same
+a folder of a sync service before a network drive
+(\link{helper_storage_kind}); among places of the same
 kind, and with \code{preferLocal = FALSE}, the first one in \code{paths}.
 }
 \seealso{

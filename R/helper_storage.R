@@ -17,9 +17,13 @@
 #' \code{"unknown"}. The table of mounts is read at most once every 30
 #' seconds, the system once per mount point.
 #'
+#' A folder of a sync service on a local disk (OneDrive, Dropbox, iCloud
+#' Drive, Google Drive; told from the path) is \code{"cloud"}: the service may
+#' keep a file online only and fetch it when it is read.
+#'
 #' @param paths Vector of character strings; paths of files or folders (they need not exist).
 #'
-#' @return Vector of character strings, one of \code{"internal"}, \code{"external"}, \code{"network"}, \code{"unknown"} per path.
+#' @return Vector of character strings, one of \code{"internal"}, \code{"external"}, \code{"cloud"}, \code{"network"}, \code{"unknown"} per path.
 #'
 #' @seealso \link{helper_storage_speed}, \link{helper_media_unique}
 #'
@@ -40,6 +44,7 @@ helper_storage_kind <- function(paths) {
 		kinds <- vapply(unique(drive), function(d) .media_volume_info(if (d == "//") "//server/share" else paste0(d, "/"))$kind %||% NA_character_, character(1))
 		k <- kinds[drive]
 		out[ok] <- ifelse(is.na(k), "unknown", k)
+		out[ok][.storage_cloud(paths[ok]) & out[ok] %in% c("internal", "external")] <- "cloud"
 		return(out)
 	}
 	mounts <- .storage_mounts()
@@ -56,7 +61,20 @@ helper_storage_kind <- function(paths) {
 		if (is.null(k) || is.na(k)) row$kind else k
 	}, character(1))
 	out[ok] <- ifelse(is.na(point), "unknown", kind_of[point])
+	out[ok][.storage_cloud(paths[ok]) & out[ok] %in% c("internal", "external")] <- "cloud"
 	out
+}
+
+# A folder a sync service keeps (OneDrive, Dropbox, iCloud Drive, Google Drive).
+# It lies on a local disk, but the service may keep a file online only and
+# fetch it when it is read: the first access is then as slow as a network
+# drive. The mount table does not know these folders, the services name them:
+# told from the path.
+.storage_cloud <- function(paths) {
+	p <- stringr::str_replace_all(path.expand(as.character(paths)), stringr::fixed("\\"), "/")
+	hit <- stringr::str_detect(p, "(?i)(^|/)(OneDrive[^/]*|Dropbox[^/]*|iCloud ?Drive[^/]*|Google ?Drive[^/]*|CloudStorage|Mobile Documents)(/|$)")
+	hit[is.na(hit)] <- FALSE
+	hit
 }
 
 
@@ -123,13 +141,14 @@ helper_storage_speed <- function(path, megabytes = 4, timeout = 1.5) {
 #' two files with the same name but another size are then two files and both
 #' are kept). Of the same files the one from the best place is kept: with
 #' \code{preferLocal = TRUE} an internal disk before an external disk before
-#' a network drive (\link{helper_storage_kind}); among places of the same
+#' a folder of a sync service before a network drive
+#' (\link{helper_storage_kind}); among places of the same
 #' kind, and with \code{preferLocal = FALSE}, the first one in \code{paths}.
 #'
 #' @param paths Vector of character strings; paths of media files, in the order of the search folders.
 #' @param uniqueBy Character string; \code{"name"} or \code{"name_size"}.
 #' @param preferLocal Logical; if \code{TRUE} local places win over network drives.
-#' @param kinds Vector of character strings or \code{NULL}; the kind of place of each path (\code{"internal"}, \code{"external"}, \code{"network"}, \code{"unknown"}), when the caller knows better than \link{helper_storage_kind}; \code{NULL} asks \link{helper_storage_kind}.
+#' @param kinds Vector of character strings or \code{NULL}; the kind of place of each path (\code{"internal"}, \code{"external"}, \code{"cloud"}, \code{"network"}, \code{"unknown"}), when the caller knows better than \link{helper_storage_kind}; \code{NULL} asks \link{helper_storage_kind}.
 #'
 #' @return Vector of character strings; the kept paths, in the order of \code{paths}.
 #'
@@ -144,7 +163,7 @@ helper_media_unique <- function(paths, uniqueBy = c("name", "name_size"), prefer
 	if (identical(uniqueBy, "name_size")) key <- paste(key, suppressWarnings(file.size(paths)), sep = "\r")
 	rank <- if (isTRUE(preferLocal)) {
 		if (is.null(kinds) || length(kinds) != length(paths)) kinds <- helper_storage_kind(paths)
-		r <- unname(c(internal = 1, external = 2, unknown = 2, network = 3)[kinds])
+		r <- unname(c(internal = 1, external = 2, unknown = 2, cloud = 3, network = 4)[kinds])
 		r[is.na(r)] <- 2
 		r
 	} else rep(1, length(paths))

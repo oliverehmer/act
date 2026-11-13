@@ -10,7 +10,7 @@ helper_storage_kind(paths)
 \item{paths}{Vector of character strings; paths of files or folders (they need not exist).}
 }
 \value{
-Vector of character strings, one of \code{"internal"}, \code{"external"}, \code{"network"}, \code{"unknown"} per path.
+Vector of character strings, one of \code{"internal"}, \code{"external"}, \code{"cloud"}, \code{"network"}, \code{"unknown"} per path.
 }
 \description{
 Tells for each path whether it lies on an internal disk, an external disk
@@ -30,6 +30,10 @@ the mount point (macOS below \code{/Volumes/}, Linux below \code{/media/},
 on a drive that is not mounted, and what cannot be decided, is
 \code{"unknown"}. The table of mounts is read at most once every 30
 seconds, the system once per mount point.
+
+A folder of a sync service on a local disk (OneDrive, Dropbox, iCloud
+Drive, Google Drive; told from the path) is \code{"cloud"}: the service may
+keep a file online only and fetch it when it is read.
 }
 \examples{
 helper_storage_kind(c(tempdir(), "/Volumes/some_drive/file.mp4"))
