@@ -33,7 +33,7 @@ helper_tiers_sort_table <- function (tierTable,
 	
 	#set old and new data frame
 	oldTable <- tierTable[order(tierTable$position),]
-	oldTable$counter <- NA
+	oldTable$counter <- rep(NA, nrow(oldTable))
 	
 	newTable <- tierTable[0,]
 	if (nrow(oldTable)>0) {

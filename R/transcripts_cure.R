@@ -51,6 +51,10 @@ transcripts_cure <- function (x,
 	tiersMissing.added.count				      <- 0
 	transcripts.cured.ids                         <- c()
 
+	#no names given: every transcript (the loop ran over NULL and cured nothing)
+	if (is.null(filterTranscriptNames)) {
+		filterTranscriptNames <- names(x@transcripts)
+	}
 	for (i in filterTranscriptNames) {
 		x@transcripts[[i]] <- act::transcripts_cure_single(x@transcripts[[i]],
 												   annotationsTimesReversed  = annotationsTimesReversed,

@@ -63,6 +63,12 @@ import_rpraat <- function(rpraatTextgrid,
 	ann <- data.frame()
 	if (length(rpraatTextgrid)>0) {
 		for (i in 1:length(rpraatTextgrid)) {
+			#a tier without entries has nothing to bind (cbind stopped on it); only its type is noted
+			entries.nr <- if (rpraatTextgrid[[i]]$type=="interval") length(rpraatTextgrid[[i]]$t1) else length(rpraatTextgrid[[i]]$t)
+			if (entries.nr==0) {
+				myTiers[i] <- if (rpraatTextgrid[[i]]$type=="interval") {"IntervalTier"} else {"TextTier"}
+				next
+			}
 			if (rpraatTextgrid[[i]]$type=="interval") {
 				ann <- rbind(ann, 
 									  cbind(

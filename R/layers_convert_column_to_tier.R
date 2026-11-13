@@ -106,6 +106,11 @@ layers_convert_column_to_tier <- function(
 	# ===== CREATE ANNOTATIONS =====
 	new_annotations <- source_rows
 	new_annotations$content <- as.character(source_rows[[columnName]])
+	# ids of their own: with the ids of their source rows a search found every hit twice (it joins by annotationID)
+	if ("annotationID" %in% colnames(new_annotations)) {
+		ids_new <- max(c(0, suppressWarnings(as.numeric(t@annotations$annotationID))), na.rm = TRUE) + seq_len(nrow(new_annotations))
+		new_annotations$annotationID <- if (is.integer(t@annotations$annotationID)) as.integer(ids_new) else ids_new
+	}
 	for (speaker in speakers) {
 		main_part <- switch(mainTierNameCase,
 			"lower" = tolower(speaker),

@@ -85,7 +85,10 @@ transcripts_add <- function(x,
 		skip <- transcriptNames.info$duplicated.ids[ which(transcriptNames.info$duplicated.ids > length(transcripts_previous_ids))]
 		
 		#skip those
-		x@transcripts           <- x@transcripts[-skip]
+		#without a duplicate skip is empty, and a negative index of nothing selects nothing: the corpus was emptied
+		if (length(skip)>0) {
+			x@transcripts           <- x@transcripts[-skip]
+		}
 		
 		#remeber numer and ids
 		transcripts_skipped_nr  <- length(skip)

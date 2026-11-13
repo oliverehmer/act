@@ -112,7 +112,7 @@ export_rpraat <- function(t,
 				}
 				
 				#add consecutive numbers
-				annotations.tier <- cbind(as.character(1:nrow(annotations.tier)),annotations.tier)
+				annotations.tier <- cbind(as.character(seq_len(nrow(annotations.tier))),annotations.tier)
 				
 				#rename columns
 				colnames(annotations.tier) <- c("intervalNr", "tierName", "startsec","endsec", "content")
@@ -128,7 +128,7 @@ export_rpraat <- function(t,
 				pointnr <- nrow(annotations.tier)
 				
 				#add consecutive numbers
-				annotations.tier <- cbind(as.character(1:nrow(annotations.tier)),annotations.tier)
+				annotations.tier <- cbind(as.character(seq_len(nrow(annotations.tier))),annotations.tier)
 				
 				#add tier to list
 				myTier <- list(name=t@tiers$name[tierNr], type="point", t=annotations.tier$startsec, label=annotations.tier$content)

@@ -70,7 +70,8 @@ transcripts_filter_remove_single <- function (t,
 				
 			#keep
 			ids <- setdiff(t@tiers$name, filterTierNames)
-			t@tiers <- t@tiers[ids, ]
+			#by name, not by row name: a tier table with plain row names gave one row of NA
+			t@tiers <- t@tiers[!(t@tiers$name %in% filterTierNames), , drop=FALSE]
 			
 			#annotations
 			annotations.deleted.count <- annotations.deleted.count + nrow( t@annotations) 
@@ -80,14 +81,30 @@ transcripts_filter_remove_single <- function (t,
 	}
 	
 	#--- time
-	IDs<-0
+	IDs <- integer(0)
 	if (nrow( t@annotations)>0) {
 		if (!is.null(filterSectionStartsec) ) {
 
 				#filter
 				#remove those
 				IDs <- which(t@annotations$startsec >= filterSectionStartsec & t@annotations$endsec <= filterSectionEndsec)
-				t@annotations <-  t@annotations[-IDs, ]
+				#no annotation lies inside the section: a negative index of nothing would select nothing and delete them all
+				if (length(IDs)>0) {
+					t@annotations <-  t@annotations[-IDs, ]
+				}
+				
+				#an annotation that spans the whole section keeps both of its parts (it lost the part before the section)
+				span <- which(t@annotations$startsec < filterSectionStartsec & t@annotations$endsec > filterSectionEndsec)
+				if (length(span)>0) {
+					part.after          <- t@annotations[span, ]
+					part.after$startsec <- filterSectionEndsec
+					if ("annotationID" %in% colnames(part.after)) {
+						ids.new <- max(c(0, suppressWarnings(as.numeric(t@annotations$annotationID))), na.rm=TRUE) + seq_along(span)
+						part.after$annotationID <- if (is.integer(t@annotations$annotationID)) as.integer(ids.new) else ids.new
+					}
+					t@annotations$endsec[span] <- filterSectionStartsec
+					t@annotations <- rbind(t@annotations, part.after)
+				}
 				
 				if (nrow( t@annotations)>0) { 
 					#set times correctly

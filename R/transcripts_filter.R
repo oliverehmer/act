@@ -89,7 +89,12 @@ transcripts_filter <- function (x,
 		#HISTORY transcript:
 		#realized in transcripts_filter_single
 		
-		h <- x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)]]
+		#transcripts_filter_single() writes no history entry when neither a tier nor a time filter is set:
+		#the last entry is then one of another function (or there is none)
+		h <- if (length(x@transcripts[[i]]@history)>0) x@transcripts[[i]]@history[[length(x@transcripts[[i]]@history)]] else list()
+		if (!identical(h$modification, "transcripts_filter_single")) {
+			next
+		}
 		if (h$tiers.deleted.count>0 | h$annotations.deleted.count>0) {
 			transcripts.modified.ids    <- c(transcripts.modified.ids, i)
 			tiers.deleted.count         <- tiers.deleted.count        + h$tiers.deleted.count  

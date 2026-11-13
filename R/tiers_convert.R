@@ -54,9 +54,11 @@ tiers_convert <- function(x,
 		if (length(filterTierNamesCurrent)>0) {
 			for (j in 1:length(filterTierNamesCurrent)) {
 				TierAlreadyConverted <- FALSE
-				if (intervalToPoint & x@transcripts[[i]]@tiers$type[j]=='IntervalTier') {
+				#the row of the tier in the tier table: j counts in the filtered names, and used as a row it changed the type of another tier
+				row <- match(filterTierNamesCurrent[j], x@transcripts[[i]]@tiers$name)
+				if (intervalToPoint & x@transcripts[[i]]@tiers$type[row]=='IntervalTier') {
 					#--change type in list
-					x@transcripts[[i]]@tiers$type[j]<-'TextTier'
+					x@transcripts[[i]]@tiers$type[row]<-'TextTier'
 					
 					#--modify times
 					ids <- which(x@transcripts[[i]]@annotations$tierName==filterTierNamesCurrent[j])
@@ -68,13 +70,15 @@ tiers_convert <- function(x,
 					TierAlreadyConverted <- TRUE
 				}
 				
-				if (pointToInterval & !TierAlreadyConverted & x@transcripts[[i]]@tiers$type[j]=='TextTier' ) {
+				if (pointToInterval & !TierAlreadyConverted & x@transcripts[[i]]@tiers$type[row]=='TextTier' ) {
 					#--change type in list
-					x@transcripts[[i]]@tiers$type[j]<-'IntervalTier'
+					x@transcripts[[i]]@tiers$type[row]<-'IntervalTier'
 					
 					#--modify times
 					#get all end times
 					ids <- which(x@transcripts[[i]]@annotations$tierName==filterTierNamesCurrent[j])
+					#in the order of time: rows in another order got ends before their starts
+					ids <- ids[order(x@transcripts[[i]]@annotations$startsec[ids])]
 					if (length(ids)>0) {
 						newTimes <- c(x@transcripts[[i]]@annotations$endsec[ids], x@transcripts[[i]]@length.sec)
 						newTimes <- newTimes[2:length(newTimes)]

@@ -111,7 +111,9 @@ search_run <- function(x, s) {
 
 	#if corpus object has changed, assign to original corpus object
 	if (getOption("act.updateX", TRUE)) {
-		if (!identical(original_x,x)) {
+		#only a plain name can be assigned to: an expression made a new object named like its text in the
+		#calling environment, and a long one stopped the search after its work
+		if (!identical(original_x,x) && is.name(captured_x)) {
 			p <- parent.frame() 
 			p[[deparse(captured_x)]] <- x
 		}	

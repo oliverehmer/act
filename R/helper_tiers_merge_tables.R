@@ -48,10 +48,10 @@ helper_tiers_merge_tables <- function (...) {
 	
 	#--- check if tiers with the same name are all of the same type
 	differing_tier_types <- c()
-	for (i in nrow(tiers.table.merged)) {
+	for (i in seq_len(nrow(tiers.table.merged))) {
 		tier1 <- tiers.table.merged[i,]
 		#compare with the other updates
-		for (j in nrow(tiers.table.merged)) {
+		for (j in seq_len(nrow(tiers.table.merged))) {
 			tier2 <- tiers.table.merged[j,]
 			temp         <- merge(x=tier1, y=tier2 , by.x = "name", by.y ="name", all.x=FALSE, all.y = FALSE)
 			#check if types of any of the tiers differ
@@ -70,7 +70,8 @@ helper_tiers_merge_tables <- function (...) {
 	}
 
 	#drop rows with non unique names
-	tiers.table.merged <- tiers.table.merged[-which(duplicated(tiers.table.merged$name)),]
+	#without a duplicate which() is empty, and a negative index of nothing selects no row
+	tiers.table.merged <- tiers.table.merged[!duplicated(tiers.table.merged$name), , drop=FALSE]
 		if (nrow(tiers.table.merged)==0 ){
 		tiers.table.merged$position <- NA
 	} else {
