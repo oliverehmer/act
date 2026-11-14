@@ -60,6 +60,15 @@ import_exb <- function(filePath=NULL,
 	#=== take file content
 	if (!is.null(fileContent)) {
 		myexb <- fileContent 
+		# text (what export_exb() returns without a path) is parsed; an xml2 document is taken as it is
+		if (is.character(fileContent)) {
+			myexb <- tryCatch(xml2::read_xml(paste(fileContent, collapse="\n")), error=function(cond) { NULL })
+			if (is.null(myexb)) {
+				t@import.result <- "error"
+				t@load.message  <- "File not recognized as .exb"
+				return(t)
+			}
+		}
 	}
 	
 	#=== load file
@@ -143,12 +152,12 @@ import_exb <- function(filePath=NULL,
 			tsTime[1]<- 0
 		}
 		#correct last timeslot being NA
+		# (one second per time slot behind the last known time: the time of the slot before gave the
+		# last event the length 0, and a time line without any time stopped the interpolation)
 		if (is.na(tsTime[length(tsTime)])) {
-			if (length(tsTime)==2) {
-				tsTime[2]=1
-			} else {
-				tsTime[length(tsTime)]=tsTime[length(tsTime)-1]
-			}
+			known <- which(!is.na(tsTime))
+			last_known <- known[length(known)]
+			tsTime[length(tsTime)] <- as.numeric(tsTime[last_known]) + (length(tsTime) - last_known)
 		}
 		
 		#if there are NA values in the time slots
@@ -276,10 +285,7 @@ import_exb <- function(filePath=NULL,
 			}
 		}
 		
-		#=== html conversion
-		t@annotations$content      <- textutils::HTMLdecode(t@annotations$content)
-		t@annotations$tierName    <- textutils::HTMLdecode(t@annotations$tierName)
-		mytiers$tierName                <- textutils::HTMLdecode(mytiers$tierName)
+		# (no decoding here: xml2 has decoded the file, a second round made the typed text "&amp;" an "&")
 		
 		#--- tiers to object
 		t@tiers <- act::helper_tiers_new_table(tierNames=mytiers$tierName)
