@@ -14,6 +14,7 @@
 #' The function will use all files in  \code{corpus@transcripts[[ ]]@media}.
 #' Therefore you will need to set the options \code{filterMediaInclude} filtering for which input media files you want to create the cuts.
 #' The filter is a regular expression, e.g.  \code{'\\.(wav|aif)'} for '.wav' and '.aif' audio files or \code{'\\.mp4'} for '.mp4' video files.
+#' A search result without a media file (after the filters) gets no command: the function warns and names the transcripts.
 #'
 #' \emph{Output file names}\cr
 #' The file names of the cuts are taken from the \code{resultID} column in the search results table. To change this, modify the contents of this column or define a different column using \code{options(act.export.filename.fromColumnName}. 
@@ -177,6 +178,7 @@ search_cuts_media <- function(x,
 
 	fps_cache <- list()
 	media_skipped  <- c()
+	media_missing  <- c()
 	media_encoded  <- c()
 
 	res<-1
@@ -246,10 +248,12 @@ search_cuts_media <- function(x,
 			in_descriptors <- in_descriptors[keep]
 		}
 
-		#if no media path found: default name
+		# a hit without a media file gets no command (user 14.11.2026): a command with a
+		# placeholder for the file fails when the list is run and lacks what a video input needs
 		if (length(in_paths)==0) {
-			in_paths       <- "DEFAULT_MEDIA_PATH"
-			in_descriptors <- ""
+			media_missing <- c(media_missing, as.character(s@results$transcriptName[res]))
+			mac_cutlist   <- c(mac_cutlist, "#      skipped: no media file")
+			next
 		}
 		j<-1
 		for (j in 1:length(in_paths)) {
@@ -633,7 +637,8 @@ search_cuts_media <- function(x,
 		w <- unique(myWarnings)
 		cli::cli_abort(c("No cut list created.",
 						 if (length(w)) stats::setNames(w, rep("-", length(w))),
-						 if (length(media_skipped)) c("i" = paste0("Media skipped (neither video nor audio by its extension): ", paste(basename(media_skipped), collapse = ", ")))))
+						 if (length(media_skipped)) c("i" = paste0("Media skipped (neither video nor audio by its extension): ", paste(basename(media_skipped), collapse = ", "))),
+						 if (length(media_missing)) c("i" = .cuts_media_missing_text(media_missing, filterMediaInclude, filterMediaExclude))))
 	} 
 	s@cuts.cutlist.win <- stringr::str_flatten(win_cutlist, collapse="\n")
 	s@cuts.cutlist.mac <- stringr::str_flatten(mac_cutlist, collapse="\n")
@@ -654,8 +659,20 @@ search_cuts_media <- function(x,
 		cli::cli_warn(c("{length(w)} transcript(s) not found in corpus:", stats::setNames(w, rep("-", length(w)))))
 	}
 	
+	if (length(media_missing) > 0) {
+		cli::cli_warn(.cuts_media_missing_text(media_missing, filterMediaInclude, filterMediaExclude))
+	}
+
 	#=== return
 	return(s)
+}
+
+# "2 hits skipped: no media file for spa_1101" - with a media filter set the files may be there and filtered out
+.cuts_media_missing_text <- function(media_missing, filterMediaInclude = "", filterMediaExclude = "") {
+	n     <- length(media_missing)
+	names <- paste(unique(media_missing), collapse = ", ")
+	paste0(n, if (n == 1) " hit skipped" else " hits skipped", ": no media file for ", names,
+		   if (!identical(filterMediaInclude, "") || !identical(filterMediaExclude, "")) " (after the media filters)" else "")
 }
 
 #==== FUNCTIONS ====

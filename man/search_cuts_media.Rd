@@ -83,6 +83,7 @@ The cut lists that can be executed in the Terminal (Apple) or the Command Line I
 The function will use all files in  \code{corpus@transcripts[[ ]]@media}.
 Therefore you will need to set the options \code{filterMediaInclude} filtering for which input media files you want to create the cuts.
 The filter is a regular expression, e.g.  \code{'\\.(wav|aif)'} for '.wav' and '.aif' audio files or \code{'\\.mp4'} for '.mp4' video files.
+A search result without a media file (after the filters) gets no command: the function warns and names the transcripts.
 
 \emph{Output file names}\cr
 The file names of the cuts are taken from the \code{resultID} column in the search results table. To change this, modify the contents of this column or define a different column using \code{options(act.export.filename.fromColumnName}.
