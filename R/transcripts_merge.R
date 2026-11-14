@@ -139,7 +139,8 @@ transcripts_merge <- function (destinationTranscript,
 
 				#get annotations form the update transcript
 				annUpdate <- transUpdate@annotations
-				annUpdate <- annUpdate[((annUpdate$startsec>=myDestInterval$startsec & annUpdate$startsec<=myDestInterval$endsec) | (annUpdate$endsec>myDestInterval$startsec & annUpdate$endsec<=myDestInterval$endsec) | (annUpdate$startsec<myDestInterval$startsec & annUpdate$endsec>myDestInterval$endsec)), ]
+				# (an annotation that starts where the region ends lies behind it: with <= it came along with the length 0)
+				annUpdate <- annUpdate[((annUpdate$startsec>=myDestInterval$startsec & annUpdate$startsec<myDestInterval$endsec) | (annUpdate$endsec>myDestInterval$startsec & annUpdate$endsec<=myDestInterval$endsec) | (annUpdate$startsec<myDestInterval$startsec & annUpdate$endsec>myDestInterval$endsec)), ]
 				
 				#---truncate intervals that do no fall entirely into the intervall
 				#intervals that start before
@@ -213,7 +214,8 @@ transcripts_merge <- function (destinationTranscript,
 
 					#get IDs of annotations in tiers that are also in the update file
 					myIDs_tiers <- which(ann$tierName %in% transUpdate@tiers$name)
-					myIDS_times <- which(ann$startsec>myDestInterval$startsec & ann$endsec<myDestInterval$endsec)
+					# (>= and <= as in the branch above: an annotation exactly as long as the region is replaced too)
+					myIDS_times <- which(ann$startsec>=myDestInterval$startsec & ann$endsec<=myDestInterval$endsec)
 					myIDs_tiers_timesection <- intersect(myIDs_tiers, myIDS_times)
 
 					if (keepOld && length(myIDs_tiers_timesection) > 0) {
@@ -321,6 +323,8 @@ transcripts_merge <- function (destinationTranscript,
 		}
 	}
 	#assign new annotations to transcript
+	# the annotations of the updates bring their own ids: counted anew, so that no id stands twice
+	if (nrow(ann) > 0 && "annotationID" %in% names(ann)) ann$annotationID <- seq_len(nrow(ann))
 	destinationTranscript@annotations <- ann
 
 	#add CHECK-update and OLD_ tiers at the TOP using helper_tiers_sort_table
