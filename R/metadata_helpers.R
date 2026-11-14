@@ -543,8 +543,8 @@ media_metadata_read <- function(file, tolerance_sec = 0.05) {
 	if (is.na(row$clip.id) || !nzchar(row$clip.id)) {
 		row$clip.id <- stem
 		notes <- c(notes, "clipID derived from filename")
-	} else if (identical(row$clip.id, stem)) {
-		# exact match
+	} else if (identical(row$clip.id, stem) || identical(row$clip.id, tools::file_path_sans_ext(basename(row$file)))) {
+		# exact match (the cut of a transcript with several media carries "__<medium>" in name and tag)
 	} else if (is_image && startsWith(stem, paste0(row$clip.id, "_"))) {
 		# still belonging to the cut (e.g. clipID_still_NNN)
 	} else {
