@@ -133,7 +133,12 @@ export_create_pfsx <- function(path.out.eaf,
 							   tierName    = NULL,
 							   overwrite   = FALSE) {
 	#--- determine target path
-	filePath.pfsx<- stringr::str_replace(path.out.eaf, pattern=stringr::regex('\\.eaf$', ignore_case=TRUE), replacement=".pfsx")
+	# the extension is replaced whatever it is: a path that does not end in .eaf stayed as it was,
+	# and with overwrite = TRUE the annotation file itself was written over with the preferences
+	filePath.pfsx <- paste0(tools::file_path_sans_ext(path.out.eaf), ".pfsx")
+	if (identical(normalizePath(filePath.pfsx, mustWork=FALSE), normalizePath(path.out.eaf, mustWork=FALSE))) {
+		cli::cli_abort("{.arg path.out.eaf} names the .pfsx file itself: {.path {path.out.eaf}}. Pass the path of the annotation file.")
+	}
 
 	#--- keep existing pfsx if overwrite is FALSE
 	if (file.exists(filePath.pfsx) && !overwrite) {
@@ -175,7 +180,7 @@ export_create_pfsx <- function(path.out.eaf,
 				</preferences>'
 	
 	
-	pfsx.1 <- sprintf(pfsx, startMiliSec, endMiliSec, max(0, startMiliSec-1000),  startMiliSec, tierName)
+	pfsx.1 <- sprintf(pfsx, startMiliSec, endMiliSec, max(0, startMiliSec-1000),  startMiliSec, .xml_escape(tierName))
 	#cat(pfsx.1)
 	
 	#write to file as UTF-8 (matches encoding declared in XML header)

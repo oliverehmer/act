@@ -81,11 +81,16 @@ export_edl <- function(t,
 	
 	#--- function for formatting times
 	hhmmssframes <- function(time, fps){
+		# a rest that rounds up to a whole second is the next second, frame 0 (3599.995 s at 50 fps gave 00:59:59:50)
+		frames <- as.integer(round((time %% 1) * fps))
+		carry  <- frames >= round(fps)
+		time   <- ifelse(carry, floor(time) + 1, time)
+		frames[carry] <- 0L
 		paste(paste(
 			formatC(time %/% (60*60) %% 24, width = 2, format = "d", flag = "0")                              #hh
 					,":", formatC(time %/% 60 %% 60, width = 2, format = "d", flag = "0")                     #mm
 					,":", formatC(time %% 60, width = 2, format = "d", flag = "0")                            #ss
-			        ,":", formatC(as.integer(round((time %% 1) * fps)) , width = 2, format = "d", flag = "0") #frames
+			        ,":", formatC(frames , width = 2, format = "d", flag = "0") #frames
 					#, ":", as.integer(round((time %% 1) * fps))                              #frames
 					, sep='' 
 					)

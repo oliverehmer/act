@@ -83,6 +83,15 @@ search_cuts_srt <- function(x,
 		dir.create(file.path(destination_folder, "srt"), showWarnings = FALSE)
 	}
 	
+	# the tiers the search looked into (names and patterns of the search, resolved on this corpus)
+	tier_names_searched <- act::search_makefilter(x,
+									 filterTranscriptNames        =s@filter.transcript.names,
+									 filterTranscriptIncludeRegex =s@filter.transcript.includeRegEx,
+									 filterTranscriptExcludeRegex =s@filter.transcript.excludeRegEx,
+									 filterTierNames              =s@filter.tier.names,
+									 filterTierIncludeRegex       =s@filter.tier.includeRegEx,
+									 filterTierExcludeRegex       =s@filter.tier.excludeRegEx)$tierNames
+
 	#set progress bar
 	helper_progress_set("Creating subtitles",max(1,nrow(s@results)))
 	
@@ -139,7 +148,7 @@ search_cuts_srt <- function(x,
 				
 				srt <- act::export_srt(   t                     = x@transcripts[[ s@results$transcriptName[i] ]],
 										  pathOutput            = myfilePath,
-										  filterTierNames       = s@filter.tier.names,
+										  filterTierNames       = tier_names_searched,
 										  filterSectionStartsec = startsec,
 										  filterSectionEndsec   = endsec,
 										  speakerShow          = speakerShow,

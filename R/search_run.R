@@ -37,6 +37,10 @@ search_run <- function(x, s) {
 									 filterTierIncludeRegex       =s@filter.tier.includeRegEx,
 									 filterTierExcludeRegex       =s@filter.tier.excludeRegEx)
 	#View(myfilter)
+	# The tiers found here count for this run only (the functions below read them from the search): left
+	# in the search they became a fixed filter, and the same search run on another corpus (or after a
+	# tier was added) looked only into the tiers of the first. The filter as given goes back at the end.
+	filter_tier_names_given <- s@filter.tier.names
 	s@filter.tier.names <- myfilter$tierNames
 
 	#==== NORMALIZATION ====
@@ -123,6 +127,7 @@ search_run <- function(x, s) {
 	s@results.tiers.nr       <- length(unique(temp$tierName))
 	s@results.transcripts.nr <- length(unique(temp$transcriptName))
 	s@x.name                 <- x@name
+	s@filter.tier.names      <- filter_tier_names_given
 	return(s)
 }
 
