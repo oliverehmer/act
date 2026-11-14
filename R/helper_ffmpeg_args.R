@@ -54,6 +54,11 @@
 #'   \link{media_metadata_read}. \code{NULL} reads it from the file.
 #' @param videoFps Numeric or \code{NULL}; frame rate of the video, e.g.
 #'   column \code{video.fps}. \code{NULL} reads it from the file.
+#' @param videoStart Numeric or \code{NULL}; start time of the file in seconds
+#'   with the edit list ignored, e.g. column \code{video.start.time}. A file
+#'   without a sound track starts at the delay of its first frame, and FFmpeg
+#'   counts the seek from there. \code{NULL} reads it from the file when the
+#'   offset or the frame rate is read as well, else 0 is taken.
 #'
 #' @return Character vector of FFmpeg arguments.
 #'
@@ -75,7 +80,8 @@ helper_ffmpeg_args <- function(output,
                                imageQuality  = getOption("act.ffmpeg.image.quality", 100),
                                maxHeight     = NULL,
                                videoOffset   = NULL,
-                               videoFps      = NULL) {
+                               videoFps      = NULL,
+                               videoStart    = NULL) {
 	if (missing(output) || length(output) != 1 || is.na(output) || !nzchar(output)) {
 		cli::cli_abort("Parameter {.arg output} is missing.")
 	}
@@ -97,8 +103,8 @@ helper_ffmpeg_args <- function(output,
 			target   <- max(0, as.numeric(startsec))
 			window   <- if (is.null(duration)) NULL else as.numeric(duration)
 			if (length(helper_ffmpeg_input_flags(input))) {
-				timing <- helper_media_video_timing_read(input, videoOffset, videoFps)
-				target <- target + timing$offset
+				timing <- helper_media_video_timing_read(input, videoOffset, videoFps, videoStart)
+				target <- target + timing$seek
 				if (is.finite(timing$frame_dur)) target <- target - timing$frame_dur * 0.99
 				target <- max(0, target)
 				if (!is.null(window) && is.finite(timing$frame_dur) && timing$frame_dur > window)
@@ -210,7 +216,7 @@ helper_ffmpeg_args <- function(output,
 #' @param audioCodecArgs Character vector; codec arguments of the sound.
 #' @param metadataArgs Character vector or \code{NULL}; further output
 #'   arguments, e.g. from \link{helper_metadata_ffmpeg_argv}.
-#' @param videoOffset,videoFps See \link{helper_ffmpeg_args}.
+#' @param videoOffset,videoFps,videoStart See \link{helper_ffmpeg_args}.
 #' @param audioInput Character or \code{NULL}; file the sound is taken from.
 #'   \code{NULL} takes it from \code{input}.
 #' @param videoCodecCopy Logical; copy the video stream instead of encoding it.
@@ -266,6 +272,7 @@ helper_ffmpeg_args_clip <- function(output,
                                     metadataArgs     = NULL,
                                     videoOffset      = NULL,
                                     videoFps         = NULL,
+                                    videoStart       = NULL,
                                     audioInput       = NULL,
                                     videoCodecCopy   = FALSE,
                                     withAudio        = TRUE,
@@ -288,7 +295,7 @@ helper_ffmpeg_args_clip <- function(output,
 	}
 	startsec <- max(0, as.numeric(startsec))
 	duration <- as.numeric(duration)
-	timing   <- helper_media_video_timing_read(input, videoOffset, videoFps)
+	timing   <- helper_media_video_timing_read(input, videoOffset, videoFps, videoStart)
 	raw_line <- identical(getOption("act.media.timeline", "editlist"), "raw")
 	if (isTRUE(videoCodecCopy)) {
 		key <- helper_ffmpeg_keyframe(input, startsec, videoOffset = timing$offset)
@@ -312,11 +319,11 @@ helper_ffmpeg_args_clip <- function(output,
 	args <- c("-hide_banner", "-loglevel", "error")
 
 	if (isTRUE(videoCodecCopy)) {
-		args <- c(args, "-ss", .ffmpeg_seconds(startsec + timing$offset), "-t", .ffmpeg_seconds(duration),
+		args <- c(args, "-ss", .ffmpeg_seconds(max(0, startsec + timing$seek)), "-t", .ffmpeg_seconds(duration),
 		          helper_ffmpeg_input_flags(input), "-i", input)
 		seek_out <- NULL
 	} else {
-		target <- startsec + timing$offset
+		target <- startsec + timing$seek
 		if (is.finite(timing$frame_dur)) target <- target - timing$frame_dur * 0.99
 		target   <- max(0, target)
 		pre_sec  <- max(0, target - 1)
@@ -816,51 +823,79 @@ helper_media_audio_track_exists <- function(filePath) {
 
 #' Helper: Timing of a video file
 #'
-#' Reads the edit list offset of the video track and the frame duration of a
-#' video file (cached per file). Values passed in are used instead of reading
-#' the file. With the option \code{act.media.timeline = "raw"} the offset is 0.
+#' Reads the edit list offset of the video track, the frame duration and the
+#' start time of a video file (cached per file). Values passed in are used
+#' instead of reading the file. With the option
+#' \code{act.media.timeline = "raw"} the offset is 0.
+#'
+#' The start time is the time of the first frame or sample of the file when
+#' the edit list is ignored. FFmpeg counts a seek before the input from there:
+#' a file whose only track is a video with B-frames starts at the delay of its
+#' first frame (two frames), a file with a sound track at 0. \code{seek} is
+#' the offset to add to a time of the recording for such a seek.
 #'
 #' @param filePath Character string; path of the video file.
 #' @param videoOffset Numeric or \code{NULL}; known edit list offset in seconds.
 #' @param videoFps Numeric or \code{NULL}; known frame rate.
+#' @param videoStart Numeric or \code{NULL}; known start time of the file in
+#'   seconds (edit list ignored). The file is read only when the offset or the
+#'   frame rate is missing; with both given and no start time, 0 is taken.
 #'
-#' @return List with \code{offset} (seconds) and \code{frame_dur} (seconds,
-#'   \code{NA} when unknown).
+#' @return List with \code{offset} (seconds), \code{frame_dur} (seconds,
+#'   \code{NA} when unknown), \code{start} (seconds) and \code{seek}
+#'   (seconds: \code{offset - start}).
 #'
 #' @export
-helper_media_video_timing_read <- function(filePath, videoOffset = NULL, videoFps = NULL) {
+helper_media_video_timing_read <- function(filePath, videoOffset = NULL, videoFps = NULL, videoStart = NULL) {
 	timeline <- getOption("act.media.timeline", "editlist")
 	if (!timeline %in% c("editlist", "raw")) {
 		cli::cli_abort("Option {.code act.media.timeline} must be {.val editlist} or {.val raw}, not {.val {timeline}}.")
 	}
 	offset <- suppressWarnings(as.numeric(videoOffset)[1])
 	fps    <- suppressWarnings(as.numeric(videoFps)[1])
+	start  <- suppressWarnings(as.numeric(videoStart)[1])
 	# the file is touched only when asked for it: a stat on a hanging drive holds R
 	if ((length(offset) == 0 || !is.finite(offset) || length(fps) == 0 || !is.finite(fps) || fps <= 0) &&
 	    length(filePath) == 1L && !is.na(filePath) && file.exists(filePath)) {
 		from_file <- .ffmpeg_video_timing(filePath)
 		if (length(offset) == 0 || !is.finite(offset)) offset <- from_file$offset
 		if (length(fps) == 0 || !is.finite(fps) || fps <= 0) fps <- 1 / from_file$frame_dur
+		if (length(start) == 0 || !is.finite(start)) start <- from_file$start
 	}
 	if (length(offset) == 0 || !is.finite(offset)) offset <- 0
-	list(offset    = if (identical(timeline, "raw")) 0 else offset,
-	     frame_dur = if (length(fps) == 1 && is.finite(fps) && fps > 0) 1 / fps else NA_real_)
+	if (length(start) == 0 || !is.finite(start)) start <- 0
+	raw <- identical(timeline, "raw")
+	list(offset    = if (raw) 0 else offset,
+	     frame_dur = if (length(fps) == 1 && is.finite(fps) && fps > 0) 1 / fps else NA_real_,
+	     start     = start,
+	     seek      = if (raw) 0 else offset - start)
 }
 
 .ffmpeg_video_timing <- function(path) {
 	info <- file.info(path)
-	if (is.na(info$size)) return(list(offset = 0, frame_dur = NA_real_))
+	if (is.na(info$size)) return(list(offset = 0, frame_dur = NA_real_, start = 0))
 	key <- paste(normalizePath(path, mustWork = FALSE), info$size, as.numeric(info$mtime), sep = "|")
 	hit <- .FFMPEG_TIMING_CACHE[[key]]
 	if (!is.null(hit)) return(hit)
 	offset <- tryCatch(.mp4_video_editlist_offset(path), error = function(e) 0)
 	fps <- tryCatch(.metadata_probe_fps(path), error = function(e) NA_real_)
+	start <- .media_file_start_raw(path)
 	res <- list(offset = if (is.finite(offset)) offset else 0,
-	            frame_dur = if (is.finite(fps) && fps > 0) 1 / fps else NA_real_)
+	            frame_dur = if (is.finite(fps) && fps > 0) 1 / fps else NA_real_,
+	            start = if (is.finite(start)) start else 0)
 	# a failed fps read is not kept: one ffprobe timeout would drop the frame
 	# rate from every later command of the session
 	if (is.finite(res$frame_dur)) assign(key, res, envir = .FFMPEG_TIMING_CACHE)
 	res
+}
+
+# The start time of a file with the edit list ignored: where FFmpeg counts a
+# seek before the input from (-ss t reads at start + t). NA when it cannot be read.
+.media_file_start_raw <- function(path) {
+	out <- tryCatch(.metadata_ffprobe_run(c("-v", "error", "-ignore_editlist", "1",
+		"-show_entries", "format=start_time", "-of", "csv=p=0", path))$out, error = function(e) character(0))
+	start <- suppressWarnings(as.numeric(out[1]))
+	if (length(start) == 1 && is.finite(start)) start else NA_real_
 }
 
 .mp4_video_editlist_offset <- function(path) {

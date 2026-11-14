@@ -25,6 +25,7 @@ helper_ffmpeg_args_clip(
   metadataArgs = NULL,
   videoOffset = NULL,
   videoFps = NULL,
+  videoStart = NULL,
   audioInput = NULL,
   videoCodecCopy = FALSE,
   withAudio = TRUE,
@@ -85,7 +86,7 @@ is the option \code{act.ffmpeg.video.keyframe_interval}.}
 \item{metadataArgs}{Character vector or \code{NULL}; further output
 arguments, e.g. from \link{helper_metadata_ffmpeg_argv}.}
 
-\item{videoOffset, videoFps}{See \link{helper_ffmpeg_args}.}
+\item{videoOffset, videoFps, videoStart}{See \link{helper_ffmpeg_args}.}
 
 \item{audioInput}{Character or \code{NULL}; file the sound is taken from.
 \code{NULL} takes it from \code{input}.}

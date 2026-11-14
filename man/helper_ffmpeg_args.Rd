@@ -16,7 +16,8 @@ helper_ffmpeg_args(
   imageQuality = getOption("act.ffmpeg.image.quality", 100),
   maxHeight = NULL,
   videoOffset = NULL,
-  videoFps = NULL
+  videoFps = NULL,
+  videoStart = NULL
 )
 }
 \arguments{
@@ -57,6 +58,12 @@ track in seconds, e.g. column \code{video.editlist.offset} of
 
 \item{videoFps}{Numeric or \code{NULL}; frame rate of the video, e.g.
 column \code{video.fps}. \code{NULL} reads it from the file.}
+
+\item{videoStart}{Numeric or \code{NULL}; start time of the file in seconds
+with the edit list ignored, e.g. column \code{video.start.time}. A file
+without a sound track starts at the delay of its first frame, and FFmpeg
+counts the seek from there. \code{NULL} reads it from the file when the
+offset or the frame rate is read as well, else 0 is taken.}
 }
 \value{
 Character vector of FFmpeg arguments.

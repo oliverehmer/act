@@ -4,7 +4,12 @@
 \alias{helper_media_video_timing_read}
 \title{Helper: Timing of a video file}
 \usage{
-helper_media_video_timing_read(filePath, videoOffset = NULL, videoFps = NULL)
+helper_media_video_timing_read(
+  filePath,
+  videoOffset = NULL,
+  videoFps = NULL,
+  videoStart = NULL
+)
 }
 \arguments{
 \item{filePath}{Character string; path of the video file.}
@@ -12,13 +17,26 @@ helper_media_video_timing_read(filePath, videoOffset = NULL, videoFps = NULL)
 \item{videoOffset}{Numeric or \code{NULL}; known edit list offset in seconds.}
 
 \item{videoFps}{Numeric or \code{NULL}; known frame rate.}
+
+\item{videoStart}{Numeric or \code{NULL}; known start time of the file in
+seconds (edit list ignored). The file is read only when the offset or the
+frame rate is missing; with both given and no start time, 0 is taken.}
 }
 \value{
-List with \code{offset} (seconds) and \code{frame_dur} (seconds,
-\code{NA} when unknown).
+List with \code{offset} (seconds), \code{frame_dur} (seconds,
+\code{NA} when unknown), \code{start} (seconds) and \code{seek}
+(seconds: \code{offset - start}).
 }
 \description{
-Reads the edit list offset of the video track and the frame duration of a
-video file (cached per file). Values passed in are used instead of reading
-the file. With the option \code{act.media.timeline = "raw"} the offset is 0.
+Reads the edit list offset of the video track, the frame duration and the
+start time of a video file (cached per file). Values passed in are used
+instead of reading the file. With the option
+\code{act.media.timeline = "raw"} the offset is 0.
+}
+\details{
+The start time is the time of the first frame or sample of the file when
+the edit list is ignored. FFmpeg counts a seek before the input from there:
+a file whose only track is a video with B-frames starts at the delay of its
+first frame (two frames), a file with a sound track at 0. \code{seek} is
+the offset to add to a time of the recording for such a seek.
 }

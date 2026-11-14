@@ -33,7 +33,9 @@ Column groups:
 \code{video.codec}, \code{video.bitrate}, \code{video.editlist.offset} (offset in
 seconds of the video track's edit list, read from the MP4/MOV header:
 raw time = time shown by players that honour the edit list + offset;
-0 without edit list)
+0 without edit list), \code{video.start.time} (start time of the file in
+seconds with the edit list ignored: FFmpeg counts a seek before the
+input from there)
 \item audio columns: \code{audio.sample.rate}, \code{audio.channels}, \code{audio.codec},
 \code{audio.bitrate}
 \item a file that was read but has no sound track gets \code{audio.codec = "none"}

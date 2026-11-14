@@ -172,7 +172,9 @@ helper_metadata_exif_argv <- function(file, sourcePath, startsec, clipID) {
 #'   `video.codec`, `video.bitrate`, `video.editlist.offset` (offset in
 #'   seconds of the video track's edit list, read from the MP4/MOV header:
 #'   raw time = time shown by players that honour the edit list + offset;
-#'   0 without edit list)
+#'   0 without edit list), `video.start.time` (start time of the file in
+#'   seconds with the edit list ignored: FFmpeg counts a seek before the
+#'   input from there)
 #' - audio columns: `audio.sample.rate`, `audio.channels`, `audio.codec`,
 #'   `audio.bitrate`
 #' - a file that was read but has no sound track gets `audio.codec = "none"`
@@ -320,6 +322,9 @@ media_metadata_read <- function(file, tolerance_sec = 0.05) {
 		if (identical(media_type, "video") && !is.na(row$video.width)) {
 			row$video.editlist.offset <- tryCatch(.mp4_video_editlist_offset(file_path),
 				error = function(e) NA_real_)
+			# NA stays the mark of a row read before the column existed: a read that gives nothing is 0
+			start <- .media_file_start_raw(file_path)
+			row$video.start.time <- if (is.finite(start)) start else 0
 		}
 	} else if (ext %in% c("jpg", "jpeg")) {
 		row <- .metadata_read_exifr(file_path, row)
@@ -355,6 +360,7 @@ media_metadata_read <- function(file, tolerance_sec = 0.05) {
 		video.codec       = NA_character_,
 		video.bitrate     = NA_real_,
 		video.editlist.offset = NA_real_,
+		video.start.time  = NA_real_,
 		audio.sample.rate = NA_integer_,
 		audio.channels    = NA_integer_,
 		audio.codec       = NA_character_,
