@@ -103,11 +103,13 @@ search_sub <- function(x,
 			}
 
 			# if results from the same tier should be excluded
+			# (the name itself, not as a pattern: "Entrevistador" also shut out "Entrevistador2")
 			if (excludeHitsInSameTier && length(rows)>0) {
-				pos <- grep(pattern=results$tierName[i], x=searchResults.all$tierName[rows])
-				if (length(pos)>0) {
-					rows <- rows[-pos]
-				}
+				rows <- rows[searchResults.all$tierName[rows] != results$tierName[i]]
+			}
+			# an annotation with several hits is taken once
+			if (length(rows)>1 && "annotationID" %in% names(searchResults.all)) {
+				rows <- rows[!duplicated(searchResults.all$annotationID[rows])]
 			}
 
 			newValues[i] <- stringr::str_flatten(searchResults.all$content[rows], collapse=collapseString)
@@ -123,7 +125,7 @@ search_sub <- function(x,
 										  pattern                     =pattern,
 										  searchMode                  =searchMode,
 										  searchNormalized            =searchNormalized,
-										  filterTranscriptIncludeRegex=s@results$transcriptName[i],
+										  filterTranscriptNames       =s@results$transcriptName[i],
 										  filterTierIncludeRegex      =filterTierIncludeRegex,
 										  filterTierExcludeRegex      =filterTierExcludeRegex,
 										  filterSectionStartsec       =s@results$startsec[i],
@@ -138,10 +140,10 @@ search_sub <- function(x,
 			} else {
 				# if results from the same tier should be excluded
 				if (excludeHitsInSameTier) {
-					pos <- grep(pattern=s@results$tierName[i], x=searchResults.sub$tierName)
-					if (length(pos)>0) {
-						searchResults.sub <- searchResults.sub[-pos, ]
-					}
+					searchResults.sub <- searchResults.sub[searchResults.sub$tierName != s@results$tierName[i], , drop=FALSE]
+				}
+				if (nrow(searchResults.sub)>1 && "annotationID" %in% names(searchResults.sub)) {
+					searchResults.sub <- searchResults.sub[!duplicated(searchResults.sub$annotationID), , drop=FALSE]
 				}
 
 				s@results[i, destinationColumn] <- stringr::str_flatten(searchResults.sub$content, collapse=collapseString)
@@ -150,8 +152,10 @@ search_sub <- function(x,
 		}
 	}
 
+	# a sub search without hits leaves "" in the column (an empty flatten), never NA
 	if (deleteEmptyLines==TRUE) {
-		s@results <- s@results[!is.na(s@results[, destinationColumn]), ]
+		found <- s@results[, destinationColumn]
+		s@results <- s@results[!is.na(found) & found != "", , drop=FALSE]
 	}
 	
 	return(s)
