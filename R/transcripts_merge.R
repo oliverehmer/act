@@ -411,7 +411,11 @@ transcripts_merge <- function (destinationTranscript,
 		modification               = "transcripts_merge",
 		systime                    = Sys.time(),
 		destinationTranscript      = destinationTranscript@name,
-		sourceTranscripts          = c(destinationTranscript, updateTranscripts)
+		# the names only: the objects themselves made every entry as large as all transcripts together,
+		# and each further merge carried the earlier ones along
+		sourceTranscripts          = c(destinationTranscript@name,
+									   if (methods::is(updateTranscripts, "transcript")) updateTranscripts@name
+									   else unname(vapply(updateTranscripts, function(u) u@name, character(1))))
 	)
 	
 
