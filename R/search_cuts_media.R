@@ -280,9 +280,10 @@ search_cuts_media <- function(x,
 			mac_cutlist <- c(mac_cutlist, paste0("#----  ", basename(in_paths[j])))
 
 			#==== INFILEPATH ====
-			mac_infilepath <- sprintf('PATH_INPUT="%s"', in_paths[j])
+			# quoted for the shell: inside double quotes a name with $ or backticks was expanded and run
+			mac_infilepath <- paste0("PATH_INPUT=", shQuote(in_paths[j], type = "sh"))
 			mac_cutlist <- c(mac_cutlist, mac_infilepath)
-			win_infilepath <- sprintf('SET "PATH_INPUT=%s"', in_paths[j])
+			win_infilepath <- sprintf('SET "PATH_INPUT=%s"', gsub("%", "%%", in_paths[j], fixed = TRUE))
 			win_cutlist <- c(win_cutlist, win_infilepath)
 			
 			#==== MEDIA ====
@@ -351,7 +352,7 @@ search_cuts_media <- function(x,
 				if (length(out_folder_video_all)>0) {
 					win_makedir  <- stringr::str_flatten(sprintf('IF NOT EXIST "%s" ( md "%s" )', out_folder_video_all, out_folder_video_all), collapse='\n')
 					win_video <- c(win_video, win_makedir)
-					mac_makedir  <- stringr::str_flatten(sprintf('mkdir -p "%s"', out_folder_video_all), collapse='\n')
+					mac_makedir  <- stringr::str_flatten(helper_cutlist_lines(list(list(type = "mkdir", args = out_folder_video_all)), os = "mac", inputVariable = NULL, header = FALSE), collapse='\n')
 					mac_video <- c(mac_video, mac_makedir)
 				}
 				
@@ -535,7 +536,7 @@ search_cuts_media <- function(x,
 					
 					#mac version thumb
 					mac_info         <- c("#.... thumbnail")
-					mac_makedir      <- sprintf('mkdir -p "%s"', out_folder_current)
+					mac_makedir      <- helper_cutlist_lines(list(list(type = "mkdir", args = out_folder_current)), os = "mac", inputVariable = NULL, header = FALSE)
 					mac_if_statement <- "\nif [ -f \"%1$s\" ]\nthen\n %2$s\nfi\n"
 					mac_if_statement <- sprintf(mac_if_statement, "$PATH_INPUT" , mac_cmd)
 					mac_thumbnail    <- c(mac_info, mac_makedir, mac_if_statement)
@@ -609,7 +610,7 @@ search_cuts_media <- function(x,
 					
 					#mac version stills
 					mac_info         <- c("#.... stills")
-					mac_makedir      <- sprintf('mkdir -p "%s"', out_folder_stills)
+					mac_makedir      <- helper_cutlist_lines(list(list(type = "mkdir", args = out_folder_stills)), os = "mac", inputVariable = NULL, header = FALSE)
 					mac_if_statement <- "\nif [ -f \"%1$s\" ]\nthen\n %2$s\n %3$s\nfi\n"
 					mac_if_statement <- sprintf(mac_if_statement, "$PATH_INPUT", mac_makedir ,mac_cmd)
 					mac_stills       <- c(mac_info, mac_if_statement)
@@ -628,12 +629,14 @@ search_cuts_media <- function(x,
 	}
 	
 	#==== SAVE entire cut list to search object ====
-	s@cuts.cutlist.win <- stringr::str_flatten(win_cutlist, collapse="\n")
-	s@cuts.cutlist.mac <- stringr::str_flatten(mac_cutlist, collapse="\n")
 	if (length(win_cutlist)==0) {
 		w <- unique(myWarnings)
-		cli::cli_abort(c("No cut list created.", stats::setNames(w, rep("-", length(w)))))
+		cli::cli_abort(c("No cut list created.",
+						 if (length(w)) stats::setNames(w, rep("-", length(w))),
+						 if (length(media_skipped)) c("i" = paste0("Media skipped (neither video nor audio by its extension): ", paste(basename(media_skipped), collapse = ", ")))))
 	} 
+	s@cuts.cutlist.win <- stringr::str_flatten(win_cutlist, collapse="\n")
+	s@cuts.cutlist.mac <- stringr::str_flatten(mac_cutlist, collapse="\n")
 	
 	#==== SAVE to file ====
 	# if output folder is given
