@@ -231,7 +231,8 @@ search_concordance <- function(x,
 	}
 
 	#--- right context
-	has_right    <- (hit_pos + hit_length) < nc
+	# (<=: with exactly one character left behind the hit, that character was lost)
+	has_right    <- (hit_pos + hit_length) <= nc
 	right_start  <- as.integer(hit_pos + hit_length)
 	right_end    <- as.integer(pmin(right_start + conc_width, nc))
 	right_part   <- rep("", n)
@@ -300,7 +301,8 @@ search_concordance <- function(x,
 		concLeft2[has_left] <- stringr::str_trim(cL2, side = "both")
 	}
 
-	has_right    <- (hit_pos + hit_length) < nc
+	# (<=: with exactly one character left behind the hit, that character was lost)
+	has_right    <- (hit_pos + hit_length) <= nc
 	right_start  <- as.integer(hit_pos + hit_length)
 	right_end    <- as.integer(pmin(right_start + conc_width, nc))
 	right_part   <- rep("", n)
