@@ -146,11 +146,19 @@ search_cuts_srt <- function(x,
 					myfilePath <- file.path(destination_folder, "srt", paste(filename, ".srt", sep=""))
 				} 
 				
-				srt <- act::export_srt(   t                     = x@transcripts[[ s@results$transcriptName[i] ]],
+				# the subtitles belong to the media cut of the same name, which starts at startsec: their
+				# times count from there (in the times of the recording they never showed in the clip)
+				t_cut <- act::transcripts_filter_single(t                     = x@transcripts[[ s@results$transcriptName[i] ]],
+														  filterTierNames       = tier_names_searched,
+														  filterSectionStartsec = startsec,
+														  filterSectionEndsec   = endsec,
+														  timesPreserve         = FALSE,
+														  sort                  = "tier>startsec")
+				srt <- act::export_srt(   t                     = t_cut,
 										  pathOutput            = myfilePath,
-										  filterTierNames       = tier_names_searched,
-										  filterSectionStartsec = startsec,
-										  filterSectionEndsec   = endsec,
+										  filterTierNames       = NULL,
+										  filterSectionStartsec = NULL,
+										  filterSectionEndsec   = NULL,
 										  speakerShow          = speakerShow,
 										  speakerWidth         = speakerWidth,
 										  speakerEnding        = speakerEnding
