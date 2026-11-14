@@ -33,8 +33,10 @@ helper_corpus_export_cured <- function(x,
 	for (tname in names(x@transcripts)) {
 		tr <- x@transcripts[[tname]]
 		if (length(tr@history) == 0L) next
-		h <- tr@history[[length(tr@history)]]
-		if (!identical(h$modification, "transcripts_cure_single")) next
+		# the newest entry of the cure, as documented (a later tiers_add() made the transcript count as not cured)
+		cure_entries <- which(vapply(tr@history, function(entry) identical(entry$modification, "transcripts_cure_single"), logical(1)))
+		if (length(cure_entries) == 0L) next
+		h <- tr@history[[cure_entries[length(cure_entries)]]]
 		was.cured <- (
 			isTRUE(h$annotationsTimesReversed.deleted.count > 0)
 			|| isTRUE(h$annotationsTimesBelowZero.deleted.count > 0)

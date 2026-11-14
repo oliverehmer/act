@@ -30,7 +30,7 @@ search_playresults_inquicktime <- function(x,
 		cli::cli_rule("Result {i}")
 		cli::cli_dl(c(
 			"transcriptName" = s@results[i, ]$transcriptName,
-			"tier.name"      = s@results[i, ]$tier.name,
+			"tier.name"      = s@results[i, ]$tierName,
 			"startsec"       = as.character(s@results[i, ]$startsec),
 			"endsec"         = as.character(s@results[i, ]$endsec),
 			"content"        = s@results[i, ]$content

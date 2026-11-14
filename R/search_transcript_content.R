@@ -57,10 +57,12 @@ search_transcript_content <- function(t, s) {
 		content_col <- ann$content
 	}
 
-	if (length(content_col) == 0 || is.na(content_col[1])) return(NULL)
+	# (all, not the first: one annotation without content at the top hid every hit of the transcript)
+	if (length(content_col) == 0 || all(is.na(content_col))) return(NULL)
 
 	#==== vectorized detection ====
 	indices <- stringr::str_detect(content_col, .search_regex(s@pattern))
+	indices[is.na(indices)] <- FALSE
 	if (!any(indices)) return(NULL)
 
 	hits.pos   <- stringr::str_locate_all(content_col[indices], .search_regex(s@pattern))
