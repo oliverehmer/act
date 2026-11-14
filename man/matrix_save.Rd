@@ -9,7 +9,7 @@ matrix_save(replacementMatrix, path, encoding = "UTF-8")
 \arguments{
 \item{replacementMatrix}{Data frame; replacement matrix.}
 
-\item{path}{Character string; path where the matrix will be saved.}
+\item{path}{Character string; path where the matrix will be saved. A path ending in \code{.xlsx} is written as an Excel file, any other as csv (separator \code{;}).}
 
 \item{encoding}{Character string; encoding of the file.}
 }
