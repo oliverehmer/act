@@ -1,7 +1,7 @@
 #' Normalize transcriptions
 #'
 #' Normalizes the contents of transcriptions in a corpus object using a normalization matrix.
-#' Function returns a corpus object with normalized transcription and updates the original corpus object passed as argument to x.
+#' Function returns a corpus object with normalized transcription.
 #'
 #' If the normalization matrix is missing or empty (0 rows), a warning is issued
 #' and the corpus object is returned unchanged.
@@ -9,6 +9,8 @@
 #' @param x Corpus object.
 #' @param transcriptNames Vector of character strings; Names of the transcripts for which you want to search media files; leave empty if you want to search media for all transcripts in the corpus object.
 #' @param forceUpdate Logical; If \code{TRUE} transcripts will be normalized in any case, if \code{FALSE} transcripts will be only normalized if there was a modification to the transcript since the last normalization.
+#'
+#' @return Corpus object with the normalized transcriptions; assign it, the object passed as \code{x} is not changed.
 #'
 #' @export
 #'

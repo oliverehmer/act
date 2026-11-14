@@ -15,6 +15,8 @@
 #' @param openOriginal Logical; if \code{TRUE} the function will check if the original annotation file was an .eaf file and if it still exists in the original location. If so, the function will not create a temporary .eaf file but open the original file. Warning: The original .pfsx file (if it exists) will be overwritten.
 #' @param overwrite Logical; if \code{TRUE} (default) an existing .pfsx file will be overwritten. If \code{FALSE} an existing .pfsx file is kept.
 #'
+#' @return Called for its side effect (opens the program); returns invisibly.
+#'
 #' @export
 #'
 #' @examples

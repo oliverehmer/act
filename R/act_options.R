@@ -411,6 +411,8 @@ options_show <- function (group = NULL) {
 
 #' Delete all options set by the package from R options
 #'
+#' @return Invisibly \code{NULL}; called for its side effect (removes the options).
+#'
 #' @export
 #'
 #' @examples
@@ -424,6 +426,8 @@ options_delete <- function() {
 
 
 #' Reset options to default values
+#'
+#' @return Invisibly a list with the previous values of the options (as \code{options()} returns them).
 #'
 #' @export
 #'

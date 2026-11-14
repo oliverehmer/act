@@ -17,9 +17,12 @@ transcripts_update_normalization(
 
 \item{forceUpdate}{Logical; If \code{TRUE} transcripts will be normalized in any case, if \code{FALSE} transcripts will be only normalized if there was a modification to the transcript since the last normalization.}
 }
+\value{
+Corpus object with the normalized transcriptions; assign it, the object passed as \code{x} is not changed.
+}
 \description{
 Normalizes the contents of transcriptions in a corpus object using a normalization matrix.
-Function returns a corpus object with normalized transcription and updates the original corpus object passed as argument to x.
+Function returns a corpus object with normalized transcription.
 }
 \details{
 If the normalization matrix is missing or empty (0 rows), a warning is issued

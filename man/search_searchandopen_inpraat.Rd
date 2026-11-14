@@ -11,6 +11,9 @@ search_searchandopen_inpraat(x, pattern)
 
 \item{pattern}{Character string; search pattern as regular expression.}
 }
+\value{
+Called for its side effect (opens the program); returns invisibly.
+}
 \description{
 The function remote controls 'Praat' with a 'Praat' script.
 It first searches your corpus object and uses the first search hit.

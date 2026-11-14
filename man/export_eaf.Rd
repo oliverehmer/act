@@ -44,6 +44,8 @@ Advice: In most situations it is more convenient to use \code{act::corpus_export
 \details{
 The .eaf file will be written to the file specified in \code{pathOutput}.
 If \code{pathOutput} is left empty, the function will return the contents of the .eaf itself.
+
+Point tiers become interval tiers: each point lasts until the next point, the last one until the end of the transcript.
 }
 \examples{
 library(act)

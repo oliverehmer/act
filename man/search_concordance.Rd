@@ -19,6 +19,9 @@ Search object.
 \description{
 Make concordance for search results
 }
+\details{
+In the search modes \code{fulltext}, \code{fulltext.byTime} and \code{fulltext.byTier} the context is taken from the full text and reaches beyond the annotation of the hit (with the separators between annotations and tiers); the word counts stay empty. In the mode \code{content} the context ends at the border of the annotation. Each side holds at most \code{s@concordance.width} characters.
+}
 \examples{
 library(act)
 

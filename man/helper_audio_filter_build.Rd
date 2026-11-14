@@ -4,7 +4,11 @@
 \alias{helper_audio_filter_build}
 \title{Build a combined FFmpeg audio filter string}
 \usage{
-helper_audio_filter_build(audio_normalize = FALSE, audio_anonymize = NULL)
+helper_audio_filter_build(
+  audio_normalize = FALSE,
+  audio_anonymize = NULL,
+  audio_distort = .audio_distort_default()
+)
 }
 \arguments{
 \item{audio_normalize}{Logical. If \code{TRUE} and option
@@ -14,6 +18,13 @@ Default is \code{FALSE}.}
 \item{audio_anonymize}{\code{data.frame} with columns \code{start} and
 \code{end} (numeric, seconds relative to cut start), or \code{NULL} for
 no anonymization. Default is \code{NULL}.}
+
+\item{audio_distort}{List; the voice distortion effects for the mode
+\code{distort}, in the form \link{helper_audio_filter_parts} takes for
+\code{distort} (e.g. \code{list(pitch = list(on = TRUE, factor = 0.75))};
+\code{scope} \code{"segments"} or \code{"all"}, default
+\code{"segments"}). Default (also for \code{NULL}) is pitch on with the
+factor 0.75 within the ranges. Used only in the mode \code{distort}.}
 }
 \value{
 A named list with:
@@ -33,10 +44,13 @@ argument, e.g. \code{"-map \"[aout]\""}. \code{""} otherwise.}
 \description{
 Constructs the audio filter arguments for an FFmpeg command that optionally
 combines loudness normalization (\code{loudnorm}) and audio anonymization
-(\code{silence}, \code{beep}, or \code{noise}) over specified time ranges.
-The filters are built by \link{helper_audio_filter_parts}; the
-anonymization comes first, the normalization last. The beep and the noise
-are generated inside the filter graph.
+over specified time ranges. The anonymization modes are \code{beep},
+\code{noise}, \code{mute} (\code{silence} is read as \code{mute}) and
+\code{distort}; the mode is read from the option
+\code{act.ffmpeg.audio.anony_filter}. The filters are built by
+\link{helper_audio_filter_parts}; the anonymization comes first, the
+normalization last. The beep and the noise are generated inside the filter
+graph.
 }
 \details{
 Audio filter and beep frequency are read from options:

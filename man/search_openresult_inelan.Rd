@@ -23,6 +23,9 @@ search_openresult_inelan(
 
 \item{overwrite}{Logical; if \code{TRUE} (default) an existing .pfsx file will be overwritten. If \code{FALSE} an existing .pfsx file is kept.}
 }
+\value{
+Called for its side effect (opens the program); returns invisibly.
+}
 \description{
 The function creates an temporary .eaf file and a .psfx file that locates the search hit.
 These files will then be opened in ELAN.

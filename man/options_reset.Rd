@@ -6,6 +6,9 @@
 \usage{
 options_reset()
 }
+\value{
+Invisibly a list with the previous values of the options (as \code{options()} returns them).
+}
 \description{
 Reset options to default values
 }

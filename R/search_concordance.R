@@ -4,6 +4,8 @@
 #' @param s Search object.
 #' @param searchNormalized Logical; if \code{TRUE} function will search in the normalized content, if \code{FALSE} function will search in the original content.
 #'
+#' @details In the search modes \code{fulltext}, \code{fulltext.byTime} and \code{fulltext.byTier} the context is taken from the full text and reaches beyond the annotation of the hit (with the separators between annotations and tiers); the word counts stay empty. In the mode \code{content} the context ends at the border of the annotation. Each side holds at most \code{s@concordance.width} characters.
+#'
 #' @return Search object.
 #' @export
 #'
@@ -71,7 +73,7 @@ search_concordance <- function(x,
 	nrWordsRight       <- rep(NA_character_, n)
 	nrWordsTotal       <- rep(NA_character_, n)
 
-	if (s@search.mode == "fulltext") {
+	if (startsWith(s@search.mode, "fulltext")) {
 		#=== fulltext mode: group by (transcriptName, searchMode)
 		# fetch the fulltext slot ONCE per group instead of once per hit.
 		hit_pos    <- as.integer(temp$hit.pos.fulltext)
@@ -214,7 +216,7 @@ search_concordance <- function(x,
 
 	#--- left context
 	has_left    <- hit_pos > 1
-	left_margin <- as.integer(pmax(0L, hit_pos - conc_width - 1L))
+	left_margin <- as.integer(pmax(1L, hit_pos - conc_width))
 	left_end    <- as.integer(hit_pos - 1L)
 	left_part   <- rep("", n)
 	if (any(has_left)) {
@@ -234,7 +236,7 @@ search_concordance <- function(x,
 	# (<=: with exactly one character left behind the hit, that character was lost)
 	has_right    <- (hit_pos + hit_length) <= nc
 	right_start  <- as.integer(hit_pos + hit_length)
-	right_end    <- as.integer(pmin(right_start + conc_width, nc))
+	right_end    <- as.integer(pmin(right_start + conc_width - 1L, nc))
 	right_part   <- rep("", n)
 	if (any(has_right)) {
 		right_part[has_right] <- substring(fulltext, right_start[has_right],
@@ -284,7 +286,7 @@ search_concordance <- function(x,
 	concRight2 <- character(n)
 
 	has_left    <- hit_pos > 1
-	left_margin <- as.integer(pmax(0L, hit_pos - conc_width - 1L))
+	left_margin <- as.integer(pmax(1L, hit_pos - conc_width))
 	left_end    <- as.integer(hit_pos - 1L)
 	left_part   <- rep("", n)
 	if (any(has_left)) {
@@ -304,7 +306,7 @@ search_concordance <- function(x,
 	# (<=: with exactly one character left behind the hit, that character was lost)
 	has_right    <- (hit_pos + hit_length) <= nc
 	right_start  <- as.integer(hit_pos + hit_length)
-	right_end    <- as.integer(pmin(right_start + conc_width, nc))
+	right_end    <- as.integer(pmin(right_start + conc_width - 1L, nc))
 	right_part   <- rep("", n)
 	if (any(has_right)) {
 		right_part[has_right] <- substring(fulltexts[has_right],

@@ -136,7 +136,7 @@ helper_progress_callback_get <- function() {
 #' Helper: Remaining time of a progress bar
 #'
 #' Formats the remaining time of a loop as a fixed-width tail
-#' \code{" (%7s left)"} (15 characters, fits "59m 20s"), estimated from the
+#' \code{" (\%7s left)"} (15 characters, fits "59m 20s"), estimated from the
 #' elapsed time per finished item. The progress bars of act and mica use it.
 #'
 #' @param start POSIXct; start time of the loop.

@@ -5,6 +5,8 @@
 #' The .exb file will be written to the file specified in \code{pathOutput}.
 #' If \code{pathOutput} is left empty, the function will return the contents of the .exb itself.
 #'
+#' Point tiers become interval tiers: each point lasts until the next point, the last one until the end of the transcript.
+#'
 #' @param t Transcript object; transcript to be exported.
 #' @param pathOutput Character string; path where .exb file will be saved.
 #' @param filterTierNames Vector of character strings; names of tiers to be included. If left unspecified, all tiers will be exported.

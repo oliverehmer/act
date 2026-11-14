@@ -20,6 +20,8 @@
 #' @param overwrite Logical; if \code{TRUE} (default) an existing .pfsx file will be overwritten. If \code{FALSE} an existing .pfsx file is kept.
 #' @param mediaWriteOffset Logical; passed to \link{export_eaf} when a temporary .eaf is created. If \code{TRUE}, clip media get a \code{TIME_ORIGIN} offset. Default \code{FALSE}.
 #'
+#' @return Called for its side effect (opens the program); returns invisibly.
+#'
 #' @export
 #'
 #' @examples

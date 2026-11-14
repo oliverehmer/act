@@ -6,6 +6,9 @@
 \usage{
 options_delete()
 }
+\value{
+Invisibly \code{NULL}; called for its side effect (removes the options).
+}
 \description{
 Delete all options set by the package from R options
 }

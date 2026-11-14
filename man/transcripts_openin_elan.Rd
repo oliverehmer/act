@@ -32,6 +32,9 @@ transcripts_openin_elan(
 
 \item{mediaWriteOffset}{Logical; passed to \link{export_eaf} when a temporary .eaf is created. If \code{TRUE}, clip media get a \code{TIME_ORIGIN} offset. Default \code{FALSE}.}
 }
+\value{
+Called for its side effect (opens the program); returns invisibly.
+}
 \description{
 The function opens a transcript in ELAN-
 It can open the an original .eaf file (if it exists) or create an .eaf file.

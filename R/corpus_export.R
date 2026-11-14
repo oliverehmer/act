@@ -4,6 +4,8 @@
 #' If only some transcripts or tiers should be affected set the parameter \code{filterTranscriptNames} and \code{filterTierNames}.
 #' In case that you want to select transcripts and/or tiers by using regular expressions use the function \code{act::search_makefilter} first. 
 #'
+#' In 'eaf' and 'exb' files point tiers become interval tiers: each point lasts until the next point, the last one until the end of the transcript.
+#'
 #' @param x Corpus object.
 #' @param folderOutput Character string; path to a folder where the transcription files will be saved. By default the forlder will be created recursively it does not exist.
 #' @param filterTranscriptNames Vector of character strings; names of transcripts to be included. If left unspecified, all transcripts will be exported.

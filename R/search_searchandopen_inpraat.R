@@ -12,6 +12,8 @@
 #' @param x Corpus object.
 #' @param pattern Character string; search pattern as regular expression.
 #' 
+#' @return Called for its side effect (opens the program); returns invisibly.
+#'
 #' @seealso \code{vignette("praat_remote_control", package = "act")}
 #'
 #' @export

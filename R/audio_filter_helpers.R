@@ -120,10 +120,13 @@ helper_audio_filter_parts <- function(channel   = "stereo",
 #'
 #' Constructs the audio filter arguments for an FFmpeg command that optionally
 #' combines loudness normalization (\code{loudnorm}) and audio anonymization
-#' (\code{silence}, \code{beep}, or \code{noise}) over specified time ranges.
-#' The filters are built by \link{helper_audio_filter_parts}; the
-#' anonymization comes first, the normalization last. The beep and the noise
-#' are generated inside the filter graph.
+#' over specified time ranges. The anonymization modes are \code{beep},
+#' \code{noise}, \code{mute} (\code{silence} is read as \code{mute}) and
+#' \code{distort}; the mode is read from the option
+#' \code{act.ffmpeg.audio.anony_filter}. The filters are built by
+#' \link{helper_audio_filter_parts}; the anonymization comes first, the
+#' normalization last. The beep and the noise are generated inside the filter
+#' graph.
 #'
 #' Audio filter and beep frequency are read from options:
 #' \code{act.ffmpeg.audio.anony_filter},
@@ -136,6 +139,12 @@ helper_audio_filter_parts <- function(channel   = "stereo",
 #' @param audio_anonymize \code{data.frame} with columns \code{start} and
 #'   \code{end} (numeric, seconds relative to cut start), or \code{NULL} for
 #'   no anonymization. Default is \code{NULL}.
+#' @param audio_distort List; the voice distortion effects for the mode
+#'   \code{distort}, in the form \link{helper_audio_filter_parts} takes for
+#'   \code{distort} (e.g. \code{list(pitch = list(on = TRUE, factor = 0.75))};
+#'   \code{scope} \code{"segments"} or \code{"all"}, default
+#'   \code{"segments"}). Default (also for \code{NULL}) is pitch on with the
+#'   factor 0.75 within the ranges. Used only in the mode \code{distort}.
 #'
 #' @return A named list with:
 #'   \describe{
@@ -154,18 +163,25 @@ helper_audio_filter_parts <- function(channel   = "stereo",
 #' @export
 helper_audio_filter_build <- function(
 	audio_normalize = FALSE,
-	audio_anonymize = NULL
+	audio_anonymize = NULL,
+	audio_distort   = .audio_distort_default()
 ) {
 	anony_type <- getOption("act.ffmpeg.audio.anony_filter")
 	ranges <- if (!is.null(anony_type)) audio_anonymize else NULL
+	mode <- .audio_default_mode()
+	if (is.null(audio_distort)) audio_distort <- .audio_distort_default()
+	if (identical(mode, "distort") && is.data.frame(ranges) && nrow(ranges) > 0 &&
+		!nzchar(.audio_distort_filter(audio_distort))) {
+		cli::cli_warn("The mode {.val distort} has no effect switched on in {.arg audio_distort}: the ranges are not anonymized.")
+	}
 	parts <- helper_audio_filter_parts(
 		channel   = "stereo",
 		mono      = FALSE,
 		normalize = audio_normalize,
 		ranges    = ranges,
-		mode      = .audio_default_mode(),
+		mode      = mode,
 		strength  = 0.8,
-		distort   = NULL,
+		distort   = audio_distort,
 		beepFreq  = getOption("act.ffmpeg.audio.anony_beep_freq", 800)
 	)
 	if (!is.null(parts$graph)) {
@@ -196,6 +212,11 @@ helper_audio_filter_build <- function(
 	m <- getOption("act.ffmpeg.audio.anony_filter")
 	if (is.null(m) || !nzchar(m)) return("beep")
 	if (identical(m, "silence")) "mute" else m
+}
+
+# the preselection of the viewer (mica: distort_pitch on, audio_distort_pitch 0.75)
+.audio_distort_default <- function() {
+	list(pitch = list(on = TRUE, factor = 0.75), scope = "segments")
 }
 
 .audio_channel_pan <- function(channel, mono) {

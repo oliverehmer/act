@@ -18,7 +18,8 @@ annotations_fill_tier_section(
 \arguments{
 \item{x}{Transcript object.}
 
-\item{tier_pattern}{Character string; regex pattern to identify target tier(s).}
+\item{tier_pattern}{Character string; regex pattern to identify the target
+tier. If several tiers match, the first one is used.}
 
 \item{content}{Character string; content to insert.}
 
@@ -41,6 +42,18 @@ Transcript object with modified annotations.
 \description{
 Fills annotations in a specific tier and time range with content.
 By default, only fills empty annotations (does not overwrite existing content).
+}
+\details{
+Only the first tier whose name matches \code{tier_pattern} is filled; if
+further tiers match, a warning names them.
+
+The annotations that lie within the section are filled. If none lies within
+it but one annotation covers the whole section, that annotation is split at
+the bounds of the section and the section gets the content when the
+annotation is empty or \code{overwrite = TRUE} (the parts before and after
+the section keep their content); an annotation with content stays as it is
+when \code{overwrite = FALSE}, with a message. If no annotation lies within
+or covers the section, a new one is created (\code{create_if_missing}).
 }
 \examples{
 \dontrun{
