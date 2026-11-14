@@ -34,7 +34,13 @@ matrix_load <- function(path=NULL,
 
 	package_path <- system.file("extdata", "normalization", "normalization_matrix.csv", package = "act")
 	if (path != package_path && file.exists(package_path)) {
-		if (!.validate_resource(path, package_path)) {
+		#a matrix of one's own needs the columns search and replace, nothing else: without the column
+		#description it was replaced by the matrix of the package, with one line of notice
+		own.columns <- tryCatch(
+			if (tolower(tools::file_ext(path)) == "xlsx") colnames(openxlsx2::read_xlsx(path, sheet = 1)) else
+				colnames(utils::read.table(path, header = TRUE, sep = ";", nrows = 1, quote = "\"", comment.char = "", fileEncoding = encoding, encoding = encoding)),
+			error = function(e) character(0))
+		if (!all(c("search", "replace") %in% own.columns) && !.validate_resource(path, package_path)) {
 			path <- package_path
 		}
 	}
@@ -44,7 +50,8 @@ matrix_load <- function(path=NULL,
 		temp <- openxlsx2::read_xlsx(path, sheet = 1)
 		temp <- as.data.frame(temp, stringsAsFactors = FALSE)
 	} else {
-		temp <- utils::read.table(path, header = TRUE, sep = ";", fileEncoding = encoding, encoding = encoding)
+		#a search pattern may hold # and an apostrophe: no comment sign, only the double quote quotes
+		temp <- utils::read.table(path, header = TRUE, sep = ";", quote = "\"", comment.char = "", fileEncoding = encoding, encoding = encoding, stringsAsFactors = FALSE)
 	}
 
 	if (!"search" %in% colnames(temp)) {

@@ -61,8 +61,10 @@ export_exb <- function(t,
 	ann <- ann[,myCols]
 
 	#convert annotations to html safe characters
-	ann$content  <- vapply(ann$content, function(x) XML::xmlValue(XML::xmlTextNode(x)), character(1))
-	ann$tierName <- vapply(ann$tierName, function(x) XML::xmlValue(XML::xmlTextNode(x)), character(1))
+	ann$content  <- vapply(.strip_invalid_xml_chars(ann$content), function(x) XML::xmlValue(XML::xmlTextNode(x)), character(1), USE.NAMES = FALSE)
+	#the tier names stay as they are: the events are found by comparing them with t@tiers$name; where a
+	#name goes into the file it is escaped (a tier, a transcript or a media file with & < > " made a
+	#file that was no XML)
 	
 	#--- generate EAF-XML-document
 	myEXB <- paste(
@@ -150,7 +152,7 @@ export_exb <- function(t,
 
 	#--- files
 	if (createMediaLinks) {
-		files   <- sprintf(files, basename(t@media$path))
+		files   <- sprintf(files, .xml_escape(basename(t@media$path)))
 		files   <- paste(files, collapse='\n')
 		if (length(files)==0) {
 			files <- '<referenced-file url=""/>'
@@ -160,7 +162,7 @@ export_exb <- function(t,
 	}
 	
 	#--- meta
-	meta  <- sprintf(meta, t@name, files)
+	meta  <- sprintf(meta, .xml_escape(t@name), files)
 	#cat(meta)
 	
 	#--- speaker
@@ -236,7 +238,7 @@ export_exb <- function(t,
 			event_block <- paste(event_block, collapse="\n")
 			#cat(event_block)
 			
-			tier_block[tierNr] <- sprintf(tier, t@tiers$name[tierNr], speaker_name, speaker_name, event_block)
+			tier_block[tierNr] <- sprintf(tier, .xml_escape(t@tiers$name[tierNr]), speaker_name, speaker_name, event_block)
 			tier_block[tierNr] <- paste(tier_block[tierNr], collapse="\n")
 			#cat(tier_block[[tierNr]])
 		}

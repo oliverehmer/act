@@ -87,7 +87,7 @@ corpus_import <- function(x,
 	}
 	
 	#--- get only supported file formats 
-	supportedFileFormats <- "(?i)\\.(eaf|exb|srt|textgrid)"
+	supportedFileFormats <- "(?i)\\.(eaf|exb|srt|textgrid)$"
 	paths.new <- unlist(paths.new[stringr::str_which(string=paths.new, pattern=supportedFileFormats, )		])
 	if (length(paths.new)==0) {
 		cli::cli_abort("No annotation files found. Please check {.code x@paths.annotation.files}.")
