@@ -44,6 +44,10 @@ annotations_replace_copy <- function (x,
 	#x <- corpus
 	
 	#make sure that the destination tier is a string	
+	# (NA = no copying, as the documentation says)
+	if (!is.null(destTier) && (length(destTier)!=1 || is.na(destTier))) {
+		destTier <- NULL
+	}
 	if (!is.null(destTier)) {
 		destTier <- as.character(destTier)
 		if (destTier=="") {
@@ -64,12 +68,21 @@ annotations_replace_copy <- function (x,
 	
 	# Add the destination tier if it is missing and should be added
 	if (!is.null(destTier) & destTierAddMissing) {
-		x <- act::tiers_add(x, tierName = destTier)
+		# only in the transcripts that are worked on
+		x <- act::tiers_add(x, tierName = destTier, filterTranscriptNames = filterTranscriptNames)
+	} else if (!is.null(destTier)) {
+		tier_missing <- filterTranscriptNames[!vapply(filterTranscriptNames, function(t) destTier %in% x@transcripts[[t]]@tiers$name, logical(1))]
+		if (length(tier_missing)>0) {
+			cli::cli_abort("The tier {.val {destTier}} is missing in: {.val {tier_missing}}. Add it, or set {.arg destTierAddMissing} to TRUE.")
+		}
 	}
 	
 	#all transcripts
 	for (i in filterTranscriptNames) {
 		anyChanges <- FALSE
+		# counted per transcript (the history entry of a transcript names its own changes)
+		annotations_replaced_nr <- 0
+		annotations_copied_nr   <- 0
 		
 		#check if destination tier exists
 		destTierIsPresent <- any(x@transcripts[[i]]@tiers$name==destTier)==TRUE
@@ -89,10 +102,8 @@ annotations_replace_copy <- function (x,
 		if (nrow(x@transcripts[[i]]@annotations)>0) {
 			for (j in 1:nrow(x@transcripts[[i]]@annotations)) {
 				#check if this tier is to be included
-				processThisRecordset <- TRUE
-				if (!is.null(filterTierNames)) {
-					processThisRecordset <- x@transcripts[[i]]@annotations$tierName[[j]] %in% filterTierNames.current
-				}
+				# (always against the list: it leaves the destination tier out, which else took its own hits again)
+				processThisRecordset <- x@transcripts[[i]]@annotations$tierName[[j]] %in% filterTierNames.current
 				
 				if (processThisRecordset) {
 					#get the hits
@@ -129,7 +140,7 @@ annotations_replace_copy <- function (x,
 								#if there is one or several overlapping record sets on the destination tiers, take the first one
 								index <- which(temp, TRUE) [[1]]
 								#add text in the end
-								x@transcripts[[i]]@annotations$content[[index]] <- paste (x@transcripts[[i]]@annotations$content[[index]], hits_merged, collapse= collapseString)
+								x@transcripts[[i]]@annotations$content[[index]] <- paste(x@transcripts[[i]]@annotations$content[[index]], hits_merged, sep=collapseString)
 							}
 							annotations_copied_nr <- annotations_copied_nr + 1
 							anyChanges <- TRUE
