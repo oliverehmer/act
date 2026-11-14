@@ -50,11 +50,12 @@ annotations_insert_from_search_to_tier <- function (x,
 	recodsets_insertederror_destinationTiermissingintranscript_ids <- c()
 	
 	#make sure that the destination tier is a string	
-	if (!is.null(destTier)) {
-		destTier <- as.character(destTier)
-		if (destTier=="") {
-			destTier<-"destinationTier"
-		}
+	if (is.null(destTier) || length(destTier)!=1 || is.na(destTier)) {
+		cli::cli_abort("{.arg destTier} has to name the tier the annotations are inserted into.")
+	}
+	destTier <- as.character(destTier)
+	if (destTier=="") {
+		destTier<-"destinationTier"
 	}
 	
 	#=== get the transcript names
@@ -75,10 +76,14 @@ annotations_insert_from_search_to_tier <- function (x,
 	}
 		
 	#=== Add the destination tier if it is missing and should be added
-	if (!is.null(destTier) & destTierAddMissing) {
-		#print("beforeadd")
-		x <- act::tiers_add(x, tierName = destTier)
-		#print("added")
+	if (destTierAddMissing) {
+		# only in the transcripts that get annotations
+		x <- act::tiers_add(x, tierName = destTier, filterTranscriptNames = filterTranscriptNames)
+	} else {
+		tier_missing <- filterTranscriptNames[!vapply(filterTranscriptNames, function(t) destTier %in% x@transcripts[[t]]@tiers$name, logical(1))]
+		if (length(tier_missing)>0) {
+			cli::cli_abort("The tier {.val {destTier}} is missing in: {.val {tier_missing}}. Add it, or set {.arg destTierAddMissing} to TRUE.")
+		}
 	}
 	
 	#=== prepare results
@@ -101,51 +106,21 @@ annotations_insert_from_search_to_tier <- function (x,
 	filterTranscriptNames <- unique(r$transcriptName)
 	
 	for (t in filterTranscriptNames) {
-		#run through all search results of this this transcript	(but not the last one)
-		resultids <- which(r$transcriptName==t)
-		resultids <- resultids[1:(length(resultids)-1)]
-		#resultids <- resultids[1:(length(resultids))]
-		
-		for (i in resultids)  {
-			if (!r$remove[i]) {
-				#if this result has not been removed
-				
-				#get the IDs of overlapping recordsets
-				ids <- which(r$transcriptName==t)
-				ids <- setdiff(ids, i)
-	
-				sub1 <- which(r$endsec   >= r$startsec[i])
-				sub2 <- which(r$startsec <= r$endsec[i])
-				sub <- intersect(sub1,sub2)
-				sub <- intersect(sub, ids)
-				
-				#check the next search results belonging to the transcript
-				for (j in sub) {
-					#j<-1852
-					#if this result has not been processed before
-					if (r$remove[j]){ 
-					} else {
-						
-						#check times
-						if (r$startsec[i]==r$startsec[j] & r$endsec[i]==r$endsec[j]) {
-							#start and end are identical
-						} else {
-							# annotations overlap
-							overlap <- TRUE
-						}
-						
-						#merge content
-						r$mytext[i] <- paste(r$mytext[i], collapseString, r$mytext[j]  )
-						#extend annotation to value of longer annotations
-						
-						r$endsec[i] <- max(r$endsec[i], r$endsec[j])
-						
-						#set j to be removed
-						r$remove[j] <- TRUE
-						
-					}
-				}				
+		# The results are sorted by start: a result that starts before the end of the one before
+		# joins it (one annotation from the first start to the last end). Results that only touch
+		# are two annotations, and no overlap.
+		current <- NA
+		for (j in which(r$transcriptName==t)) {
+			if (is.na(current) || r$startsec[j] >= r$endsec[current]) {
+				current <- j
+				next
 			}
+			if (!(r$startsec[current]==r$startsec[j] & r$endsec[current]==r$endsec[j])) {
+				overlap <- TRUE
+			}
+			r$mytext[current] <- paste0(r$mytext[current], collapseString, r$mytext[j])
+			r$endsec[current] <- max(r$endsec[current], r$endsec[j])
+			r$remove[j]       <- TRUE
 		}
 	}
 	#View(r)
