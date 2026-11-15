@@ -20,7 +20,7 @@ search_cuts_media(
   audioAsMP3 = FALSE,
   audioPanning = NULL,
   audioNormalize = FALSE,
-  outputOS = c("mac", "win"),
+  outputOS = getOption("act.cutlist.os", c("mac", "win")),
   outputFileName = "FFMPEG_cutlist",
   videoCodecCopyFail = "encode"
 )
@@ -56,7 +56,7 @@ search_cuts_media(
 
 \item{audioNormalize}{Logical; If \code{TRUE} and option \code{act.ffmpeg.audio.normalize} is \code{TRUE}, a loudnorm filter is appended to the audio filter chain. Default is \code{FALSE}.}
 
-\item{outputOS}{Vector of character Strings; Saves FFMpeg cut list in format for \code{"win"}=windows, \code{"mac"}=apple ox/linux.}
+\item{outputOS}{Vector of character Strings; Saves FFMpeg cut list in format for \code{"win"}=windows, \code{"mac"}=apple ox/linux. Default: option \code{act.cutlist.os}.}
 
 \item{outputFileName}{Character String; Name of the cut list.}
 

@@ -57,7 +57,7 @@
 #' @param audioAsMP3 Logical; If \code{TRUE} audio cuts will be converted to .mp3 files (bit rate \code{act.ffmpeg.audio.bitrate}). If \code{FALSE} (default) the audio format is preserved.
 #' @param audioPanning Integer; 0=leave audio as is (ch1&ch2) , 1=only channel 1 (ch1), 2=only channel 2 (ch2), 3=both channels separated (ch1&ch2), 4=all three versions (ch1&ch2, ch1, ch2). This setting will override the option made in 'act.ffmpeg.channels_from_column' .
 #' @param audioNormalize Logical; If \code{TRUE} and option \code{act.ffmpeg.audio.normalize} is \code{TRUE}, a loudnorm filter is appended to the audio filter chain. Default is \code{FALSE}.
-#' @param outputOS Vector of character Strings; Saves FFMpeg cut list in format for \code{"win"}=windows, \code{"mac"}=apple ox/linux.
+#' @param outputOS Vector of character Strings; Saves FFMpeg cut list in format for \code{"win"}=windows, \code{"mac"}=apple ox/linux. Default: option \code{act.cutlist.os}.
 #' @param outputFileName Character String; Name of the cut list.
 #' @param videoCodecCopyFail Character; what happens when \code{videoCodecCopy} is \code{TRUE} and no keyframe can be found for a cut (ffprobe missing or failed, source not readable): \code{"abort"} stops with an error, \code{"encode"} encodes this cut instead and shows a warning. Default is \code{"encode"}: a cut list is run later and should not fail as a whole because of one source.
 #'
@@ -84,7 +84,7 @@ search_cuts_media <- function(x,
 							  audioAsMP3           = FALSE,
 							  audioPanning         = NULL,
 							  audioNormalize       = FALSE,
-							  outputOS             = c("mac", "win"),
+							  outputOS             = getOption("act.cutlist.os", c("mac", "win")),
 							  outputFileName       = "FFMPEG_cutlist",
 							  videoCodecCopyFail   = "encode")
 {

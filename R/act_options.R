@@ -89,7 +89,7 @@
 	act.cutlist.os = list(
 		value       = c("mac", "win"),
 		group       = "export",
-		description = "Terminal script formats written by helper_cutlist_save(): 'mac' (POSIX sh, also runs on Linux) and/or 'win' (.cmd)."
+		description = "Terminal script formats of the cut list: 'mac' (POSIX sh, also runs on Linux) and/or 'win' (.cmd). Default of outputOS in search_cuts_media()."
 	),
 	act.cutlist.ffmpeg = list(
 		value       = "ffmpeg",
