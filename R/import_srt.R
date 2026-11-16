@@ -47,20 +47,31 @@ import_srt <- function(filePath,
 			return(t)
 		}
 		
-		#--- check if the file can be opened
-		mysrt <- srt::read_srt(	t@file.path 		)	
-	}
-	if(getOption("act.import.storefileContentInTranscript", default=FALSE)) {
-		if (!is.null(filePath)) {
-			read_result <- helper_annotationfile_read(
-				filePath       = filePath,
-				expectedHeader = NULL,
-				fileType       = "srt",
-				verbose        = FALSE
-			)
-			if (!is.null(read_result$lines)) {
-				t@file.content <- read_result$lines
-			}
+		#--- read the text in the encoding the bytes have, as for eaf; srt::read_srt() reads UTF-8 only and stopped
+		#--- on latin1 and UTF-16, which ended the whole corpus import (review 16.11.2026, T2)
+		read_result <- helper_annotationfile_read(
+			filePath       = filePath,
+			expectedHeader = NULL,
+			fileType       = "srt",
+			verbose        = FALSE
+		)
+		if (read_result$status != "ok" || is.null(read_result$lines)) {
+			t@import.result  <- "error"
+			t@load.message   <- if (nzchar(read_result$message)) read_result$message else "File could not be read."
+			return(t)
+		}
+		t@file.encoding <- read_result$encoding_detected
+		srt_utf8 <- tempfile(fileext = ".srt")
+		on.exit(unlink(srt_utf8), add = TRUE)
+		writeLines(enc2utf8(read_result$lines), srt_utf8, useBytes = TRUE)
+		mysrt <- tryCatch(srt::read_srt(srt_utf8), error = function(e) e)
+		if (inherits(mysrt, "error")) {
+			t@import.result  <- "error"
+			t@load.message   <- paste0("File not recognized as .srt: ", conditionMessage(mysrt))
+			return(t)
+		}
+		if(getOption("act.import.storefileContentInTranscript", default=FALSE)) {
+			t@file.content <- read_result$lines
 		}
 	}
 	

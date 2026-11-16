@@ -80,9 +80,25 @@ import_exb <- function(filePath=NULL,
 			return(t)
 		}
 		
-		#--- check if the file can be opened
+		#--- read the text in the encoding the bytes have, as for eaf: xml2 alone trusted the declaration, and a
+		#--- latin1 file that declares UTF-8 (or nothing) was not recognized at all (review 16.11.2026, T2)
+		read_result <- helper_annotationfile_read(
+			filePath       = filePath,
+			expectedHeader = NULL,
+			fileType       = "exb",
+			verbose        = FALSE
+		)
+		if (read_result$status != "ok" || is.null(read_result$lines)) {
+			t@import.result 		<- "error"
+			t@load.message   <- if (nzchar(read_result$message)) read_result$message else "File could not be read."
+			return(t)
+		}
+		t@file.encoding <- read_result$encoding_detected
+		exb_lines <- read_result$lines
+		# the text is UTF-8 now: a declaration naming another encoding would make libxml decode it a second time
+		exb_lines[1] <- stringr::str_replace(exb_lines[1], "(<\\?xml[^>]*encoding\\s*=\\s*[\"'])[^\"']+([\"'])", "\\1UTF-8\\2")
 		out <- tryCatch(
-			{ xml2::read_xml(filePath) 	},
+			{ xml2::read_xml(paste(exb_lines, collapse = "\n"), encoding = "UTF-8") 	},
 			error=function(cond) { 	NULL }
 		)
 		if (is.null(out)) 						{	
@@ -91,18 +107,8 @@ import_exb <- function(filePath=NULL,
 			return(t)
 		}
 		myexb <- out
-	}
-	if(getOption("act.import.storefileContentInTranscript", default=FALSE)) {
-		if (!is.null(filePath)) {
-			read_result <- helper_annotationfile_read(
-				filePath       = filePath,
-				expectedHeader = NULL,
-				fileType       = "exb",
-				verbose        = FALSE
-			)
-			if (!is.null(read_result$lines)) {
-				t@file.content <- read_result$lines
-			}
+		if(getOption("act.import.storefileContentInTranscript", default=FALSE)) {
+			t@file.content <- read_result$lines
 		}
 	}
 	
