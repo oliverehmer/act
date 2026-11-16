@@ -1198,9 +1198,10 @@ apply_indent_alignment <- function(ann, report, anchor_chars,
 	if (length(conflict) > 0) {
 		# try to flip the base label that reaches into the incoming one:
 		# "#08" becomes "08#" with the mark keeping its column
+		figure_mark <- getOption("act.layout.figure.char", "#")
 		first_in <- which(in_g != " " & seq_len(width) > pad)[1]
 		label_start <- NA_integer_
-		for (b in which(base_g == "#")) {
+		for (b in which(base_g == figure_mark)) {
 			d <- b + 1L
 			while (d <= width && stringr::str_detect(base_g[d], "^[0-9]$")) d <- d + 1L
 			if (b < first_in && d - 1L >= first_in) {
@@ -1216,7 +1217,7 @@ apply_indent_alignment <- function(ann, report, anchor_chars,
 		if (any(base_g[flip_from:(label_start - 1L)] != " ")) return(NULL)
 		digits <- base_g[(label_start + 1L):label_end]
 		base_g[flip_from:(label_start - 1L)] <- digits
-		base_g[label_start] <- "#"
+		base_g[label_start] <- figure_mark
 		base_g[(label_start + 1L):label_end] <- " "
 		conflict <- which(base_g != " " & in_g != " " &
 		                  seq_len(width) > pad)
@@ -5583,6 +5584,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 	# 2026-08-14); rows without digits get a sequential fallback.
 	# The "#" then anchors under the main's "#" via the point alignment.
 	if (isTRUE(fig_replace)) {
+		figure_mark <- getOption("act.layout.figure.char", "#")
 		fig_rows <- which(stringr::str_detect(ann$tierName, fig_tier_regex))
 		fig_counter <- 0L
 		for (i in fig_rows) {
@@ -5590,7 +5592,7 @@ prepare_annotations_new <- function(t, l, layout_mode = "gat",
 			id_digits <- stringr::str_extract(
 				stringr::str_trim(ann$content_render[i]), "[0-9]+$")
 			number <- if (!is.na(id_digits)) id_digits else as.character(fig_counter)
-			ann$content_render[i] <- paste0("#", number)
+			ann$content_render[i] <- paste0(figure_mark, number)
 		}
 	}
 

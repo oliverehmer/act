@@ -213,6 +213,11 @@
 		group       = "layout",
 		description = "Character in annotation content that forces a manual line break in the alignment engine (corpus convention - do not change mid-project)"
 	),
+	act.layout.figure.char = list(
+		value       = "#",
+		group       = "layout",
+		description = "Figure mark: the character in the verbal line at the moment a still was taken; in print transcripts the content of a stills tier becomes this character plus the still number and aligns under the mark (corpus convention - do not change mid-project)"
+	),
 	act.tier.multimodal.name.regex = list(
 		value       = "#mm[0-9]*$",
 		group       = "tier",
