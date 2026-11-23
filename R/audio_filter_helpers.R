@@ -232,7 +232,11 @@ helper_audio_filter_build <- function(
 	parts <- character(0)
 	if (isTRUE(d$pitch$on)) {
 		f <- max(0.5, min(2, d$pitch$factor %||% 0.9))
-		parts <- c(parts, sprintf("asetrate=44100*%.4f,aresample=44100,atempo=%.4f", f, 1 / f))
+		# asetrate relabels the rate it is given: on 48 kHz sound "44100*f" stretched the sound by 8.8 %
+		# (52 s late after 10 minutes, measured 23.11.2026). So the sound is brought to 44.1 kHz first, the
+		# rate in between is a whole number, and the tempo follows from that number with all its digits.
+		rate_between <- round(44100 * f)
+		parts <- c(parts, sprintf("aresample=44100,asetrate=%d,aresample=44100,atempo=%.10f", rate_between, 44100 / rate_between))
 	}
 	if (isTRUE(d$vibrato$on))
 		parts <- c(parts, sprintf("vibrato=f=%.2f:d=%.2f", d$vibrato$freq %||% 5, d$vibrato$depth %||% 0.5))
